@@ -4,6 +4,7 @@
   "short_name": "Captode",
   "version": "1.0.0",
   "description": "Capture full-page, visible or selected-area screenshots and recordings. Annotate, then export as PNG, JPG, PDF, GIF, MP4 or WebP.",
+  "homepage_url": "https://github.com/nevin/Captode",
   "minimum_chrome_version": "116",
   "icons": {
     "16": "icons/icon16.png",
@@ -27,7 +28,6 @@
     "activeTab",
     "scripting",
     "tabCapture",
-    "desktopCapture",
     "offscreen",
     "storage",
     "unlimitedStorage"

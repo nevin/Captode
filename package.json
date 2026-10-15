@@ -6,10 +6,11 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "icons": "node tools/make-icons.mjs",
-    "package": "node tools/package.mjs",
     "test": "node test/run.mjs",
-    "bench": "node test/bench.mjs"
+    "bench": "node test/bench.mjs",
+    "icons": "node tools/brand.mjs",
+    "store": "node tools/store-assets.mjs",
+    "package": "node tools/package.mjs"
   },
   "devDependencies": {
     "puppeteer": "24.43.1"

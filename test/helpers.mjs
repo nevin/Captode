@@ -50,7 +50,10 @@ export async function launch({ scheme = 'light', args = [] } = {}) {
     pipe: true,
     enableExtensions: true,
     userDataDir: profile,
-    args: ['--window-size=1280,900', '--use-fake-ui-for-media-stream', '--autoplay-policy=no-user-gesture-required', '--no-sandbox', ...args],
+    // No vsync pacing: with a Mac's display asleep, headless Chrome otherwise stops
+    // producing frames, and screenshots and animation hang.
+    args: ['--window-size=1280,900', '--use-fake-ui-for-media-stream', '--autoplay-policy=no-user-gesture-required', '--no-sandbox',
+      '--disable-gpu-vsync', '--disable-frame-rate-limit', ...args],
     defaultViewport: null,
   });
   const id = await browser.installExtension(ext);

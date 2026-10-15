@@ -188,7 +188,8 @@ test/
   *.test.mjs             browser tests (capture, encoders, video export, interface)
   bench.mjs              compression benchmark with stored baselines
 tools/
-  make-icons.mjs         draws the icons
+  brand.mjs              makes every icon from store/logo-source.png
+  store-assets.mjs       makes the store screenshots and promo tiles from the real UI
   package.mjs            builds the store zip
 ```
 
@@ -196,7 +197,8 @@ tools/
 npm install       # test tools only: Puppeteer and its Chrome for Testing
 npm test          # run the browser tests (npm test -- video runs only matching ones)
 npm run bench     # compression benchmark; fails on a size or quality regression
-npm run icons     # redraw src/icons/*.png
+npm run icons     # icons from store/logo-source.png (background removed, every size)
+npm run store     # store screenshots and promo tiles in store/
 npm run package   # build dist/captode-<version>.zip for the stores
 ```
 
@@ -214,11 +216,14 @@ operating system. After an intended change, save new numbers with
 ## Publishing
 
 1. Bump `version` in `src/manifest.json`.
-2. Run `npm run package`.
-3. Upload `dist/captode-<version>.zip` to the
+2. Run `npm test`, then `npm run icons` and `npm run store` if the logo or interface changed.
+3. Run `npm run package`.
+4. Upload `dist/captode-<version>.zip` to the
    [Chrome Web Store developer dashboard](https://chrome.google.com/webstore/devconsole) and to
    [Microsoft Edge Add-ons](https://partner.microsoft.com/dashboard/microsoftedge/).
-   Listing text, permission justifications and the privacy statement are in [`store/`](store/).
+   [`store/listing.md`](store/listing.md) has every dashboard field ready to paste
+   (description, single purpose, permission justifications, data-use answers) and lists
+   the assets in `store/` to upload.
 
 Firefox is not supported yet. It has no offscreen documents or `tabCapture`, which tab
 recording relies on.
