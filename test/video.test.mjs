@@ -4,11 +4,11 @@ import { open, recordClip, ok, near, sleep } from './helpers.mjs';
 
 export async function setup({ browser, url }) {
   const ctl = await open(browser, url('lab/lab.html'));
-  await ctl.waitForFunction(() => globalThis.lab);
+  await ctl.waitForFunction(() => globalThis.lab, { polling: 100 });
   const clip = await recordClip(ctl, { seconds: 8, audio: true });
   const page = await open(browser, url(`video/video.html?id=${clip}`), { width: 1440, height: 900 });
   await page.bringToFront();
-  await page.waitForFunction(() => /fps/.test(document.querySelector('#dims').textContent));
+  await page.waitForFunction(() => /fps/.test(document.querySelector('#dims').textContent), { polling: 100 });
   await page.evaluate(() => { console.warn = (...a) => { window.__fallback = a.join(' '); }; });
 
   const set = (sel, value) => page.evaluate((sel, value) => {
@@ -24,7 +24,7 @@ export async function setup({ browser, url }) {
     await sleep(100);
     const t0 = Date.now();
     await page.click('#convert');
-    await page.waitForFunction(() => !document.querySelector('#result').classList.contains('hidden') || /failed/i.test(document.querySelector('#status').textContent), { timeout: 180000 });
+    await page.waitForFunction(() => !document.querySelector('#result').classList.contains('hidden') || /failed/i.test(document.querySelector('#status').textContent), { timeout: 180000, polling: 100 });
     const ms = Date.now() - t0;
     const info = await page.evaluate(async () => {
       const failed = document.querySelector('#status').textContent;

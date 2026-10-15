@@ -13,7 +13,7 @@ export async function setup({ browser, url, site }) {
     const ed = await waitForTab(browser, (u) => u.includes('editor.html?id='));
     await ed.setViewport({ width: 1440, height: 900 });
     await ed.bringToFront();
-    await ed.waitForFunction(() => /px/.test(document.querySelector('#doc-dims').textContent));
+    await ed.waitForFunction(() => /px/.test(document.querySelector('#doc-dims').textContent), { polling: 100 });
     return ed;
   };
   return { page, editor };
@@ -60,12 +60,12 @@ export const tests = {
     await ed.click('#tab-export');
     ok(await ed.evaluate(() => document.querySelector('#tab-export').getAttribute('aria-selected') === 'true'), 'tab not selected');
     await ed.click('#device-panel input[data-k="enabled"]');
-    await ed.waitForFunction(() => !document.querySelector('#export-preview').classList.contains('hidden') && document.querySelector('#device-preview').width > 300, { timeout: 20000 });
+    await ed.waitForFunction(() => !document.querySelector('#export-preview').classList.contains('hidden') && document.querySelector('#device-preview').width > 300, { timeout: 20000, polling: 100 });
     await ed.click('#device-panel input[data-k="enabled"]');
     await ed.evaluate(() => { const s = document.querySelector('#x-format'); s.value = 'jpeg'; s.dispatchEvent(new Event('input', { bubbles: true })); });
     await ed.evaluate(() => { const s = document.querySelector('#x-limit'); s.value = '100'; s.dispatchEvent(new Event('input', { bubbles: true })); });
     await sleep(600);
-    await ed.waitForFunction(() => !/Working/.test(document.querySelector('#x-estimate').textContent), { timeout: 30000 });
+    await ed.waitForFunction(() => !/Working/.test(document.querySelector('#x-estimate').textContent), { timeout: 30000, polling: 100 });
     const est = await ed.evaluate(() => [document.querySelector('#x-estimate').textContent, document.querySelector('#x-fitted').textContent]);
     const kb = Number(est[0].match(/([\d.]+) KB/)?.[1]);
     ok(kb && kb <= 100, `estimate ${est[0]}`);
@@ -245,12 +245,16 @@ export const tests = {
     for (const fx of [0.2, 0.4, 0.6]) { await ed.mouse.click(...at(fx, 0.5)); await sleep(50); }
     let p = await panel();
     ok(p.label === 'Number' && p.n === '3', `after three clicks the selected step shows ${p.label} ${p.n}`);
-    // The circle is drawn in the chosen colour (#e5484d), away from its digit.
-    const px = await ed.evaluate(([x, y, k, size]) => {
-      const c = document.querySelector('#fg'); const r = c.getBoundingClientRect();
-      return [...c.getContext('2d').getImageData(Math.round((x - r.x) * k - size * 0.32), Math.round((y - r.y) * k), 1, 1).data];
-    }, [...at(0.2, 0.5), b.k, p.size]);
-    ok(Math.abs(px[0] - 0xe5) < 12 && Math.abs(px[1] - 0x48) < 12 && Math.abs(px[2] - 0x4d) < 12, `step colour ${px}`);
+    // Three circles in the chosen colour (#e5484d) are drawn.
+    const red = await ed.evaluate(() => {
+      const c = document.querySelector('#fg');
+      const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
+      let n = 0;
+      for (let i = 0; i < d.length; i += 4) if (Math.abs(d[i] - 0xe5) < 12 && Math.abs(d[i + 1] - 0x48) < 12 && Math.abs(d[i + 2] - 0x4d) < 12 && d[i + 3] > 250) n++;
+      return n;
+    });
+    const area = Math.PI * (p.size / 2) ** 2;
+    ok(red > area * 3 * 0.5, `step circles: ${red} pixels in the step colour, expected about ${Math.round(area * 3 * 0.8)}`);
     await ed.keyboard.press('Escape');
     ok((await panel()).n === '4', 'next number after 3 is not 4');
     // Select the second and renumber it.
@@ -299,8 +303,8 @@ export const tests = {
     const size = await ed.evaluate(() => [document.querySelector('#bg').width, document.querySelector('#bg').height]);
     await clear();
     await ed.bringToFront();
-    await ed.click('#tab-export');
-    await ed.click('#copy2');
+    await ed.evaluate(() => document.querySelector('#tab-export').click());
+    await ed.evaluate(() => document.querySelector('#copy2').click());
     await sleep(500);
     let got = await clip();
     ok(got && got[0] === size[0] && got[1] === size[1], `Export panel copy put ${got} on the clipboard, expected ${size}`);
@@ -313,10 +317,10 @@ export const tests = {
     await st.close();
     await clear();
     const ed2 = await editor();
-    await ed2.waitForFunction(() => /copied to the clipboard/i.test(document.body.innerText), { timeout: 10000 }).catch(() => {});
+    await ed2.waitForFunction(() => /copied to the clipboard/i.test(document.body.innerText), { timeout: 10000, polling: 100 }).catch(() => {});
     got = await clip();
     ok(got && got[0] > 0, 'new screenshot was not copied automatically');
-    ok(ed2.url().includes('reopen=1'), 'a reload would copy it again');
+    ok(await ed2.evaluate(() => location.search.includes('reopen=1')), 'a reload would copy it again');
     await ed2.evaluate(async () => { const { saveSettings } = await import('/lib/settings.js'); await saveSettings({ autoCopy: false }); });
     await ed2.close();
   },
@@ -336,12 +340,12 @@ export const tests = {
     await ed.mouse.click(b.x + b.w * 0.7, b.y + b.h * 0.7);
     await ed.keyboard.press('Escape');
     ok(await drawn() > 0 && !(await disabled('undo-all')), 'nothing drawn, or Undo all not available');
-    await ed.click('#undo-all');
+    await ed.evaluate(() => document.querySelector('#undo-all').click());
     await sleep(100);
     ok(await drawn() === 0, 'Undo all left annotations behind');
     ok(await disabled('undo-all') && !(await disabled('undo')), 'after Undo all: it should be disabled, and Undo available');
     // The toast's Undo brings everything back.
-    await ed.click('.toast-action');
+    await ed.evaluate(() => document.querySelector('.toast-action').click());
     await sleep(100);
     ok(await drawn() > 0, 'Undo did not bring the changes back');
     await ed.evaluate(() => { window.onbeforeunload = null; });

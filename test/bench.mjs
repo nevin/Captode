@@ -28,7 +28,7 @@ await sleep(200);
 images.flat = await page.screenshot({ encoding: 'base64' });
 
 const lab = await open(env.browser, env.url('lab/lab.html'));
-await lab.waitForFunction(() => globalThis.lab);
+await lab.waitForFunction(() => globalThis.lab, { polling: 100 });
 
 const results = await lab.evaluate(async (images) => {
   const f = await import('/lib/formats.js');

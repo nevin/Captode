@@ -10,7 +10,7 @@ export async function setup({ browser, url, site }) {
   const photo = await page.screenshot({ encoding: 'base64', clip: r });
   await page.close();
   const lab = await open(browser, url('lab/lab.html'));
-  await lab.waitForFunction(() => globalThis.lab);
+  await lab.waitForFunction(() => globalThis.lab, { polling: 100 });
   return { lab, images: { ui, photo } };
 }
 

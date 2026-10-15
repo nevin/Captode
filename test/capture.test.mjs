@@ -26,7 +26,7 @@ export async function setup({ browser, url, site }) {
     seen.add(ed.url());
     await ed.bringToFront();
     try {
-      await ed.waitForFunction(() => /px/.test(document.querySelector('#doc-dims').textContent), { timeout: 45000 });
+      await ed.waitForFunction(() => /px/.test(document.querySelector('#doc-dims').textContent), { timeout: 45000, polling: 100 });
     } catch (e) {
       // Say what the editor shows instead, so a failure on a CI runner can be diagnosed.
       const state = await ed.evaluate(() => ({ url: location.href, visible: document.visibilityState, body: document.body.innerText.slice(0, 300) })).catch((err) => String(err));
@@ -81,7 +81,7 @@ export const tests = {
         s.dispatchEvent(new Event('input', { bubbles: true }));
       }, f);
       await sleep(600);
-      await ed.waitForFunction(() => !/Working/.test(document.querySelector('#x-estimate').textContent), { timeout: 30000 });
+      await ed.waitForFunction(() => !/Working/.test(document.querySelector('#x-estimate').textContent), { timeout: 30000, polling: 100 });
       const est = await ed.evaluate(() => document.querySelector('#x-estimate').textContent);
       ok(/\d+(\.\d+)? (B|KB|MB)/.test(est), `${f}: no size estimate (${est})`);
       sizes.push(`${f} ${est.replace(/.*px/, '')}`);
@@ -108,7 +108,7 @@ export const tests = {
       await page.bringToFront();
       await ctl.evaluate((tabId) => chrome.runtime.sendMessage({ type: 'capture-image', mode: 'full', tabId }), tabId);
       const ed = await waitForTab(browser, (u) => u.includes('editor.html?id='));
-      await ed.waitForFunction(() => /px/.test(document.querySelector('#doc-dims').textContent), { timeout: 30000 });
+      await ed.waitForFunction(() => /px/.test(document.querySelector('#doc-dims').textContent), { timeout: 30000, polling: 100 });
       const r = await ed.evaluate(async (b64) => {
         const bg = document.querySelector('#bg');
         const ours = bg.getContext('2d', { willReadFrequently: true }).getImageData(0, 0, bg.width, bg.height).data;
@@ -183,7 +183,7 @@ export const tests = {
       await page.mouse.move(400, 300, { steps: 5 });
       await page.mouse.up();
       const ed2 = await waitForTab(browser, (u) => u.includes('editor.html?id='));
-      await ed2.waitForFunction(() => /px/.test(document.querySelector('#doc-dims').textContent), { timeout: 30000 });
+      await ed2.waitForFunction(() => /px/.test(document.querySelector('#doc-dims').textContent), { timeout: 30000, polling: 100 });
       const area = await ed2.evaluate(() => [document.querySelector('#bg').width, document.querySelector('#bg').height]);
       near(area[0], 300 * scale, 1, `${scale * 100}%: area width`);
       near(area[1], 200 * scale, 1, `${scale * 100}%: area height`);
