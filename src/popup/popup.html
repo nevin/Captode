@@ -11,61 +11,69 @@
   <header>
     <div class="brand"><img src="../icons/icon48.png" alt="">Captode</div>
     <div class="head-actions">
-      <button class="btn ghost icon" id="open-editor" title="Open the editor">
+      <button class="btn ghost icon" id="open-editor" data-tip-align="end" data-tip="Editor and recent captures">
         <svg class="i" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></svg>
       </button>
-      <button class="btn ghost icon" id="open-settings" title="Settings">
+      <button class="btn ghost icon" id="open-settings" data-tip-align="end" data-tip="Settings">
         <svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
       </button>
     </div>
   </header>
 
-  <div class="seg kind" role="tablist">
-    <button role="tab" data-kind="image" class="on">
+  <div class="seg kind" role="tablist" aria-label="Capture type">
+    <button role="tab" data-kind="image" class="on" aria-controls="modes-image">
       <svg class="i" viewBox="0 0 24 24"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3z"/><circle cx="12" cy="13" r="3"/></svg>Screenshot
     </button>
-    <button role="tab" data-kind="video">
+    <button role="tab" data-kind="video" aria-controls="modes-video">
       <svg class="i" viewBox="0 0 24 24"><path d="m22 8-6 4 6 4V8z"/><rect x="2" y="6" width="14" height="12" rx="2"/></svg>Record
     </button>
   </div>
 
-  <div id="error" class="error hidden" role="alert"></div>
+  <div id="error" class="banner error hidden" role="alert">
+    <svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.01"/></svg>
+    <div><b>The last capture didn't work</b><span id="error-text"></span></div>
+    <button class="btn ghost icon close" id="error-close" data-tip="Dismiss"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+  </div>
+  <div id="blocked" class="banner warn hidden">
+    <svg class="i" viewBox="0 0 24 24"><path d="M12 3 2 20h20L12 3z"/><path d="M12 10v4M12 17v.01"/></svg>
+    <div><b>This page can't be captured</b><span>Chrome protects its own pages and the Web Store. Open a website to capture it, or record your whole screen.</span></div>
+  </div>
 
   <main>
     <p class="hint-top" id="hint-image">Choose what to capture</p>
-    <div class="modes" id="modes-image">
+    <div class="modes" id="modes-image" role="tabpanel">
       <button class="mode" data-mode="full">
         <span class="ico"><svg class="i" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M9 6h6M9 10h6M9 14h6M9 18h3"/></svg></span>
-        <span class="txt"><b>Full page</b><small>The whole page, top to bottom</small></span>
+        <span class="txt"><b>Full page</b><small>The whole page, top to bottom</small></span><kbd class="num">1</kbd>
       </button>
       <button class="mode" data-mode="visible">
         <span class="ico"><svg class="i" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 8h20"/></svg></span>
-        <span class="txt"><b>Visible area</b><small>What's on screen right now</small></span>
+        <span class="txt"><b>Visible area</b><small>What's on screen right now</small></span><kbd class="num">2</kbd>
       </button>
       <button class="mode" data-mode="area">
         <span class="ico"><svg class="i" viewBox="0 0 24 24"><path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3"/><rect x="8" y="8" width="8" height="8" rx="1"/></svg></span>
-        <span class="txt"><b>Selected area</b><small>Drag to choose a region</small></span>
+        <span class="txt"><b>Selected area</b><small>Drag to choose a region</small></span><kbd class="num">3</kbd>
       </button>
     </div>
 
     <p class="hint-top hidden" id="hint-video">Choose what to record</p>
-    <div class="modes hidden" id="modes-video">
+    <div class="modes hidden" id="modes-video" role="tabpanel">
       <button class="mode" data-mode="screen">
         <span class="ico"><svg class="i" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
-        <span class="txt"><b>Full screen</b><small>Your whole screen or a window</small></span>
+        <span class="txt"><b>Full screen</b><small>Your whole screen or a window</small></span><kbd class="num">1</kbd>
       </button>
       <button class="mode" data-mode="visible">
         <span class="ico"><svg class="i" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><circle cx="12" cy="12" r="3"/></svg></span>
-        <span class="txt"><b>This tab</b><small>Everything visible in this tab</small></span>
+        <span class="txt"><b>This tab</b><small>Everything visible in this tab</small></span><kbd class="num">2</kbd>
       </button>
       <button class="mode" data-mode="area">
         <span class="ico"><svg class="i" viewBox="0 0 24 24"><path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3"/><circle cx="12" cy="12" r="3"/></svg></span>
-        <span class="txt"><b>Selected area</b><small>Record only part of this tab</small></span>
+        <span class="txt"><b>Selected area</b><small>Record only part of this tab</small></span><kbd class="num">3</kbd>
       </button>
 
       <div class="opts">
-        <div class="field"><span>Frame rate</span>
-          <div class="seg" id="fps">
+        <div class="field"><span id="fps-label">Frame rate</span>
+          <div class="seg" id="fps" role="radiogroup" aria-label="Frame rate">
             <button data-fps="15">15</button><button data-fps="24">24</button><button data-fps="30">30</button><button data-fps="60">60 fps</button>
           </div>
         </div>

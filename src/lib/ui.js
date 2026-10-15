@@ -1,0 +1,102 @@
+// Shared interface helpers: notifications, accessible tabs and tooltips, dialogs.
+
+const ICONS = {
+  success: '<path d="m5 12 5 5 9-10"/>',
+  error: '<circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.01"/>',
+  info: '<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.5v.01"/>',
+};
+
+let region = null;
+let timer = 0;
+
+/** Shows a short notification. `kind` is 'success', 'error' or 'info'. */
+export function toast(message, { kind = 'info', ms = 2600 } = {}) {
+  if (!region) {
+    region = document.createElement('div');
+    region.className = 'toast hidden';
+    region.setAttribute('role', 'status');
+    region.setAttribute('aria-live', 'polite');
+    document.body.appendChild(region);
+  }
+  region.dataset.kind = kind;
+  region.innerHTML = `<svg class="i" viewBox="0 0 24 24">${ICONS[kind] || ICONS.info}</svg><span></span>`;
+  region.lastChild.textContent = message;
+  region.classList.remove('hidden');
+  region.style.animation = 'none';
+  void region.offsetWidth;
+  region.style.animation = '';
+  clearTimeout(timer);
+  timer = setTimeout(() => region.classList.add('hidden'), ms);
+}
+
+/**
+ * Gives icon-only buttons with a tooltip an accessible name, and wires a
+ * `.tabs` bar to the panes it controls with the ARIA tab pattern.
+ */
+export function enhance(root = document) {
+  for (const el of root.querySelectorAll('[data-tip]')) {
+    if (!el.hasAttribute('aria-label') && !el.textContent.trim()) {
+      el.setAttribute('aria-label', el.dataset.tip.split(/\s{2,}/)[0]);
+    }
+  }
+  for (const el of root.querySelectorAll('button:not([type])')) el.type = 'button';
+  if (!isMac) {
+    for (const el of root.querySelectorAll('[data-tip]')) el.dataset.tip = el.dataset.tip.replace(/⇧⌘|⌘⇧/g, 'Ctrl+Shift+').replace(/⌘/g, 'Ctrl+');
+    for (const el of root.querySelectorAll('kbd')) if (el.textContent === '⌘') el.textContent = 'Ctrl';
+    for (const el of root.querySelectorAll('[title]')) el.title = el.title.replace(/⌘⇧|⇧⌘/g, 'Ctrl+Shift+').replace(/⌘/g, 'Ctrl+');
+  }
+}
+
+/** Keeps `aria-selected` and roving focus in step for a tab list. */
+export function tablist(list, onSelect) {
+  const tabs = () => [...list.querySelectorAll('[role="tab"]')];
+  list.addEventListener('keydown', (e) => {
+    const all = tabs();
+    const i = all.indexOf(document.activeElement);
+    if (i < 0) return;
+    const next = { ArrowRight: i + 1, ArrowLeft: i - 1, Home: 0, End: all.length - 1 }[e.key];
+    if (next === undefined) return;
+    e.preventDefault();
+    const t = all[(next + all.length) % all.length];
+    t.focus();
+    onSelect(t);
+  });
+  return (selected) => {
+    for (const t of tabs()) {
+      const on = t === selected;
+      t.setAttribute('aria-selected', String(on));
+      t.tabIndex = on ? 0 : -1;
+    }
+  };
+}
+
+/** Opens a modal `<dialog>` and closes it on a click outside. */
+export function openDialog(dialog) {
+  if (!dialog.dataset.wired) {
+    dialog.dataset.wired = '1';
+    dialog.addEventListener('click', (e) => { if (e.target === dialog) dialog.close(); });
+    for (const b of dialog.querySelectorAll('[data-close]')) b.addEventListener('click', () => dialog.close());
+  }
+  dialog.tabIndex = -1;
+  dialog.showModal();
+  dialog.focus(); // focus the dialog, not its first button, so no tooltip pops up
+}
+
+export function fmtBytes(n) {
+  if (n < 1024) return n + ' B';
+  if (n < 1024 * 1024) return (n / 1024).toFixed(1) + ' KB';
+  return (n / 1024 / 1024).toFixed(2) + ' MB';
+}
+
+/** "2 minutes ago" style text for a timestamp. */
+export function ago(t) {
+  const s = Math.round((Date.now() - t) / 1000);
+  if (s < 45) return 'Just now';
+  const m = Math.round(s / 60);
+  if (m < 60) return `${m} min ago`;
+  const h = Math.round(m / 60);
+  return `${h} hr ago`;
+}
+
+export const isMac = /Mac|iPhone|iPad/.test(navigator.platform);
+export const MOD = isMac ? '⌘' : 'Ctrl';

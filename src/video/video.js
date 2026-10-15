@@ -4,6 +4,7 @@ import { buildPalette } from '../lib/quantize.js';
 import { getSettings } from '../lib/settings.js';
 import { WebpAnimEncoder } from '../lib/webp.js';
 import { mountDevicePanel, deviceRenderer } from '../lib/device.js';
+import { toast, enhance, fmtBytes } from '../lib/ui.js';
 
 const $ = (s) => document.querySelector(s);
 const player = $('#player');
@@ -26,10 +27,6 @@ const even = (n) => Math.max(2, Math.round(n / 2) * 2);
 const once = (el, ev) => new Promise((r) => el.addEventListener(ev, r, { once: true }));
 const fmtTime = (s) => `${Math.floor(s / 60)}:${(s % 60).toFixed(1).padStart(4, '0')}`;
 
-function fmtBytes(n) {
-  if (n < 1024 * 1024) return (n / 1024).toFixed(1) + ' KB';
-  return (n / 1024 / 1024).toFixed(2) + ' MB';
-}
 
 // MediaRecorder writes WebM without a duration; seeking to the end makes the browser find it.
 async function loadDuration(v) {
@@ -79,7 +76,7 @@ function fillResolutions(reset = false) {
   const short = Math.min(r.width, r.height);
   const keep = reset ? '' : $('#res').value;
   const def = format === 'gif' || format === 'webp' ? 480 : 0;
-  $('#res').innerHTML = `<option value="0">Original (${even(r.width)} × ${even(r.height)})</option>` +
+  $('#res').innerHTML = `<option value="0" title="${even(r.width)} × ${even(r.height)}">Original (${even(short)}p)</option>` +
     RES.filter((p) => p < short).map((p) => `<option value="${p}">${p}p</option>`).join('');
   const values = [...$('#res').options].map((o) => o.value);
   $('#res').value = values.includes(keep) && keep !== '' ? keep : values.includes(String(def)) ? String(def) : '0';
@@ -96,12 +93,14 @@ function fillFps(reset = false) {
 
 function syncUi() {
   for (const b of document.querySelectorAll('#formats button')) b.classList.toggle('on', b.dataset.f === format);
-  $('#convert').textContent = `Convert to ${format.toUpperCase()}`;
+  $('#convert').textContent = `Export ${format.toUpperCase()}`;
   for (const el of document.querySelectorAll('[data-for]')) el.classList.toggle('hidden', !el.dataset.for.split(' ').includes(format));
   $('#w-quality-f').classList.toggle('hidden', $('#w-lossless').checked);
   $('#w-quality-v').textContent = $('#w-quality').value + '%';
   $('#v-audio').disabled = !meta.hasAudio;
+  $('#v-audio-note').classList.toggle('hidden', Boolean(meta.hasAudio));
   if (!meta.hasAudio) $('#v-audio').checked = false;
+  drawTimeline();
   if (!player.videoWidth) return;
   const p = plan();
   const { start, end } = trim();
@@ -115,6 +114,7 @@ function stale() {
   result = null;
   $('#result').classList.add('hidden');
   $('#download').classList.add('hidden');
+  $('#redo-export').classList.add('hidden');
   $('#convert').classList.remove('hidden');
   showPreview('player');
 }
@@ -125,6 +125,7 @@ function showPreview(which) {
   for (const id of ['player', 'live', 'out-img', 'out-video']) $('#' + id).classList.toggle('hidden', id !== which);
   $('#preview-label').textContent = PREVIEW_LABELS[which] || '';
   $('#preview-label').classList.toggle('hidden', !PREVIEW_LABELS[which]);
+  $('#timeline').classList.toggle('hidden', which !== 'player');
 }
 
 $('#formats').addEventListener('click', (e) => {
@@ -139,8 +140,127 @@ document.querySelector('.inspector').addEventListener('input', (e) => {
   if (e.target.closest('#device-panel')) return; // handled by the panel's own callback
   syncUi();
 });
-$('#t-start-set').addEventListener('click', () => { $('#t-start').value = player.currentTime.toFixed(1); syncUi(); });
-$('#t-end-set').addEventListener('click', () => { $('#t-end').value = player.currentTime.toFixed(1); syncUi(); });
+const setStart = (t) => { if (busy) return; $('#t-start').value = Math.max(0, Math.min(t, trim().end - 0.1)).toFixed(1); syncUi(); };
+const setEnd = (t) => { if (busy) return; $('#t-end').value = Math.min(duration, Math.max(t, trim().start + 0.1)).toFixed(1); syncUi(); };
+$('#t-start-set').addEventListener('click', () => setStart(player.currentTime));
+$('#t-end-set').addEventListener('click', () => setEnd(player.currentTime));
+
+// ---------- timeline ----------
+
+const pct = (t) => (duration ? (t / duration) * 100 : 0) + '%';
+
+function drawTimeline() {
+  const { start, end } = trim();
+  $('#h-start').style.left = pct(start);
+  $('#h-end').style.left = pct(end);
+  $('#range').style.left = pct(start);
+  $('#range').style.width = `calc(${pct(end)} - ${pct(start)})`;
+  $('#shade-l').style.width = pct(start);
+  $('#shade-r').style.width = `calc(100% - ${pct(end)})`;
+  $('#tc-len').textContent = `${(end - start).toFixed(1)} s selected`;
+  for (const [h, v] of [['#h-start', start], ['#h-end', end]]) {
+    $(h).setAttribute('aria-valuemin', '0');
+    $(h).setAttribute('aria-valuemax', duration.toFixed(1));
+    $(h).setAttribute('aria-valuenow', v.toFixed(1));
+    $(h).setAttribute('aria-valuetext', fmtTime(v));
+  }
+  drawPlayhead();
+}
+
+function drawPlayhead() {
+  $('#playhead').style.left = pct(player.currentTime);
+  $('#tc-now').textContent = fmtTime(player.currentTime);
+}
+
+function timeAt(e) {
+  const r = $('#track').getBoundingClientRect();
+  return Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)) * duration;
+}
+
+$('#track').addEventListener('pointerdown', (e) => {
+  if (!duration) return;
+  const handle = e.target.closest('.handle');
+  $('#track').setPointerCapture(e.pointerId);
+  const move = (ev) => {
+    const t = timeAt(ev);
+    if (handle?.id === 'h-start') { setStart(t); player.currentTime = trim().start; }
+    else if (handle?.id === 'h-end') { setEnd(t); player.currentTime = trim().end; }
+    else player.currentTime = t;
+    drawPlayhead();
+  };
+  move(e);
+  const up = () => { $('#track').removeEventListener('pointermove', move); $('#track').removeEventListener('pointerup', up); };
+  $('#track').addEventListener('pointermove', move);
+  $('#track').addEventListener('pointerup', up);
+});
+
+for (const [id, set, get] of [['#h-start', setStart, () => trim().start], ['#h-end', setEnd, () => trim().end]]) {
+  $(id).addEventListener('keydown', (e) => {
+    const step = e.shiftKey ? 1 : 0.1;
+    const d = { ArrowLeft: -step, ArrowDown: -step, ArrowRight: step, ArrowUp: step }[e.key];
+    if (d === undefined) return;
+    e.preventDefault();
+    e.stopPropagation();
+    set(get() + d);
+    player.currentTime = get();
+  });
+}
+
+function togglePlay() {
+  if (busy || $('#player').classList.contains('hidden')) return;
+  if (player.paused) {
+    const { start, end } = trim();
+    if (player.currentTime < start || player.currentTime >= end - 0.05) player.currentTime = start;
+    player.play();
+  } else {
+    player.pause();
+  }
+}
+$('#play').addEventListener('click', togglePlay);
+player.addEventListener('click', togglePlay);
+// Play only the trimmed part.
+player.addEventListener('timeupdate', () => {
+  if (!player.paused && player.currentTime >= trim().end) { player.pause(); player.currentTime = trim().end; }
+  drawPlayhead();
+});
+for (const ev of ['play', 'pause']) {
+  player.addEventListener(ev, () => {
+    $('#play .play').classList.toggle('hidden', !player.paused);
+    $('#play .pause').classList.toggle('hidden', player.paused);
+  });
+}
+player.addEventListener('seeked', drawPlayhead);
+(function tick() { if (!player.paused) drawPlayhead(); requestAnimationFrame(tick); })();
+
+document.addEventListener('keydown', (e) => {
+  if (e.metaKey || e.ctrlKey || e.altKey || /^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName)) return;
+  const k = e.key.toLowerCase();
+  if (k === ' ' && !e.target.closest('button')) { e.preventDefault(); togglePlay(); }
+  else if (k === 'i') setStart(player.currentTime);
+  else if (k === 'o') setEnd(player.currentTime);
+  else if (k === 'arrowleft' && !e.target.closest('.handle')) { player.currentTime = Math.max(0, player.currentTime - (e.shiftKey ? 1 : 1 / (meta.fps || 30))); }
+  else if (k === 'arrowright' && !e.target.closest('.handle')) { player.currentTime = Math.min(duration, player.currentTime + (e.shiftKey ? 1 : 1 / (meta.fps || 30))); }
+});
+
+/** Fills the timeline with thumbnails taken across the clip. */
+async function buildFilmstrip() {
+  const film = $('#film');
+  const v = makeWorkVideo();
+  try {
+    if (v.readyState < 1) await once(v, 'loadedmetadata');
+    const n = Math.max(4, Math.min(14, Math.round(film.clientWidth / 70)));
+    const h = 44 * devicePixelRatio;
+    const w = Math.round(h * (player.videoWidth / player.videoHeight));
+    for (let i = 0; i < n; i++) {
+      await seek(v, Math.min(duration - 0.05, ((i + 0.5) / n) * duration));
+      const c = document.createElement('canvas');
+      c.width = w; c.height = h;
+      c.getContext('2d').drawImage(v, 0, 0, w, h);
+      film.append(c);
+    }
+  } catch { /* the timeline still works without thumbnails */ }
+  v.remove();
+}
 
 // ---------- conversion ----------
 
@@ -357,15 +477,20 @@ async function convert() {
       $('#out-video').src = url;
       showPreview('out-video');
     }
-    const pct = Math.round((1 - blob.size / source.size) * 100);
+    const change = Math.round((1 - blob.size / source.size) * 100);
+    const larger = change < 0;
     $('#r-size').textContent = `${EXT[format].toUpperCase()} ready · ${fmtBytes(blob.size)}`;
-    $('#r-detail').textContent = `${p.width} × ${p.height} at ${p.fps} fps. ` +
-      (pct >= 0 ? `${pct}% smaller than the recording.` : `${-pct}% larger than the recording.`);
+    $('#r-detail').textContent = `${p.width} × ${p.height} at ${p.fps} fps. ` + (larger
+      ? `${(blob.size / source.size).toFixed(1)}× the size of the recording. A lower resolution or frame rate makes it smaller.`
+      : `${change}% smaller than the recording.`);
+    $('#result').classList.toggle('larger', larger);
     $('#result').classList.remove('hidden');
     $('#convert').classList.add('hidden');
     $('#download').classList.remove('hidden');
+    $('#redo-export').classList.remove('hidden');
+    $('#download').focus();
   } catch (e) {
-    if (e.message !== 'cancelled') $('#status').textContent = 'Conversion failed: ' + e.message;
+    if (e.message !== 'cancelled') { $('#status').textContent = 'Export failed: ' + e.message; toast('Export failed: ' + e.message, { kind: 'error', ms: 5000 }); }
     else $('#progress-wrap').classList.add('hidden');
     showPreview('player');
   } finally {
@@ -388,7 +513,13 @@ function save(blob, name) {
 
 $('#convert').addEventListener('click', convert);
 $('#cancel').addEventListener('click', () => { cancelled = true; });
-$('#download').addEventListener('click', () => result && save(result.blob, result.name));
+$('#download').addEventListener('click', () => {
+  if (!result) return;
+  save(result.blob, result.name);
+  toast(`Saved ${result.name} · ${fmtBytes(result.blob.size)}`, { kind: 'success' });
+});
+$('#redo-export').addEventListener('click', () => stale());
+window.addEventListener('beforeunload', (e) => { if (busy) e.preventDefault(); });
 $('#dl-original').addEventListener('click', () => source && save(source, `captode-recording-${Date.now()}.webm`));
 
 // ---------- start ----------
@@ -398,6 +529,7 @@ $('#dl-original').addEventListener('click', () => source && save(source, `captod
   const rec = id ? await getCapture(id) : null;
   if (!rec) {
     document.querySelector('.preview').classList.add('hidden');
+    $('#timeline').classList.add('hidden');
     $('#empty').classList.remove('hidden');
     $('#convert').disabled = true;
     return;
@@ -417,4 +549,6 @@ $('#dl-original').addEventListener('click', () => source && save(source, `captod
   fillResolutions(true);
   fillFps(true);
   syncUi();
+  enhance();
+  buildFilmstrip();
 })();

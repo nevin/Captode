@@ -28,6 +28,9 @@ The capture opens in the editor, where you can:
   Letter pages with long pages split across them). The quality and size controls compress the
   file, and the live estimate shows the size before you download. You can also copy the image
   to the clipboard.
+- **Keyboard shortcuts** for every tool. Press **?** in the editor to see them all.
+- **Recent captures:** open the editor from the popup to get back any capture from the last
+  24 hours, even after closing its tab.
 
 ### Recordings
 
@@ -39,7 +42,9 @@ You can pick the frame rate (15, 24, 30 or 60 fps), include audio, and start aft
 countdown. Click the Captode icon (or press **Alt+Shift+R**) to stop. The recording then
 opens in the video page, where you can:
 
-- Trim the start and end.
+- Trim on a timeline with thumbnails: drag the handles, or play to a point and press **I**
+  (start) or **O** (end). **Space** plays only the trimmed part; the arrow keys step frame by
+  frame.
 - Export as **MP4**, **GIF**, **WebP** (animated) or **WebM**.
 - Choose the resolution (original, 2160p down to 240p) and the frame rate.
 - **Reduce file size losslessly** (GIF and WebP). Repeated frames are merged and only the
@@ -68,6 +73,12 @@ Open **Settings** from the gear in the popup (or right-click the icon → Option
   and around padded screenshots. JPEG, BMP, PDF, MP4 and WebM can't be transparent, so
   they get white when Transparent is chosen.
 - **Default formats** for screenshots and recordings, and whether device frames are on.
+
+Settings also has links to help, problem reports and the privacy policy, and a button that
+resets everything to the defaults.
+
+On browser pages that Chrome protects (such as `chrome://` pages and the Web Store), the
+popup explains that the page can't be captured and leaves full-screen recording available.
 
 ## Install
 

@@ -1,7 +1,8 @@
-import { getCapture } from '../lib/db.js';
+import { getCapture, listCaptures, deleteCapture } from '../lib/db.js';
 import { toPdf, toBmp, toPng8, toGif } from '../lib/formats.js';
 import { mountDevicePanel, renderInDevice } from '../lib/device.js';
 import { getSettings, backgroundColour } from '../lib/settings.js';
+import { toast, enhance, tablist, openDialog, fmtBytes, ago } from '../lib/ui.js';
 
 const $ = (s) => document.querySelector(s);
 const bg = $('#bg');
@@ -64,6 +65,7 @@ let editing = null;
 let meta = {};
 let device = null;
 const history = [];
+let dirty = false;   // edited since the last download or copy
 let hIndex = -1;
 
 // ---------- helpers ----------
@@ -77,19 +79,6 @@ const norm = (o) => ({
 const fullW = () => base.width + frame.padding * 2;
 const fullH = () => base.height + frame.padding * 2;
 
-function toast(msg, ms = 2400) {
-  const t = document.createElement('div');
-  t.className = 'toast';
-  t.textContent = msg;
-  document.body.appendChild(t);
-  setTimeout(() => t.remove(), ms);
-}
-
-function fmtBytes(n) {
-  if (n < 1024) return n + ' B';
-  if (n < 1024 * 1024) return (n / 1024).toFixed(1) + ' KB';
-  return (n / 1024 / 1024).toFixed(2) + ' MB';
-}
 
 function debounce(fn, ms) {
   let t = 0;
@@ -104,6 +93,7 @@ function snapshot() {
 }
 
 function commit() {
+  if (hIndex >= 0) dirty = true;
   history.splice(hIndex + 1);
   history.push(snapshot());
   if (history.length > 80) history.shift();
@@ -678,10 +668,15 @@ stage.addEventListener('wheel', (e) => {
 
 // ---------- inspector tabs ----------
 
+const selectTab = tablist(document.querySelector('.tabs'), (t) => showPane(t.dataset.pane));
+
 function showPane(name) {
   for (const b of document.querySelectorAll('.tabs button')) b.classList.toggle('on', b.dataset.pane === name);
   for (const p of document.querySelectorAll('.pane')) p.classList.toggle('hidden', p.dataset.pane !== name);
+  selectTab(document.querySelector(`.tabs [data-pane="${name}"]`));
+  document.body.dataset.pane = name;
   if (name === 'export') refreshExport();
+  else updateDevicePreview();
 }
 document.querySelector('.tabs').addEventListener('click', (e) => {
   const b = e.target.closest('button[data-pane]');
@@ -863,15 +858,15 @@ for (const [id, d] of [['t-smaller', -1], ['t-bigger', 1]]) {
 }
 
 $('#t-fonts').addEventListener('click', async () => {
-  if (!window.queryLocalFonts) { toast('This browser cannot list installed fonts.'); return; }
+  if (!window.queryLocalFonts) { toast('This browser cannot list installed fonts.', { kind: 'error' }); return; }
   try {
     const fonts = await window.queryLocalFonts();
     const have = new Set([...$('#t-font').options].map((o) => o.value));
     const families = [...new Set(fonts.map((f) => f.family))].filter((f) => !have.has(f)).sort();
     for (const f of families) $('#t-font').add(new Option(f));
-    toast(`Added ${families.length} installed fonts`);
+    toast(`Added ${families.length} installed fonts`, { kind: 'success' });
   } catch {
-    toast('Font access was not allowed.');
+    toast('Font access was not allowed.', { kind: 'error' });
   }
 });
 
@@ -938,7 +933,7 @@ $('#rs-apply').addEventListener('click', async () => {
   layout();
   fitZoom();
   commit();
-  toast(`Resized to ${w} × ${h}`);
+  toast(`Resized to ${w} × ${h}`, { kind: 'success' });
 });
 
 function setBackdrop(bg) {
@@ -1016,6 +1011,8 @@ function syncExportUi() {
   document.querySelector('[data-x="colors"]').classList.toggle('hidden', !['png8', 'gif'].includes(f));
   document.querySelector('[data-x="pdf"]').classList.toggle('hidden', f !== 'pdf');
   $('#x-quality-v').textContent = $('#x-quality').value + '%';
+  const label = `Download ${FORMAT_INFO[f][0]}`;
+  for (const id of ['download', 'download2']) $('#' + id).lastChild.textContent = label;
 }
 
 async function finalCanvas({ scaled = true } = {}) {
@@ -1076,19 +1073,24 @@ const refreshExport = debounce(async () => {
   updateDevicePreview();
 }, 450);
 
+// With a device frame on, the Export tab shows the finished image on the stage
+// in place of the editable canvas, so what you see is what downloads.
+let previewRun = 0;
 async function updateDevicePreview() {
-  const prev = $('#device-preview');
+  const run = ++previewRun;
   const d = device?.get();
-  prev.classList.toggle('hidden', !d?.enabled);
-  if (!d?.enabled || !base) return;
+  const show = Boolean(d?.enabled && base && document.body.dataset.pane === 'export');
+  stage.classList.toggle('previewing', show);
+  $('#export-preview').classList.toggle('hidden', !show);
+  if (!show) return;
   const c = await finalCanvas({ scaled: false });
-  const w = 540;
-  prev.width = w;
-  prev.height = Math.round((c.height / c.width) * w);
-  const ctx = prev.getContext('2d');
-  ctx.imageSmoothingQuality = 'high';
-  ctx.drawImage(c, 0, 0, prev.width, prev.height);
+  if (run !== previewRun) return;
+  const prev = $('#device-preview');
+  prev.width = c.width;
+  prev.height = c.height;
+  prev.getContext('2d').drawImage(c, 0, 0);
 }
+$('#preview-edit').addEventListener('click', () => showPane('annotate'));
 
 function fileName() {
   const n = ($('#x-name').value || 'captode').trim().replace(/[\\/:*?"<>|]+/g, '-');
@@ -1107,9 +1109,10 @@ async function download() {
     a.download = fileName();
     a.click();
     setTimeout(() => URL.revokeObjectURL(a.href), 30000);
-    toast(`Saved ${a.download} · ${fmtBytes(blob.size)}`);
+    dirty = false;
+    toast(`Saved ${a.download} · ${fmtBytes(blob.size)}`, { kind: 'success' });
   } catch (e) {
-    toast('Export failed: ' + e.message, 4000);
+    toast('Export failed: ' + e.message, { kind: 'error', ms: 5000 });
   } finally {
     btns.forEach((b) => { b.disabled = false; });
   }
@@ -1122,9 +1125,10 @@ async function copyImage() {
   try {
     const c = await finalCanvas();
     await navigator.clipboard.write([new ClipboardItem({ 'image/png': c.convertToBlob({ type: 'image/png' }) })]);
-    toast('Copied to the clipboard');
+    dirty = false;
+    toast('Copied to the clipboard', { kind: 'success' });
   } catch (e) {
-    toast('Could not copy: ' + e.message);
+    toast('Could not copy: ' + e.message, { kind: 'error', ms: 4000 });
   }
 }
 $('#copy').addEventListener('click', copyImage);
@@ -1145,6 +1149,7 @@ async function loadBlob(blob, info = {}) {
   meta = info;
   history.length = 0;
   hIndex = -1;
+  dirty = false;
   document.body.classList.remove('no-image');
   $('#empty').classList.add('hidden');
   wrap.classList.remove('hidden');
@@ -1163,6 +1168,37 @@ function showEmpty() {
   document.body.classList.add('no-image');
   $('#empty').classList.remove('hidden');
   wrap.classList.add('hidden');
+  renderRecent();
+}
+
+// Captures from the last day, so a closed tab isn't a lost screenshot.
+async function renderRecent() {
+  if (!globalThis.chrome?.runtime) return;
+  const items = await listCaptures(12);
+  $('#recent').classList.toggle('hidden', !items.length);
+  $('#recent-list').innerHTML = '';
+  for (const it of items) {
+    const a = document.createElement('a');
+    a.className = 'recent-item';
+    a.href = it.kind === 'video' ? `../video/video.html?id=${it.id}` : `?id=${it.id}`;
+    const thumb = document.createElement(it.kind === 'video' ? 'video' : 'img');
+    thumb.src = URL.createObjectURL(it.blob) + (it.kind === 'video' ? '#t=0.1' : '');
+    if (it.kind === 'video') { thumb.muted = true; thumb.preload = 'metadata'; }
+    thumb.alt = '';
+    const title = it.meta.title || (it.kind === 'video' ? 'Recording' : 'Screenshot');
+    a.innerHTML = `<span class="thumb"></span><span class="meta"><b></b><small></small></span>
+      <button class="btn ghost icon remove" data-tip="Remove" aria-label="Remove ${title.replace(/"/g, '')}"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>`;
+    a.querySelector('.thumb').append(thumb);
+    if (it.kind === 'video') a.querySelector('.thumb').insertAdjacentHTML('beforeend', '<span class="badge">Video</span>');
+    a.querySelector('b').textContent = title;
+    a.querySelector('small').textContent = `${ago(it.created)} · ${fmtBytes(it.size)}`;
+    a.querySelector('.remove').addEventListener('click', async (e) => {
+      e.preventDefault();
+      await deleteCapture(it.id);
+      renderRecent();
+    });
+    $('#recent-list').append(a);
+  }
 }
 
 async function openFile(file) {
@@ -1181,6 +1217,14 @@ stage.addEventListener('drop', (e) => {
   openFile(e.dataTransfer.files[0]);
 });
 window.addEventListener('resize', debounce(() => base && applyZoom(), 150));
+window.addEventListener('beforeunload', (e) => {
+  if (dirty) e.preventDefault();
+});
+
+$('#help').addEventListener('click', () => openDialog($('#shortcuts')));
+document.addEventListener('keydown', (e) => {
+  if (e.key === '?' && !/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) openDialog($('#shortcuts'));
+});
 
 // ---------- start ----------
 
@@ -1203,12 +1247,13 @@ window.addEventListener('resize', debounce(() => base && applyZoom(), 150));
   syncExportUi();
   syncFrameUi();
   setTool('select');
+  enhance();
 
   const id = new URLSearchParams(location.search).get('id');
   const rec = id && globalThis.chrome?.runtime ? await getCapture(id) : null;
   if (rec) {
     await loadBlob(rec.blob, rec.meta);
-    if (rec.meta?.truncated) toast('This page is very long, so only its top part was captured.', 5000);
+    if (rec.meta?.truncated) toast('This page is very long, so only its top part was captured.', { ms: 6000 });
   } else {
     showEmpty();
   }

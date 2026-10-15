@@ -25,5 +25,19 @@
 .callout { margin: 14px 0 0; }
 .shortcut { justify-content: space-between; }
 .shortcut p { margin: 0; flex: 1; }
-.foot { text-align: center; font-size: 12px; margin: 4px 0 0; }
+.about { display: flex; align-items: center; gap: 12px; margin: 12px 0; }
+.about img { border-radius: 10px; }
+.about div { display: grid; }
+.about b { font-size: 14px; }
+.privacy { margin: 0 0 16px; }
+.links { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.links a { text-decoration: none; }
+.btn.danger { color: var(--rec); }
+.btn.primary.danger { background: var(--rec); border-color: var(--rec); color: #fff; }
+.btn.primary.danger:hover { filter: brightness(1.08); }
+.confirm { width: min(420px, calc(100vw - 32px)); }
+.confirm h2 { margin: 0 0 6px; font-size: 16px; }
+.confirm p { margin: 0 0 18px; }
+.confirm .actions { justify-content: flex-end; }
+.confirm .actions .btn { flex: none; }
 @media (max-width: 560px) { .choices.three { grid-template-columns: 1fr; } }

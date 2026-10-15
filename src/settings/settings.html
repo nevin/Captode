@@ -85,9 +85,33 @@
     </div>
   </section>
 
-  <p class="foot muted" id="version"></p>
+  <section class="card">
+    <h2>About</h2>
+    <div class="about">
+      <img src="../icons/icon128.png" alt="" width="44" height="44">
+      <div><b>Captode</b><span class="muted" id="version"></span></div>
+    </div>
+    <p class="muted privacy">Everything happens on your computer. Captode has no account and no server, and it never uploads your captures.</p>
+    <div class="links">
+      <a class="btn" href="https://github.com/nevin/Captode#readme" target="_blank" rel="noopener">Help and guide</a>
+      <a class="btn" href="https://github.com/nevin/Captode/issues/new" target="_blank" rel="noopener">Report a problem</a>
+      <a class="btn" href="https://github.com/nevin/Captode/blob/main/PRIVACY.md" target="_blank" rel="noopener">Privacy policy</a>
+      <span class="spacer"></span>
+      <button class="btn danger" id="reset">Reset all settings</button>
+    </div>
+  </section>
 </main>
-<div class="toast hidden" id="saved" role="status">Saved</div>
+
+<dialog class="modal confirm" id="reset-dialog" aria-labelledby="reset-title">
+  <div class="modal-body">
+    <h2 id="reset-title">Reset all settings?</h2>
+    <p class="muted">Theme, export background, default formats, the device frame and recording options go back to how they were when you installed Captode. Your captures aren't affected.</p>
+    <div class="row actions">
+      <button class="btn" data-close>Cancel</button>
+      <button class="btn primary danger" id="reset-yes">Reset</button>
+    </div>
+  </div>
+</dialog>
 <script type="module" src="settings.js"></script>
 </body>
 </html>

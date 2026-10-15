@@ -1,16 +1,11 @@
-import { getSettings, saveSettings } from '../lib/settings.js';
+import { getSettings, saveSettings, DEFAULT_SETTINGS } from '../lib/settings.js';
+import { toast, enhance, openDialog } from '../lib/ui.js';
 
 const $ = (s) => document.querySelector(s);
 let settings = await getSettings();
 const { device } = await chrome.storage.local.get({ device: false });
 
-let toastTimer = 0;
-function saved() {
-  const t = $('#saved');
-  t.classList.remove('hidden');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t.classList.add('hidden'), 1400);
-}
+const saved = () => toast('Saved', { kind: 'success', ms: 1400 });
 
 async function update(patch) {
   settings = await saveSettings(patch);
@@ -49,5 +44,15 @@ $('#videoFormat').addEventListener('change', (e) => update({ videoFormat: e.targ
 $('#device').checked = device;
 $('#device').addEventListener('change', async (e) => { await chrome.storage.local.set({ device: e.target.checked }); saved(); });
 $('#shortcuts').addEventListener('click', () => chrome.tabs.create({ url: 'chrome://extensions/shortcuts' }));
-$('#version').textContent = `Captode ${chrome.runtime.getManifest().version}`;
+$('#version').textContent = `Version ${chrome.runtime.getManifest().version}`;
+$('#reset').addEventListener('click', () => openDialog($('#reset-dialog')));
+$('#reset-yes').addEventListener('click', async () => {
+  settings = await saveSettings(DEFAULT_SETTINGS);
+  await chrome.storage.local.remove(['device', 'fps', 'audio', 'countdown', 'kind', 'deviceOpts', 'editorDefaults']);
+  $('#device').checked = false;
+  render();
+  $('#reset-dialog').close();
+  toast('Settings reset', { kind: 'success' });
+});
+enhance();
 render();

@@ -2,14 +2,14 @@ html, body { height: 100%; }
 body { display: flex; flex-direction: column; overflow: hidden; }
 .layout { flex: 1; display: flex; min-height: 0; }
 .stage {
-  flex: 1; position: relative; min-width: 0; overflow: auto; display: grid; place-items: center; padding: 32px;
+  flex: 1; position: relative; min-width: 0; overflow: auto; display: flex; flex-direction: column; align-items: center; gap: 18px; padding: 28px 32px 22px;
   background-color: var(--stage);
   background-image: radial-gradient(circle, var(--stage-dot) 1px, transparent 1px);
   background-size: 20px 20px;
 }
-.preview { position: relative; max-width: 100%; display: grid; place-items: center; }
+.preview { position: relative; flex: 1; min-height: 0; width: 100%; display: grid; place-items: center; }
 .preview video, .preview canvas, .preview img {
-  display: block; max-width: 100%; max-height: calc(100vh - 130px); border-radius: 10px; box-shadow: var(--shadow-lg); background: #000;
+  display: block; max-width: 100%; max-height: calc(100vh - 190px); border-radius: 10px; box-shadow: var(--shadow-lg); background: #000;
 }
 .preview img, .preview canvas { background: repeating-conic-gradient(rgba(127,127,127,.18) 0 25%, transparent 0 50%) 0 0 / 16px 16px; }
 .preview-label {
@@ -49,3 +49,35 @@ body { display: flex; flex-direction: column; overflow: hidden; }
   .layout { flex-direction: column; overflow-y: auto; }
   .inspector { width: auto; border-left: 0; border-top: 1px solid var(--line); overflow: visible; }
 }
+
+#player { cursor: pointer; }
+.result.larger { background: var(--warn-soft); }
+.result.larger .i { color: var(--warn); }
+.export-bar .row .btn:not(.block) { flex: none; }
+.export-bar .row .btn.block { width: auto; flex: 1; }
+
+/* Timeline with trim handles */
+.timeline {
+  flex: none; width: 100%; max-width: 980px; display: flex; align-items: center; gap: 12px;
+  padding: 8px 12px; border-radius: 12px; background: var(--panel); border: 1px solid var(--line); box-shadow: var(--shadow);
+}
+.timeline .btn.icon { width: 34px; height: 34px; border-radius: 50%; }
+.timeline .play { fill: currentColor; stroke-width: 1.2; }
+.tc { font-variant-numeric: tabular-nums; font-size: 12px; min-width: 46px; white-space: nowrap; }
+.track { position: relative; flex: 1; height: 44px; border-radius: 7px; background: var(--panel-2); cursor: pointer; touch-action: none; }
+.film { position: absolute; inset: 0; display: flex; border-radius: 7px; overflow: hidden; }
+.film canvas { flex: 1; min-width: 0; height: 100%; object-fit: cover; }
+.shade { position: absolute; top: 0; bottom: 0; background: rgba(10, 10, 16, .55); }
+.shade.left { left: 0; border-radius: 7px 0 0 7px; }
+.shade.right { right: 0; border-radius: 0 7px 7px 0; }
+.range { position: absolute; top: -2px; bottom: -2px; border: 2px solid var(--accent); border-radius: 7px; pointer-events: none; }
+.handle {
+  position: absolute; top: -2px; bottom: -2px; width: 14px; margin-left: -7px; border-radius: 5px; cursor: ew-resize;
+  background: var(--accent); display: grid; place-items: center; z-index: 2;
+}
+.handle::before { content: ""; width: 2px; height: 14px; border-radius: 1px; background: rgba(255,255,255,.85); }
+.handle:focus-visible { outline: 2px solid var(--text); outline-offset: 1px; }
+.handle[data-tip]::after { top: auto; bottom: calc(100% + 8px); }
+.playhead { position: absolute; top: -6px; bottom: -6px; width: 2px; margin-left: -1px; background: var(--text); border-radius: 1px; pointer-events: none; z-index: 3; }
+.playhead::before { content: ""; position: absolute; top: 0; left: -4px; width: 10px; height: 10px; border-radius: 50%; background: var(--text); }
+.timeline [data-tip]:not(.handle)::after { top: auto; bottom: calc(100% + 8px); }

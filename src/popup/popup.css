@@ -16,7 +16,12 @@ main { padding: 0 16px 12px; }
   width: 32px; height: 32px; flex: none; display: grid; place-items: center;
   border-radius: 9px; background: var(--accent-soft); color: var(--accent);
 }
-.mode .txt { display: grid; }
+.mode .txt { display: grid; flex: 1; min-width: 0; }
+.mode .num { opacity: 0; transition: opacity .12s; }
+.mode:hover .num, .mode:focus-visible .num, body.kbd-nav .mode .num { opacity: 1; }
+.mode:disabled { opacity: .45; cursor: not-allowed; }
+.mode:disabled:hover { border-color: var(--line); background: var(--panel); }
+#modes-video .mode:disabled:hover { border-color: var(--line); background: var(--panel); }
 .mode b { font-weight: 600; }
 .mode small { color: var(--muted); font-size: 12px; }
 #modes-video .mode .ico { background: rgba(229, 72, 77, .1); color: var(--rec); }
@@ -29,5 +34,6 @@ main { padding: 0 16px 12px; }
 .stop-hint { margin: 8px 0 0; font-size: 12px; color: var(--muted); }
 footer { padding: 4px 16px 4px; border-top: 1px solid var(--line); background: var(--panel-2); }
 footer .toggle { margin: 0; }
-.error { margin: 6px 16px 0; padding: 9px 12px; border-radius: 8px; background: rgba(229, 72, 77, .1); color: var(--rec); font-size: 12px; }
+.banner { margin: 8px 16px 0; }
+.banner span { color: var(--muted); }
 .head-actions { display: flex; gap: 2px; }

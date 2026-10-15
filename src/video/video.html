@@ -23,11 +23,28 @@
 <div class="layout">
   <main class="stage">
     <div class="preview">
-      <video id="player" controls playsinline></video>
+      <video id="player" playsinline></video>
       <canvas id="live" class="hidden"></canvas>
       <img id="out-img" class="hidden" alt="Exported animation">
       <video id="out-video" class="hidden" controls playsinline></video>
       <div class="preview-label hidden" id="preview-label"></div>
+    </div>
+    <div class="timeline" id="timeline">
+      <button class="btn icon" id="play" data-tip="Play or pause  Space">
+        <svg class="i play" viewBox="0 0 24 24"><path d="M7 4v16l13-8z"/></svg>
+        <svg class="i pause hidden" viewBox="0 0 24 24"><path d="M7 4v16M17 4v16"/></svg>
+      </button>
+      <span class="tc" id="tc-now">0:00.0</span>
+      <div class="track" id="track">
+        <div class="film" id="film"></div>
+        <div class="shade left" id="shade-l"></div>
+        <div class="shade right" id="shade-r"></div>
+        <div class="range" id="range"></div>
+        <div class="handle" id="h-start" role="slider" tabindex="0" aria-label="Trim start" data-tip="Start  I"></div>
+        <div class="handle" id="h-end" role="slider" tabindex="0" aria-label="Trim end" data-tip="End  O"></div>
+        <div class="playhead" id="playhead"></div>
+      </div>
+      <span class="tc muted" id="tc-len">0:00.0</span>
     </div>
     <div id="empty" class="empty hidden">
       <div class="empty-card">
@@ -42,13 +59,13 @@
       <h3 class="section-title">Trim</h3>
       <div class="trim">
         <label class="field"><span>Start</span>
-          <div class="with-btn"><input type="number" id="t-start" min="0" step="0.1" value="0"><button class="btn ghost icon" id="t-start-set" data-tip="Use the playhead"><svg class="i" viewBox="0 0 24 24"><path d="M4 4v16M8 12h12M14 6l6 6-6 6"/></svg></button></div>
+          <div class="with-btn"><input type="number" id="t-start" min="0" step="0.1" value="0"><button class="btn ghost icon" id="t-start-set" data-tip="Start at the playhead  I"><svg class="i" viewBox="0 0 24 24"><path d="M4 4v16M8 12h12M14 6l6 6-6 6"/></svg></button></div>
         </label>
         <label class="field"><span>End</span>
-          <div class="with-btn"><input type="number" id="t-end" min="0" step="0.1"><button class="btn ghost icon" id="t-end-set" data-tip="Use the playhead"><svg class="i" viewBox="0 0 24 24"><path d="M20 4v16M16 12H4M10 6l-6 6 6 6"/></svg></button></div>
+          <div class="with-btn"><input type="number" id="t-end" min="0" step="0.1"><button class="btn ghost icon" id="t-end-set" data-tip="End at the playhead  O" data-tip-align="end"><svg class="i" viewBox="0 0 24 24"><path d="M20 4v16M16 12H4M10 6l-6 6 6 6"/></svg></button></div>
         </label>
       </div>
-      <p class="muted small" style="margin:0">Times in seconds. Play to a point, then use the playhead buttons.</p>
+      <p class="muted small" style="margin:0">Drag the handles on the timeline, or play to a point and press <kbd>I</kbd> for the start and <kbd>O</kbd> for the end.</p>
     </section>
 
     <section class="section">
@@ -73,8 +90,8 @@
             <option value="0.02">Smallest file</option>
           </select>
         </label>
-        <label class="toggle"><span>Include audio</span><input type="checkbox" id="v-audio" checked></label>
-        <p class="callout">MP4 and WebM convert in real time: a 30-second clip takes about 30 seconds. Keep this tab open in front while it runs.</p>
+        <label class="toggle"><span>Include audio<small id="v-audio-note">This recording has no sound</small></span><input type="checkbox" id="v-audio" checked></label>
+        <p class="callout">MP4 and WebM export in real time: a 30-second clip takes about 30 seconds. Keep this tab open and in front while it runs.</p>
       </div>
 
       <div data-for="gif">
@@ -108,13 +125,14 @@
         <div class="progress"><div id="progress"></div></div>
         <p class="muted small" id="status"></p>
       </div>
-      <div id="result" class="result hidden">
+      <div id="result" class="result hidden" role="status">
         <svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg>
         <div><b id="r-size"></b><span class="muted small" id="r-detail"></span></div>
       </div>
       <div class="row">
         <button class="btn hidden" id="cancel" disabled>Cancel</button>
-        <button class="btn primary block" id="convert">Convert</button>
+        <button class="btn primary block" id="convert">Export</button>
+        <button class="btn hidden" id="redo-export" data-tip="Change settings and export again">Edit</button>
         <button class="btn primary block hidden" id="download">
           <svg class="i" viewBox="0 0 24 24"><path d="M12 4v12M7 11l5 5 5-5M4 20h16"/></svg>Download
         </button>

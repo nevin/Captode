@@ -45,6 +45,32 @@ export async function getCapture(id) {
   });
 }
 
+/** Captures from the last day, newest first: `{ id, kind, meta, created, size, blob }`. */
+export async function listCaptures(limit = 12) {
+  const db = await open();
+  return new Promise((resolve) => {
+    const out = [];
+    const req = db.transaction(STORE).objectStore(STORE).openCursor();
+    req.onsuccess = () => {
+      const c = req.result;
+      if (!c) {
+        db.close();
+        out.sort((a, b) => b.created - a.created);
+        resolve(out.slice(0, limit));
+        return;
+      }
+      const { blob, meta = {}, created = 0 } = c.value;
+      if (blob) out.push({ id: c.key, kind: blob.type.startsWith('video/') ? 'video' : 'image', meta, created, size: blob.size, blob });
+      c.continue();
+    };
+    req.onerror = () => { db.close(); resolve(out); };
+  });
+}
+
+export async function deleteCapture(id) {
+  await tx('readwrite', (s) => s.delete(id));
+}
+
 // Keep the store from growing forever: captures older than a day are dropped.
 async function prune() {
   const cutoff = Date.now() - 24 * 60 * 60 * 1000;
