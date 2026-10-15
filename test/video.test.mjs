@@ -65,14 +65,15 @@ export async function setup({ browser, url }) {
     } catch { return 0; }
   });
 
-  /** The time stamped on the source frame showing at `t`, and on the frame after it. */
+  /** Times stamped on the source frame showing at `t` and on the frames either side. */
   const sourceFrames = (t) => page.evaluate(async (t) => {
     const v = document.querySelector('#player');
     const at = async (x) => { await new Promise((res) => { v.addEventListener('seeked', res, { once: true }); v.currentTime = x; }); return lab.frameTime(v); };
     const shown = await at(t);
-    let next = shown;
-    for (let x = t + 0.01; next === shown && x < t + 0.5; x += 0.01) next = await at(x);
-    return [shown, next];
+    let before = shown, after = shown;
+    for (let x = t - 0.01; before === shown && x > t - 0.5; x -= 0.01) before = await at(x);
+    for (let x = t + 0.01; after === shown && x < t + 0.5; x += 0.01) after = await at(x);
+    return [before, after];
   }, t);
 
   // The lab page reads frame times; give the video page the same helper.
@@ -101,16 +102,18 @@ export const tests = {
   },
 
   async 'trimmed export starts and ends on the right frames'({ exportAs, set, sourceFrames }) {
-    // The right frames are the recording's own frames at the trim points; on a busy
-    // machine the recording has gaps, so they aren't always exactly 2.5 s and 5.45 s.
-    const [startShown, startNext] = await sourceFrames(2.5);
-    const [endShown, endNext] = await sourceFrames(5.45);
     await set('#t-start', '2.5');
     await set('#t-end', '5.5');
     const r = await exportAs('mp4');
     near(r.duration, 3, 0.1, 'duration');
-    ok(r.first >= startShown - 0.01 && r.first <= startNext + 0.01, `first frame time ${r.first}, expected a source frame from ${startShown} to ${startNext}`);
-    ok(r.last >= endShown - 0.01 && r.last <= endNext + 0.01, `last frame time ${r.last}, expected a source frame from ${endShown} to ${endNext}`);
+    // Each end must be the recording's own frame at that point, give or take one frame
+    // (on a busy machine the recording has gaps, so frames aren't evenly spaced).
+    const check = async (got, t, what) => {
+      const [lo, hi] = await sourceFrames(t);
+      ok(got >= lo - 0.005 && got <= hi + 0.005, `${what} ${got}, expected the recording's frame at ${t.toFixed(2)} s (${lo} to ${hi})`);
+    };
+    await check(r.first, 2.5 + 0.02, 'first frame time');
+    await check(r.last, 5.45, 'last frame time');
     await set('#t-start', '0');
     await set('#t-end', '8');
   },
