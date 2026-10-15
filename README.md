@@ -41,8 +41,9 @@ The capture opens in the editor, where you can:
 - **Visible area:** the current tab.
 - **Selected area:** drag a rectangle; only that part of the tab is recorded.
 
-You can pick the frame rate (15, 24, 30 or 60 fps), include audio, and start after a 3-second
-countdown. Click the Captode icon (or press **Alt+Shift+R**) to stop. The recording then
+You can pick the frame rate (15, 24, 30 or 60 fps), include audio, and set a countdown of up
+to 30 seconds (or none) to get ready; press Esc, or Cancel for full-screen recordings, to
+call it off. Click the Captode icon (or press **Alt+Shift+R**) to stop. The recording then
 opens in the video page, where you can:
 
 - Trim on a timeline with thumbnails: drag the handles, or play to a point and press **I**

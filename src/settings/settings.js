@@ -48,7 +48,7 @@ $('#version').textContent = `Version ${chrome.runtime.getManifest().version}`;
 $('#reset').addEventListener('click', () => openDialog($('#reset-dialog')));
 $('#reset-yes').addEventListener('click', async () => {
   settings = await saveSettings(DEFAULT_SETTINGS);
-  await chrome.storage.local.remove(['device', 'fps', 'audio', 'countdown', 'kind', 'deviceOpts', 'editorDefaults']);
+  await chrome.storage.local.remove(['device', 'fps', 'audio', 'countdown', 'countdownSeconds', 'kind', 'deviceOpts', 'editorDefaults']);
   $('#device').checked = false;
   render();
   $('#reset-dialog').close();

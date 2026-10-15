@@ -169,6 +169,16 @@ input[type="checkbox"]:disabled { opacity: .4; cursor: default; }
 .seg > button:hover { color: var(--text); }
 .seg > button.on { background: var(--panel); color: var(--text); box-shadow: var(--shadow-sm); }
 
+/* Stepper: − value + */
+.stepper { display: inline-flex; align-items: center; flex: none; padding: 2px; background: var(--panel); border: 1px solid var(--line); border-radius: 9px; }
+.stepper button {
+  width: 26px; height: 26px; padding: 0; border: 0; border-radius: 6px; background: transparent;
+  color: var(--text); font-size: 16px; line-height: 1; cursor: pointer;
+}
+.stepper button:hover:not(:disabled) { background: var(--panel-2); }
+.stepper button:disabled { color: var(--muted); opacity: .45; cursor: default; }
+.stepper output { min-width: 40px; text-align: center; font-weight: 500; font-variant-numeric: tabular-nums; border-radius: 5px; }
+
 /* Swatches */
 .swatches { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
 .swatches button {
@@ -305,7 +315,7 @@ dialog.modal:focus-visible { outline: none; }
     forced-color-adjust: none; background: Highlight; color: HighlightText; border-color: Highlight;
   }
   .tabs button.on { border-bottom-color: Highlight; }
-  .btn, .seg, .mode, .card, .banner, dialog.modal, .toast { border: 1px solid CanvasText; }
+  .btn, .seg, .stepper, .mode, .card, .banner, dialog.modal, .toast { border: 1px solid CanvasText; }
   :focus-visible { outline-color: Highlight; }
   .handle, .range, .playhead { forced-color-adjust: none; }
 }

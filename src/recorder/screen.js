@@ -6,10 +6,12 @@ import { putCapture } from '../lib/db.js';
 const params = new URLSearchParams(location.search);
 const fps = Number(params.get('fps')) || 30;
 const audio = params.get('audio') === '1';
+const countdownFrom = Math.max(0, Math.min(30, Number(params.get('countdown') ?? 3) || 0));
 const $ = (id) => document.getElementById(id);
 
 let session = null;
 let ticker = 0;
+let cancelCountdown = null;
 
 const fmt = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
 
@@ -35,8 +37,13 @@ async function choose() {
     $('err').classList.remove('hidden');
     return;
   }
-  session = record(stream, { fps, onEnded: stop });
   $('pick').classList.add('hidden');
+  if (countdownFrom && !(await countdown(countdownFrom, stream))) {
+    for (const t of stream.getTracks()) t.stop();
+    $('pick').classList.remove('hidden');
+    return;
+  }
+  session = record(stream, { fps, onEnded: stop });
   $('live').classList.remove('hidden');
   document.title = '● Recording — Captode';
   chrome.runtime.sendMessage({ type: 'rec-started', kind: 'page' });
@@ -45,6 +52,42 @@ async function choose() {
     $('time').textContent = fmt(elapsed);
     chrome.runtime.sendMessage({ type: 'rec-tick', elapsed });
   }, 1000);
+}
+
+/**
+ * Counts down on this page and on the toolbar badge (the user is usually looking at
+ * the screen or window they picked). Resolves false if cancelled, or if sharing
+ * ended in the meantime.
+ */
+function countdown(seconds, stream) {
+  $('counting').classList.remove('hidden');
+  return new Promise((resolve) => {
+    let n = seconds;
+    let timer = 0;
+    const [track] = stream.getVideoTracks();
+    const finish = (go) => {
+      clearTimeout(timer);
+      track.removeEventListener('ended', onEnded);
+      cancelCountdown = null;
+      chrome.action.setBadgeText({ text: '' });
+      $('counting').classList.add('hidden');
+      document.title = 'Captode — Screen recorder';
+      resolve(go);
+    };
+    const onEnded = () => finish(false);
+    track.addEventListener('ended', onEnded);
+    cancelCountdown = () => finish(false);
+    chrome.action.setBadgeBackgroundColor({ color: '#6c56ff' });
+    const tick = () => {
+      if (n === 0) return finish(true);
+      $('count').textContent = n;
+      document.title = `Recording in ${n}… — Captode`;
+      chrome.action.setBadgeText({ text: String(n) });
+      n--;
+      timer = setTimeout(tick, 1000);
+    };
+    tick();
+  });
 }
 
 async function stop() {
@@ -62,6 +105,7 @@ async function stop() {
 
 $('choose').addEventListener('click', choose);
 $('stop').addEventListener('click', stop);
+$('cancel').addEventListener('click', () => cancelCountdown?.());
 chrome.runtime.onMessage.addListener((msg) => {
   if (msg.target === 'recorder' && msg.type === 'rec-stop' && session) stop();
 });

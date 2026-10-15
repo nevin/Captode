@@ -78,7 +78,13 @@
           </div>
         </div>
         <label class="toggle"><span>Record audio<small>Sound from the tab or screen</small></span><input type="checkbox" id="audio"></label>
-        <label class="toggle"><span>Countdown<small>3 seconds before recording starts</small></span><input type="checkbox" id="countdown"></label>
+        <div class="toggle setting"><span id="countdown-label">Countdown<small id="countdown-hint">Time to get ready first</small></span>
+          <div class="stepper">
+            <button type="button" id="countdown-less" aria-label="Shorter countdown" tabindex="-1">−</button>
+            <output id="countdown" role="spinbutton" tabindex="0" aria-labelledby="countdown-label" aria-describedby="countdown-hint" aria-valuemin="0" aria-valuemax="30">3 s</output>
+            <button type="button" id="countdown-more" aria-label="Longer countdown" tabindex="-1">+</button>
+          </div>
+        </div>
       </div>
       <p class="stop-hint">Stop: click the Captode icon or press <span class="shortcut-keys"></span></p>
     </div>

@@ -191,11 +191,15 @@ async function ensureOffscreen() {
   });
 }
 
+/** Seconds of countdown asked for (older popups sent true for a fixed 3 seconds). */
+const countdownSeconds = (v) => (v === true ? 3 : Math.max(0, Math.min(30, Number(v) || 0)));
+
 async function startRecording({ mode, fps, audio, countdown: wantCountdown }, tab) {
   if (mode === 'screen') {
     // Picking a screen or window needs a visible page for the browser's picker.
     await setRec({ state: 'starting', kind: 'page', tabId: tab.id });
-    await openPage(`recorder/screen.html?fps=${fps}&audio=${audio ? 1 : 0}`, tab);
+    const seconds = countdownSeconds(wantCountdown);
+    await openPage(`recorder/screen.html?fps=${fps}&audio=${audio ? 1 : 0}&countdown=${seconds}`, tab);
     return;
   }
 
@@ -206,7 +210,11 @@ async function startRecording({ mode, fps, audio, countdown: wantCountdown }, ta
     crop = { x: rect.x / rect.vw, y: rect.y / rect.vh, w: rect.w / rect.vw, h: rect.h / rect.vh };
     await run(tab.id, showOutline, rect);
   }
-  if (wantCountdown) await run(tab.id, countdown, 3);
+  const seconds = countdownSeconds(wantCountdown);
+  if (seconds && !(await run(tab.id, countdown, seconds))) {
+    await run(tab.id, hideOutline); // cancelled with Esc
+    return;
+  }
 
   const streamId = await chrome.tabCapture.getMediaStreamId({ targetTabId: tab.id });
   await ensureOffscreen();

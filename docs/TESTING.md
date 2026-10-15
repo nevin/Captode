@@ -34,16 +34,19 @@ or install the zip from `npm run package`.
    result has no lines, gaps or repeated strips, and fixed headers appear once.
 2. **Screenshot → Selected area**: drag a rectangle. On a touchscreen, drag with a
    finger. Press Esc once to check it cancels.
-3. **Record → This tab** with **Record audio** on, on a page playing sound. Stop with the
+3. Set the **Countdown** in the popup to 10 s and start **Record → This tab**; press Esc
+   partway through: nothing is recorded. Set it to Off: recording starts at once.
+4. **Record → This tab** with **Record audio** on, on a page playing sound. Stop with the
    toolbar icon. Check the recording plays with sound.
-4. **Record → Selected area**, stop with the keyboard shortcut shown in the popup.
-5. **Record → Full screen**: pick a window in Chrome's picker, record a few seconds,
-   stop. Then try again and press Cancel in the picker: Captode should say nothing
+5. **Record → Selected area**, stop with the keyboard shortcut shown in the popup.
+6. **Record → Full screen**: pick a window in Chrome's picker, wait for the countdown
+   (shown on the page and on the toolbar badge), record a few seconds, stop. Start again
+   and press Cancel during the countdown: nothing is recorded. Then try again and press Cancel in the picker: Captode should say nothing
    was shared (on macOS, with a pointer to the Screen Recording permission).
-6. In the recording, trim with the timeline, then export **MP4**, **GIF**, **WebP** and
+7. In the recording, trim with the timeline, then export **MP4**, **GIF**, **WebP** and
    **WebM**. Open each downloaded file in the system's own player or viewer.
-7. Turn on the **device frame** and export a screenshot and a GIF.
-8. Switch the theme in Settings and check the popup and editor follow it; set it to
+8. Turn on the **device frame** and export a screenshot and a GIF.
+9. Switch the theme in Settings and check the popup and editor follow it; set it to
    System and change the operating system's dark mode.
 
 ### Windows

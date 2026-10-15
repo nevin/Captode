@@ -142,24 +142,45 @@ export function fullPageRestore() {
   }
 }
 
-/** Shows a 3-2-1 countdown and resolves once it has left the screen. */
+/**
+ * Shows a countdown (…3, 2, 1) and resolves true once it has left the screen, or
+ * false if the user pressed Esc to cancel.
+ */
 export function countdown(seconds) {
   return new Promise((resolve) => {
     const el = document.createElement('div');
+    el.id = '__captode_countdown';
+    el.setAttribute('role', 'timer');
     el.style.cssText =
-      'position:fixed;inset:0;z-index:2147483647;display:flex;align-items:center;justify-content:center;' +
+      'position:fixed;inset:0;z-index:2147483647;display:flex;flex-direction:column;align-items:center;justify-content:center;' +
       'pointer-events:none;font:700 140px system-ui,sans-serif;color:#fff;text-shadow:0 8px 40px rgba(0,0,0,.5);' +
       'background:rgba(15,15,25,.25);';
+    const num = document.createElement('div');
+    const hint = document.createElement('div');
+    hint.textContent = 'Recording starts soon · Esc to cancel';
+    hint.style.cssText = 'font:500 15px system-ui,sans-serif;margin-top:8px;padding:6px 12px;border-radius:999px;background:rgba(0,0,0,.45);text-shadow:none;';
+    el.append(num, hint);
     document.documentElement.appendChild(el);
     let n = seconds;
+    let timer;
+    const finish = (started) => {
+      clearTimeout(timer);
+      removeEventListener('keydown', onKey, true);
+      el.remove();
+      if (started) requestAnimationFrame(() => requestAnimationFrame(() => resolve(true)));
+      else resolve(false);
+    };
+    const onKey = (e) => {
+      if (e.key !== 'Escape') return;
+      e.preventDefault();
+      e.stopPropagation();
+      finish(false);
+    };
+    addEventListener('keydown', onKey, true);
     const tick = () => {
-      if (n === 0) {
-        el.remove();
-        requestAnimationFrame(() => requestAnimationFrame(() => resolve(true)));
-        return;
-      }
-      el.textContent = n--;
-      setTimeout(tick, 1000);
+      if (n === 0) return finish(true);
+      num.textContent = n--;
+      timer = setTimeout(tick, 1000);
     };
     tick();
   });

@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Captode — Screenshot & Screen Recorder",
   "short_name": "Captode",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Take full-page, visible or selected-area screenshots and screen recordings, mark them up, and save them as images, PDFs or videos.",
   "homepage_url": "https://github.com/nevin/Captode",
   "minimum_chrome_version": "116",

@@ -5,10 +5,22 @@ const selectTab = tablist($('.kind'), (t) => { setKind(t.dataset.kind); chrome.s
 let kind = 'image';
 let fps = '30';
 
-const settings = await chrome.storage.local.get({ kind: 'image', fps: '30', audio: false, countdown: true, device: false });
+const settings = await chrome.storage.local.get({ kind: 'image', fps: '30', audio: false, countdown: true, countdownSeconds: null, device: false });
 fps = String(settings.fps);
 $('#audio').checked = settings.audio;
-$('#countdown').checked = settings.countdown;
+// Seconds of countdown before a recording starts (0 = none): a second at a time up
+// to 10, then 5 at a time up to 30. Earlier versions only stored whether the
+// 3-second countdown was on.
+const COUNTDOWNS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30];
+const MAX_COUNTDOWN = COUNTDOWNS.at(-1);
+/** The countdown `by` steps from the current one. */
+const stepCountdown = (by) => {
+  const i = COUNTDOWNS.findIndex((v) => v >= countdown);
+  const at = i < 0 ? COUNTDOWNS.length - 1 : COUNTDOWNS[i] > countdown && by > 0 ? i - 1 : i;
+  return COUNTDOWNS[Math.max(0, Math.min(COUNTDOWNS.length - 1, at + by))];
+};
+let countdown = settings.countdownSeconds ?? (settings.countdown ? 3 : 0);
+setCountdown(countdown, false);
 $('#device').checked = settings.device;
 setKind(settings.kind);
 setFps(fps);
@@ -63,7 +75,17 @@ $('#fps').addEventListener('click', (e) => {
   setFps(v);
   chrome.storage.local.set({ fps: v });
 });
-for (const id of ['audio', 'countdown', 'device']) {
+$('#countdown-less').addEventListener('click', () => setCountdown(stepCountdown(-1)));
+$('#countdown-more').addEventListener('click', () => setCountdown(stepCountdown(1)));
+$('#countdown').addEventListener('keydown', (e) => {
+  const next = { ArrowUp: stepCountdown(1), ArrowRight: stepCountdown(1), ArrowDown: stepCountdown(-1), ArrowLeft: stepCountdown(-1), PageUp: stepCountdown(5), PageDown: stepCountdown(-5), Home: 0, End: MAX_COUNTDOWN }[e.key]
+    ?? (/^\d$/.test(e.key) ? Number(e.key) : undefined);
+  if (next === undefined) return;
+  e.preventDefault();
+  e.stopPropagation(); // digits here set the countdown, not the capture mode
+  setCountdown(next);
+});
+for (const id of ['audio', 'device']) {
   $('#' + id).addEventListener('change', (e) => chrome.storage.local.set({ [id]: e.target.checked }));
 }
 $('#open-settings').addEventListener('click', () => { chrome.runtime.openOptionsPage(); window.close(); });
@@ -91,9 +113,21 @@ for (const b of document.querySelectorAll('.mode')) {
       ? { type: 'capture-image', mode: b.dataset.mode, tabId: tab.id }
       : {
           type: 'record-start', mode: b.dataset.mode, tabId: tab.id,
-          fps: Number(fps), audio: $('#audio').checked, countdown: $('#countdown').checked,
+          fps: Number(fps), audio: $('#audio').checked, countdown,
         };
     await chrome.runtime.sendMessage(msg);
     window.close();
   });
+}
+
+function setCountdown(n, save = true) {
+  countdown = Math.max(0, Math.min(MAX_COUNTDOWN, Math.round(n) || 0));
+  const out = $('#countdown');
+  out.textContent = countdown ? `${countdown} s` : 'Off';
+  out.setAttribute('aria-valuenow', countdown);
+  out.setAttribute('aria-valuetext', countdown ? `${countdown} second${countdown > 1 ? 's' : ''}` : 'Off');
+  $('#countdown-less').disabled = countdown === 0;
+  $('#countdown-more').disabled = countdown === MAX_COUNTDOWN;
+  $('#countdown-hint').textContent = countdown ? 'Time to get ready first' : 'Recording starts straight away';
+  if (save) chrome.storage.local.set({ countdownSeconds: countdown });
 }
