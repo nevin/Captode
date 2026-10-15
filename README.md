@@ -122,6 +122,23 @@ Everything runs in the browser; nothing is uploaded.
 - Encoding runs in background workers, so the editor and video page stay responsive. GIF
   exports spread colour mapping and compression across several CPU cores.
 
+## Supported platforms
+
+Captode runs on **Windows, macOS, Linux and ChromeOS**, in Chrome 116 or later and other
+Chromium browsers (Edge, Brave, Opera, Arc). The automated tests run on Windows, macOS
+and Linux on every push, including captures at 125%, 150% and 200% display scale, touch
+input and Windows high-contrast mode. [docs/TESTING.md](docs/TESTING.md) has the manual
+checklist for what automation can't reach: recording (which needs a real click) and
+Chromebooks.
+
+Platform differences, all handled:
+
+- Keyboard shortcuts show as the platform writes them: ⌘ and ⌥ on macOS, Ctrl and Alt
+  elsewhere. The popup and Settings show the shortcut actually set in Chrome.
+- On Linux, and on Windows without Media Foundation, Chrome has no AAC encoder, so MP4
+  exports keep the recording's Opus audio.
+- Touchscreens (Chromebooks, Windows tablets) can drag out a selected area.
+
 ## Install
 
 Captode works in Chromium browsers: Chrome 116 or later, Edge, Brave, Opera and Arc.

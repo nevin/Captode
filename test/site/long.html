@@ -1,0 +1,20 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Long page</title>
+<style>
+body{margin:0;font:15px/1.6 Georgia,serif;color:#222;background:#fff}
+.row{display:flex;gap:16px;padding:10px 24px;border-bottom:1px solid #ddd}
+.row:nth-child(odd){background:#f4f6fb}
+.row b{width:70px;font:700 13px monospace;color:#5b4bff}
+.band{height:6px;background:repeating-linear-gradient(90deg,#e5484d 0 12px,#12a37f 12px 24px,#5b4bff 24px 36px)}
+</style></head><body>
+<script>
+// A tall page of numbered rows with sharp lines, so any seam or repeated strip in a
+// stitched capture shows up when compared with Chrome's own full-page screenshot.
+const words = 'capture stitch scroll pixel border seam viewport window frame scale render'.split(' ');
+let html = '';
+for (let i = 0; i < 160; i++) {
+  html += `<div class="row"><b>${String(i).padStart(4, '0')}</b><span>${Array.from({ length: 12 }, (_, k) => words[(i * 7 + k * 3) % words.length]).join(' ')}</span></div>`;
+  if (i % 10 === 9) html += '<div class="band"></div>';
+}
+document.body.innerHTML = html;
+</script>
+</body></html>

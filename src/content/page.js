@@ -10,7 +10,7 @@ export function pickArea(hint) {
     const root = document.createElement('div');
     root.id = '__captode_pick';
     root.style.cssText =
-      'position:fixed;inset:0;z-index:2147483647;cursor:crosshair;user-select:none;' +
+      'position:fixed;inset:0;z-index:2147483647;cursor:crosshair;user-select:none;touch-action:none;' +
       'background:rgba(15,15,25,.35);font:13px system-ui,sans-serif;';
     const box = document.createElement('div');
     box.style.cssText =
@@ -41,15 +41,18 @@ export function pickArea(hint) {
     };
     window.addEventListener('keydown', onKey, true);
 
-    root.addEventListener('mousedown', (e) => {
-      if (e.button !== 0) return;
+    // Pointer events, so a finger or pen works as well as a mouse (touchscreen
+    // Chromebooks and Windows tablets).
+    root.addEventListener('pointerdown', (e) => {
+      if (e.button !== 0 || start) return;
       e.preventDefault();
-      start = { x: e.clientX, y: e.clientY };
+      root.setPointerCapture(e.pointerId);
+      start = { x: e.clientX, y: e.clientY, id: e.pointerId };
       root.style.background = 'transparent';
       tip.style.display = 'none';
     });
-    root.addEventListener('mousemove', (e) => {
-      if (!start) return;
+    root.addEventListener('pointermove', (e) => {
+      if (!start || e.pointerId !== start.id) return;
       const x = Math.min(start.x, e.clientX);
       const y = Math.min(start.y, e.clientY);
       const w = Math.abs(e.clientX - start.x);
@@ -63,10 +66,10 @@ export function pickArea(hint) {
         top: (y > 30 ? y - 28 : y + h + 6) + 'px',
       });
     });
-    root.addEventListener('mouseup', () => {
-      if (!start) return;
+    const end = (e) => {
+      if (!start || e.pointerId !== start.id) return;
       start = null;
-      if (!rect || rect.w < 4 || rect.h < 4) {
+      if (e.type === 'pointercancel' || !rect || rect.w < 4 || rect.h < 4) {
         rect = null;
         box.style.display = label.style.display = 'none';
         root.style.background = 'rgba(15,15,25,.35)';
@@ -74,7 +77,9 @@ export function pickArea(hint) {
         return;
       }
       finish({ ...rect, vw: window.innerWidth, vh: window.innerHeight });
-    });
+    };
+    root.addEventListener('pointerup', end);
+    root.addEventListener('pointercancel', end);
   });
 }
 

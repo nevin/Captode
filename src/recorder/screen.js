@@ -25,10 +25,14 @@ async function choose() {
       surfaceSwitching: 'include',
     });
   } catch (e) {
-    if (e.name !== 'NotAllowedError') {
-      $('err').textContent = e.message;
-      $('err').classList.remove('hidden');
-    }
+    // NotAllowedError is a cancelled picker, or (on macOS) Chrome lacking the
+    // system's Screen Recording permission, which looks the same from here.
+    const mac = /mac/i.test(navigator.userAgentData?.platform || navigator.platform || '');
+    $('err').textContent = e.name === 'NotAllowedError'
+      ? 'Nothing was shared, so nothing was recorded.' +
+        (mac ? ' If you did choose a screen, allow Chrome under System Settings → Privacy & Security → Screen Recording, then restart Chrome.' : '')
+      : e.message;
+    $('err').classList.remove('hidden');
     return;
   }
   session = record(stream, { fps, onEnded: stop });

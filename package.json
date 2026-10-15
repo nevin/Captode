@@ -13,5 +13,8 @@
   },
   "devDependencies": {
     "puppeteer": "24.43.1"
+  },
+  "engines": {
+    "node": ">=22"
   }
 }

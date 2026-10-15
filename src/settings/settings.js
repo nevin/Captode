@@ -1,5 +1,5 @@
 import { getSettings, saveSettings, DEFAULT_SETTINGS } from '../lib/settings.js';
-import { toast, enhance, openDialog } from '../lib/ui.js';
+import { toast, enhance, openDialog, showShortcut } from '../lib/ui.js';
 
 const $ = (s) => document.querySelector(s);
 let settings = await getSettings();
@@ -55,4 +55,7 @@ $('#reset-yes').addEventListener('click', async () => {
   toast('Settings reset', { kind: 'success' });
 });
 enhance();
+showShortcut(document.querySelector('.shortcut-keys'));
+// Pick up a shortcut changed on chrome://extensions/shortcuts when coming back.
+document.addEventListener('visibilitychange', () => { if (!document.hidden) showShortcut(document.querySelector('.shortcut-keys')); });
 render();

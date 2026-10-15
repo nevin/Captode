@@ -98,5 +98,31 @@ export function ago(t) {
   return `${h} hr ago`;
 }
 
-export const isMac = /Mac|iPhone|iPad/.test(navigator.platform);
+const platform = navigator.userAgentData?.platform || navigator.platform || '';
+export const isMac = /mac|iphone|ipad/i.test(platform);
 export const MOD = isMac ? '⌘' : 'Ctrl';
+
+/**
+ * Shows the keyboard shortcut that opens Captode (and stops a recording) in `el`,
+ * as the user has it set: Chrome reports it in the platform's own style, such as
+ * "Alt+Shift+R" or "⌥⇧R". Says so when no shortcut is set.
+ */
+export async function showShortcut(el) {
+  let key = '';
+  try {
+    const cmd = (await chrome.commands.getAll()).find((c) => c.name === '_execute_action');
+    key = cmd?.shortcut || '';
+  } catch { /* commands API unavailable */ }
+  el.textContent = '';
+  if (!key) {
+    el.textContent = 'no shortcut set';
+    return;
+  }
+  // "Ctrl+Shift+R" splits on "+"; macOS symbols ("⌥⇧R") are one character each.
+  const parts = key.includes('+') ? key.split('+') : [...key];
+  for (const p of parts) {
+    const k = document.createElement('kbd');
+    k.textContent = p;
+    el.append(k, ' ');
+  }
+}

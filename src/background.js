@@ -100,8 +100,14 @@ async function captureFullPage(tab, meta) {
       for (let p = 0; p < total; p += view) out.push(Math.min(p, Math.max(0, total - view)));
       return [...new Set(out)];
     };
-    const xs = steps(info.width, info.vw);
-    const ys = steps(height, info.vh);
+    // Step by what a capture really holds. At fractional scales (125%, 150%) the
+    // reported viewport is rounded up, and stepping by it would leave a blank row
+    // between tiles; a pixel of overlap is harmless. Each tile is then placed at the
+    // scroll position the page actually reached.
+    const viewW = Math.max(1, Math.floor(first.width / scale) - 1);
+    const viewH = Math.max(1, Math.floor(first.height / scale) - 1);
+    const xs = steps(info.width, viewW);
+    const ys = steps(height, viewH);
     const total = xs.length * ys.length;
     let done = 1;
 

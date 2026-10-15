@@ -292,3 +292,20 @@ kbd {
   *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
 }
 dialog.modal:focus-visible { outline: none; }
+
+/* Windows high-contrast themes: the system picks the colours, so switches, selected
+   states and focus rings use its colour keywords to stay visible. */
+@media (forced-colors: active) {
+  input[type="checkbox"] { border: 1px solid CanvasText; background: Canvas; }
+  input[type="checkbox"]::after { background: CanvasText; box-shadow: none; }
+  input[type="checkbox"]:checked { background: Highlight; border-color: Highlight; }
+  input[type="checkbox"]:checked::after { background: HighlightText; }
+  .seg > button.on, .tabs button.on, .formats button.on, .tools .btn.active, .btn.on, .btn.active,
+  .choices button[aria-checked="true"], .swatches button.picked {
+    forced-color-adjust: none; background: Highlight; color: HighlightText; border-color: Highlight;
+  }
+  .tabs button.on { border-bottom-color: Highlight; }
+  .btn, .seg, .mode, .card, .banner, dialog.modal, .toast { border: 1px solid CanvasText; }
+  :focus-visible { outline-color: Highlight; }
+  .handle, .range, .playhead { forced-color-adjust: none; }
+}

@@ -1,6 +1,6 @@
 // Screenshots of a page: full page, visible area and a dragged selection, opened in
 // the editor, then exported in every format.
-import { open, waitForTab, ok, near, sleep } from './helpers.mjs';
+import { open, waitForTab, ok, near, sleep, launch } from './helpers.mjs';
 
 export async function setup({ browser, url, site }) {
   const page = await open(browser, `${site}/index.html`);
@@ -66,5 +66,85 @@ export const tests = {
     }
     await ed.close();
     return sizes.join(', ');
+  },
+
+  async 'captures line up at every display scale (100%, 125%, 150%, 200%)'({ site }) {
+    const notes = [];
+    for (const scale of [1, 1.25, 1.5, 2]) {
+      // A Chrome that really runs at this scale, as on a Windows display set to 125%:
+      // emulating it only changes the page, not what tab capture sees.
+      const env = await launch({ args: [`--force-device-scale-factor=${scale}`] });
+      const { browser, url } = env;
+      const ctl = await open(browser, url('popup/popup.html'), { width: 340, height: 600 });
+      const page = await browser.newPage();
+      await page.goto(`${site}/long.html`);
+      await sleep(300);
+      // Chrome's own full-page screenshot, to compare with.
+      const reference = await page.screenshot({ fullPage: true, encoding: 'base64' });
+      await page.evaluate(() => window.scrollTo(0, 0));
+      const tabId = await ctl.evaluate(async (site) => (await chrome.tabs.query({ url: `${site}/long.html` }))[0].id, site);
+      await page.bringToFront();
+      await ctl.evaluate((tabId) => chrome.runtime.sendMessage({ type: 'capture-image', mode: 'full', tabId }), tabId);
+      const ed = await waitForTab(browser, (u) => u.includes('editor.html?id='));
+      await ed.waitForFunction(() => /px/.test(document.querySelector('#doc-dims').textContent), { timeout: 30000 });
+      const r = await ed.evaluate(async (b64) => {
+        const bg = document.querySelector('#bg');
+        const ours = bg.getContext('2d', { willReadFrequently: true }).getImageData(0, 0, bg.width, bg.height).data;
+        const img = await createImageBitmap(await (await fetch('data:image/png;base64,' + b64)).blob());
+        const c = new OffscreenCanvas(img.width, img.height).getContext('2d', { willReadFrequently: true });
+        c.drawImage(img, 0, 0);
+        const ref = c.getImageData(0, 0, img.width, img.height).data;
+        const w = Math.min(bg.width, img.width), h = Math.min(bg.height, img.height);
+        // Rows that differ a lot point to a seam or a repeated or missing strip.
+        let badRows = 0, worst = 0;
+        for (let y = 0; y < h; y++) {
+          let d = 0;
+          for (let x = 0; x < w; x++) {
+            const i = (y * bg.width + x) * 4, j = (y * img.width + x) * 4;
+            d += Math.abs(ours[i] - ref[j]) + Math.abs(ours[i + 1] - ref[j + 1]) + Math.abs(ours[i + 2] - ref[j + 2]);
+          }
+          d /= w * 3;
+          worst = Math.max(worst, d);
+          if (d > 8) badRows++;
+        }
+        return { ours: [bg.width, bg.height], ref: [img.width, img.height], badRows, worst: +worst.toFixed(1) };
+      }, reference);
+      ok(Math.abs(r.ours[0] - r.ref[0]) <= 1 && Math.abs(r.ours[1] - r.ref[1]) <= 2, `${scale * 100}%: size ${r.ours} vs Chrome's ${r.ref}`);
+      ok(r.badRows === 0, `${scale * 100}%: ${r.badRows} rows differ from Chrome's own full-page screenshot (worst ${r.worst})`);
+      await ed.close();
+
+      // Selected area: a 300 × 200 CSS-pixel drag gives 300 × 200 × scale pixels.
+      await page.bringToFront();
+      await ctl.evaluate((tabId) => chrome.runtime.sendMessage({ type: 'capture-image', mode: 'area', tabId }), tabId);
+      await page.bringToFront();
+      await page.waitForSelector('#__captode_pick');
+      await page.mouse.move(100, 100);
+      await page.mouse.down();
+      await page.mouse.move(400, 300, { steps: 5 });
+      await page.mouse.up();
+      const ed2 = await waitForTab(browser, (u) => u.includes('editor.html?id='));
+      await ed2.waitForFunction(() => /px/.test(document.querySelector('#doc-dims').textContent), { timeout: 30000 });
+      const area = await ed2.evaluate(() => [document.querySelector('#bg').width, document.querySelector('#bg').height]);
+      near(area[0], 300 * scale, 1, `${scale * 100}%: area width`);
+      near(area[1], 200 * scale, 1, `${scale * 100}%: area height`);
+      notes.push(`${scale * 100}% ${r.ours.join('×')}`);
+      await env.close();
+    }
+    return notes.join(', ');
+  },
+
+  async 'selected area can be dragged out with a finger (touchscreens)'({ page, capture }) {
+    await page.bringToFront();
+    const { ed, size } = await capture('area', async () => {
+      await page.bringToFront();
+      await page.waitForSelector('#__captode_pick');
+      await page.touchscreen.touchStart(120, 140);
+      await page.touchscreen.touchMove(220, 200);
+      await page.touchscreen.touchMove(320, 260);
+      await page.touchscreen.touchEnd();
+    });
+    near(size[0], 200, 1, 'width');
+    near(size[1], 120, 1, 'height');
+    await ed.close();
   },
 };

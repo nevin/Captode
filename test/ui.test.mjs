@@ -103,4 +103,32 @@ export const tests = {
     await pop.close();
     await st.close();
   },
+
+  async 'popup shows the keyboard shortcut as Chrome has it set'({ browser, url }) {
+    const pop = await open(browser, url('popup/popup.html'), { width: 340, height: 600 });
+    await sleep(300);
+    const r = await pop.evaluate(async () => ({
+      shown: document.querySelector('.shortcut-keys').textContent.replace(/\s+/g, ''),
+      actual: ((await chrome.commands.getAll()).find((c) => c.name === '_execute_action')?.shortcut || '').replace(/\+/g, ''),
+    }));
+    ok(r.actual ? r.shown === r.actual : r.shown === 'noshortcutset', `shows "${r.shown}", Chrome has "${r.actual}"`);
+    await pop.close();
+    return r.actual || 'no shortcut set';
+  },
+
+  async 'switches and selections stay visible in Windows high-contrast mode'({ browser, url }) {
+    const pop = await open(browser, url('popup/popup.html'), { width: 340, height: 600 });
+    // Puppeteer's helper doesn't know this feature; Chrome's DevTools protocol does.
+    const cdp = await pop.createCDPSession();
+    await cdp.send('Emulation.setEmulatedMedia', { features: [{ name: 'forced-colors', value: 'active' }] });
+    await sleep(200);
+    const r = await pop.evaluate(() => {
+      const box = getComputedStyle(document.querySelector('#countdown'));
+      const on = getComputedStyle(document.querySelector('.kind button.on'));
+      return { border: box.borderTopStyle !== 'none' && box.borderTopWidth !== '0px', onAdjust: on.forcedColorAdjust };
+    });
+    ok(r.border, 'switches have no outline in high-contrast mode');
+    ok(r.onAdjust === 'none', 'selected tab does not use the system highlight');
+    await pop.close();
+  },
 };

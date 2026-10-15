@@ -14,6 +14,7 @@ import { launch, open, serveSite, sleep } from './helpers.mjs';
 const here = dirname(fileURLToPath(import.meta.url));
 const baselineFile = join(here, 'bench-baseline.json');
 const update = process.argv.includes('--update');
+const reportOnly = process.argv.includes('--report'); // print, never fail (for CI)
 
 const site = await serveSite();
 const env = await launch();
@@ -141,6 +142,8 @@ if (update) {
   all[process.platform] = Object.fromEntries(Object.entries(results).map(([k, { ms, ...rest }]) => [k, rest]));
   writeFileSync(baselineFile, JSON.stringify(all, null, 2) + '\n');
   console.log(`\nSaved ${process.platform} baselines to ${baselineFile}`);
+} else if (problems.length && reportOnly) {
+  console.log(`\nDiffers from the ${process.platform} baseline (not failing: --report):\n  ${problems.join('\n  ')}`);
 } else if (problems.length) {
   console.log(`\nWorse than the baseline:\n  ${problems.join('\n  ')}`);
   process.exit(1);

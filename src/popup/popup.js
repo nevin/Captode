@@ -1,4 +1,4 @@
-import { enhance, tablist } from '../lib/ui.js';
+import { enhance, tablist, showShortcut } from '../lib/ui.js';
 
 const $ = (s) => document.querySelector(s);
 const selectTab = tablist($('.kind'), (t) => { setKind(t.dataset.kind); chrome.storage.local.set({ kind: t.dataset.kind }); });
@@ -32,6 +32,7 @@ if (blocked) {
   for (const b of document.querySelectorAll('.mode:not([data-mode="screen"])')) b.disabled = true;
 }
 enhance();
+showShortcut(document.querySelector('.shortcut-keys'));
 
 function setKind(k) {
   kind = k;

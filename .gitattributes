@@ -1,0 +1,5 @@
+# Same line endings on every OS, so builds and tests behave the same on Windows.
+* text=auto eol=lf
+*.wasm binary
+*.png binary
+*.zip binary

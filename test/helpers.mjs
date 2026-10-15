@@ -41,7 +41,7 @@ function testCopy() {
  * Starts Chrome with the extension. Uses CHROME_PATH if set, else the browser
  * Puppeteer downloaded. Returns `{ browser, id, url(path), close() }`.
  */
-export async function launch({ scheme = 'light' } = {}) {
+export async function launch({ scheme = 'light', args = [] } = {}) {
   const ext = testCopy();
   const profile = mkdtempSync(join(tmpdir(), 'captode-profile-'));
   const browser = await puppeteer.launch({
@@ -50,7 +50,7 @@ export async function launch({ scheme = 'light' } = {}) {
     pipe: true,
     enableExtensions: true,
     userDataDir: profile,
-    args: ['--window-size=1280,900', '--use-fake-ui-for-media-stream', '--autoplay-policy=no-user-gesture-required', '--no-sandbox'],
+    args: ['--window-size=1280,900', '--use-fake-ui-for-media-stream', '--autoplay-policy=no-user-gesture-required', '--no-sandbox', ...args],
     defaultViewport: null,
   });
   const id = await browser.installExtension(ext);
