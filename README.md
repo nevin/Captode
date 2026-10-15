@@ -114,7 +114,8 @@ Everything runs in the browser; nothing is uploaded.
   for screenshots of text, or always when quality is set to 100%.
 - **MP4 and WebM** are made with WebCodecs: the recording is decoded, each frame is drawn
   (in a device frame if chosen) and encoded again, then written to a new file. WebM keeps
-  the original Opus audio as it is; MP4 converts it to AAC. If the browser can't do this,
+  the original Opus audio as it is; MP4 converts it to AAC, or keeps it as Opus where the
+  browser has no AAC encoder (Chrome on Linux). If the browser can't do this,
   Captode falls back to playing the clip through in real time.
 - **Recordings** are made with settings for screen content (sharp text, enough bitrate that
   still areas don't shimmer, and a key frame every 2 seconds), which also keeps exports small.

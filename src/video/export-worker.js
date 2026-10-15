@@ -171,7 +171,17 @@ async function exportAudio(src, format, start, end) {
   }
 
   const encConfig = { codec: 'mp4a.40.2', sampleRate: 48000, numberOfChannels: Math.min(2, a.channels), bitrate: 128000 };
-  if (!(await AudioEncoder.isConfigSupported(encConfig)).supported) throw new Unsupported('This browser cannot encode AAC audio.');
+  if (!(await AudioEncoder.isConfigSupported(encConfig)).supported) {
+    // No AAC encoder (Chrome on Linux): keep the original Opus audio. MP4 can carry
+    // Opus, and Chrome, Firefox and Safari all play it.
+    if (!a.description) throw new Unsupported('This browser cannot encode AAC audio.');
+    const frames = packets.map((f, i) => {
+      const next = packets[i + 1];
+      const duration = next ? next.timestamp - f.timestamp : (i ? f.timestamp - packets[i - 1].timestamp : 20000);
+      return { timestamp: f.timestamp - start, duration, key: true, data: f.data };
+    });
+    return { codec: 'opus', sampleRate: 48000, channels: a.channels, opusHead: a.description, frames };
+  }
   const decConfig = { codec: 'opus', sampleRate: a.sampleRate, numberOfChannels: a.channels, description: a.description || undefined };
   if (!(await AudioDecoder.isConfigSupported(decConfig)).supported) throw new Unsupported('This browser cannot decode the recording\'s audio.');
 

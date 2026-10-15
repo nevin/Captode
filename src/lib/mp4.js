@@ -1,4 +1,4 @@
-// MP4 writer for WebCodecs output: H.264 video and, optionally, AAC audio.
+// MP4 writer for WebCodecs output: H.264 video and, optionally, AAC or Opus audio.
 // The index (moov) goes before the media data, so players can start straight away.
 
 const enc = new TextEncoder();
@@ -92,12 +92,45 @@ function mp4aEntry(sampleRate, channels, asc, bitrate) {
     full('esds', 0, 0, es));
 }
 
-function trak(id, kind, { width = 0, height = 0, timescale, stbl, mediaDuration, movieDuration }) {
+/**
+ * The Opus sample entry, with its dOps box built from the stream's OpusHead
+ * (little-endian there, big-endian in MP4).
+ */
+function opusEntry(channels, opusHead) {
+  const h = new DataView(opusHead.buffer, opusHead.byteOffset, opusHead.byteLength);
+  const family = h.getUint8(18);
+  const dops = [
+    0, h.getUint8(9), // version, output channels
+    ...u16(h.getUint16(10, true)), // pre-skip
+    ...u32(h.getUint32(12, true)), // input sample rate
+    ...u16(h.getUint16(16, true)), // output gain
+    family,
+    ...(family ? [...new Uint8Array(opusHead.buffer, opusHead.byteOffset + 19, opusHead.byteLength - 19)] : []),
+  ];
+  return box('Opus',
+    zeros(6), u16(1),
+    zeros(8), u16(channels), u16(16), zeros(4),
+    u32(48000 * 65536),
+    box('dOps', dops));
+}
+
+/**
+ * An edit list that starts the track `delay` (movie ticks) into the movie: used
+ * when audio begins a little after the video and can't be padded with silence.
+ */
+function edts(delay, duration) {
+  return box('edts', full('elst', 0, 0, u32(2),
+    u32(delay), s32(-1), u16(1), u16(0), // empty edit: nothing plays for `delay`
+    u32(duration), u32(0), u16(1), u16(0)));
+}
+
+function trak(id, kind, { width = 0, height = 0, timescale, stbl, mediaDuration, movieDuration, delay = 0 }) {
   const video = kind === 'video';
   return box('trak',
     full('tkhd', 0, 3, u32(0), u32(0), u32(id), u32(0), u32(movieDuration), zeros(8),
       u16(0), u16(video ? 0 : 1), u16(video ? 0 : 0x0100), u16(0), MATRIX,
       u32(width * 65536), u32(height * 65536)),
+    ...(delay > 0 ? [edts(delay, movieDuration)] : []),
     box('mdia',
       full('mdhd', 0, 0, u32(0), u32(0), u32(timescale), u32(mediaDuration), u16(0x55c4), u16(0)), // language "und"
       full('hdlr', 0, 0, u32(0), str(video ? 'vide' : 'soun'), zeros(12), str(video ? 'VideoHandler' : 'SoundHandler'), [0]),
@@ -110,7 +143,8 @@ function trak(id, kind, { width = 0, height = 0, timescale, stbl, mediaDuration,
 /**
  * Builds an MP4 from encoded chunks.
  * `video`: `{ width, height, avcC, frames }` (avcC is the encoder's decoder
- * description); `audio` (optional): `{ sampleRate, channels, asc, bitrate, frames }`.
+ * description); `audio` (optional): AAC `{ sampleRate, channels, asc, bitrate, frames }`
+ * or Opus `{ codec: 'opus', channels, opusHead, frames }`.
  */
 export function muxMp4({ video, audio = null }) {
   const vData = concat(video.frames.map((f) => f.data));
@@ -122,10 +156,15 @@ export function muxMp4({ video, audio = null }) {
   // once to measure, then again with the real offsets.
   const build = (vOffset, aOffset) => {
     const v = sampleTables(video.frames, VTS, vOffset, avc1Entry(video.width, video.height, video.avcC), true);
-    const a = audio ? sampleTables(audio.frames, audio.sampleRate, aOffset, mp4aEntry(audio.sampleRate, audio.channels, audio.asc, audio.bitrate), false) : null;
-    const movieMs = Math.max(Math.round((v.duration / VTS) * 1000), a ? Math.round((a.duration / audio.sampleRate) * 1000) : 0);
+    const entry = audio?.codec === 'opus'
+      ? opusEntry(audio.channels, audio.opusHead)
+      : audio && mp4aEntry(audio.sampleRate, audio.channels, audio.asc, audio.bitrate);
+    const a = audio ? sampleTables(audio.frames, audio.sampleRate, aOffset, entry, false) : null;
+    // Sample tables start at zero; a later first sample becomes an edit-list delay.
+    const aDelay = audio ? Math.round(Math.max(0, audio.frames[0]?.timestamp || 0) / 1000) : 0;
+    const movieMs = Math.max(Math.round((v.duration / VTS) * 1000), a ? Math.round((a.duration / audio.sampleRate) * 1000) + aDelay : 0);
     const traks = [trak(1, 'video', { width: video.width, height: video.height, timescale: VTS, stbl: v.stbl, mediaDuration: v.duration, movieDuration: Math.round((v.duration / VTS) * 1000) })];
-    if (a) traks.push(trak(2, 'audio', { timescale: audio.sampleRate, stbl: a.stbl, mediaDuration: a.duration, movieDuration: Math.round((a.duration / audio.sampleRate) * 1000) }));
+    if (a) traks.push(trak(2, 'audio', { timescale: audio.sampleRate, stbl: a.stbl, mediaDuration: a.duration, movieDuration: Math.round((a.duration / audio.sampleRate) * 1000), delay: aDelay }));
     return box('moov',
       full('mvhd', 0, 0, u32(0), u32(0), u32(1000), u32(movieMs), u32(0x00010000), u16(0x0100), zeros(10), MATRIX, zeros(24), u32(audio ? 3 : 2)),
       ...traks);

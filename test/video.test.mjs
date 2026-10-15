@@ -19,6 +19,7 @@ export async function setup({ browser, url }) {
 
   /** Exports in `format` and returns details of the result. */
   const exportAs = async (format) => {
+    await page.evaluate(() => { window.__fallback = null; });
     await page.click(`#formats [data-f="${format}"]`);
     await sleep(100);
     const t0 = Date.now();
@@ -66,7 +67,7 @@ export async function setup({ browser, url }) {
 
   // The lab page reads frame times; give the video page the same helper.
   await page.evaluate(async () => { window.lab = await import('/lab/lab.js'); });
-  return { video: page, exportAs, set, mp4AudioSeconds };
+  return { video: page, exportAs, set, mp4AudioSeconds, clip };
 }
 
 export const tests = {
@@ -104,6 +105,45 @@ export const tests = {
     const r = await exportAs('mp4');
     const audio = await mp4AudioSeconds();
     near(audio, r.duration, 0.15, 'audio length');
+  },
+
+  async 'MP4 can carry the original Opus audio (used where there is no AAC encoder)'({ video, clip }) {
+    const r = await video.evaluate(async (clip) => {
+      const { getCapture } = await import('/lib/db.js');
+      const { demuxWebm } = await import('/lib/webm.js');
+      const { muxMp4 } = await import('/lib/mp4.js');
+      const src = demuxWebm(await (await getCapture(clip)).blob.arrayBuffer());
+      // A short H.264 track to go with it.
+      const chunks = [];
+      let avcC = null;
+      const enc = new VideoEncoder({
+        output: (c, md) => { if (md?.decoderConfig?.description) avcC = new Uint8Array(md.decoderConfig.description); const d = new Uint8Array(c.byteLength); c.copyTo(d); chunks.push({ timestamp: c.timestamp, duration: c.duration, key: c.type === 'key', data: d }); },
+        error: () => {},
+      });
+      enc.configure({ codec: 'avc1.42e01e', width: 320, height: 240, bitrate: 500000, framerate: 30, avc: { format: 'avc' } });
+      const cv = new OffscreenCanvas(320, 240);
+      const cx = cv.getContext('2d');
+      for (let k = 0; k < 90; k++) {
+        cx.fillStyle = `hsl(${k * 4} 60% 50%)`; cx.fillRect(0, 0, 320, 240);
+        const f = new VideoFrame(cv, { timestamp: Math.round((k * 1e6) / 30), duration: 33333 });
+        enc.encode(f, { keyFrame: k % 30 === 0 }); f.close();
+      }
+      await enc.flush();
+      // Opus packets from the recording's first 3 s, starting 0.1 s in.
+      const packets = src.audio.frames.filter((f) => f.timestamp < 3e6);
+      const frames = packets.map((f, i) => ({ timestamp: f.timestamp + 100000, duration: (packets[i + 1]?.timestamp ?? f.timestamp + 20000) - f.timestamp, key: true, data: f.data }));
+      const blob = muxMp4({ video: { width: 320, height: 240, avcC, frames: chunks }, audio: { codec: 'opus', sampleRate: 48000, channels: src.audio.channels, opusHead: src.audio.description, frames } });
+      const bytes = new Uint8Array(await blob.arrayBuffer());
+      const text = new TextDecoder('latin1').decode(bytes);
+      const audio = await new OfflineAudioContext(2, 48000, 48000).decodeAudioData(bytes.buffer.slice(0));
+      const v = document.createElement('video');
+      v.src = URL.createObjectURL(blob);
+      await new Promise((res, rej) => { v.onloadedmetadata = res; v.onerror = () => rej(new Error('video element could not load it')); });
+      return { hasOpus: text.includes('dOps'), hasEdit: text.includes('elst'), audioSeconds: audio.duration, videoSeconds: v.duration };
+    }, clip);
+    ok(r.hasOpus && r.hasEdit, `missing boxes: ${JSON.stringify(r)}`);
+    near(r.audioSeconds, 3, 0.15, 'Opus audio length');
+    near(r.videoSeconds, 3.1, 0.15, 'movie length');
   },
 
   async 'GIF and WebP export, with and without a device frame'({ video, exportAs, set }) {
