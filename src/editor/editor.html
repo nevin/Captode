@@ -32,6 +32,7 @@
     <div class="toolbar" role="toolbar" aria-label="Tools">
       <div class="tools" id="tools"></div>
       <div class="sep"></div>
+      <button class="btn ghost icon" id="undo-all" data-tip="Undo all changes"><svg class="i" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 2.6-6.4L3 8"/><path d="M3 3v5h5"/><path d="M9.5 9.5 14.5 14.5M14.5 9.5 9.5 14.5"/></svg></button>
       <button class="btn ghost icon" id="undo" data-tip="Undo  ⌘Z"><svg class="i" viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/></svg></button>
       <button class="btn ghost icon" id="redo" data-tip="Redo  ⇧⌘Z"><svg class="i" viewBox="0 0 24 24"><path d="m15 14 5-5-5-5"/><path d="M20 9H9a5 5 0 0 0 0 10h3"/></svg></button>
       <button class="btn ghost icon" id="delete" data-tip="Delete  ⌫"><svg class="i" viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg></button>
@@ -132,6 +133,15 @@
           <div class="row fill-row"><input type="color" id="t-bg"><div class="swatches" data-for="t-bg"></div></div>
         </div>
 
+        <div data-group="step">
+          <div class="field"><span>Colour</span>
+            <div class="row"><input type="color" id="st-color"><div class="swatches" data-for="st-color"></div></div>
+          </div>
+          <label class="field"><span>Size <b id="st-size-v"></b></span><input type="range" id="st-size" min="20" max="160"></label>
+          <label class="field"><span id="st-n-label">Next number</span><input type="number" id="st-n" min="0" max="999" inputmode="numeric"></label>
+          <p class="muted small">Click to add a step: each one counts up from the last. Drag to move one.</p>
+        </div>
+
         <div data-group="redact">
           <div class="field"><span>Effect</span>
             <select id="r-mode"><option value="pixelate">Pixelate</option><option value="blur">Blur</option><option value="solid">Solid box</option></select>
@@ -228,9 +238,14 @@
       <div class="export-bar">
         <div class="estimate" id="x-estimate">—</div>
         <p class="fitted hidden" id="x-fitted"></p>
-        <button class="btn primary block" id="download2">
-          <svg class="i" viewBox="0 0 24 24"><path d="M12 4v12M7 11l5 5 5-5M4 20h16"/></svg>Download
-        </button>
+        <div class="export-actions">
+          <button class="btn block" id="copy2" title="Copy the image to the clipboard, as PNG (⌘⇧C)">
+            <svg class="i" viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg>Copy
+          </button>
+          <button class="btn primary block" id="download2">
+            <svg class="i" viewBox="0 0 24 24"><path d="M12 4v12M7 11l5 5 5-5M4 20h16"/></svg>Download
+          </button>
+        </div>
       </div>
     </div>
   </aside>
@@ -243,6 +258,7 @@
   <div class="modal-body keys">
     <h3>Tools</h3>
     <div><span>Select and move</span><span><kbd>V</kbd></span></div>
+    <div><span>Pan</span><span><kbd>M</kbd>, or hold <kbd>Space</kbd></span></div>
     <div><span>Crop</span><span><kbd>C</kbd></span></div>
     <div><span>Pen</span><span><kbd>P</kbd></span></div>
     <div><span>Highlighter</span><span><kbd>H</kbd></span></div>
@@ -251,10 +267,12 @@
     <div><span>Rectangle</span><span><kbd>R</kbd></span></div>
     <div><span>Ellipse</span><span><kbd>E</kbd></span></div>
     <div><span>Text</span><span><kbd>T</kbd></span></div>
+    <div><span>Step number</span><span><kbd>N</kbd></span></div>
     <div><span>Blur or pixelate</span><span><kbd>B</kbd></span></div>
     <h3>Editing</h3>
     <div><span>Undo</span><span><kbd>⌘</kbd> <kbd>Z</kbd></span></div>
     <div><span>Redo</span><span><kbd>⇧</kbd> <kbd>⌘</kbd> <kbd>Z</kbd></span></div>
+    <div><span>Undo all changes</span><span>Toolbar button</span></div>
     <div><span>Delete selection</span><span><kbd>⌫</kbd></span></div>
     <div><span>Deselect</span><span><kbd>Esc</kbd></span></div>
     <div><span>Nudge (10 px with ⇧)</span><span><kbd>←</kbd><kbd>↑</kbd><kbd>→</kbd><kbd>↓</kbd></span></div>

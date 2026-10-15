@@ -46,7 +46,10 @@ or install the zip from `npm run package`.
 7. In the recording, trim with the timeline, then export **MP4**, **GIF**, **WebP** and
    **WebM**. Open each downloaded file in the system's own player or viewer.
 8. Turn on the **device frame** and export a screenshot and a GIF.
-9. Switch the theme in Settings and check the popup and editor follow it; set it to
+9. In Settings turn on **Copy screenshots to the clipboard**, take a screenshot, and paste
+   it into another app (a chat or document). In the editor, add numbered steps and use
+   **Copy** in the Export panel; paste again.
+10. Switch the theme in Settings and check the popup and editor follow it; set it to
    System and change the operating system's dark mode.
 
 ### Windows

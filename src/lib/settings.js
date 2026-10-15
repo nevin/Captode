@@ -6,6 +6,7 @@ export const DEFAULT_SETTINGS = {
   backgroundColor: '#ffffff',
   imageFormat: 'png',
   videoFormat: 'mp4',
+  autoCopy: false,           // copy new screenshots to the clipboard when the editor opens them
 };
 
 export async function getSettings() {

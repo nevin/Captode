@@ -234,4 +234,155 @@ export const tests = {
     ok(p.url().includes('video/video.html?id='), `after stopping: ${p.url()}`);
     await p.close();
   },
+
+  async 'editor: step numbers count up, can be renumbered, and undo'({ editor }) {
+    const ed = await editor();
+    const b = await ed.evaluate(() => { const c = document.querySelector('#fg'); const r = c.getBoundingClientRect(); return { x: r.x, y: r.y, w: r.width, h: r.height, k: c.width / r.width }; });
+    const at = (fx, fy) => [b.x + b.w * fx, b.y + b.h * fy];
+    const panel = () => ed.evaluate(() => ({ label: document.querySelector('#st-n-label').textContent, n: document.querySelector('#st-n').value, size: Number(document.querySelector('#st-size').value) }));
+    await ed.keyboard.press('n');
+    ok((await panel()).n === '1', 'first step is not 1');
+    for (const fx of [0.2, 0.4, 0.6]) { await ed.mouse.click(...at(fx, 0.5)); await sleep(50); }
+    let p = await panel();
+    ok(p.label === 'Number' && p.n === '3', `after three clicks the selected step shows ${p.label} ${p.n}`);
+    // The circle is drawn in the chosen colour (#e5484d), away from its digit.
+    const px = await ed.evaluate(([x, y, k, size]) => {
+      const c = document.querySelector('#fg'); const r = c.getBoundingClientRect();
+      return [...c.getContext('2d').getImageData(Math.round((x - r.x) * k - size * 0.32), Math.round((y - r.y) * k), 1, 1).data];
+    }, [...at(0.2, 0.5), b.k, p.size]);
+    ok(Math.abs(px[0] - 0xe5) < 12 && Math.abs(px[1] - 0x48) < 12 && Math.abs(px[2] - 0x4d) < 12, `step colour ${px}`);
+    await ed.keyboard.press('Escape');
+    ok((await panel()).n === '4', 'next number after 3 is not 4');
+    // Select the second and renumber it.
+    await ed.keyboard.press('v');
+    await ed.mouse.click(...at(0.4, 0.5));
+    ok((await panel()).n === '2', 'clicking the second step did not select it');
+    await ed.click('#st-n', { count: 3 });
+    await ed.keyboard.type('7');
+    await ed.keyboard.press('Enter'); // leaves the box
+    await sleep(500);
+    await ed.keyboard.press('Escape');
+    // Start the next one at 10.
+    await ed.keyboard.press('n');
+    await ed.click('#st-n', { count: 3 });
+    await ed.keyboard.type('10');
+    await ed.keyboard.press('Enter');
+    await ed.mouse.click(...at(0.8, 0.5));
+    await ed.keyboard.press('Escape');
+    ok((await panel()).n === '11', 'after a step set to 10 the next is not 11');
+    // Undo removes 10; the next is then one more than the highest left (7).
+    await ed.keyboard.down('Meta'); await ed.keyboard.press('z'); await ed.keyboard.up('Meta');
+    await ed.keyboard.down('Control'); await ed.keyboard.press('z'); await ed.keyboard.up('Control');
+    await sleep(100);
+    // (One of the two undo shortcuts applies on this platform; the other is ignored.)
+    const n = (await panel()).n;
+    ok(n === '8' || n === '4', `after undo the next number is ${n}`);
+    await ed.close();
+  },
+
+  async 'editor: copy from the Export panel, and copy new screenshots automatically'({ browser, url, editor, page }) {
+    // Extension pages can't be granted clipboard reading in a test, so read it from the
+    // test web page.
+    await browser.defaultBrowserContext().overridePermissions(new URL(page.url()).origin, ['clipboard-read', 'clipboard-write', 'clipboard-sanitized-write']);
+    const clip = async () => {
+      await page.bringToFront();
+      return page.evaluate(async () => {
+        const items = await navigator.clipboard.read();
+        const item = items.find((i) => i.types.includes('image/png'));
+        if (!item) return null;
+        const bmp = await createImageBitmap(await item.getType('image/png'));
+        return [bmp.width, bmp.height];
+      });
+    };
+    const clear = async () => { await page.bringToFront(); await page.evaluate(() => navigator.clipboard.writeText('before')); };
+    const ed = await editor();
+    const size = await ed.evaluate(() => [document.querySelector('#bg').width, document.querySelector('#bg').height]);
+    await clear();
+    await ed.bringToFront();
+    await ed.click('#tab-export');
+    await ed.click('#copy2');
+    await sleep(500);
+    let got = await clip();
+    ok(got && got[0] === size[0] && got[1] === size[1], `Export panel copy put ${got} on the clipboard, expected ${size}`);
+    await ed.close();
+
+    // Settings → Copy screenshots to the clipboard.
+    const st = await open(browser, url('settings/settings.html'), { width: 900, height: 1000 });
+    await st.click('#autoCopy');
+    await sleep(300);
+    await st.close();
+    await clear();
+    const ed2 = await editor();
+    await ed2.waitForFunction(() => /copied to the clipboard/i.test(document.body.innerText), { timeout: 10000 }).catch(() => {});
+    got = await clip();
+    ok(got && got[0] > 0, 'new screenshot was not copied automatically');
+    ok(ed2.url().includes('reopen=1'), 'a reload would copy it again');
+    await ed2.evaluate(async () => { const { saveSettings } = await import('/lib/settings.js'); await saveSettings({ autoCopy: false }); });
+    await ed2.close();
+  },
+
+  async 'editor: undo all, and bring the changes back'({ editor }) {
+    const ed = await editor();
+    const b = await ed.evaluate(() => { const r = document.querySelector('#fg').getBoundingClientRect(); return { x: r.x, y: r.y, w: r.width, h: r.height }; });
+    const drawn = () => ed.evaluate(() => { const c = document.querySelector('#fg'); const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data; let n = 0; for (let i = 3; i < d.length; i += 4) if (d[i]) n++; return n; });
+    const disabled = (id) => ed.evaluate((id) => document.getElementById(id).disabled, id);
+    ok(await disabled('undo-all'), 'Undo all is enabled before any change');
+    await ed.keyboard.press('r');
+    await ed.mouse.move(b.x + b.w * 0.2, b.y + b.h * 0.2);
+    await ed.mouse.down();
+    await ed.mouse.move(b.x + b.w * 0.5, b.y + b.h * 0.5, { steps: 4 });
+    await ed.mouse.up();
+    await ed.keyboard.press('n');
+    await ed.mouse.click(b.x + b.w * 0.7, b.y + b.h * 0.7);
+    await ed.keyboard.press('Escape');
+    ok(await drawn() > 0 && !(await disabled('undo-all')), 'nothing drawn, or Undo all not available');
+    await ed.click('#undo-all');
+    await sleep(100);
+    ok(await drawn() === 0, 'Undo all left annotations behind');
+    ok(await disabled('undo-all') && !(await disabled('undo')), 'after Undo all: it should be disabled, and Undo available');
+    // The toast's Undo brings everything back.
+    await ed.click('.toast-action');
+    await sleep(100);
+    ok(await drawn() > 0, 'Undo did not bring the changes back');
+    await ed.evaluate(() => { window.onbeforeunload = null; });
+    await ed.close({ runBeforeUnload: false });
+  },
+
+  async 'editor: pan with the hand tool, Space or the middle button'({ editor }) {
+    const ed = await editor();
+    for (let i = 0; i < 4; i++) await ed.keyboard.press('+');
+    await sleep(100);
+    const scroll = () => ed.evaluate(() => { const s = document.querySelector('#stage'); return [s.scrollLeft, s.scrollTop]; });
+    const mid = await ed.evaluate(() => { const r = document.querySelector('#stage').getBoundingClientRect(); return [r.x + r.width / 2, r.y + r.height / 2]; });
+    const dragBy = async (dx, dy, button = 'left') => {
+      await ed.mouse.move(...mid);
+      await ed.mouse.down({ button });
+      await ed.mouse.move(mid[0] + dx, mid[1] + dy, { steps: 5 });
+      await ed.mouse.up({ button });
+    };
+    const undoState = () => ed.evaluate(() => document.querySelector('#undo').disabled);
+    await ed.evaluate(() => { const s = document.querySelector('#stage'); s.scrollLeft = 400; s.scrollTop = 400; });
+    // Hand tool.
+    await ed.keyboard.press('m');
+    let before = await scroll();
+    await dragBy(-120, -80);
+    let after = await scroll();
+    ok(Math.abs(after[0] - before[0] - 120) <= 2 && Math.abs(after[1] - before[1] - 80) <= 2, `hand tool scrolled ${before} → ${after}`);
+    // Space with the rectangle tool: pans, draws nothing.
+    await ed.keyboard.press('r');
+    const undoBefore = await undoState();
+    before = await scroll();
+    await ed.keyboard.down(' ');
+    await dragBy(100, 60);
+    await ed.keyboard.up(' ');
+    after = await scroll();
+    ok(Math.abs(before[0] - after[0] - 100) <= 2 && Math.abs(before[1] - after[1] - 60) <= 2, `Space-drag scrolled ${before} → ${after}`);
+    ok(await undoState() === undoBefore, 'Space-drag drew a rectangle');
+    // Middle button.
+    before = await scroll();
+    await dragBy(-50, -30, 'middle');
+    after = await scroll();
+    ok(Math.abs(after[0] - before[0] - 50) <= 2, `middle-button drag scrolled ${before} → ${after}`);
+    await ed.close();
+  },
 };

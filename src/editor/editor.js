@@ -17,6 +17,7 @@ const mctx = new OffscreenCanvas(1, 1).getContext('2d'); // text measuring
 const svg = (d) => `<svg class="i" viewBox="0 0 24 24">${d}</svg>`;
 const TOOLS = [
   ['select', 'Select and move', 'v', svg('<path d="m5 3 14 8-6 2-2 6z"/>')],
+  ['pan', 'Pan (or hold Space)', 'm', svg('<path d="M18 11V6a2 2 0 0 0-4 0v5"/><path d="M14 10V4a2 2 0 0 0-4 0v6"/><path d="M10 10.5V6a2 2 0 0 0-4 0v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.9-6-2.4l-3.6-3.6a2 2 0 0 1 2.8-2.8L7 15"/>')],
   ['crop', 'Crop', 'c', svg('<path d="M6 2v14a2 2 0 0 0 2 2h14"/><path d="M18 22V8a2 2 0 0 0-2-2H2"/>')],
   ['pen', 'Pen', 'p', svg('<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>')],
   ['highlighter', 'Highlighter', 'h', svg('<path d="m9 11-6 6v3h9l3-3"/><path d="m22 12-4.6 4.6a2 2 0 0 1-2.8 0l-5.2-5.2a2 2 0 0 1 0-2.8L14 4"/>')],
@@ -25,6 +26,7 @@ const TOOLS = [
   ['rect', 'Rectangle', 'r', svg('<rect x="3" y="5" width="18" height="14" rx="1"/>')],
   ['ellipse', 'Ellipse', 'e', svg('<ellipse cx="12" cy="12" rx="9" ry="7"/>')],
   ['text', 'Text', 't', svg('<path d="M4 7V4h16v3M9 20h6M12 4v16"/>')],
+  ['step', 'Step number', 'n', svg('<circle cx="12" cy="12" r="9"/><path d="M10.5 9.5 12.5 8v8"/>')],
   ['redact', 'Blur or pixelate', 'b', svg('<rect x="3" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="14" y="3" width="7" height="7" opacity=".4"/><rect x="3" y="14" width="7" height="7" opacity=".4"/>')],
 ];
 const FONTS = [
@@ -36,11 +38,11 @@ const SWATCHES = ['#e5484d', '#f76b15', '#ffc53d', '#30a46c', '#0090ff', '#5b4bf
 const BACKDROPS = ['transparent', '#ffffff', '#ececf4', '#17171c', '#dbe4ff', '#ffe4e6', '#dcfce7', '#0f172a'];
 const GROUPS = {
   pen: ['stroke'], highlighter: ['stroke'], line: ['stroke'], arrow: ['stroke'],
-  rect: ['stroke', 'fill'], ellipse: ['stroke', 'fill'], text: ['text'], redact: ['redact'], crop: ['crop'],
+  rect: ['stroke', 'fill'], ellipse: ['stroke', 'fill'], text: ['text'], step: ['step'], redact: ['redact'], crop: ['crop'],
 };
 const NAMES = {
   pen: 'Pen', highlighter: 'Highlighter', line: 'Line', arrow: 'Arrow', rect: 'Rectangle',
-  ellipse: 'Ellipse', text: 'Text', redact: 'Blur / pixelate', crop: 'Crop',
+  ellipse: 'Ellipse', text: 'Text', step: 'Step number', redact: 'Blur / pixelate', crop: 'Crop',
 };
 
 // ---------- state ----------
@@ -51,6 +53,7 @@ const defaults = {
   fill: { on: false, color: '#ffd60a' },
   text: { font: 'system-ui', size: 32, bold: true, italic: false, color: '#ffffff', bg: '#17171c' },
   redact: { mode: 'pixelate', strength: 12 },
+  step: { color: '#e5484d', size: null }, // size null: scaled to the image
 };
 const frame = { padding: 0, bg: 'transparent', radius: 0, shadow: false }; // bg: a colour or 'transparent'
 
@@ -66,6 +69,11 @@ let meta = {};
 let device = null;
 const history = [];
 let dirty = false;   // edited since the last download or copy
+let original = null; // the image as it was opened, for Undo all
+let spacePan = false; // Space held down: pan with any tool
+let panDrag = null;
+let lastStep = null; // the step number placed last, which the next one follows
+let stepStart = null; // a next step number the user typed in
 let hIndex = -1;
 
 // ---------- helpers ----------
@@ -117,12 +125,25 @@ function restore(s) {
 }
 
 function undo() { if (hIndex > 0) restore(history[--hIndex]); }
+
+/** Back to the image as it was opened. Itself undoable, so Undo brings the edits back. */
+function undoAll() {
+  if (!original || atOriginal()) return;
+  if (editing) ta.blur();
+  restore(original);
+  commit();
+  history[hIndex].reverted = true;
+  updateButtons();
+  toast('All changes undone', { action: { label: 'Undo', run: undo }, ms: 6000 });
+}
+const atOriginal = () => hIndex <= 0 || !!history[hIndex]?.reverted;
 function redo() { if (hIndex < history.length - 1) restore(history[++hIndex]); }
 
 function updateButtons() {
   $('#undo').disabled = hIndex <= 0;
   $('#redo').disabled = hIndex >= history.length - 1;
   $('#delete').disabled = !selected;
+  $('#undo-all').disabled = !original || atOriginal();
 }
 
 // ---------- drawing ----------
@@ -158,6 +179,15 @@ function arrowHead(ctx, x1, y1, x2, y2, width) {
   ctx.closePath();
   ctx.fill();
   return size;
+}
+
+const stepRing = (o) => Math.max(1.5, o.size * 0.06);
+
+/** Relative luminance of a #rrggbb colour, 0 (black) to 1 (white). */
+function luminance(hex) {
+  const v = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255)
+    .map((c) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4));
+  return 0.2126 * v[0] + 0.7152 * v[1] + 0.0722 * v[2];
 }
 
 function drawObject(ctx, o) {
@@ -227,6 +257,28 @@ function drawObject(ctx, o) {
       ctx.fillStyle = o.color;
       ctx.textBaseline = 'middle';
       L.lines.forEach((line, i) => ctx.fillText(line, o.x + L.pad, o.y + L.pad + i * L.lh + L.lh / 2));
+      break;
+    }
+    case 'step': {
+      const r = o.size / 2;
+      ctx.globalAlpha = 1;
+      ctx.shadowColor = 'rgba(0,0,0,0.28)';
+      ctx.shadowBlur = r * 0.35;
+      ctx.shadowOffsetY = r * 0.1;
+      ctx.beginPath();
+      ctx.arc(o.x, o.y, r, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.shadowColor = 'transparent';
+      ctx.lineWidth = stepRing(o);
+      ctx.strokeStyle = '#fff';
+      ctx.stroke();
+      const label = String(o.n);
+      const fs = r * (label.length >= 3 ? 0.78 : label.length === 2 ? 0.95 : 1.1);
+      ctx.font = `700 ${fs}px system-ui, sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillStyle = luminance(o.color) > 0.55 ? '#17171c' : '#ffffff';
+      ctx.fillText(label, o.x, o.y + fs * 0.04);
       break;
     }
     case 'redact': {
@@ -398,13 +450,17 @@ function bounds(o) {
     const L = textLayout(o);
     return { x: o.x, y: o.y, w: L.bw, h: L.bh };
   }
+  if (o.type === 'step') {
+    const r = o.size / 2 + stepRing(o) / 2;
+    return { x: o.x - r, y: o.y - r, w: r * 2, h: r * 2 };
+  }
   const r = norm(o);
   const h = (o.width || 0) / 2;
   return { x: r.x - h, y: r.y - h, w: r.w + h * 2, h: r.h + h * 2 };
 }
 
 function handles(o) {
-  if (o.type === 'pen' || o.type === 'highlighter' || o.type === 'text') return [];
+  if (o.type === 'pen' || o.type === 'highlighter' || o.type === 'text' || o.type === 'step') return [];
   return [[o.x1, o.y1], [o.x2, o.y2]];
 }
 
@@ -436,7 +492,7 @@ const topHit = (pt) => [...objects].reverse().find((o) => hits(o, pt)) || null;
 
 function moveObj(o, dx, dy) {
   if (o.points) o.points = o.points.map(([x, y]) => [x + dx, y + dy]);
-  else if (o.type === 'text') { o.x += dx; o.y += dy; }
+  else if (o.type === 'text' || o.type === 'step') { o.x += dx; o.y += dy; }
   else { o.x1 += dx; o.y1 += dy; o.x2 += dx; o.y2 += dy; }
 }
 
@@ -444,6 +500,7 @@ function scaleObj(o, sx, sy) {
   const s = (sx + sy) / 2;
   if (o.points) o.points = o.points.map(([x, y]) => [x * sx, y * sy]);
   else if (o.type === 'text') { o.x *= sx; o.y *= sy; o.size = Math.max(4, Math.round(o.size * sy)); }
+  else if (o.type === 'step') { o.x *= sx; o.y *= sy; o.size = Math.max(8, Math.round(o.size * s)); }
   else { o.x1 *= sx; o.y1 *= sy; o.x2 *= sx; o.y2 *= sy; }
   if (o.width) o.width = Math.max(1, o.width * s);
 }
@@ -474,9 +531,20 @@ function propsFor(type) {
   if (type === 'highlighter') return { ...defaults.hl };
   if (type === 'text') return { ...defaults.text };
   if (type === 'redact') return { ...defaults.redact };
+  if (type === 'step') return { color: defaults.step.color, size: defaults.step.size || autoStepSize() };
   const p = { ...defaults.stroke };
   if (type === 'rect' || type === 'ellipse') p.fill = defaults.fill.on ? defaults.fill.color : null;
   return p;
+}
+
+/** A step size that reads well on this image: about 4% of its shorter side. */
+const autoStepSize = () => (base ? Math.round(clamp(Math.min(base.width, base.height) * 0.04, 28, 96)) : 40);
+
+/** The number the next step gets: one more than the last placed, or than the highest. */
+function nextStep() {
+  if (stepStart !== null) return stepStart;
+  if (lastStep && objects.includes(lastStep)) return lastStep.n + 1;
+  return Math.max(0, ...objects.filter((o) => o.type === 'step').map((o) => o.n)) + 1;
 }
 
 function newShape(type, pt) {
@@ -543,7 +611,7 @@ ta.addEventListener('keydown', (e) => {
 // ---------- pointer ----------
 
 fg.addEventListener('pointerdown', (e) => {
-  if (!base || e.button !== 0) return;
+  if (!base || e.button !== 0 || tool === 'pan' || spacePan) return; // panning: the stage handles it
   if (editing) { ta.blur(); return; }
   fg.setPointerCapture(e.pointerId);
   const pt = toImage(e);
@@ -581,6 +649,23 @@ fg.addEventListener('pointerdown', (e) => {
     }
     syncStyleUi();
     editText(selected);
+    return;
+  }
+
+  if (tool === 'step') {
+    const hit = topHit(pt);
+    if (hit?.type === 'step') {
+      selected = hit;
+      drag = { kind: 'move', last: pt, moved: false };
+    } else {
+      selected = { type: 'step', ...propsFor('step'), n: nextStep(), x: pt.x, y: pt.y };
+      objects.push(selected);
+      lastStep = selected;
+      stepStart = null;
+      drag = { kind: 'move', last: pt, moved: true }; // drag to place it exactly
+    }
+    syncStyleUi();
+    renderFg();
     return;
   }
 
@@ -660,6 +745,33 @@ fg.addEventListener('dblclick', (e) => {
   if (hit?.type === 'text') { selected = hit; syncStyleUi(); editText(hit); }
 });
 
+// ---------- panning ----------
+// With the Pan tool, while Space is held, or with the middle mouse button: drag to
+// scroll around a zoomed-in or long image.
+
+stage.addEventListener('pointerdown', (e) => {
+  if (!base || !((e.button === 0 && (tool === 'pan' || spacePan)) || e.button === 1)) return;
+  if (e.target.closest('.toolbar, .zoombar, .export-preview, .empty, textarea')) return;
+  e.preventDefault();
+  stage.setPointerCapture(e.pointerId);
+  panDrag = { x: e.clientX, y: e.clientY, left: stage.scrollLeft, top: stage.scrollTop };
+  stage.classList.add('panning');
+});
+stage.addEventListener('pointermove', (e) => {
+  if (!panDrag) return;
+  stage.scrollLeft = panDrag.left - (e.clientX - panDrag.x);
+  stage.scrollTop = panDrag.top - (e.clientY - panDrag.y);
+});
+for (const ev of ['pointerup', 'pointercancel']) {
+  stage.addEventListener(ev, () => { panDrag = null; stage.classList.remove('panning'); });
+}
+function setSpacePan(on) {
+  spacePan = on;
+  stage.toggleAttribute('data-pan', on);
+}
+document.addEventListener('keyup', (e) => { if (e.key === ' ') setSpacePan(false); });
+addEventListener('blur', () => setSpacePan(false));
+
 stage.addEventListener('wheel', (e) => {
   if (!e.ctrlKey && !e.metaKey) return;
   e.preventDefault();
@@ -698,7 +810,7 @@ function setTool(t) {
   renderFg();
 }
 
-const TOOL_GROUPS = [['select', 'crop'], ['pen', 'highlighter'], ['arrow', 'line', 'rect', 'ellipse'], ['text', 'redact']];
+const TOOL_GROUPS = [['select', 'pan', 'crop'], ['pen', 'highlighter'], ['arrow', 'line', 'rect', 'ellipse'], ['text', 'step', 'redact']];
 $('#tools').innerHTML = TOOL_GROUPS.map((g) => g.map((id) => {
   const [, title, key, icon] = TOOLS.find((t) => t[0] === id);
   return `<button class="btn ghost icon" data-tool="${id}" data-tip="${title}  ${key.toUpperCase()}" aria-label="${title}">${icon}</button>`;
@@ -725,6 +837,7 @@ document.addEventListener('keydown', (e) => {
   if (mod && e.key.toLowerCase() === 's') { e.preventDefault(); download(); return; }
   if (mod && e.shiftKey && e.key.toLowerCase() === 'c') { e.preventDefault(); copyImage(); return; }
   if (typing) return;
+  if (e.key === ' ') { e.preventDefault(); if (!e.repeat && base) setSpacePan(true); return; }
   if ((e.key === 'Delete' || e.key === 'Backspace') && selected) { e.preventDefault(); deleteSelected(); return; }
   if (e.key === 'Escape') { selected = null; crop = null; updateCropUi(); syncStyleUi(); renderFg(); return; }
   if (e.key === 'Enter' && tool === 'crop' && crop) { applyCrop(); return; }
@@ -799,6 +912,13 @@ function syncStyleUi() {
     $('#r-mode').value = p.mode;
     $('#r-strength').value = p.strength;
   }
+  if (type === 'step') {
+    $('#st-color').value = p.color;
+    $('#st-size').value = p.size;
+    $('#st-size-v').textContent = Math.round(p.size) + ' px';
+    $('#st-n-label').textContent = selected ? 'Number' : 'Next number';
+    if (document.activeElement !== $('#st-n')) $('#st-n').value = selected ? p.n : nextStep();
+  }
 }
 
 function readStyleUi(type) {
@@ -819,6 +939,7 @@ function readStyleUi(type) {
     });
   }
   if (type === 'redact') Object.assign(p, { mode: $('#r-mode').value, strength: Number($('#r-strength').value) });
+  if (type === 'step') Object.assign(p, { color: $('#st-color').value, size: Number($('#st-size').value) });
   return p;
 }
 
@@ -835,6 +956,7 @@ function onStyleChange() {
   if (type === 'highlighter') defaults.hl = { color: p.color, width: p.width, opacity: p.opacity };
   else if (type === 'text') defaults.text = p;
   else if (type === 'redact') defaults.redact = p;
+  else if (type === 'step') { defaults.step = p; $('#st-size-v').textContent = p.size + ' px'; }
   else {
     defaults.stroke = { color: p.color, width: p.width, opacity: p.opacity };
     if ('fill' in p) defaults.fill = { on: !!p.fill, color: p.fill || $('#s-fill').value };
@@ -843,7 +965,22 @@ function onStyleChange() {
   $('#s-opacity-v').textContent = $('#s-opacity').value + '%';
   chrome.storage?.local.set({ editorDefaults: defaults });
 }
-$('#style-panel').addEventListener('input', (e) => { if (e.target.id !== 'c-ratio') onStyleChange(); });
+$('#style-panel').addEventListener('input', (e) => { if (e.target.id !== 'c-ratio' && e.target.id !== 'st-n') onStyleChange(); });
+// A step's number: the selected step's, or the one the next step will get.
+$('#st-n').addEventListener('input', () => {
+  const v = Math.round(Number($('#st-n').value));
+  if (!Number.isFinite(v) || v < 0 || v > 999 || $('#st-n').value === '') return;
+  if (selected?.type === 'step') {
+    selected.n = v;
+    renderFg();
+    commitSoon();
+  } else {
+    stepStart = v;
+  }
+});
+$('#st-n').addEventListener('change', () => syncStyleUi());
+// Enter or Esc leaves the box, back to placing steps.
+$('#st-n').addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === 'Escape') { e.preventDefault(); $('#st-n').blur(); } });
 for (const id of ['t-bold', 't-italic']) {
   $('#' + id).addEventListener('mousedown', (e) => e.preventDefault()); // keep the text editor focused
   $('#' + id).addEventListener('click', () => { $('#' + id).classList.toggle('on'); onStyleChange(); });
@@ -972,6 +1109,7 @@ for (const id of ['f-pad', 'f-bg', 'f-radius', 'f-shadow']) {
 $('#zoom-in').addEventListener('click', () => setZoom(zoom * 1.25));
 $('#zoom-out').addEventListener('click', () => setZoom(zoom / 1.25));
 $('#zoom-label').addEventListener('click', () => (zoom === 1 ? fitZoom() : setZoom(1)));
+$('#undo-all').addEventListener('click', undoAll);
 $('#undo').addEventListener('click', undo);
 $('#redo').addEventListener('click', redo);
 $('#delete').addEventListener('click', deleteSelected);
@@ -1133,18 +1271,36 @@ async function download() {
 
 $('#download').addEventListener('click', download);
 $('#download2').addEventListener('click', download);
-async function copyImage() {
-  if (!base) return;
+async function copyImage({ auto = false } = {}) {
+  if (!base) return false;
   try {
     const c = await finalCanvas();
     await navigator.clipboard.write([new ClipboardItem({ 'image/png': c.convertToBlob({ type: 'image/png' }) })]);
     dirty = false;
-    toast('Copied to the clipboard', { kind: 'success' });
+    toast(auto ? 'Screenshot copied to the clipboard' : 'Copied to the clipboard', { kind: 'success' });
+    return true;
   } catch (e) {
-    toast('Could not copy: ' + e.message, { kind: 'error', ms: 4000 });
+    if (!auto) toast('Could not copy: ' + e.message, { kind: 'error', ms: 4000 });
+    return false;
   }
 }
-$('#copy').addEventListener('click', copyImage);
+
+/**
+ * Copies a new screenshot as it opens (Settings → Copy screenshots to the clipboard).
+ * The clipboard needs the page focused; if it isn't yet, copy once it is, or on the
+ * first click or key press.
+ */
+async function autoCopy() {
+  if (document.hasFocus() && await copyImage({ auto: true })) return;
+  const events = ['focus', 'pointerdown', 'keydown'];
+  const once = async () => {
+    if (!document.hasFocus() || !(await copyImage({ auto: true }))) return; // try again on the next one
+    for (const ev of events) removeEventListener(ev, once, true);
+  };
+  for (const ev of events) addEventListener(ev, once, true);
+}
+$('#copy').addEventListener('click', () => copyImage());
+$('#copy2').addEventListener('click', () => copyImage());
 for (const id of ['x-format', 'x-scale', 'x-limit', 'x-quality', 'x-colors', 'x-dither', 'x-lossy', 'x-page', 'x-split']) {
   $('#' + id).addEventListener('input', () => { syncExportUi(); refreshExport(); });
 }
@@ -1175,6 +1331,8 @@ async function loadBlob(blob, info = {}) {
   layout();
   fitZoom();
   commit();
+  original = history[0];
+  updateButtons();
 }
 
 function showEmpty() {
@@ -1193,7 +1351,7 @@ async function renderRecent() {
   for (const it of items) {
     const a = document.createElement('a');
     a.className = 'recent-item';
-    a.href = it.kind === 'video' ? `../video/video.html?id=${it.id}` : `?id=${it.id}`;
+    a.href = it.kind === 'video' ? `../video/video.html?id=${it.id}` : `?id=${it.id}&reopen=1`;
     const thumb = document.createElement(it.kind === 'video' ? 'video' : 'img');
     thumb.src = URL.createObjectURL(it.blob) + (it.kind === 'video' ? '#t=0.1' : '');
     if (it.kind === 'video') { thumb.muted = true; thumb.preload = 'metadata'; }
@@ -1246,10 +1404,11 @@ document.addEventListener('keydown', (e) => {
     $('#x-format').querySelector('[value="avif"]').hidden = false;
   }
   renderFormatTiles();
+  let settings = {};
   if (globalThis.chrome?.storage) {
     const { editorDefaults } = await chrome.storage.local.get('editorDefaults');
     if (editorDefaults) Object.assign(defaults, editorDefaults);
-    const settings = await getSettings();
+    settings = await getSettings();
     frame.bg = backgroundColour(settings) || 'transparent';
     const fmt = $('#x-format').querySelector(`option[value="${settings.imageFormat}"]`);
     if (fmt && !fmt.hidden) $('#x-format').value = settings.imageFormat;
@@ -1267,6 +1426,11 @@ document.addEventListener('keydown', (e) => {
   if (rec) {
     await loadBlob(rec.blob, rec.meta);
     if (rec.meta?.truncated) toast('This page is very long, so only its top part was captured.', { ms: 6000 });
+    // Only a capture that has just been taken, not one reopened from Recent captures.
+    if (settings.autoCopy && !new URLSearchParams(location.search).has('reopen')) {
+      window.history.replaceState(null, '', `?id=${id}&reopen=1`); // not again on reload (`history` here is the undo stack)
+      autoCopy();
+    }
   } else {
     showEmpty();
   }

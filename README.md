@@ -20,8 +20,13 @@ The capture opens in the editor, where you can:
 - **Add shapes:** lines, arrows, rectangles and ellipses, with stroke colour, fill, thickness and opacity.
 - **Add text:** choose the font (including fonts installed on your computer), size (A− / A+),
   bold, italic, text colour and background colour.
+- **Number the steps:** each click adds a numbered marker (1, 2, 3…) in the colour and
+  size you choose; start from any number, or renumber one.
 - **Blur, pixelate or black out** sensitive details.
-- Select, move, restyle and delete anything you added. Undo and redo.
+- Select, move, restyle and delete anything you added. Undo and redo, or **Undo all** to go
+  back to the original (itself undoable).
+- **Pan** around a zoomed-in or long capture with the hand tool, by holding Space, or with
+  the middle mouse button.
 - **Resize** to exact pixel sizes, with or without keeping the proportions.
 - **Frame** the shot with padding, a backdrop colour, rounded corners and a shadow.
 - **Set a size limit** (100 KB to 25 MB) and Captode finds the best quality that fits,
@@ -30,7 +35,8 @@ The capture opens in the editor, where you can:
 - **Export** as PNG, compressed 8-bit PNG, JPEG, WebP, GIF, BMP or PDF (one page, or A4 or
   Letter pages with long pages split across them). The quality and size controls compress the
   file, and the live estimate shows the size before you download. You can also copy the image
-  to the clipboard. See [How compression works](#how-compression-works).
+  to the clipboard, from the top bar or the Export panel, or have every new screenshot copied
+  automatically (Settings → Copy screenshots to the clipboard). See [How compression works](#how-compression-works).
 - **Keyboard shortcuts** for every tool. Press **?** in the editor to see them all.
 - **Recent captures:** open the editor from the popup to get back any capture from the last
   24 hours, even after closing its tab.

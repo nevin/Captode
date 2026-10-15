@@ -33,6 +33,8 @@ body { display: flex; flex-direction: column; overflow: hidden; }
 .stage[data-tool="select"] #fg { cursor: default; }
 .stage[data-tool="text"] #fg { cursor: text; }
 .stage:not([data-tool="select"]):not([data-tool="text"]) #fg { cursor: crosshair; }
+.stage[data-tool="pan"], .stage[data-tool="pan"] #fg, .stage[data-pan], .stage[data-pan] #fg { cursor: grab !important; }
+.stage.panning, .stage.panning #fg { cursor: grabbing !important; }
 
 .text-edit {
   position: absolute; z-index: 2; margin: 0; border: 0; outline: 1.5px dashed var(--accent); outline-offset: 2px;
@@ -85,6 +87,8 @@ body { display: flex; flex-direction: column; overflow: hidden; }
   position: sticky; bottom: 0; margin-top: auto; display: grid; gap: 10px; padding: 14px 16px 16px;
   background: var(--panel); border-top: 1px solid var(--line);
 }
+.export-actions { display: grid; grid-template-columns: auto 1fr; gap: 8px; }
+.export-actions #copy2 { padding: 0 16px; }
 .export-preview {
   position: absolute; inset: 0; z-index: 6; display: flex; flex-direction: column; gap: 14px; padding: 18px 24px 24px;
   background-color: var(--stage);

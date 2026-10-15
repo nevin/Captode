@@ -169,15 +169,15 @@ input[type="checkbox"]:disabled { opacity: .4; cursor: default; }
 .seg > button:hover { color: var(--text); }
 .seg > button.on { background: var(--panel); color: var(--text); box-shadow: var(--shadow-sm); }
 
-/* Stepper: − value + */
-.stepper { display: inline-flex; align-items: center; flex: none; padding: 2px; background: var(--panel); border: 1px solid var(--line); border-radius: 9px; }
-.stepper button {
+/* Spinner: − value + (popup countdown) */
+.spin { display: inline-flex; align-items: center; flex: none; padding: 2px; background: var(--panel); border: 1px solid var(--line); border-radius: 9px; }
+.spin button {
   width: 26px; height: 26px; padding: 0; border: 0; border-radius: 6px; background: transparent;
   color: var(--text); font-size: 16px; line-height: 1; cursor: pointer;
 }
-.stepper button:hover:not(:disabled) { background: var(--panel-2); }
-.stepper button:disabled { color: var(--muted); opacity: .45; cursor: default; }
-.stepper output { min-width: 40px; text-align: center; font-weight: 500; font-variant-numeric: tabular-nums; border-radius: 5px; }
+.spin button:hover:not(:disabled) { background: var(--panel-2); }
+.spin button:disabled { color: var(--muted); opacity: .45; cursor: default; }
+.spin output { min-width: 40px; text-align: center; font-weight: 500; font-variant-numeric: tabular-nums; border-radius: 5px; }
 
 /* Swatches */
 .swatches { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
@@ -253,6 +253,12 @@ details.section[open] > summary::after { transform: rotate(-135deg); margin-top:
   animation: toast-in .18s ease-out;
 }
 .toast .i { width: 18px; height: 18px; color: #a59cff; }
+.toast.has-action { pointer-events: auto; }
+.toast-action {
+  margin-left: 6px; padding: 4px 10px; border: 0; border-radius: 6px; background: rgba(255,255,255,.12);
+  color: #fff; font: inherit; font-weight: 600; cursor: pointer;
+}
+.toast-action:hover { background: rgba(255,255,255,.2); }
 .toast[data-kind="success"] .i { color: #3dd6a5; }
 .toast[data-kind="error"] .i { color: #ff8589; }
 :root[data-theme="dark"] .toast { background: #2a2a34; border: 1px solid #3a3a46; }
@@ -315,7 +321,7 @@ dialog.modal:focus-visible { outline: none; }
     forced-color-adjust: none; background: Highlight; color: HighlightText; border-color: Highlight;
   }
   .tabs button.on { border-bottom-color: Highlight; }
-  .btn, .seg, .stepper, .mode, .card, .banner, dialog.modal, .toast { border: 1px solid CanvasText; }
+  .btn, .seg, .spin, .mode, .card, .banner, dialog.modal, .toast { border: 1px solid CanvasText; }
   :focus-visible { outline-color: Highlight; }
   .handle, .range, .playhead { forced-color-adjust: none; }
 }

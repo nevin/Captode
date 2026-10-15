@@ -10,7 +10,8 @@ let region = null;
 let timer = 0;
 
 /** Shows a short notification. `kind` is 'success', 'error' or 'info'. */
-export function toast(message, { kind = 'info', ms = 2600 } = {}) {
+/** Shows a short message; `action` ({ label, run }) adds a button, such as Undo. */
+export function toast(message, { kind = 'info', ms = 2600, action = null } = {}) {
   if (!region) {
     region = document.createElement('div');
     region.className = 'toast hidden';
@@ -21,6 +22,14 @@ export function toast(message, { kind = 'info', ms = 2600 } = {}) {
   region.dataset.kind = kind;
   region.innerHTML = `<svg class="i" viewBox="0 0 24 24">${ICONS[kind] || ICONS.info}</svg><span></span>`;
   region.lastChild.textContent = message;
+  if (action) {
+    const b = document.createElement('button');
+    b.className = 'toast-action';
+    b.textContent = action.label;
+    b.addEventListener('click', () => { region.classList.add('hidden'); action.run(); });
+    region.append(b);
+  }
+  region.classList.toggle('has-action', !!action);
   region.classList.remove('hidden');
   region.style.animation = 'none';
   void region.offsetWidth;
