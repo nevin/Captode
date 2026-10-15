@@ -1,0 +1,143 @@
+{
+  "darwin": {
+    "ui png": {
+      "bytes": 374557,
+      "psnr": 99,
+      "ssim": 1
+    },
+    "ui png8 256 dither": {
+      "bytes": 167593,
+      "psnr": 42.77,
+      "ssim": 0.977
+    },
+    "ui png8 auto": {
+      "bytes": 70224,
+      "psnr": 38.89,
+      "ssim": 0.9883
+    },
+    "ui jpeg 85": {
+      "bytes": 95723,
+      "psnr": 37.7,
+      "ssim": 0.9872
+    },
+    "ui webp 85": {
+      "bytes": 69222,
+      "psnr": 38.77,
+      "ssim": 0.9888
+    },
+    "ui gif dither": {
+      "bytes": 246655,
+      "psnr": 42.77,
+      "ssim": 0.977
+    },
+    "ui pdf 92": {
+      "bytes": 123124
+    },
+    "photo png": {
+      "bytes": 215596,
+      "psnr": 99,
+      "ssim": 1
+    },
+    "photo png8 256 dither": {
+      "bytes": 91453,
+      "psnr": 41.89,
+      "ssim": 0.9822
+    },
+    "photo png8 auto": {
+      "bytes": 60658,
+      "psnr": 39.34,
+      "ssim": 0.9779
+    },
+    "photo jpeg 85": {
+      "bytes": 17865,
+      "psnr": 35.27,
+      "ssim": 0.9236
+    },
+    "photo webp 85": {
+      "bytes": 25088,
+      "psnr": 36.11,
+      "ssim": 0.948
+    },
+    "photo gif dither": {
+      "bytes": 106448,
+      "psnr": 41.89,
+      "ssim": 0.9822
+    },
+    "photo pdf 92": {
+      "bytes": 28110
+    },
+    "flat png": {
+      "bytes": 9030,
+      "psnr": 99,
+      "ssim": 1
+    },
+    "flat png8 256 dither": {
+      "bytes": 3783,
+      "psnr": 73.22,
+      "ssim": 1
+    },
+    "flat png8 auto": {
+      "bytes": 2540,
+      "psnr": 60.2,
+      "ssim": 1
+    },
+    "flat jpeg 85": {
+      "bytes": 9561,
+      "psnr": 47.18,
+      "ssim": 0.9999
+    },
+    "flat webp 85": {
+      "bytes": 5670,
+      "psnr": 45.46,
+      "ssim": 0.9999
+    },
+    "flat gif dither": {
+      "bytes": 5592,
+      "psnr": 73.22,
+      "ssim": 1
+    },
+    "flat pdf 92": {
+      "bytes": 15021
+    },
+    "anim clean gif": {
+      "bytes": 46021,
+      "psnr": 50.15,
+      "ssim": 0.9979
+    },
+    "anim clean gif dither": {
+      "bytes": 58933,
+      "psnr": 45.14,
+      "ssim": 0.9919
+    },
+    "anim clean gif lossy 40": {
+      "bytes": 35616,
+      "psnr": 43.64,
+      "ssim": 0.991
+    },
+    "anim clean webp 80": {
+      "bytes": 17528,
+      "psnr": 40.74,
+      "ssim": 0.9982
+    },
+    "anim noisy gif": {
+      "bytes": 514843,
+      "psnr": 45.38,
+      "ssim": 0.9796
+    },
+    "anim noisy gif dither": {
+      "bytes": 405835,
+      "psnr": 43.71,
+      "ssim": 0.9703
+    },
+    "anim noisy gif lossy 40": {
+      "bytes": 390624,
+      "psnr": 39.85,
+      "ssim": 0.9613
+    },
+    "anim noisy webp 80": {
+      "bytes": 442794,
+      "psnr": 38.91,
+      "ssim": 0.9789
+    }
+  }
+}

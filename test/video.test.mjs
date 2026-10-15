@@ -1,0 +1,134 @@
+// Video page: exporting a recording to MP4, WebM, GIF and WebP in the worker,
+// with trims that land on the right frames, audio, and device frames.
+import { open, recordClip, ok, near, sleep } from './helpers.mjs';
+
+export async function setup({ browser, url }) {
+  const ctl = await open(browser, url('lab/lab.html'));
+  await ctl.waitForFunction(() => globalThis.lab);
+  const clip = await recordClip(ctl, { seconds: 8, audio: true });
+  const page = await open(browser, url(`video/video.html?id=${clip}`), { width: 1440, height: 900 });
+  await page.bringToFront();
+  await page.waitForFunction(() => /fps/.test(document.querySelector('#dims').textContent));
+  await page.evaluate(() => { console.warn = (...a) => { window.__fallback = a.join(' '); }; });
+
+  const set = (sel, value) => page.evaluate((sel, value) => {
+    const el = document.querySelector(sel);
+    if (el.type === 'checkbox') el.checked = value; else el.value = value;
+    el.dispatchEvent(new Event('input', { bubbles: true }));
+  }, sel, value);
+
+  /** Exports in `format` and returns details of the result. */
+  const exportAs = async (format) => {
+    await page.click(`#formats [data-f="${format}"]`);
+    await sleep(100);
+    const t0 = Date.now();
+    await page.click('#convert');
+    await page.waitForFunction(() => !document.querySelector('#result').classList.contains('hidden') || /failed/i.test(document.querySelector('#status').textContent), { timeout: 180000 });
+    const ms = Date.now() - t0;
+    const info = await page.evaluate(async () => {
+      const failed = document.querySelector('#status').textContent;
+      const out = document.querySelector('#out-video:not(.hidden)') || document.querySelector('#out-img:not(.hidden)');
+      if (!out) return { failed };
+      const blob = await (await fetch(out.src)).blob();
+      const r = { size: blob.size, type: blob.type, fallback: window.__fallback || null };
+      if (out.tagName === 'VIDEO') {
+        if (out.readyState < 2) await new Promise((res) => out.addEventListener('loadeddata', res, { once: true }));
+        const seek = (t) => new Promise((res) => { out.addEventListener('seeked', res, { once: true }); out.currentTime = t; });
+        await seek(0.02);
+        r.first = lab.frameTime(out);
+        await seek(out.duration - 0.05);
+        r.last = lab.frameTime(out);
+        Object.assign(r, { width: out.videoWidth, height: out.videoHeight, duration: out.duration });
+      } else {
+        const d = new ImageDecoder({ data: blob.stream(), type: blob.type });
+        await d.tracks.ready;
+        await d.completed;
+        const { image } = await d.decode({ frameIndex: 0 });
+        const c = new OffscreenCanvas(image.displayWidth, image.displayHeight).getContext('2d', { willReadFrequently: true });
+        c.drawImage(image, 0, 0);
+        Object.assign(r, { frames: d.tracks.selectedTrack.frameCount, width: image.displayWidth, height: image.displayHeight, corner: [...c.getImageData(1, 1, 1, 1).data] });
+      }
+      return r;
+    });
+    await page.click('#redo-export').catch(() => {});
+    return { ms, ...info };
+  };
+
+  /** The audio track of an MP4, decoded: its length in seconds (or 0 if none). */
+  const mp4AudioSeconds = () => page.evaluate(async () => {
+    const out = document.querySelector('#out-video');
+    const ctx = new OfflineAudioContext(2, 48000, 48000);
+    try {
+      const buf = await ctx.decodeAudioData(await (await fetch(out.src)).arrayBuffer());
+      return buf.duration;
+    } catch { return 0; }
+  });
+
+  // The lab page reads frame times; give the video page the same helper.
+  await page.evaluate(async () => { window.lab = await import('/lab/lab.js'); });
+  return { video: page, exportAs, set, mp4AudioSeconds };
+}
+
+export const tests = {
+  async 'MP4 export: whole clip, faster than real time'({ exportAs }) {
+    const r = await exportAs('mp4');
+    ok(!r.failed && r.type === 'video/mp4', `export failed: ${r.failed || r.type}`);
+    ok(!r.fallback, `fell back to real-time export: ${r.fallback}`);
+    ok(r.width === 1280 && r.height === 720, `size ${r.width}×${r.height}`);
+    near(r.duration, 8, 0.15, 'duration');
+    near(r.first, 0, 0.05, 'first frame time');
+    ok(r.ms < 8000, `took ${r.ms} ms for an 8 s clip`);
+    return `${r.ms} ms, ${Math.round(r.size / 1024)} KB`;
+  },
+
+  async 'WebM export keeps the original audio'({ exportAs }) {
+    const r = await exportAs('webm');
+    ok(!r.failed && r.type === 'video/webm', `export failed: ${r.failed || r.type}`);
+    ok(!r.fallback, `fell back to real-time export: ${r.fallback}`);
+    near(r.duration, 8, 0.15, 'duration');
+    return `${r.ms} ms, ${Math.round(r.size / 1024)} KB`;
+  },
+
+  async 'trimmed export starts and ends on the right frames'({ exportAs, set }) {
+    await set('#t-start', '2.5');
+    await set('#t-end', '5.5');
+    const r = await exportAs('mp4');
+    near(r.duration, 3, 0.1, 'duration');
+    near(r.first, 2.5, 0.05, 'first frame time');
+    near(r.last, 5.45, 0.06, 'last frame time');
+    await set('#t-start', '0');
+    await set('#t-end', '8');
+  },
+
+  async 'MP4 audio lasts as long as the video'({ exportAs, mp4AudioSeconds }) {
+    const r = await exportAs('mp4');
+    const audio = await mp4AudioSeconds();
+    near(audio, r.duration, 0.15, 'audio length');
+  },
+
+  async 'GIF and WebP export, with and without a device frame'({ video, exportAs, set }) {
+    const gif = await exportAs('gif');
+    ok(gif.type === 'image/gif' && gif.frames > 30, `GIF: ${JSON.stringify(gif)}`);
+    const webp = await exportAs('webp');
+    ok(webp.type === 'image/webp' && webp.frames > 30, `WebP: ${JSON.stringify(webp)}`);
+    await set('#g-lossy', '40');
+    const lossy = await exportAs('gif');
+    ok(lossy.size < gif.size, `lossy GIF ${lossy.size} not smaller than ${gif.size}`);
+    await set('#g-lossy', '0');
+    // Scroll the switch clear of the sticky export bar before clicking it.
+    const toggle = async () => {
+      await video.evaluate(() => {
+        document.querySelector('#device-section').open = true;
+        document.querySelector('#device-panel input[data-k="enabled"]').scrollIntoView({ block: 'center' });
+      });
+      await video.click('#device-panel input[data-k="enabled"]');
+    };
+    await toggle();
+    await sleep(200);
+    const framed = await exportAs('gif');
+    ok(framed.corner[3] === 0, `device frame corner should be transparent: ${framed.corner}`);
+    ok(framed.width !== gif.width, 'device frame should change the size');
+    await toggle();
+    return `GIF ${gif.ms} ms ${Math.round(gif.size / 1024)} KB (lossy 40: ${Math.round(lossy.size / 1024)} KB), WebP ${webp.ms} ms ${Math.round(webp.size / 1024)} KB`;
+  },
+};

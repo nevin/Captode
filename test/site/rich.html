@@ -1,0 +1,30 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Rich page</title>
+<style>
+body{margin:0;font:15px/1.55 -apple-system,system-ui,sans-serif;color:#1d1d24;background:#fafafb}
+header{height:64px;display:flex;align-items:center;gap:24px;padding:0 32px;background:#fff;border-bottom:1px solid #e6e6ea;box-shadow:0 2px 8px rgba(0,0,0,.05)}
+header b{font-size:18px} header a{color:#555;text-decoration:none}
+.hero{height:260px;background:linear-gradient(120deg,#6a5cff,#e5484d 60%,#ffb224);color:#fff;padding:48px 32px;box-sizing:border-box}
+.hero h1{font-size:40px;margin:0 0 10px} .wrap{display:grid;grid-template-columns:2fr 1fr;gap:28px;padding:28px 32px}
+.card{background:#fff;border:1px solid #e6e6ea;border-radius:12px;padding:18px;box-shadow:0 6px 18px rgba(20,20,40,.06);margin-bottom:18px}
+.btn{display:inline-block;padding:9px 16px;border-radius:8px;background:#5b4bff;color:#fff;margin-right:8px}
+.btn.s{background:#eef;color:#5b4bff} canvas{width:100%;height:220px;border-radius:10px;display:block}
+table{width:100%;border-collapse:collapse;font-size:13px} td,th{padding:7px;border-bottom:1px solid #eee;text-align:left}
+</style></head><body>
+<header><b>Northwind</b><a>Products</a><a>Pricing</a><a>Docs</a><a>Blog</a><span style="flex:1"></span><span class="btn">Sign up</span></header>
+<div class="hero"><h1>Ship faster with less friction</h1><p>Everything your team needs to plan, build and release — in one place. Trusted by 4,000 companies.</p><span class="btn s">Get started</span><span class="btn s">Book a demo</span></div>
+<div class="wrap"><div>
+<div class="card"><canvas id="photo" width="900" height="300"></canvas></div>
+<div class="card"><h2>Quarterly overview</h2><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer posuere erat a ante venenatis dapibus posuere velit aliquet. Maecenas faucibus mollis interdum. Cras mattis consectetur purus sit amet fermentum. Donec ullamcorper nulla non metus auctor fringilla.</p>
+<table><tr><th>Region</th><th>Revenue</th><th>Growth</th><th>Status</th></tr><tr><td>North</td><td>$1.2M</td><td style="color:#12a37f">+12%</td><td>On track</td></tr><tr><td>South</td><td>$860K</td><td style="color:#e5484d">−3%</td><td>At risk</td></tr><tr><td>East</td><td>$2.1M</td><td style="color:#12a37f">+21%</td><td>Ahead</td></tr><tr><td>West</td><td>$990K</td><td style="color:#12a37f">+4%</td><td>On track</td></tr></table></div>
+</div><div>
+<div class="card"><h3>Team</h3><p>Ada Lovelace · Grace Hopper · Alan Turing · Katherine Johnson · Edsger Dijkstra</p><span class="btn">Invite</span></div>
+<div class="card"><h3>Activity</h3><p>Deployed v2.4.1 to production. Merged 18 pull requests. Closed 42 issues. Two incidents resolved within SLA.</p></div>
+</div></div>
+<script>
+const c=document.getElementById('photo'),x=c.getContext('2d');
+const g=x.createLinearGradient(0,0,0,300);g.addColorStop(0,'#7fb3e6');g.addColorStop(.6,'#dcecf7');g.addColorStop(.61,'#4c7a3a');g.addColorStop(1,'#25401b');x.fillStyle=g;x.fillRect(0,0,900,300);
+let s=7;const r=()=>(s=(s*16807)%2147483647)/2147483647;
+for(let i=0;i<40;i++){x.fillStyle=`hsla(${200+r()*40},30%,${85+r()*10}%,.5)`;x.beginPath();x.ellipse(r()*900,r()*120,60+r()*90,15+r()*20,0,0,7);x.fill();}
+for(let i=0;i<3000;i++){x.fillStyle=`hsla(${80+r()*50},${40+r()*30}%,${15+r()*30}%,.6)`;x.fillRect(r()*900,185+r()*115,2+r()*4,2+r()*8);}
+const d=x.getImageData(0,0,900,300);for(let i=0;i<d.data.length;i+=4){const n=(r()-.5)*14;d.data[i]+=n;d.data[i+1]+=n;d.data[i+2]+=n;}x.putImageData(d,0,0);
+</script></body></html>
