@@ -134,3 +134,6 @@ body { display: flex; flex-direction: column; overflow: hidden; }
 }
 .no-image .toolbar, .no-image .zoombar, .no-image #copy, .no-image #download, .no-image .inspector, .no-image .doc, .no-image .topbar > .sep { display: none; }
 .swatches button.picked { box-shadow: 0 0 0 2px var(--accent); }
+
+.fitted { margin: -4px 0 0; font-size: 12px; color: var(--muted); }
+.fitted.warn { color: var(--warn); }

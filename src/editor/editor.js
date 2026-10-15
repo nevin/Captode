@@ -1010,6 +1010,8 @@ function syncExportUi() {
   document.querySelector('[data-x="quality"]').classList.toggle('hidden', !['jpeg', 'webp', 'avif', 'pdf'].includes(f));
   document.querySelector('[data-x="colors"]').classList.toggle('hidden', !['png8', 'gif'].includes(f));
   document.querySelector('[data-x="pdf"]').classList.toggle('hidden', f !== 'pdf');
+  document.querySelector('[data-x="lossy"]').classList.toggle('hidden', f !== 'gif');
+  $('#x-lossy-v').textContent = Number($('#x-lossy').value) ? $('#x-lossy').value : 'Off';
   $('#x-quality-v').textContent = $('#x-quality').value + '%';
   const label = `Download ${FORMAT_INFO[f][0]}`;
   for (const id of ['download', 'download2']) $('#' + id).lastChild.textContent = label;
@@ -1036,16 +1038,32 @@ async function finalCanvas({ scaled = true } = {}) {
 function encodeOptions() {
   return {
     quality: Number($('#x-quality').value) / 100,
-    colors: Number($('#x-colors').value),
+    colors: $('#x-colors').value === 'auto' ? 'auto' : Number($('#x-colors').value),
     dither: $('#x-dither').checked,
+    lossy: Number($('#x-lossy').value),
     page: $('#x-page').value,
     split: $('#x-split').checked,
   };
 }
 
-/** Encodes in a worker; `lane` lets a newer estimate cancel an older one. */
+/**
+ * Encodes in a worker, within the size limit if one is set. `lane` lets a newer
+ * estimate cancel an older one. Resolves to `{ blob, width, height, fitted }`.
+ */
 function encode(c, lane = 'export') {
-  return encodeOffThread(c, $('#x-format').value, encodeOptions(), lane);
+  return encodeOffThread(c, $('#x-format').value, encodeOptions(), lane, Number($('#x-limit').value) * 1024);
+}
+
+/** Says what was changed to fit the size limit, if anything. */
+function fittedNote(f) {
+  if (!f) return '';
+  if (f.tooBig) return "Can't get under the size limit; this is as small as it goes.";
+  const parts = [];
+  if (f.quality !== undefined) parts.push(`quality ${Math.round(f.quality * 100)}%`);
+  if (f.lossy) parts.push(`lossy ${f.lossy}`);
+  if (f.colors) parts.push(`${f.colors} colours`);
+  if (f.scale) parts.push(`${Math.round(f.scale * 100)}% size`);
+  return `To fit the limit: ${parts.join(', ')}.`;
 }
 
 let estimateRun = 0;
@@ -1055,9 +1073,12 @@ const refreshExport = debounce(async () => {
   $('#x-estimate').innerHTML = '<span>Working out the file size…</span>';
   try {
     const c = await finalCanvas();
-    const blob = await encode(c, 'estimate');
+    const r = await encode(c, 'estimate');
     if (run !== estimateRun) return;
-    $('#x-estimate').innerHTML = `<span>${c.width} × ${c.height} px</span><b>${fmtBytes(blob.size)}</b>`;
+    $('#x-estimate').innerHTML = `<span>${r.width} × ${r.height} px</span><b>${fmtBytes(r.blob.size)}</b>`;
+    $('#x-fitted').textContent = fittedNote(r.fitted);
+    $('#x-fitted').classList.toggle('hidden', !r.fitted);
+    $('#x-fitted').classList.toggle('warn', !!r.fitted?.tooBig);
   } catch (e) {
     if (e.superseded) return;
     if (run === estimateRun) $('#x-estimate').textContent = 'Could not encode: ' + e.message;
@@ -1095,7 +1116,7 @@ async function download() {
   const btns = [$('#download'), $('#download2')];
   btns.forEach((b) => { b.disabled = true; });
   try {
-    const blob = await encode(await finalCanvas());
+    const { blob } = await encode(await finalCanvas());
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
     a.download = fileName();
@@ -1124,7 +1145,7 @@ async function copyImage() {
   }
 }
 $('#copy').addEventListener('click', copyImage);
-for (const id of ['x-format', 'x-scale', 'x-quality', 'x-colors', 'x-dither', 'x-page', 'x-split']) {
+for (const id of ['x-format', 'x-scale', 'x-limit', 'x-quality', 'x-colors', 'x-dither', 'x-lossy', 'x-page', 'x-split']) {
   $('#' + id).addEventListener('input', () => { syncExportUi(); refreshExport(); });
 }
 

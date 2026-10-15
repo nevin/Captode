@@ -98,6 +98,7 @@ function syncUi() {
   $('#w-quality-f').classList.toggle('hidden', $('#w-lossless').checked);
   $('#denoise-row').classList.toggle('hidden', !$('#optimize').checked);
   $('#w-quality-v').textContent = $('#w-quality').value + '%';
+  $('#g-lossy-v').textContent = Number($('#g-lossy').value) ? $('#g-lossy').value : 'Off';
   $('#v-audio').disabled = !meta.hasAudio;
   $('#v-audio-note').classList.toggle('hidden', Boolean(meta.hasAudio));
   if (!meta.hasAudio) $('#v-audio').checked = false;
@@ -330,7 +331,7 @@ async function convertFrames(p, { start, end }) {
     }
 
     const enc = format === 'gif'
-      ? new GifEncoder(p.width, p.height, { palette, dither: $('#g-dither').checked, optimize, transparent, loop, tolerance })
+      ? new GifEncoder(p.width, p.height, { palette, dither: $('#g-dither').checked, optimize, transparent, loop, tolerance, lossy: Number($('#g-lossy').value) })
       : new WebpAnimEncoder(p.width, p.height, {
           quality: Number($('#w-quality').value) / 100, lossless: $('#w-lossless').checked, optimize, loop, alpha: transparent, tolerance,
         });
@@ -454,7 +455,7 @@ function convertInWorker(p, { start, end }) {
     blob: source, format, width: p.width, height: p.height, fps: p.fps, start, end,
     device: d?.enabled ? { ...d } : null,
     video: { bitsPerPixel: Number($('#v-quality').value), audio: $('#v-audio').checked && !!meta.hasAudio },
-    gif: { colors: Number($('#g-colors').value), dither: $('#g-dither').checked },
+    gif: { colors: Number($('#g-colors').value), dither: $('#g-dither').checked, lossy: Number($('#g-lossy').value) },
     webp: { quality: Number($('#w-quality').value) / 100, lossless: $('#w-lossless').checked },
     optimize: $('#optimize').checked,
     tolerance: $('#denoise').checked ? undefined : 0,

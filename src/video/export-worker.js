@@ -11,6 +11,7 @@ import { muxMp4 } from '../lib/mp4.js';
 import { GifEncoder } from '../lib/gif.js';
 import { WebpAnimEncoder } from '../lib/webp.js';
 import { buildPalette } from '../lib/quantize.js';
+import { WorkerPool } from '../lib/pool.js';
 import { deviceRenderer, frameDrawer } from '../lib/device.js';
 
 /** An error after which the page should fall back to its slower, simpler path. */
@@ -86,6 +87,23 @@ async function forEachFrame(src, { start, fps, count, onFrame, want = () => true
     cur?.close();
     for (const f of queue) f.close();
     if (decoder.state !== 'closed') decoder.close();
+  }
+}
+
+/** Decodes key frames on their own, calling `onFrame` for each in order. */
+async function decodeAlone(src, keys, onFrame) {
+  const frames = [];
+  let failure = null;
+  const decoder = new VideoDecoder({ output: (f) => frames.push(f), error: (e) => { failure = e; } });
+  decoder.configure(src.decoderConfig);
+  for (const k of keys) decoder.decode(new EncodedVideoChunk({ type: 'key', timestamp: k.timestamp, data: k.data }));
+  await decoder.flush();
+  decoder.close();
+  try {
+    if (failure) throw failure;
+    for (const f of frames) await onFrame(f);
+  } finally {
+    for (const f of frames) f.close();
   }
 }
 
@@ -174,7 +192,17 @@ async function exportAudio(src, format, start, end) {
   // MP4 sample tables have no start offsets, so any gap (audio usually starts a
   // little after the video) is filled with silence to keep sound and picture in sync.
   let expected = 0; // µs of audio written so far
+  const length = end - start; // µs: audio stops where the video does
   const write = (planes, n, sampleRate) => {
+    const room = Math.floor(((length - expected) * sampleRate) / 1e6);
+    if (room <= 0) return;
+    if (n > room) {
+      // Keep the first `room` samples of each channel.
+      const cut = new Float32Array(room * channels);
+      for (let c = 0; c < channels; c++) cut.set(planes.subarray(c * n, c * n + room), c * room);
+      planes = cut;
+      n = room;
+    }
     const re = new AudioData({ format: 'f32-planar', sampleRate, numberOfFrames: n, numberOfChannels: channels, timestamp: Math.round(expected), data: planes });
     encoder.encode(re);
     re.close();
@@ -213,7 +241,7 @@ async function exportAudio(src, format, start, end) {
  * job: {
  *   blob, format ('mp4' | 'webm' | 'gif' | 'webp'),
  *   width, height, fps, start, end (seconds), device (options or null),
- *   video: { bitsPerPixel, audio }, gif: { colors, dither }, webp: { quality, lossless },
+ *   video: { bitsPerPixel, audio }, gif: { colors, dither, lossy }, webp: { quality, lossless },
  *   optimize, tolerance, loop
  * }
  */
@@ -237,7 +265,10 @@ async function run(job) {
   // The source size comes from the first decoded frame (MediaRecorder sometimes
   // leaves the track's pixel size out).
   const canvas = new OffscreenCanvas(W, H);
-  const ctx = canvas.getContext('2d', { willReadFrequently: job.format === 'gif' || job.format === 'webp', alpha: true });
+  // A GPU canvas, even for GIF and WebP, which read the pixels back: drawing a
+  // decoded frame into a CPU canvas converts and scales it in software, which
+  // took about 7 ms a frame, against well under 1 ms here plus a quicker read-back.
+  const ctx = canvas.getContext('2d', { alpha: true });
   let draw = null;
   const paint = (frame) => {
     if (!draw) {
@@ -305,41 +336,91 @@ async function run(job) {
   let palette = null;
   if (job.format === 'gif') {
     // One palette for the whole clip, from frames spread across it.
-    const samples = Math.min(count, 16);
-    const picks = new Set(Array.from({ length: samples }, (_, s) => Math.floor(((s + 0.5) * count) / samples)));
     const parts = [];
-    await forEachFrame(src, {
-      start, fps, count, want: (k) => picks.has(k),
-      onFrame: async (k, frame) => {
-        paint(frame);
-        const px = ctx.getImageData(0, 0, W, H).data;
-        const part = new Uint8ClampedArray(Math.ceil(px.length / 12) * 4);
-        for (let i = 0, o = 0; i < px.length; i += 12, o += 4) part.set(px.subarray(i, i + 4), o);
-        parts.push(part);
-        progress(0, 'Choosing colours…');
-      },
-    });
+    const sample = (frame) => {
+      paint(frame);
+      const px = ctx.getImageData(0, 0, W, H).data;
+      const part = new Uint8ClampedArray(Math.ceil(px.length / 12) * 4);
+      for (let i = 0, o = 0; i < px.length; i += 12, o += 4) part.set(px.subarray(i, i + 4), o);
+      parts.push(part);
+      progress(0, 'Choosing colours…');
+    };
+    // Key frames decode on their own, so when there are enough of them in range,
+    // sample those instead of decoding the whole clip an extra time.
+    const keys = src.video.frames.filter((f) => f.key && f.timestamp >= start && f.timestamp < end);
+    if (keys.length >= 4) {
+      const step = Math.max(1, keys.length / 16);
+      const picks = [];
+      for (let x = 0; x < keys.length && picks.length < 16; x += step) picks.push(keys[Math.floor(x)]);
+      await decodeAlone(src, picks, sample);
+    } else {
+      const samples = Math.min(count, 16);
+      const want = new Set(Array.from({ length: samples }, (_, n) => Math.floor(((n + 0.5) * count) / samples)));
+      await forEachFrame(src, { start, fps, count, want: (k) => want.has(k), onFrame: async (k, frame) => sample(frame) });
+    }
     const all = new Uint8ClampedArray(parts.reduce((n, a) => n + a.length, 0));
     let o = 0;
     for (const part of parts) { all.set(part, o); o += part.length; }
     palette = buildPalette(all, Math.max(2, job.gif.colors - 1));
   }
 
-  const enc = job.format === 'gif'
-    ? new GifEncoder(W, H, { palette, dither: job.gif.dither, optimize: job.optimize, transparent, loop: job.loop, tolerance: job.tolerance })
-    : new WebpAnimEncoder(W, H, {
-        quality: job.webp.quality, lossless: job.webp.lossless, optimize: job.optimize, loop: job.loop, alpha: transparent, tolerance: job.tolerance,
-      });
+  if (job.format === 'gif') return exportGif(src, { start, fps, count, frameUs, palette, transparent, paint, preview, ctx, W, H, job });
+
+  const enc = new WebpAnimEncoder(W, H, {
+    quality: job.webp.quality, lossless: job.webp.lossless, optimize: job.optimize, loop: job.loop, alpha: transparent, tolerance: job.tolerance,
+  });
   await forEachFrame(src, {
     start, fps, count,
     onFrame: async (k, frame) => {
       paint(frame);
-      if (job.format === 'gif') enc.addFrame(ctx.getImageData(0, 0, W, H).data, frameUs / 1000);
-      else await enc.addFrame(canvas, frameUs / 1000);
+      await enc.addFrame(canvas, frameUs / 1000);
       preview();
       progress((k + 1) / count, `Encoding frame ${k + 1} of ${count}`);
     },
   });
   progress(1, 'Finishing…');
   return enc.finish();
+}
+
+/**
+ * GIF on several cores: frames are drawn here in order, mapped to the palette and
+ * compressed on a pool of workers, and compared with the frame before here (the
+ * one step that has to go in order).
+ */
+async function exportGif(src, { start, fps, count, frameUs, palette, transparent, paint, preview, ctx, W, H, job }) {
+  const pool = new WorkerPool(new URL('../lib/gif-worker.js', import.meta.url));
+  try {
+    await pool.broadcast({ op: 'palette', pal: palette });
+    const enc = new GifEncoder(W, H, {
+      palette, dither: job.gif.dither, optimize: job.optimize, transparent, loop: job.loop, tolerance: job.tolerance, lossy: job.gif.lossy,
+      pool: {
+        encode: ({ pal, ...rect }) => pool.run({ op: 'encode', job: rect }, rect.masked ? [rect.plain.buffer, rect.masked.buffer] : [rect.plain.buffer]),
+      },
+    });
+    const { dither, transparentIndex } = enc.mapOptions();
+    const mapped = []; // in frame order
+    const limit = pool.workers.length * 3;
+    const takeOne = async () => {
+      const { idx, rgba } = await mapped.shift();
+      enc.addMapped(idx, rgba, frameUs / 1000);
+      // Don't let compression fall far behind, or frames pile up in memory.
+      if (pool.load > limit * 2) await enc.frames[enc.frames.length - 1].result;
+    };
+    await forEachFrame(src, {
+      start, fps, count,
+      onFrame: async (k, frame) => {
+        paint(frame);
+        const rgba = ctx.getImageData(0, 0, W, H).data;
+        preview();
+        mapped.push(pool.run({ op: 'map', rgba, width: W, height: H, dither, transparentIndex }, [rgba.buffer]));
+        while (mapped.length > limit) await takeOne();
+        progress((k + 1) / count, `Encoding frame ${k + 1} of ${count}`);
+      },
+    });
+    while (mapped.length) await takeOne();
+    progress(1, 'Finishing…');
+    return await enc.finish();
+  } finally {
+    pool.close();
+  }
 }

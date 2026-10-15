@@ -40,5 +40,8 @@
       "description": "Open Captode, or stop the current recording"
     }
   },
-  "options_page": "settings/settings.html"
+  "options_page": "settings/settings.html",
+  "content_security_policy": {
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'"
+  }
 }

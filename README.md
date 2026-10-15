@@ -24,6 +24,9 @@ The capture opens in the editor, where you can:
 - Select, move, restyle and delete anything you added. Undo and redo.
 - **Resize** to exact pixel sizes, with or without keeping the proportions.
 - **Frame** the shot with padding, a backdrop colour, rounded corners and a shadow.
+- **Set a size limit** (100 KB to 25 MB) and Captode finds the best quality that fits,
+  lowering quality or colours before it shrinks the image. **Auto** picks the fewest
+  colours for PNG-8 and GIF that still look right. GIF has **lossy compression** too.
 - **Export** as PNG, compressed 8-bit PNG, JPEG, WebP, GIF, BMP or PDF (one page, or A4 or
   Letter pages with long pages split across them). The quality and size controls compress the
   file, and the live estimate shows the size before you download. You can also copy the image
@@ -91,11 +94,17 @@ Everything runs in the browser; nothing is uploaded.
 - **PNG** is always lossless. Captode checks a few encodings and keeps the smallest: a
   palette at 1, 2, 4 or 8 bits per pixel when the image has 256 colours or fewer, greyscale
   when there's no colour, no alpha channel when nothing is transparent, and the best
-  filter for each row. Fully transparent pixels are stored as transparent black.
+  filter for each row. Fully transparent pixels are stored as transparent black. oxipng
+  then recompresses the result.
+- **JPEG** uses MozJPEG, tuned so each file is at least as faithful (by PSNR) as Chrome's
+  own encoder at the same quality setting: the setting means what it did, the file is
+  smaller (27% on average in the tests).
 - **PNG-8 and GIF** keep the exact colours when an image has few enough of them, so flat
   UI screenshots lose nothing. Otherwise a median-cut palette is refined with k-means and
   colours are matched by a perceptual distance. Dithering is serpentine Floyd–Steinberg
   at reduced strength, and leaves areas of exact palette colours clean.
+- **Lossy GIF** lets a pixel take a slightly different colour when that continues a run
+  the compressor already knows, the technique behind gifsicle's `--lossy`.
 - **Animated GIF** uses one palette for the whole clip and stores only the pixels that
   change. Dithering uses an ordered pattern, which stays still from frame to frame so it
   doesn't count as motion.
@@ -109,7 +118,8 @@ Everything runs in the browser; nothing is uploaded.
   Captode falls back to playing the clip through in real time.
 - **Recordings** are made with settings for screen content (sharp text, enough bitrate that
   still areas don't shimmer, and a key frame every 2 seconds), which also keeps exports small.
-- Encoding runs in background workers, so the editor and video page stay responsive.
+- Encoding runs in background workers, so the editor and video page stay responsive. GIF
+  exports spread colour mapping and compression across several CPU cores.
 
 ## Install
 
@@ -124,7 +134,8 @@ MP4 export uses the H.264 encoder built into Chrome. On the rare system without 
 
 ## Development
 
-The extension is plain JavaScript modules with no build step and no dependencies.
+The extension is plain JavaScript modules with no build step. Its only third-party code is
+two WebAssembly codecs in `src/vendor` (see [Credits](#credits)).
 
 ```
 src/
@@ -143,19 +154,44 @@ src/
     device.js            phone and tablet frames
     settings.js          user settings shared by every page
     theme.js             applies the Light, Dark or System theme
-    gif.js               animated GIF encoder with lossless frame diffing
+    gif.js               animated GIF encoder: frame diffing, lossy LZW
+    gif-worker.js        GIF colour mapping and compression on a worker pool
     webp.js              animated WebP muxer
-    quantize.js          median-cut colour reduction and dithering
-    formats.js           PDF, BMP, 8-bit PNG and still GIF encoders
+    quantize.js          colour reduction (exact, median cut + k-means) and dithering
+    png.js               lossless PNG writer (palette, greyscale, adaptive filters)
+    formats.js           every still format, Auto colours and size limits
+    encoder.js           runs still-image encoding in a worker (encode-worker.js)
+    wasm.js              loads oxipng and MozJPEG
+    webm.js, mp4.js      WebM reader/writer and MP4 writer for WebCodecs export
+    pool.js              a small worker pool
+  video/export-worker.js decodes, draws and encodes video exports with WebCodecs
+  vendor/                oxipng and MozJPEG, compiled to WebAssembly
+test/
+  *.test.mjs             browser tests (capture, encoders, video export, interface)
+  bench.mjs              compression benchmark with stored baselines
 tools/
   make-icons.mjs         draws the icons
   package.mjs            builds the store zip
 ```
 
 ```bash
+npm install       # test tools only: Puppeteer and its Chrome for Testing
+npm test          # run the browser tests (npm test -- video runs only matching ones)
+npm run bench     # compression benchmark; fails on a size or quality regression
 npm run icons     # redraw src/icons/*.png
 npm run package   # build dist/captode-<version>.zip for the stores
 ```
+
+The tests load the extension into Chrome and drive real captures, edits and exports
+against a local test page. They check what the encoders promise: lossless output is
+pixel-identical, JPEG is at least as faithful as Chrome's own at the same quality and no
+larger, size limits are met, trims land on the right frame, and audio lasts as long as
+the video. Set `CHROME_PATH` to use another Chrome. GitHub Actions runs the tests and the
+benchmark on every push.
+
+`npm run bench` compares sizes, PSNR and SSIM with `test/bench-baseline.json`, kept per
+operating system. After an intended change, save new numbers with
+`npm run bench -- --update`.
 
 ## Publishing
 
@@ -172,6 +208,17 @@ recording relies on.
 ## Privacy
 
 Captode does not collect, send or store anything outside your browser. See [PRIVACY.md](PRIVACY.md).
+
+## Credits
+
+Captode includes, compiled to WebAssembly from the [jSquash](https://github.com/jamsinclair/jSquash)
+packages of Google's [Squoosh](https://github.com/GoogleChromeLabs/squoosh) codecs:
+
+- [oxipng](https://github.com/shssoichiro/oxipng) (MIT) for lossless PNG recompression
+- [MozJPEG](https://github.com/mozilla/mozjpeg) (IJG and BSD licences) for JPEG
+
+This software is based in part on the work of the Independent JPEG Group. The licences
+are in `src/vendor`.
 
 ## License
 
