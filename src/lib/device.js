@@ -1,5 +1,6 @@
 // Device mode: draws a capture inside a phone or tablet frame, for screenshots and
 // for every frame of a video. The frame is drawn from shapes, so it scales cleanly.
+import { getSettings } from './settings.js';
 
 export const DEVICES = {
   phone: { label: 'Phone — island', aspect: 19.5 / 9, bezel: 0.045, radius: 0.17, screenRadius: 0.13, cutout: 'island', size: 900 },
@@ -20,9 +21,8 @@ export const DEFAULTS = {
   orientation: 'auto',
   fit: 'width',
   frame: 'midnight',
-  bg: 'gradient',
-  bg1: '#5b4bff',
-  bg2: '#e5484d',
+  bg: 'none',       // 'none' (transparent) | 'white' | 'custom'
+  bg1: '#ffffff',   // colour for 'custom'
   padding: 12,
   statusBar: true,
   statusStyle: 'light',
@@ -60,14 +60,8 @@ function layout(o, srcW, srcH) {
 function drawUnder(ctx, o, g) {
   const { width: W, height: H, body, screen, S, d, landscape } = g;
   ctx.clearRect(0, 0, W, H);
-  if (o.bg === 'solid') {
-    ctx.fillStyle = o.bg1;
-    ctx.fillRect(0, 0, W, H);
-  } else if (o.bg === 'gradient') {
-    const gr = ctx.createLinearGradient(0, 0, W, H);
-    gr.addColorStop(0, o.bg1);
-    gr.addColorStop(1, o.bg2);
-    ctx.fillStyle = gr;
+  if (o.bg === 'white' || o.bg === 'custom') {
+    ctx.fillStyle = o.bg === 'white' ? '#ffffff' : o.bg1;
     ctx.fillRect(0, 0, W, H);
   }
   const f = FRAMES[o.frame] || FRAMES.midnight;
@@ -266,7 +260,14 @@ const sel = (name, options, value) =>
 /** Builds the device-mode controls inside `el`. Calls `onChange(opts)` on every change. */
 export async function mountDevicePanel(el, onChange) {
   const stored = await chrome.storage.local.get({ deviceOpts: {}, device: false });
-  const o = { ...DEFAULTS, ...stored.deviceOpts, enabled: stored.device };
+  const settings = await getSettings();
+  // The background always starts from Settings; the frame itself is remembered.
+  const { bg, bg1, bg2, ...frameOpts } = stored.deviceOpts;
+  const o = {
+    ...DEFAULTS, ...frameOpts, enabled: stored.device,
+    bg: { transparent: 'none', white: 'white', custom: 'custom' }[settings.background] || 'none',
+    bg1: settings.backgroundColor,
+  };
   const map = (obj) => Object.fromEntries(Object.entries(obj).map(([k, v]) => [k, v.label]));
 
   el.innerHTML = `
@@ -278,10 +279,9 @@ export async function mountDevicePanel(el, onChange) {
         <label class="field"><span>Finish</span>${sel('frame', map(FRAMES), o.frame)}</label>
       </div>
       <label class="field"><span>Fit on screen</span>${sel('fit', { width: 'Fill width, from the top', cover: 'Fill the screen', contain: 'Show everything' }, o.fit)}</label>
-      <div class="field"><span>Background</span>
-        <div class="row">${sel('bg', { gradient: 'Gradient', solid: 'Solid colour', none: 'Transparent' }, o.bg)}
+      <div class="field"><span>Background <a href="#" class="settings-link">Change default</a></span>
+        <div class="row">${sel('bg', { none: 'Transparent', white: 'White', custom: 'Custom colour' }, o.bg)}
           <input type="color" data-k="bg1" value="${o.bg1}" title="Background colour">
-          <input type="color" data-k="bg2" value="${o.bg2}" title="Second gradient colour">
         </div>
       </div>
       <label class="field"><span>Padding</span><input type="range" min="0" max="30" data-k="padding" value="${o.padding}"></label>
@@ -291,18 +291,21 @@ export async function mountDevicePanel(el, onChange) {
 
   const sync = () => {
     el.querySelector('.dev-opts').classList.toggle('hidden', !o.enabled);
-    el.querySelector('[data-k="bg2"]').classList.toggle('hidden', o.bg !== 'gradient');
-    el.querySelector('[data-k="bg1"]').classList.toggle('hidden', o.bg === 'none');
+    el.querySelector('[data-k="bg1"]').classList.toggle('hidden', o.bg !== 'custom');
     el.querySelector('.status-style').classList.toggle('hidden', !o.statusBar);
   };
   sync();
+  el.querySelector('.settings-link').addEventListener('click', (e) => {
+    e.preventDefault();
+    chrome.runtime.openOptionsPage();
+  });
   el.addEventListener('input', (e) => {
     const k = e.target.dataset.k;
     if (!k) return;
     const t = e.target;
     o[k] = t.type === 'checkbox' ? t.checked : t.type === 'range' ? Number(t.value) : t.value;
     sync();
-    const { enabled, ...rest } = o;
+    const { enabled, bg: _bg, bg1: _bg1, ...rest } = o;
     chrome.storage.local.set({ deviceOpts: rest, device: enabled });
     onChange({ ...o });
   });

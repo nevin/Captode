@@ -55,9 +55,19 @@ video inside a phone or tablet frame. You can choose:
 - the device and its colour
 - portrait or landscape
 - how the capture fits the screen
-- a gradient, solid or transparent background
+- a transparent, white or custom-colour background (the default is set in Settings)
 - padding
 - a status bar
+
+### Settings
+
+Open **Settings** from the gear in the popup (or right-click the icon → Options) to choose:
+
+- **Theme:** System (follows your browser and computer), Light or Dark.
+- **Export background:** Transparent, White or a custom colour, used behind device frames
+  and around padded screenshots. JPEG, BMP, PDF, MP4 and WebM can't be transparent, so
+  they get white when Transparent is chosen.
+- **Default formats** for screenshots and recordings, and whether device frames are on.
 
 ## Install
 
@@ -80,6 +90,7 @@ src/
   background.js          service worker: captures, recording state, toolbar icon
   content/page.js        functions injected into the page (area picker, scrolling, countdown)
   popup/                 the toolbar popup
+  settings/              the Settings page
   editor/                image editor
   video/                 recording preview and export
   recorder/offscreen.*   records the tab (offscreen document)
@@ -88,6 +99,8 @@ src/
     db.js                hands captures between pages through IndexedDB
     recorder.js          MediaRecorder wrapper, with cropping for selected-area recordings
     device.js            phone and tablet frames
+    settings.js          user settings shared by every page
+    theme.js             applies the Light, Dark or System theme
     gif.js               animated GIF encoder with lossless frame diffing
     webp.js              animated WebP muxer
     quantize.js          median-cut colour reduction and dithering

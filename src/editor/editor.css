@@ -97,3 +97,4 @@ body { display: flex; flex-direction: column; overflow: hidden; }
   .doc b { max-width: 30vw; }
 }
 .no-image .toolbar, .no-image .zoombar, .no-image #copy, .no-image #download { display: none; }
+.swatches button.picked { box-shadow: 0 0 0 2px var(--accent); }

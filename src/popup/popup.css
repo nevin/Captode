@@ -30,3 +30,4 @@ main { padding: 0 16px 12px; }
 footer { padding: 4px 16px 4px; border-top: 1px solid var(--line); background: var(--panel-2); }
 footer .toggle { margin: 0; }
 .error { margin: 6px 16px 0; padding: 9px 12px; border-radius: 8px; background: rgba(229, 72, 77, .1); color: var(--rec); font-size: 12px; }
+.head-actions { display: flex; gap: 2px; }

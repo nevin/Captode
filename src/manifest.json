@@ -34,8 +34,11 @@
   ],
   "commands": {
     "_execute_action": {
-      "suggested_key": { "default": "Alt+Shift+R" },
+      "suggested_key": {
+        "default": "Alt+Shift+R"
+      },
       "description": "Open Captode, or stop the current recording"
     }
-  }
+  },
+  "options_page": "settings/settings.html"
 }

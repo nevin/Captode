@@ -45,7 +45,11 @@ VIDEO EXPORT
 • Lossless size reduction for GIF and WebP: repeated frames are merged and only changed pixels are stored, with no visible quality loss
 
 DEVICE MODE
-• Present any screenshot or recording inside a phone or tablet frame, with a gradient or transparent background
+• Present any screenshot or recording inside a phone or tablet frame, on a transparent, white or custom background
+
+SETTINGS
+• Light, dark or system theme
+• Choose the default export background and formats
 
 No account, no watermark, no tracking.
 
@@ -61,7 +65,7 @@ lets the user edit and export them.
 - **tabCapture:** Records the current tab when the user starts a tab recording.
 - **desktopCapture:** Lets the user pick a screen or window to record in Full screen mode.
 - **offscreen:** Hosts the MediaRecorder for tab recordings, since a service worker cannot hold a media stream.
-- **storage:** Stores the user's settings.
+- **storage:** Stores the user's settings (theme, export background, default formats).
 - **unlimitedStorage:** Holds recordings locally until the user exports them. Long recordings can exceed the default quota.
 
 **Remote code:** No. All code ships in the package.
@@ -74,4 +78,5 @@ lets the user edit and export them.
 2. The editor with arrows, text and a blurred area
 3. The export panel showing format, size and estimated file size
 4. The video page converting to GIF with the lossless option
-5. Device mode: a screenshot in a phone frame on a gradient
+5. Device mode: a screenshot in a phone frame on a transparent background
+6. The Settings page in dark mode

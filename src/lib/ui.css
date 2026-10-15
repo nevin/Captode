@@ -25,8 +25,29 @@
   --font: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   color-scheme: light;
 }
+/* Dark theme: chosen in Settings, or following the system/browser when set to System. */
+:root[data-theme="dark"] {
+    --bg: #0f0f13;
+    --panel: #17171d;
+    --panel-2: #1e1e26;
+    --hover: #26262f;
+    --line: #2a2a34;
+    --line-strong: #383844;
+    --text: #ececf1;
+    --muted: #a0a0ad;
+    --faint: #6e6e7c;
+    --accent: #7a6cff;
+    --accent-hover: #8b7fff;
+    --accent-soft: rgba(122, 108, 255, 0.16);
+    --stage: #0b0b0e;
+    --stage-dot: rgba(255, 255, 255, 0.05);
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --shadow: 0 8px 24px rgba(0, 0, 0, 0.45), 0 1px 3px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 18px 50px rgba(0, 0, 0, 0.6);
+    color-scheme: dark;
+}
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
     --bg: #0f0f13;
     --panel: #17171d;
     --panel-2: #1e1e26;
@@ -215,3 +236,6 @@ kbd {
   display: inline-block; min-width: 18px; padding: 0 5px; border-radius: 4px; text-align: center;
   border: 1px solid var(--line-strong); border-bottom-width: 2px; font: 11px/16px var(--font); color: var(--muted);
 }
+.settings-link { color: var(--accent); font-weight: 500; text-decoration: none; }
+.settings-link:hover { text-decoration: underline; }
+.swatches button[data-c="transparent"] { background: repeating-conic-gradient(#d4d4dc 0 25%, #fff 0 50%) 0 0 / 8px 8px !important; }

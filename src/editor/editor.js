@@ -1,6 +1,7 @@
 import { getCapture } from '../lib/db.js';
 import { toPdf, toBmp, toPng8, toGif } from '../lib/formats.js';
 import { mountDevicePanel, renderInDevice } from '../lib/device.js';
+import { getSettings, backgroundColour } from '../lib/settings.js';
 
 const $ = (s) => document.querySelector(s);
 const bg = $('#bg');
@@ -31,7 +32,7 @@ const FONTS = [
   'Impact', 'Comic Sans MS', 'Brush Script MT', 'monospace', 'serif', 'cursive',
 ];
 const SWATCHES = ['#e5484d', '#f76b15', '#ffc53d', '#30a46c', '#0090ff', '#5b4bff', '#17171c', '#ffffff'];
-const BACKDROPS = ['#ececf4', '#ffffff', '#17171c', '#dbe4ff', '#ffe4e6', '#dcfce7', '#5b4bff', '#0f172a'];
+const BACKDROPS = ['transparent', '#ffffff', '#ececf4', '#17171c', '#dbe4ff', '#ffe4e6', '#dcfce7', '#0f172a'];
 const GROUPS = {
   pen: ['stroke'], highlighter: ['stroke'], line: ['stroke'], arrow: ['stroke'],
   rect: ['stroke', 'fill'], ellipse: ['stroke', 'fill'], text: ['text'], redact: ['redact'], crop: ['crop'],
@@ -50,7 +51,7 @@ const defaults = {
   text: { font: 'system-ui', size: 32, bold: true, italic: false, color: '#ffffff', bg: '#17171c' },
   redact: { mode: 'pixelate', strength: 12 },
 };
-const frame = { padding: 0, bg: '#ececf4', radius: 0, shadow: false };
+const frame = { padding: 0, bg: 'transparent', radius: 0, shadow: false }; // bg: a colour or 'transparent'
 
 let base = null;     // OffscreenCanvas with the pixels being edited
 let objects = [];    // annotations, in image coordinates
@@ -275,8 +276,10 @@ function paintImage(ctx) {
   const r = frame.radius;
   ctx.clearRect(0, 0, W, H);
   if (p > 0) {
-    ctx.fillStyle = frame.bg;
-    ctx.fillRect(0, 0, W, H);
+    if (frame.bg !== 'transparent') {
+      ctx.fillStyle = frame.bg;
+      ctx.fillRect(0, 0, W, H);
+    }
     if (frame.shadow) {
       ctx.save();
       ctx.shadowColor = 'rgba(0,0,0,0.3)';
@@ -756,6 +759,7 @@ for (const box of document.querySelectorAll('.swatches')) {
   box.addEventListener('click', (e) => {
     const c = e.target.dataset.c;
     if (!c) return;
+    if (c === 'transparent') { setBackdrop('transparent'); return; }
     input.value = c;
     input.dispatchEvent(new Event('input', { bubbles: true }));
   });
@@ -937,19 +941,29 @@ $('#rs-apply').addEventListener('click', async () => {
   toast(`Resized to ${w} × ${h}`);
 });
 
+function setBackdrop(bg) {
+  frame.bg = bg;
+  syncFrameUi();
+  if (base) layout();
+  commitSoon();
+}
+
 function syncFrameUi() {
   $('#f-pad').value = frame.padding;
   $('#f-pad-v').textContent = frame.padding + ' px';
-  $('#f-bg').value = frame.bg;
+  if (frame.bg !== 'transparent') $('#f-bg').value = frame.bg;
+  for (const b of document.querySelectorAll('[data-set="backdrop"] button')) {
+    b.classList.toggle('picked', b.dataset.c === frame.bg);
+  }
   $('#f-radius').value = frame.radius;
   $('#f-radius-v').textContent = frame.radius + ' px';
   $('#f-shadow').checked = frame.shadow;
-  wrap.classList.toggle('checker', frame.padding === 0 && frame.radius > 0);
+  wrap.classList.toggle('checker', frame.radius > 0 || (frame.padding > 0 && frame.bg === 'transparent'));
 }
 for (const id of ['f-pad', 'f-bg', 'f-radius', 'f-shadow']) {
   $('#' + id).addEventListener('input', () => {
     frame.padding = Number($('#f-pad').value);
-    frame.bg = $('#f-bg').value;
+    if (id === 'f-bg') frame.bg = $('#f-bg').value;
     frame.radius = Number($('#f-radius').value);
     frame.shadow = $('#f-shadow').checked;
     syncFrameUi();
@@ -1176,10 +1190,12 @@ window.addEventListener('resize', debounce(() => base && applyZoom(), 150));
   }
   renderFormatTiles();
   if (globalThis.chrome?.storage) {
-    const { editorDefaults, exportFormat } = await chrome.storage.local.get(['editorDefaults', 'exportFormat']);
+    const { editorDefaults } = await chrome.storage.local.get('editorDefaults');
     if (editorDefaults) Object.assign(defaults, editorDefaults);
-    if (exportFormat) $('#x-format').value = exportFormat;
-    $('#x-format').addEventListener('change', () => chrome.storage.local.set({ exportFormat: $('#x-format').value }));
+    const settings = await getSettings();
+    frame.bg = backgroundColour(settings) || 'transparent';
+    const fmt = $('#x-format').querySelector(`option[value="${settings.imageFormat}"]`);
+    if (fmt && !fmt.hidden) $('#x-format').value = settings.imageFormat;
     device = await mountDevicePanel($('#device-panel'), () => refreshExport());
   } else {
     $('#device-panel').textContent = 'Available when running as the extension.';

@@ -1,6 +1,7 @@
 import { getCapture } from '../lib/db.js';
 import { GifEncoder } from '../lib/gif.js';
 import { buildPalette } from '../lib/quantize.js';
+import { getSettings } from '../lib/settings.js';
 import { WebpAnimEncoder } from '../lib/webp.js';
 import { mountDevicePanel, deviceRenderer } from '../lib/device.js';
 
@@ -148,13 +149,21 @@ function progress(f, text) {
   if (text) $('#status').textContent = text;
 }
 
-function drawer(p) {
+// Formats without transparency get white behind a transparent device background.
+function drawer(p, opaque = false) {
   return (ctx, v) => {
     if (p.renderer) {
       ctx.save();
       ctx.scale(p.width / p.renderer.width, p.height / p.renderer.height);
       p.renderer.render(ctx, v);
       ctx.restore();
+      if (opaque && p.renderer.transparent) {
+        ctx.save();
+        ctx.globalCompositeOperation = 'destination-over'; // paint behind the frame
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(0, 0, p.width, p.height);
+        ctx.restore();
+      }
     } else {
       ctx.drawImage(v, 0, 0, p.width, p.height);
     }
@@ -270,7 +279,7 @@ async function convertRealtime(p, { start, end }) {
   live.width = p.width;
   live.height = p.height;
   const ctx = live.getContext('2d');
-  const draw = drawer(p);
+  const draw = drawer(p, true);
   showPreview('live');
 
   let audioCtx = null;
@@ -404,6 +413,7 @@ $('#dl-original').addEventListener('click', () => source && save(source, `captod
   if (meta.title) { $('#doc-name').textContent = meta.title; document.title = `${meta.title} — Captode`; }
   if ((await chrome.storage.local.get('device')).device) $('#device-section').open = true;
   device = await mountDevicePanel($('#device-panel'), () => { fillResolutions(); syncUi(); });
+  format = (await getSettings()).videoFormat || 'mp4';
   fillResolutions(true);
   fillFps(true);
   syncUi();

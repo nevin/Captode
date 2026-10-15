@@ -45,6 +45,7 @@ $('#fps').addEventListener('click', (e) => {
 for (const id of ['audio', 'countdown', 'device']) {
   $('#' + id).addEventListener('change', (e) => chrome.storage.local.set({ [id]: e.target.checked }));
 }
+$('#open-settings').addEventListener('click', () => { chrome.runtime.openOptionsPage(); window.close(); });
 $('#open-editor').addEventListener('click', async () => {
   await chrome.tabs.create({ url: chrome.runtime.getURL('editor/editor.html') });
   window.close();
