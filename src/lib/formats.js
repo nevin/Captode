@@ -1,6 +1,7 @@
 // Still-image encoders the browser does not provide: PDF, BMP, 8-bit PNG, GIF.
-import { buildPalette, mapPixels } from './quantize.js';
+import { buildPalette, mapPixels, exactColors } from './quantize.js';
 import { GifEncoder } from './gif.js';
+import { deflate, encodeIndexed, encodePng, filterRows } from './png.js';
 
 const enc = new TextEncoder();
 
@@ -29,7 +30,7 @@ const PAGE_SIZES = { a4: [595.28, 841.89], letter: [612, 792] };
 export async function toPdf(src, { page = 'fit', split = true, margin = 24, quality = 0.92 } = {}) {
   const W = src.width, H = src.height;
   const pages = [];
-  const jpeg = async (c) => new Uint8Array(await (await c.convertToBlob({ type: 'image/jpeg', quality })).arrayBuffer());
+  const jpeg = (c) => pdfImage(c, quality);
 
   if (page === 'fit') {
     // 96 dpi screen pixels at 72 points an inch; PDF pages top out at 14400 points.
@@ -58,6 +59,45 @@ export async function toPdf(src, { page = 'fit', split = true, margin = 24, qual
   return buildPdf(pages);
 }
 
+/**
+ * A page image for the PDF: JPEG, or lossless Flate when that is smaller (screenshots
+ * of text and UI often are) or when the quality is set to 100%. Lossless pages use a
+ * colour index when the image has 256 colours or fewer, and PNG row prediction
+ * otherwise.
+ */
+async function pdfImage(c, quality) {
+  const w = c.width, h = c.height;
+  const lossless = quality >= 0.995;
+  const jpegData = lossless ? null : new Uint8Array(await (await c.convertToBlob({ type: 'image/jpeg', quality })).arrayBuffer());
+  const px = pixelsOf(c);
+  let flate;
+  const pal = exactColors(px, 256);
+  if (pal) {
+    const lookup = new Map();
+    for (let i = 0; i < pal.length / 3; i++) lookup.set(pal[i * 3] | (pal[i * 3 + 1] << 8) | (pal[i * 3 + 2] << 16), i);
+    const idx = new Uint8Array(w * h);
+    for (let i = 0, p = 0; p < idx.length; i += 4, p++) idx[p] = lookup.get(px[i] | (px[i + 1] << 8) | (px[i + 2] << 16));
+    const hex = [...pal].map((b) => b.toString(16).padStart(2, '0')).join('');
+    flate = {
+      colorSpace: `[/Indexed /DeviceRGB ${pal.length / 3 - 1} <${hex}>]`, filter: '/FlateDecode',
+      parms: `<< /Predictor 15 /Colors 1 /BitsPerComponent 8 /Columns ${w} >>`,
+      data: await deflate(filterRows(idx, w, h, 1, 'none')),
+    };
+  } else if (lossless || jpegData.length > w * h / 4) {
+    // Only worth trying when the JPEG isn't already tiny: lossless RGB rarely gets
+    // below a quarter of a byte per pixel.
+    const rgb = new Uint8Array(w * h * 3);
+    for (let i = 0, o = 0; i < px.length; i += 4) { rgb[o++] = px[i]; rgb[o++] = px[i + 1]; rgb[o++] = px[i + 2]; }
+    flate = {
+      colorSpace: '/DeviceRGB', filter: '/FlateDecode',
+      parms: `<< /Predictor 15 /Colors 3 /BitsPerComponent 8 /Columns ${w} >>`,
+      data: await deflate(filterRows(rgb, w * 3, h, 3)),
+    };
+  }
+  if (lossless || (flate && flate.data.length <= jpegData.length)) return flate;
+  return { colorSpace: '/DeviceRGB', filter: '/DCTDecode', data: jpegData };
+}
+
 function buildPdf(pages) {
   const parts = [];
   const offsets = [];
@@ -77,8 +117,9 @@ function buildPdf(pages) {
     obj(n, `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${f(p.pw)} ${f(p.ph)}] ` +
       `/Resources << /XObject << /Im0 ${n + 2} 0 R >> >> /Contents ${n + 1} 0 R >>`);
     obj(n + 1, `<< /Length ${content.length} >>\nstream\n${content}\nendstream`);
-    obj(n + 2, `<< /Type /XObject /Subtype /Image /Width ${p.iw} /Height ${p.ih} /ColorSpace /DeviceRGB ` +
-      `/BitsPerComponent 8 /Filter /DCTDecode /Length ${p.img.length} >>\nstream\n`, p.img, '\nendstream');
+    const im = p.img;
+    obj(n + 2, `<< /Type /XObject /Subtype /Image /Width ${p.iw} /Height ${p.ih} /ColorSpace ${im.colorSpace} ` +
+      `/BitsPerComponent 8 /Filter ${im.filter}${im.parms ? ` /DecodeParms ${im.parms}` : ''} /Length ${im.data.length} >>\nstream\n`, im.data, '\nendstream');
   });
   const count = 3 + pages.length * 3;
   const xref = pos;
@@ -122,70 +163,37 @@ export function toBmp(src) {
   return new Blob([buf], { type: 'image/bmp' });
 }
 
-// ---------- 8-bit PNG ----------
+// ---------- PNG ----------
 
-const crcTable = (() => {
-  const t = new Uint32Array(256);
-  for (let n = 0; n < 256; n++) {
-    let c = n;
-    for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
-    t[n] = c >>> 0;
-  }
-  return t;
-})();
+const pixelsOf = (src) => src.getContext('2d', { willReadFrequently: true }).getImageData(0, 0, src.width, src.height).data;
 
-function crc32(bytes) {
-  let c = 0xffffffff;
-  for (let i = 0; i < bytes.length; i++) c = crcTable[(c ^ bytes[i]) & 255] ^ (c >>> 8);
-  return (c ^ 0xffffffff) >>> 0;
-}
-
-function pngChunk(type, data) {
-  const out = new Uint8Array(12 + data.length);
-  const v = new DataView(out.buffer);
-  v.setUint32(0, data.length);
-  out.set(enc.encode(type), 4);
-  out.set(data, 8);
-  v.setUint32(8 + data.length, crc32(out.subarray(4, 8 + data.length)));
-  return out;
-}
-
-async function deflate(bytes) {
-  const stream = new Blob([bytes]).stream().pipeThrough(new CompressionStream('deflate'));
-  return new Uint8Array(await new Response(stream).arrayBuffer());
+/** Lossless PNG: the smaller of the browser's encoding and Captode's optimised one. */
+export async function toPng(src) {
+  const [own, browser] = await Promise.all([
+    encodePng(pixelsOf(src), src.width, src.height),
+    src.convertToBlob({ type: 'image/png' }),
+  ]);
+  return own.size <= browser.size ? own : browser;
 }
 
 /** Palette PNG with at most `colors` colours: much smaller than a full-colour PNG. */
 export async function toPng8(src, { colors = 256, dither = true } = {}) {
   const { width: w, height: h } = src;
-  const px = src.getContext('2d', { willReadFrequently: true }).getImageData(0, 0, w, h).data;
+  const px = pixelsOf(src);
   let hasAlpha = false;
   for (let i = 3; i < px.length; i += 4) if (px[i] < 128) { hasAlpha = true; break; }
   const pal = buildPalette(px, hasAlpha ? colors - 1 : colors);
   const n = pal.length / 3;
   const idx = mapPixels(px, w, h, pal, { dither, transparentIndex: hasAlpha ? n : -1 });
-  const raw = new Uint8Array((w + 1) * h);
-  for (let y = 0; y < h; y++) raw.set(idx.subarray(y * w, y * w + w), y * (w + 1) + 1);
-
-  const ihdr = new Uint8Array(13);
-  const v = new DataView(ihdr.buffer);
-  v.setUint32(0, w);
-  v.setUint32(4, h);
-  ihdr.set([8, 3, 0, 0, 0], 8);
-  const plte = new Uint8Array((n + (hasAlpha ? 1 : 0)) * 3);
-  plte.set(pal);
-  const parts = [
-    new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10]),
-    pngChunk('IHDR', ihdr),
-    pngChunk('PLTE', plte),
-  ];
-  if (hasAlpha) {
-    const trns = new Uint8Array(n + 1).fill(255);
-    trns[n] = 0;
-    parts.push(pngChunk('tRNS', trns));
-  }
-  parts.push(pngChunk('IDAT', await deflate(raw)), pngChunk('IEND', new Uint8Array(0)));
-  return new Blob(parts, { type: 'image/png' });
+  if (!hasAlpha) return encodeIndexed(idx, w, h, pal);
+  // The transparent entry goes first, so the tRNS chunk is a single byte.
+  const rgb = new Uint8Array((n + 1) * 3);
+  rgb.set(pal, 3);
+  const shifted = new Uint8Array(idx.length);
+  for (let p = 0; p < idx.length; p++) shifted[p] = idx[p] === n ? 0 : idx[p] + 1;
+  const alpha = new Uint8Array(n + 1).fill(255);
+  alpha[0] = 0;
+  return encodeIndexed(shifted, w, h, rgb, alpha);
 }
 
 // ---------- GIF (still) ----------

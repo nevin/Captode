@@ -96,6 +96,7 @@ function syncUi() {
   $('#convert').textContent = `Export ${format.toUpperCase()}`;
   for (const el of document.querySelectorAll('[data-for]')) el.classList.toggle('hidden', !el.dataset.for.split(' ').includes(format));
   $('#w-quality-f').classList.toggle('hidden', $('#w-lossless').checked);
+  $('#denoise-row').classList.toggle('hidden', !$('#optimize').checked);
   $('#w-quality-v').textContent = $('#w-quality').value + '%';
   $('#v-audio').disabled = !meta.hasAudio;
   $('#v-audio-note').classList.toggle('hidden', Boolean(meta.hasAudio));
@@ -318,6 +319,7 @@ async function convertFrames(p, { start, end }) {
     const transparent = !!p.renderer?.transparent;
     const loop = $('#loop').checked ? 0 : 1;
     const optimize = $('#optimize').checked;
+    const tolerance = $('#denoise').checked ? undefined : 0; // undefined: the encoder's default
     const step = 1 / p.fps;
     const count = Math.max(1, Math.round((end - start) * p.fps));
     const at = (i) => Math.min(start + i * step, Math.max(start, end - 0.001));
@@ -346,9 +348,9 @@ async function convertFrames(p, { start, end }) {
     }
 
     const enc = format === 'gif'
-      ? new GifEncoder(p.width, p.height, { palette, dither: $('#g-dither').checked, optimize, transparent, loop })
+      ? new GifEncoder(p.width, p.height, { palette, dither: $('#g-dither').checked, optimize, transparent, loop, tolerance })
       : new WebpAnimEncoder(p.width, p.height, {
-          quality: Number($('#w-quality').value) / 100, lossless: $('#w-lossless').checked, optimize, loop, alpha: transparent,
+          quality: Number($('#w-quality').value) / 100, lossless: $('#w-lossless').checked, optimize, loop, alpha: transparent, tolerance,
         });
 
     for (let i = 0; i < count; i++) {

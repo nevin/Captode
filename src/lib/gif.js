@@ -1,8 +1,10 @@
 // Animated GIF encoder. With `optimize` on, frames that look the same as the one
 // before are merged into it. With a shared palette as well, each frame stores only
-// the rectangle that changed, with unchanged pixels transparent. The result shows
-// exactly the same pixels as encoding every frame in full: lossless, but smaller.
-import { buildPalette, mapPixels } from './quantize.js';
+// the rectangle that changed, with unchanged pixels transparent, and a pixel keeps
+// its previous colour when that is within a hair of the best match, so video noise
+// doesn't count as change. Dithered animations use an ordered pattern, which stays
+// put from frame to frame where error diffusion would ripple across the image.
+import { buildPalette, mapPixels, WR, WG, WB } from './quantize.js';
 
 class Bytes {
   constructor(size = 1 << 16) { this.buf = new Uint8Array(size); this.len = 0; }
@@ -80,9 +82,12 @@ export class GifEncoder {
    * @param {boolean} [o.dither=false]
    * @param {boolean} [o.transparent=false] keep transparent pixels
    * @param {number} [o.loop=0] 0 loops forever
+   * @param {number} [o.tolerance=2.5] how far (in 0–255 levels per channel) a pixel may drift
+   *                                   from the best match to keep last frame's colour; 0 is exact
    */
-  constructor(width, height, { colors = 256, palette = null, optimize = true, dither = false, transparent = false, loop = 0 } = {}) {
+  constructor(width, height, { colors = 256, palette = null, optimize = true, dither = false, transparent = false, loop = 0, tolerance = 2.5 } = {}) {
     Object.assign(this, { width, height, colors, palette, optimize, dither, transparent, loop });
+    this.slack = tolerance * tolerance * (WR + WG + WB);
     this.frames = [];
     this.prev = null;     // previous frame's palette indices
   }
@@ -94,10 +99,24 @@ export class GifEncoder {
     // frame gets its own, with a slot kept free for transparency.
     const pal = this.palette || buildPalette(rgba, Math.max(2, this.colors - 1));
     const trans = pal.length / 3;
-    const idx = mapPixels(rgba, W, H, pal, { dither: this.dither, transparentIndex: this.transparent ? trans : -1 });
+    const animated = !!this.palette && this.optimize;
+    const dither = this.dither && animated ? 'ordered' : this.dither;
+    const idx = mapPixels(rgba, W, H, pal, { dither, transparentIndex: this.transparent ? trans : -1 });
 
     let x0 = 0, y0 = 0, x1 = W - 1, y1 = H - 1;
     const prev = this.optimize ? this.prev : null;
+    if (prev && animated && this.slack > 0) {
+      // Keep last frame's colour where it is as good a match, give or take the
+      // tolerance: decoder noise then leaves still areas untouched.
+      const err = (i, c) => {
+        const dr = rgba[i] - pal[c * 3], dg = rgba[i + 1] - pal[c * 3 + 1], db = rgba[i + 2] - pal[c * 3 + 2];
+        return dr * dr * WR + dg * dg * WG + db * db * WB;
+      };
+      for (let p = 0; p < idx.length; p++) {
+        const a = idx[p], b = prev[p];
+        if (a !== b && a !== trans && b !== trans && err(p * 4, b) <= err(p * 4, a) + this.slack) idx[p] = b;
+      }
+    }
     if (prev) {
       // Compare what is shown, not the source pixels: noise too small to change
       // a pixel's colour in the GIF is not a change.

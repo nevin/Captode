@@ -1,5 +1,5 @@
 import { getCapture, listCaptures, deleteCapture } from '../lib/db.js';
-import { toPdf, toBmp, toPng8, toGif } from '../lib/formats.js';
+import { toPdf, toBmp, toPng, toPng8, toGif } from '../lib/formats.js';
 import { mountDevicePanel, renderInDevice } from '../lib/device.js';
 import { getSettings, backgroundColour } from '../lib/settings.js';
 import { toast, enhance, tablist, openDialog, fmtBytes, ago } from '../lib/ui.js';
@@ -1039,7 +1039,7 @@ async function encode(c) {
   const colors = Number($('#x-colors').value);
   const dither = $('#x-dither').checked;
   switch (f) {
-    case 'png': return c.convertToBlob({ type: 'image/png' });
+    case 'png': return toPng(c);
     case 'png8': return toPng8(c, { colors, dither });
     case 'jpeg': {
       const flat = canvas(c.width, c.height);

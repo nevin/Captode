@@ -109,7 +109,8 @@
       </div>
 
       <div data-for="gif webp">
-        <label class="toggle"><span>Reduce size losslessly<small>Merge repeated frames and store only the pixels that change. No visible quality loss.</small></span><input type="checkbox" id="optimize" checked></label>
+        <label class="toggle"><span>Reduce size losslessly<small>Merge repeated frames and store only the pixels that change. Every frame looks exactly the same.</small></span><input type="checkbox" id="optimize" checked></label>
+        <label class="toggle" id="denoise-row"><span>Ignore flicker<small>Tiny changes from recording noise (2 levels in 255) don't count as motion. Much smaller files, no visible difference.</small></span><input type="checkbox" id="denoise" checked></label>
         <label class="toggle"><span>Loop forever</span><input type="checkbox" id="loop" checked></label>
       </div>
     </section>
