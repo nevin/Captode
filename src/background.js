@@ -77,6 +77,36 @@ async function toPng(bmp, x, y, w, h) {
   return c.convertToBlob({ type: 'image/png' });
 }
 
+/**
+ * The vertical position (near `guess`) at which `bmp`'s top rows best match the
+ * rows already drawn on the canvas. Flat overlaps match anywhere, so ties keep
+ * the guess.
+ */
+function alignTile(ctx, bmp, dx, guess, overlap) {
+  const rows = Math.max(1, Math.min(overlap - 2, bmp.height));
+  const w = Math.min(bmp.width, ctx.canvas.width - dx);
+  if (w < 1 || guess < 2) return guess;
+  const sample = new OffscreenCanvas(w, rows).getContext('2d', { willReadFrequently: true });
+  sample.drawImage(bmp, 0, 0, w, rows, 0, 0, w, rows);
+  const tile = sample.getImageData(0, 0, w, rows).data;
+  const top = Math.max(0, guess - 2);
+  const area = ctx.getImageData(dx, top, w, rows + 4).data;
+  let best = guess, bestCost = Infinity;
+  for (let shift = -2; shift <= 2; shift++) {
+    const from = guess + shift - top;
+    if (from < 0 || from + rows > rows + 4) continue;
+    let cost = 0;
+    for (let r = 0; r < rows; r++) {
+      for (let x = 0; x < w; x += 3) {
+        const i = (r * w + x) * 4, j = ((from + r) * w + x) * 4;
+        cost += Math.abs(tile[i] - area[j]) + Math.abs(tile[i + 1] - area[j + 1]) + Math.abs(tile[i + 2] - area[j + 2]);
+      }
+    }
+    if (cost < bestCost - 1 || (cost <= bestCost + 1 && shift === 0)) { bestCost = cost; best = guess + shift; }
+  }
+  return best;
+}
+
 async function captureFullPage(tab, meta) {
   const info = await run(tab.id, fullPagePrepare);
   try {
@@ -92,7 +122,7 @@ async function captureFullPage(tab, meta) {
     if (height < info.height) meta.truncated = true;
 
     const canvas = new OffscreenCanvas(Math.round(info.width * scale), Math.round(height * scale));
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d', { willReadFrequently: true }); // alignTile reads it back
     ctx.drawImage(first, 0, 0);
     // How far the tiles reach: the page's reported size, scaled and rounded, can be
     // a pixel or two more than was actually painted.
@@ -108,8 +138,9 @@ async function captureFullPage(tab, meta) {
     // reported viewport is rounded up, and stepping by it would leave a blank row
     // between tiles; a pixel of overlap is harmless. Each tile is then placed at the
     // scroll position the page actually reached.
+    const OVERLAP = 8; // CSS pixels shared by neighbouring tiles, for lining them up
     const viewW = Math.max(1, Math.floor(first.width / scale) - 1);
-    const viewH = Math.max(1, Math.floor(first.height / scale) - 1);
+    const viewH = Math.max(1, Math.floor(first.height / scale) - OVERLAP);
     const xs = steps(info.width, viewW);
     const ys = steps(height, viewH);
     const total = xs.length * ys.length;
@@ -121,7 +152,10 @@ async function captureFullPage(tab, meta) {
         const at = await run(tab.id, fullPageScroll, x, y, true);
         const bmp = await captureVisible(tab.windowId);
         const dx = Math.round(at.x * scale);
-        const dy = Math.round(at.y * scale);
+        // Where Chrome put the pixels can differ by one from the rounded scroll
+        // position at fractional scales, and differently on each OS; line the tile up
+        // with what's already drawn where they overlap.
+        const dy = y > 0 ? alignTile(ctx, bmp, dx, Math.round(at.y * scale), Math.round(OVERLAP * scale)) : Math.round(at.y * scale);
         ctx.drawImage(bmp, dx, dy);
         paintedW = Math.max(paintedW, dx + bmp.width);
         paintedH = Math.max(paintedH, dy + bmp.height);
