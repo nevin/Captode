@@ -65,9 +65,19 @@ export async function setup({ browser, url }) {
     } catch { return 0; }
   });
 
+  /** The time stamped on the source frame showing at `t`, and on the frame after it. */
+  const sourceFrames = (t) => page.evaluate(async (t) => {
+    const v = document.querySelector('#player');
+    const at = async (x) => { await new Promise((res) => { v.addEventListener('seeked', res, { once: true }); v.currentTime = x; }); return lab.frameTime(v); };
+    const shown = await at(t);
+    let next = shown;
+    for (let x = t + 0.01; next === shown && x < t + 0.5; x += 0.01) next = await at(x);
+    return [shown, next];
+  }, t);
+
   // The lab page reads frame times; give the video page the same helper.
   await page.evaluate(async () => { window.lab = await import('/lab/lab.js'); });
-  return { video: page, exportAs, set, mp4AudioSeconds, clip };
+  return { video: page, exportAs, set, mp4AudioSeconds, sourceFrames, clip };
 }
 
 export const tests = {
@@ -90,13 +100,17 @@ export const tests = {
     return `${r.ms} ms, ${Math.round(r.size / 1024)} KB`;
   },
 
-  async 'trimmed export starts and ends on the right frames'({ exportAs, set }) {
+  async 'trimmed export starts and ends on the right frames'({ exportAs, set, sourceFrames }) {
+    // The right frames are the recording's own frames at the trim points; on a busy
+    // machine the recording has gaps, so they aren't always exactly 2.5 s and 5.45 s.
+    const [startShown, startNext] = await sourceFrames(2.5);
+    const [endShown, endNext] = await sourceFrames(5.45);
     await set('#t-start', '2.5');
     await set('#t-end', '5.5');
     const r = await exportAs('mp4');
     near(r.duration, 3, 0.1, 'duration');
-    near(r.first, 2.5, 0.05, 'first frame time');
-    near(r.last, 5.45, 0.06, 'last frame time');
+    ok(r.first >= startShown - 0.01 && r.first <= startNext + 0.01, `first frame time ${r.first}, expected a source frame from ${startShown} to ${startNext}`);
+    ok(r.last >= endShown - 0.01 && r.last <= endNext + 0.01, `last frame time ${r.last}, expected a source frame from ${endShown} to ${endNext}`);
     await set('#t-start', '0');
     await set('#t-end', '8');
   },

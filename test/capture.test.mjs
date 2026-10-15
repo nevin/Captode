@@ -25,7 +25,14 @@ export async function setup({ browser, url, site }) {
     const ed = await waitForTab(browser, (u) => u.includes('editor.html?id=') && !seen.has(u));
     seen.add(ed.url());
     await ed.bringToFront();
-    await ed.waitForFunction(() => /px/.test(document.querySelector('#doc-dims').textContent), { timeout: 20000 });
+    try {
+      await ed.waitForFunction(() => /px/.test(document.querySelector('#doc-dims').textContent), { timeout: 45000 });
+    } catch (e) {
+      // Say what the editor shows instead, so a failure on a CI runner can be diagnosed.
+      const state = await ed.evaluate(() => ({ url: location.href, visible: document.visibilityState, body: document.body.innerText.slice(0, 300) })).catch((err) => String(err));
+      const error = await ctl.evaluate(async () => (await chrome.storage.session.get('lastError')).lastError);
+      throw new Error(`editor did not show the capture: ${JSON.stringify(state)}, lastError ${error}`);
+    }
     const size = await ed.evaluate(() => [document.querySelector('#bg').width, document.querySelector('#bg').height]);
     const error = await ctl.evaluate(async () => (await chrome.storage.session.get('lastError')).lastError);
     ok(!error, `capture reported an error: ${error}`);
