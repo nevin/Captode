@@ -3,17 +3,22 @@
 import { open, waitForTab, ok, near, sleep, launch } from './helpers.mjs';
 
 export async function setup({ browser, url, site }) {
-  const page = await open(browser, `${site}/index.html`);
+  // No emulated viewport: in real use the page fills the window, which is what tab
+  // capture sees. (An emulated size bigger than the window can't be scrolled into view.)
+  const page = await browser.newPage();
+  await page.goto(`${site}/index.html`);
   await page.evaluate(() => window.scrollTo(0, 700));
   const ctl = await open(browser, url('popup/popup.html'), { width: 340, height: 600 });
   const tabId = await ctl.evaluate(async (site) => (await chrome.tabs.query({ url: `${site}/*` }))[0].id, site);
   await page.bringToFront();
 
+  const seen = new Set(); // editors already handed out, so a stale one is never reused
   // Starts a capture of the test page and returns the editor it opens.
   const capture = async (mode, during) => {
     await ctl.evaluate((tabId, mode) => chrome.runtime.sendMessage({ type: 'capture-image', mode, tabId }), tabId, mode);
     if (during) await during();
-    const ed = await waitForTab(browser, (u) => u.includes('editor.html?id='));
+    const ed = await waitForTab(browser, (u) => u.includes('editor.html?id=') && !seen.has(u));
+    seen.add(ed.url());
     await ed.bringToFront();
     await ed.waitForFunction(() => /px/.test(document.querySelector('#doc-dims').textContent), { timeout: 20000 });
     const size = await ed.evaluate(() => [document.querySelector('#bg').width, document.querySelector('#bg').height]);
@@ -107,9 +112,16 @@ export const tests = {
           worst = Math.max(worst, d);
           if (d > 8) badRows++;
         }
-        return { ours: [bg.width, bg.height], ref: [img.width, img.height], badRows, worst: +worst.toFixed(1) };
+        // No unpainted (transparent) pixels anywhere along the edges.
+        let blankEdge = 0;
+        for (let x = 0; x < bg.width; x++) if (ours[((bg.height - 1) * bg.width + x) * 4 + 3] < 255) blankEdge++;
+        for (let y = 0; y < bg.height; y++) if (ours[(y * bg.width + bg.width - 1) * 4 + 3] < 255) blankEdge++;
+        return { ours: [bg.width, bg.height], ref: [img.width, img.height], badRows, worst: +worst.toFixed(1), blankEdge };
       }, reference);
-      ok(Math.abs(r.ours[0] - r.ref[0]) <= 1 && Math.abs(r.ours[1] - r.ref[1]) <= 2, `${scale * 100}%: size ${r.ours} vs Chrome's ${r.ref}`);
+      // Chrome rounds the page height its own way; a few rows either way is fine as
+      // long as every row is painted and matches.
+      ok(Math.abs(r.ours[0] - r.ref[0]) <= 1 && Math.abs(r.ours[1] - r.ref[1]) <= 4, `${scale * 100}%: size ${r.ours} vs Chrome's ${r.ref}`);
+      ok(r.blankEdge === 0, `${scale * 100}%: ${r.blankEdge} unpainted pixels along the right or bottom edge`);
       ok(r.badRows === 0, `${scale * 100}%: ${r.badRows} rows differ from Chrome's own full-page screenshot (worst ${r.worst})`);
       await ed.close();
 

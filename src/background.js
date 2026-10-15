@@ -94,6 +94,10 @@ async function captureFullPage(tab, meta) {
     const canvas = new OffscreenCanvas(Math.round(info.width * scale), Math.round(height * scale));
     const ctx = canvas.getContext('2d');
     ctx.drawImage(first, 0, 0);
+    // How far the tiles reach: the page's reported size, scaled and rounded, can be
+    // a pixel or two more than was actually painted.
+    let paintedW = first.width;
+    let paintedH = first.height;
 
     const steps = (total, view) => {
       const out = [];
@@ -116,10 +120,20 @@ async function captureFullPage(tab, meta) {
         if (x === 0 && y === 0) continue;
         const at = await run(tab.id, fullPageScroll, x, y, true);
         const bmp = await captureVisible(tab.windowId);
-        ctx.drawImage(bmp, Math.round(at.x * scale), Math.round(at.y * scale));
+        const dx = Math.round(at.x * scale);
+        const dy = Math.round(at.y * scale);
+        ctx.drawImage(bmp, dx, dy);
+        paintedW = Math.max(paintedW, dx + bmp.width);
+        paintedH = Math.max(paintedH, dy + bmp.height);
         bmp.close();
         await badge(`${Math.round((++done / total) * 100)}%`, '#5b4bff');
       }
+    }
+    // Trim any unpainted strip at the right or bottom edge.
+    if (paintedW < canvas.width || paintedH < canvas.height) {
+      const trimmed = new OffscreenCanvas(Math.min(canvas.width, paintedW), Math.min(canvas.height, paintedH));
+      trimmed.getContext('2d').drawImage(canvas, 0, 0);
+      return await trimmed.convertToBlob({ type: 'image/png' });
     }
     return await canvas.convertToBlob({ type: 'image/png' });
   } finally {

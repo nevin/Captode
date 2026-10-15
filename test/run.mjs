@@ -3,7 +3,7 @@
 // export `setup(env)`; every file gets its own Chrome with the extension loaded.
 import { readdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { launch, serveSite, Failure } from './helpers.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -14,7 +14,7 @@ let passed = 0;
 const failed = [];
 
 for (const file of files) {
-  const mod = await import(join(here, file));
+  const mod = await import(pathToFileURL(join(here, file)).href); // a file:// URL, so Windows paths work
   const names = Object.keys(mod.tests).filter((n) => `${file} ${n}`.includes(filter));
   if (!names.length) continue;
   console.log(`\n${file}`);

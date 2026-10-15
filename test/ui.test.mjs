@@ -74,7 +74,8 @@ export const tests = {
     return est.join(' — ');
   },
 
-  async 'empty editor lists recent captures'({ browser, url }) {
+  async 'empty editor lists recent captures'({ browser, url, editor }) {
+    await (await editor()).close(); // make sure there is at least one
     const em = await open(browser, url('editor/editor.html'));
     await sleep(800);
     ok(await em.evaluate(() => document.querySelectorAll('.recent-item').length) > 0, 'no recent captures');
