@@ -18,7 +18,10 @@ const logo = 'data:image/png;base64,' + readFileSync(logoPath).toString('base64'
 const site = await serveSite();
 // A window whose page area is exactly the UI part of a screenshot (1280 × 690), so
 // what the page shows and what the extension captures are the same size.
-const env = await launch({ args: ['--window-size=1280,777'] });
+// No vsync pacing: with a Mac's display asleep, Chrome otherwise stops producing
+// frames and screenshots hang. (Not used for tests: unpaced animation makes the
+// test recordings drop frames.)
+const env = await launch({ args: ['--window-size=1280,777', '--disable-gpu-vsync', '--disable-frame-rate-limit'] });
 const { browser, url } = env;
 const UI = { width: 1280, height: 690 }; // the UI part of each screenshot, under the caption
 
