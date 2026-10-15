@@ -311,3 +311,28 @@ export async function mountDevicePanel(el, onChange) {
   });
   return { get: () => ({ ...o }) };
 }
+
+/**
+ * Returns `draw(ctx, source)`, which paints one video frame at `width` × `height`,
+ * inside the device frame when `renderer` is given. With `opaque`, a transparent
+ * device background becomes white (for formats without transparency).
+ */
+export function frameDrawer({ width, height }, renderer, opaque = false) {
+  return (ctx, source) => {
+    if (!renderer) {
+      ctx.drawImage(source, 0, 0, width, height);
+      return;
+    }
+    ctx.save();
+    ctx.scale(width / renderer.width, height / renderer.height);
+    renderer.render(ctx, source);
+    ctx.restore();
+    if (opaque && renderer.transparent) {
+      ctx.save();
+      ctx.globalCompositeOperation = 'destination-over'; // paint behind the frame
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(0, 0, width, height);
+      ctx.restore();
+    }
+  };
+}

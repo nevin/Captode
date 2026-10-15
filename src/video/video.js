@@ -3,7 +3,7 @@ import { GifEncoder } from '../lib/gif.js';
 import { buildPalette } from '../lib/quantize.js';
 import { getSettings } from '../lib/settings.js';
 import { WebpAnimEncoder } from '../lib/webp.js';
-import { mountDevicePanel, deviceRenderer } from '../lib/device.js';
+import { mountDevicePanel, deviceRenderer, frameDrawer } from '../lib/device.js';
 import { toast, enhance, fmtBytes } from '../lib/ui.js';
 
 const $ = (s) => document.querySelector(s);
@@ -271,25 +271,7 @@ function progress(f, text) {
 }
 
 // Formats without transparency get white behind a transparent device background.
-function drawer(p, opaque = false) {
-  return (ctx, v) => {
-    if (p.renderer) {
-      ctx.save();
-      ctx.scale(p.width / p.renderer.width, p.height / p.renderer.height);
-      p.renderer.render(ctx, v);
-      ctx.restore();
-      if (opaque && p.renderer.transparent) {
-        ctx.save();
-        ctx.globalCompositeOperation = 'destination-over'; // paint behind the frame
-        ctx.fillStyle = '#fff';
-        ctx.fillRect(0, 0, p.width, p.height);
-        ctx.restore();
-      }
-    } else {
-      ctx.drawImage(v, 0, 0, p.width, p.height);
-    }
-  };
-}
+const drawer = (p, opaque = false) => frameDrawer(p, p.renderer, opaque);
 
 function makeWorkVideo() {
   const v = document.createElement('video');
@@ -451,6 +433,51 @@ async function convertRealtime(p, { start, end }) {
   }
 }
 
+// ---------- export in a worker ----------
+
+let worker = null;
+let abortWorker = null;
+
+/**
+ * Exports in a worker with WebCodecs: faster than real time and off the page's
+ * thread. Rejects with `fallback: true` when this browser can't, so the slower
+ * paths above can take over.
+ */
+function convertInWorker(p, { start, end }) {
+  const live = $('#live');
+  live.width = p.width;
+  live.height = p.height;
+  const lctx = live.getContext('2d');
+  showPreview('live');
+  const d = device?.get();
+  const job = {
+    blob: source, format, width: p.width, height: p.height, fps: p.fps, start, end,
+    device: d?.enabled ? { ...d } : null,
+    video: { bitsPerPixel: Number($('#v-quality').value), audio: $('#v-audio').checked && !!meta.hasAudio },
+    gif: { colors: Number($('#g-colors').value), dither: $('#g-dither').checked },
+    webp: { quality: Number($('#w-quality').value) / 100, lossless: $('#w-lossless').checked },
+    optimize: $('#optimize').checked,
+    tolerance: $('#denoise').checked ? undefined : 0,
+    loop: $('#loop').checked ? 0 : 1,
+  };
+  return new Promise((resolve, reject) => {
+    worker = new Worker(new URL('./export-worker.js', import.meta.url), { type: 'module' });
+    abortWorker = () => reject(new Error('cancelled'));
+    worker.onmessage = ({ data }) => {
+      if (data.type === 'progress') progress(data.f, data.text);
+      else if (data.type === 'preview') { lctx.clearRect(0, 0, live.width, live.height); lctx.drawImage(data.bitmap, 0, 0); data.bitmap.close(); }
+      else if (data.type === 'done') resolve(data.blob);
+      else if (data.type === 'error') reject(Object.assign(new Error(data.message), { fallback: data.fallback }));
+    };
+    worker.onerror = (e) => reject(Object.assign(new Error(e.message || 'The export stopped'), { fallback: true }));
+    worker.postMessage({ type: 'start', job });
+  }).finally(() => {
+    worker?.terminate();
+    worker = null;
+    abortWorker = null;
+  });
+}
+
 async function convert() {
   if (busy || !source) return;
   busy = true;
@@ -466,7 +493,19 @@ async function convert() {
   try {
     const p = plan();
     const range = trim();
-    const blob = format === 'gif' || format === 'webp' ? await convertFrames(p, range) : await convertRealtime(p, range);
+    let blob;
+    try {
+      blob = await convertInWorker(p, range);
+    } catch (e) {
+      if (!e.fallback) throw e;
+      console.warn('Captode: falling back to in-page export:', e.message);
+      if (format === 'gif' || format === 'webp') {
+        blob = await convertFrames(p, range);
+      } else {
+        progress(0, 'This browser needs to export in real time. Keep this tab open and in front.');
+        blob = await convertRealtime(p, range);
+      }
+    }
     const base = (meta.title ? 'captode-' + meta.title : 'captode-recording').toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 50);
     const stamp = new Date().toISOString().slice(0, 19).replace(/[-:]/g, '').replace('T', '-');
     result = { blob, name: `${base}-${stamp}.${EXT[format]}` };
@@ -514,7 +553,10 @@ function save(blob, name) {
 }
 
 $('#convert').addEventListener('click', convert);
-$('#cancel').addEventListener('click', () => { cancelled = true; });
+$('#cancel').addEventListener('click', () => {
+  cancelled = true;
+  abortWorker?.();
+});
 $('#download').addEventListener('click', () => {
   if (!result) return;
   save(result.blob, result.name);

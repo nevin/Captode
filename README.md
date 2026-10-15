@@ -45,7 +45,9 @@ opens in the video page, where you can:
 - Trim on a timeline with thumbnails: drag the handles, or play to a point and press **I**
   (start) or **O** (end). **Space** plays only the trimmed part; the arrow keys step frame by
   frame.
-- Export as **MP4**, **GIF**, **WebP** (animated) or **WebM**.
+- Export as **MP4** (H.264, with AAC audio), **GIF**, **WebP** (animated) or **WebM** (VP9, with
+  Opus audio). Exports run in the background and much faster than real time: a 20-second
+  clip takes about 2 seconds. Trims are frame-accurate.
 - Choose the resolution (original, 2160p down to 240p) and the frame rate.
 - **Reduce file size losslessly** (GIF and WebP). Repeated frames are merged and only the
   pixels that change are stored; every frame looks exactly as it would without this.
@@ -101,11 +103,18 @@ Everything runs in the browser; nothing is uploaded.
   frames can leave unchanged pixels transparent to show the frame below.
 - **PDF** pages use lossless compression when that is smaller than JPEG, which is common
   for screenshots of text, or always when quality is set to 100%.
+- **MP4 and WebM** are made with WebCodecs: the recording is decoded, each frame is drawn
+  (in a device frame if chosen) and encoded again, then written to a new file. WebM keeps
+  the original Opus audio as it is; MP4 converts it to AAC. If the browser can't do this,
+  Captode falls back to playing the clip through in real time.
+- **Recordings** are made with settings for screen content (sharp text, enough bitrate that
+  still areas don't shimmer, and a key frame every 2 seconds), which also keeps exports small.
+- Encoding runs in background workers, so the editor and video page stay responsive.
 
 ## Install
 
 Captode works in Chromium browsers: Chrome 116 or later, Edge, Brave, Opera and Arc.
-MP4 export needs Chrome 126 or later.
+MP4 export uses the H.264 encoder built into Chrome. On the rare system without one, Captode falls back to real-time export, which needs Chrome 126 or later.
 
 ### From source
 

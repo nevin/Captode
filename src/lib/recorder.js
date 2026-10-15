@@ -58,18 +58,25 @@ export function record(stream, { fps = 30, crop = null, onEnded } = {}) {
   const source = stream.getVideoTracks()[0];
   const settings = source.getSettings();
   const video = crop ? cropTrack(source, crop) : source;
+  // Screen content: ask the encoder to keep text and edges sharp rather than motion
+  // smooth. Sharper, steadier recordings also export to much smaller GIFs.
+  if ('contentHint' in video) video.contentHint = 'detail';
   const tracks = [video, ...stream.getAudioTracks()];
   const recStream = new MediaStream(tracks);
 
   const w = crop ? settings.width * crop.w : settings.width || 1280;
   const h = crop ? settings.height * crop.h : settings.height || 720;
-  const bitrate = Math.min(25e6, Math.max(2.5e6, w * h * fps * 0.12));
+  // About 0.18 bits per pixel: enough that still areas don't shimmer between
+  // frames, which would otherwise count as motion when exporting.
+  const bitrate = Math.min(30e6, Math.max(4e6, w * h * fps * 0.18));
 
   const mimeType = MIME_TYPES.find((t) => MediaRecorder.isTypeSupported(t)) || '';
   const recorder = new MediaRecorder(recStream, {
     mimeType,
     videoBitsPerSecond: Math.round(bitrate),
     audioBitsPerSecond: 160000,
+    // A key frame every 2 s lets exports start decoding near the trim point.
+    videoKeyFrameIntervalDuration: 2000,
   });
   const chunks = [];
   recorder.ondataavailable = (e) => e.data.size && chunks.push(e.data);

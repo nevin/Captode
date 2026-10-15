@@ -1,5 +1,5 @@
 import { getCapture, listCaptures, deleteCapture } from '../lib/db.js';
-import { toPdf, toBmp, toPng, toPng8, toGif } from '../lib/formats.js';
+import { encodeOffThread } from '../lib/encoder.js';
 import { mountDevicePanel, renderInDevice } from '../lib/device.js';
 import { getSettings, backgroundColour } from '../lib/settings.js';
 import { toast, enhance, tablist, openDialog, fmtBytes, ago } from '../lib/ui.js';
@@ -1033,28 +1033,19 @@ async function finalCanvas({ scaled = true } = {}) {
   return c;
 }
 
-async function encode(c) {
-  const f = $('#x-format').value;
-  const q = Number($('#x-quality').value) / 100;
-  const colors = Number($('#x-colors').value);
-  const dither = $('#x-dither').checked;
-  switch (f) {
-    case 'png': return toPng(c);
-    case 'png8': return toPng8(c, { colors, dither });
-    case 'jpeg': {
-      const flat = canvas(c.width, c.height);
-      const fctx2 = flat.getContext('2d');
-      fctx2.fillStyle = '#fff';
-      fctx2.fillRect(0, 0, c.width, c.height);
-      fctx2.drawImage(c, 0, 0);
-      return flat.convertToBlob({ type: 'image/jpeg', quality: q });
-    }
-    case 'webp': return c.convertToBlob({ type: 'image/webp', quality: q });
-    case 'avif': return c.convertToBlob({ type: 'image/avif', quality: q });
-    case 'gif': return toGif(c, { colors, dither });
-    case 'bmp': return toBmp(c);
-    case 'pdf': return toPdf(c, { page: $('#x-page').value, split: $('#x-split').checked, quality: q });
-  }
+function encodeOptions() {
+  return {
+    quality: Number($('#x-quality').value) / 100,
+    colors: Number($('#x-colors').value),
+    dither: $('#x-dither').checked,
+    page: $('#x-page').value,
+    split: $('#x-split').checked,
+  };
+}
+
+/** Encodes in a worker; `lane` lets a newer estimate cancel an older one. */
+function encode(c, lane = 'export') {
+  return encodeOffThread(c, $('#x-format').value, encodeOptions(), lane);
 }
 
 let estimateRun = 0;
@@ -1064,10 +1055,11 @@ const refreshExport = debounce(async () => {
   $('#x-estimate').innerHTML = '<span>Working out the file size…</span>';
   try {
     const c = await finalCanvas();
-    const blob = await encode(c);
+    const blob = await encode(c, 'estimate');
     if (run !== estimateRun) return;
     $('#x-estimate').innerHTML = `<span>${c.width} × ${c.height} px</span><b>${fmtBytes(blob.size)}</b>`;
   } catch (e) {
+    if (e.superseded) return;
     if (run === estimateRun) $('#x-estimate').textContent = 'Could not encode: ' + e.message;
   }
   updateDevicePreview();

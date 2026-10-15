@@ -205,3 +205,23 @@ export function toGif(src, { colors = 256, dither = true } = {}) {
   g.addFrame(px, 0);
   return g.finish();
 }
+
+// ---------- any format ----------
+
+/**
+ * Encodes `src` (an OffscreenCanvas) as `format`: png, png8, jpeg, webp, avif, gif,
+ * bmp or pdf. `o`: `{ quality (0–1), colors, dither, page, split }`.
+ */
+export async function encodeImage(src, format, { quality = 0.85, colors = 256, dither = true, page = 'fit', split = true } = {}) {
+  switch (format) {
+    case 'png': return toPng(src);
+    case 'png8': return toPng8(src, { colors, dither });
+    case 'jpeg': return flatten(src).convertToBlob({ type: 'image/jpeg', quality });
+    case 'webp': return src.convertToBlob({ type: 'image/webp', quality });
+    case 'avif': return src.convertToBlob({ type: 'image/avif', quality });
+    case 'gif': return toGif(src, { colors, dither });
+    case 'bmp': return toBmp(src);
+    case 'pdf': return toPdf(src, { page, split, quality });
+    default: throw new Error(`Unknown format: ${format}`);
+  }
+}
