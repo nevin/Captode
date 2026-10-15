@@ -136,7 +136,7 @@ await ed.waitForFunction(() => !document.querySelector('#export-preview').classL
 await sleep(800);
 await ed.waitForFunction(() => /KB|MB/.test(document.querySelector('#x-estimate').textContent), { timeout: 30000 });
 await compose('3-export.jpg', 'Export it your way',
-  'PNG, JPEG, WebP, GIF or PDF, with a size limit, in a phone or tablet frame',
+  'Set a file size limit, or show it in a phone or tablet frame',
   `<img class="full" src="${await png(ed, { x: 0, y: 0, ...UI })}">`);
 await ed.click('#device-panel input[data-k="enabled"]'); // leave the setting off again
 
@@ -185,7 +185,7 @@ await vp.click('#convert');
 await vp.waitForFunction(() => !document.querySelector('#result').classList.contains('hidden'), { timeout: 120000 });
 await sleep(500);
 await compose('4-record.jpg', 'Record, trim and share',
-  'Record a tab, a selected area or your whole screen, then export MP4, GIF or WebP in seconds',
+  'Record a tab, a selected area or your whole screen, then trim and export it in seconds',
   `<img class="full" src="${await png(vp, { x: 0, y: 0, ...UI })}">`);
 
 // ---------- 5. Settings, dark ----------
@@ -229,7 +229,7 @@ await tile('promo-marquee.jpg', 1400, 560, `
         <img src="${logo}" style="width:120px;height:120px;filter:drop-shadow(0 8px 24px rgba(0,0,0,.35))">
         <div style="font-size:60px;font-weight:800;letter-spacing:-0.02em">Captode</div>
       </div>
-      <div style="font-size:26px;margin:26px 0 22px;line-height:1.3;opacity:.95">Capture, annotate and record any page. Export to PNG, PDF, GIF or MP4.</div>
+      <div style="font-size:26px;margin:26px 0 22px;line-height:1.3;opacity:.95">Capture, annotate and record any page, then save it as an image, PDF or video.</div>
       <div style="font-size:18px;opacity:.75">Private by design · No account · No watermark</div>
     </div>
     <img src="${await png(ed, { x: 0, y: 0, ...UI })}" style="width:760px;border-radius:14px;box-shadow:0 30px 80px rgba(0,0,0,.45)">

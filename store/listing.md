@@ -3,13 +3,13 @@
 Everything to fill in the Chrome Web Store Developer Dashboard, field by field, plus the
 assets to upload. (Microsoft Edge Add-ons asks for the same things; notes at the end.)
 
-Build the package with `npm run package` and upload `dist/captode-1.0.0.zip`.
+Build the package with `npm run package` and upload `dist/captode-1.0.1.zip`.
 
 ---
 
 ## Package (uploaded zip)
 
-- Manifest V3, version 1.0.0, minimum Chrome 116.
+- Manifest V3, version 1.0.1, minimum Chrome 116.
 - Permissions: `activeTab`, `scripting`, `tabCapture`, `offscreen`, `storage`,
   `unlimitedStorage`. **No host permissions** and no content scripts: Captode only touches
   a page after the user invokes it, which avoids the extra review that broad host access
@@ -25,60 +25,57 @@ Build the package with `npm run package` and upload `dist/captode-1.0.0.zip`.
 **Item name** (in the manifest, 38 of 75 characters)
 Captode — Screenshot & Screen Recorder
 
-**Summary** (in the manifest, 129 of 132 characters)
-Capture full-page, visible or selected-area screenshots and recordings. Annotate, then export as PNG, JPG, PDF, GIF, MP4 or WebP.
+**Summary** (in the manifest, 130 of 132 characters)
+Take full-page, visible or selected-area screenshots and screen recordings, mark them up, and save them as images, PDFs or videos.
 
 **Description**
 
+Written as plain sentences, without lists of formats, platforms or features: the store
+treats runs of such terms as keyword spam (the first submission was rejected for a list
+of image formats). Keep it this way when editing.
+
 ```
-Captode captures exactly what you need from any web page, lets you mark it up, and
-exports it in the format you want. Everything happens in your browser: no account, no
-uploads, no watermark.
+Captode takes screenshots and screen recordings of web pages, lets you mark them up,
+and saves them to your computer. Everything happens in your browser: no account, no
+uploads and no watermark.
 
-SCREENSHOTS
-• Full page: the whole scrolling page in one image, with fixed headers shown once
-• Visible area: just what's on screen
-• Selected area: drag out a region, with a mouse, finger or pen
+Screenshots
+Capture a whole scrolling page in one image, just what's on screen, or an area you drag
+out with a mouse, finger or pen. Long pages are stitched cleanly, with sticky headers
+shown once.
 
-ANNOTATE
-• Arrows, lines, rectangles and ellipses
-• Text in any font, size and colour, with an optional background
-• Pen and highlighter
-• Blur, pixelate or black out anything private
-• Crop freely or to 1:1, 16:9, 4:3 and more; resize; add padding, a backdrop, rounded corners and a shadow
-• Undo and redo, and keyboard shortcuts for every tool (press ? to see them)
+Mark up
+Add arrows, shapes, text and highlights, and blur or black out anything private before
+you share. Crop, resize, or add padding, a background and a shadow. Every tool has a
+keyboard shortcut, and changes can be undone.
 
-EXPORT
-• PNG, compressed PNG, JPEG, WebP, GIF, BMP and PDF (one page, or A4 / Letter pages for long captures)
-• Set a size limit, from 100 KB to 25 MB, and Captode finds the best quality that fits
-• Smart compression: lossless PNGs up to half the size, and smaller JPEGs at the same quality
-• See the file size before you download, or copy the image to the clipboard
+Save
+Save as an image or a PDF, or copy straight to the clipboard. You can see the file size
+before you save, and set a size limit for email or chat apps: Captode keeps the best
+quality that fits.
 
-RECORD
-• Your whole screen or a window, the current tab, or a selected area of the tab
-• 15 to 60 fps, with optional audio and a 3-second countdown
-• Stop with one click on the toolbar icon, or with the keyboard shortcut
+Record
+Record the current tab, an area of it, or your whole screen or a window, with sound if
+you like. A countdown gives you time to get ready, and one click on the toolbar button
+stops the recording.
 
-EDIT AND EXPORT VIDEO
-• Trim on a timeline with thumbnails, frame by frame if you need to
-• Export to MP4, GIF, animated WebP or WebM, in seconds rather than in real time
-• Choose the resolution and frame rate
-• Make GIFs and WebPs smaller without visible loss, with optional lossy compression for even smaller GIFs
+Edit recordings
+Trim the start and end on a timeline, then save the result as a video or an animated
+GIF. Exports take seconds rather than the length of the recording.
 
-DEVICE FRAMES
-• Show any screenshot or recording inside a phone or tablet, on a transparent, white or custom background
+Device frames
+Present any screenshot or recording inside a phone or tablet frame.
 
-MADE FOR EVERYONE
-• Light, dark or system theme
-• Works on Windows, macOS, Linux and ChromeOS, including touchscreens and high-contrast mode
-• Keyboard accessible, with screen-reader labels
+For everyone
+Captode follows your light or dark theme, works with touchscreens, keyboards, screen
+readers and high-contrast mode, and runs wherever Chrome does, including Chromebooks.
 
-PRIVATE BY DESIGN
-Captode has no servers and makes no network requests. Your captures stay on your device
-until you download them, and are cleared automatically after 24 hours. No account, no
-analytics, no tracking.
+Private by design
+Captode has no servers and makes no network requests. Your captures stay on your
+device until you save them, and are cleared automatically after 24 hours. There is no
+account, analytics or tracking.
 
-Open source: https://github.com/nevin/Captode
+Captode is open source: https://github.com/nevin/Captode
 ```
 
 **Category:** Productivity › Tools
@@ -177,6 +174,7 @@ extensions); the popup says so on those pages.
 
 - [x] Every requested permission is used; the unused `desktopCapture` was removed
 - [x] No host permissions, no content scripts, no remote code, no `eval`
+- [x] No lists of formats, platforms or keywords in the summary, description or images
 - [x] Name, summary and description match what the extension does; no keyword lists, no
       claims about other products, no Google or Chrome logos in the assets
 - [x] Privacy policy is public, accurate and matches the data-use answers
@@ -186,7 +184,7 @@ extensions); the popup says so on those pages.
 - [x] Tests pass on Windows, macOS and Linux (`npm test`, GitHub Actions)
 - [ ] Go through the manual checklist in `docs/TESTING.md` (recording can't be automated)
 - [ ] Developer account: one-time registration fee paid, contact email verified
-- [ ] Upload `dist/captode-1.0.0.zip` and fill in the fields above
+- [ ] Upload `dist/captode-1.0.1.zip` and fill in the fields above
 
 ---
 
