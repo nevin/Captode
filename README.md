@@ -188,7 +188,7 @@ test/
   *.test.mjs             browser tests (capture, encoders, video export, interface)
   bench.mjs              compression benchmark with stored baselines
 tools/
-  brand.mjs              makes every icon from store/logo-source.png
+  brand.mjs              makes every icon from the vector logo in store/brand/
   store-assets.mjs       makes the store screenshots and promo tiles from the real UI
   package.mjs            builds the store zip
 ```
@@ -197,7 +197,7 @@ tools/
 npm install       # test tools only: Puppeteer and its Chrome for Testing
 npm test          # run the browser tests (npm test -- video runs only matching ones)
 npm run bench     # compression benchmark; fails on a size or quality regression
-npm run icons     # icons from store/logo-source.png (background removed, every size)
+npm run icons     # every icon size from store/brand/logo.svg and logo-small.svg
 npm run store     # store screenshots and promo tiles in store/
 npm run package   # build dist/captode-<version>.zip for the stores
 ```
@@ -208,6 +208,12 @@ pixel-identical, JPEG is at least as faithful as Chrome's own at the same qualit
 larger, size limits are met, trims land on the right frame, and audio lasts as long as
 the video. Set `CHROME_PATH` to use another Chrome. GitHub Actions runs the tests and the
 benchmark on every push.
+
+The logo is vector artwork in `store/brand/`: `logo.svg` (the full mark),
+`logo-small.svg` (the window alone, for 16 and 32 px, where the brackets would be lost)
+and `logo-reverse.svg` (white brackets, for the brand's violet backgrounds). The window
+has a thin light outline so it stays visible on dark toolbars. Edit these, then run
+`npm run icons` and `npm run store`.
 
 `npm run bench` compares sizes, PSNR and SSIM with `test/bench-baseline.json`, kept per
 operating system. After an intended change, save new numbers with

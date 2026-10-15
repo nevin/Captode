@@ -12,8 +12,13 @@ import { launch, open, serveSite, waitForTab, sleep } from '../test/helpers.mjs'
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const store = join(root, 'store');
 mkdirSync(join(store, 'screenshots'), { recursive: true });
+// The tiles and captions sit on the brand's violet, so they use the logo with white
+// brackets (store/brand/logo-reverse.svg) when there is one.
+const reverse = join(store, 'brand', 'logo-reverse.svg');
 const logoPath = existsSync(join(store, 'logo.png')) ? join(store, 'logo.png') : join(root, 'src/icons/icon128.png');
-const logo = 'data:image/png;base64,' + readFileSync(logoPath).toString('base64');
+const logo = existsSync(reverse)
+  ? 'data:image/svg+xml;base64,' + readFileSync(reverse).toString('base64')
+  : 'data:image/png;base64,' + readFileSync(logoPath).toString('base64');
 
 const site = await serveSite();
 // A window whose page area is exactly the UI part of a screenshot (1280 × 690), so
