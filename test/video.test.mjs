@@ -139,11 +139,14 @@ export const tests = {
       const v = document.createElement('video');
       v.src = URL.createObjectURL(blob);
       await new Promise((res, rej) => { v.onloadedmetadata = res; v.onerror = () => rej(new Error('video element could not load it')); });
-      return { hasOpus: text.includes('dOps'), hasEdit: text.includes('elst'), audioSeconds: audio.duration, videoSeconds: v.duration };
+      const recorded = (frames.at(-1).timestamp + frames.at(-1).duration - frames[0].timestamp) / 1e6;
+      return { hasOpus: text.includes('dOps'), hasEdit: text.includes('elst'), audioSeconds: audio.duration, recorded, delay: frames[0].timestamp / 1e6, videoSeconds: v.duration };
     }, clip);
     ok(r.hasOpus && r.hasEdit, `missing boxes: ${JSON.stringify(r)}`);
-    near(r.audioSeconds, 3, 0.15, 'Opus audio length');
-    near(r.videoSeconds, 3.1, 0.15, 'movie length');
+    // As much audio as was recorded (it can start a little late), and the movie
+    // spans the delayed audio.
+    near(r.audioSeconds, r.recorded, 0.1, 'Opus audio length');
+    ok(r.videoSeconds >= Math.max(3, r.delay + r.recorded) - 0.1, `movie length ${r.videoSeconds}`);
   },
 
   async 'GIF and WebP export, with and without a device frame'({ video, exportAs, set }) {

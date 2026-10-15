@@ -26,6 +26,12 @@ jobs:
         run: npm test
       # Fonts and rendering differ between machines, so CI reports the numbers
       # rather than comparing them with baselines recorded elsewhere.
+      - if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-output-${{ matrix.os }}
+          path: test/output/
+          if-no-files-found: ignore
       - name: Compression benchmark
         run: npm run bench -- --report
       - name: Package

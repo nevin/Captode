@@ -1,6 +1,11 @@
 // Screenshots of a page: full page, visible area and a dragged selection, opened in
 // the editor, then exported in every format.
 import { open, waitForTab, ok, near, sleep, launch } from './helpers.mjs';
+import { mkdirSync, writeFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const outDir = join(dirname(fileURLToPath(import.meta.url)), 'output');
 
 export async function setup({ browser, url, site }) {
   // No emulated viewport: in real use the page fills the window, which is what tab
@@ -31,17 +36,22 @@ export async function setup({ browser, url, site }) {
 
 export const tests = {
   async 'full page is stitched and the scroll position restored'({ page, capture }) {
+    // Expected size from the page itself: window frames and scrollbars differ by OS.
+    const want = await page.evaluate(() => ({ w: Math.round(document.documentElement.clientWidth * devicePixelRatio), h: Math.round(document.documentElement.scrollHeight * devicePixelRatio), sb: window.innerWidth - document.documentElement.clientWidth }));
     const { ed, size } = await capture('full');
-    ok(size[0] === 1280, `width ${size[0]}`);
-    near(size[1], 3000, 2, 'height of the whole page');
+    // The capture hides the scrollbar, so the page gains its width.
+    near(size[0], want.w + want.sb, 2, 'width of the page');
+    near(size[1], want.h, 2, 'height of the whole page');
     near(await page.evaluate(() => window.scrollY), 700, 1, 'scroll position afterwards');
     await ed.close();
     await page.bringToFront();
   },
 
   async 'visible area matches the viewport'({ page, capture }) {
+    const want = await page.evaluate(() => [Math.round(innerWidth * devicePixelRatio), Math.round(innerHeight * devicePixelRatio)]);
     const { ed, size } = await capture('visible');
-    ok(size[0] === 1280 && size[1] > 700, `size ${size}`);
+    near(size[0], want[0], 2, 'width');
+    near(size[1], want[1], 2, 'height');
     await ed.close();
     await page.bringToFront();
   },
@@ -116,8 +126,22 @@ export const tests = {
         let blankEdge = 0;
         for (let x = 0; x < bg.width; x++) if (ours[((bg.height - 1) * bg.width + x) * 4 + 3] < 255) blankEdge++;
         for (let y = 0; y < bg.height; y++) if (ours[(y * bg.width + bg.width - 1) * 4 + 3] < 255) blankEdge++;
-        return { ours: [bg.width, bg.height], ref: [img.width, img.height], badRows, worst: +worst.toFixed(1), blankEdge };
+        let png = null;
+        if (badRows || blankEdge) { // keep the evidence
+          const c = new OffscreenCanvas(bg.width, bg.height);
+          c.getContext('2d').drawImage(bg, 0, 0);
+          const a = new Uint8Array(await (await c.convertToBlob({ type: 'image/png' })).arrayBuffer());
+          let str = '';
+          for (let i = 0; i < a.length; i += 0x8000) str += String.fromCharCode(...a.subarray(i, i + 0x8000));
+          png = btoa(str);
+        }
+        return { ours: [bg.width, bg.height], ref: [img.width, img.height], badRows, worst: +worst.toFixed(1), blankEdge, png };
       }, reference);
+      if (r.png) {
+        mkdirSync(outDir, { recursive: true });
+        writeFileSync(join(outDir, `scale-${scale * 100}-captode.png`), Buffer.from(r.png, 'base64'));
+        writeFileSync(join(outDir, `scale-${scale * 100}-chrome.png`), Buffer.from(reference, 'base64'));
+      }
       // Chrome rounds the page height its own way; a few rows either way is fine as
       // long as every row is painted and matches.
       ok(Math.abs(r.ours[0] - r.ref[0]) <= 1 && Math.abs(r.ours[1] - r.ref[1]) <= 4, `${scale * 100}%: size ${r.ours} vs Chrome's ${r.ref}`);
