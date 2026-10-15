@@ -122,7 +122,7 @@ async function captureFullPage(tab, meta) {
     if (height < info.height) meta.truncated = true;
 
     const canvas = new OffscreenCanvas(Math.round(info.width * scale), Math.round(height * scale));
-    const ctx = canvas.getContext('2d', { willReadFrequently: true }); // alignTile reads it back
+    const ctx = canvas.getContext('2d');
     ctx.drawImage(first, 0, 0);
     // How far the tiles reach: the page's reported size, scaled and rounded, can be
     // a pixel or two more than was actually painted.
@@ -138,7 +138,7 @@ async function captureFullPage(tab, meta) {
     // reported viewport is rounded up, and stepping by it would leave a blank row
     // between tiles; a pixel of overlap is harmless. Each tile is then placed at the
     // scroll position the page actually reached.
-    const OVERLAP = 8; // CSS pixels shared by neighbouring tiles, for lining them up
+    const OVERLAP = 24; // CSS pixels shared by neighbouring tiles, for lining them up
     const viewW = Math.max(1, Math.floor(first.width / scale) - 1);
     const viewH = Math.max(1, Math.floor(first.height / scale) - OVERLAP);
     const xs = steps(info.width, viewW);
