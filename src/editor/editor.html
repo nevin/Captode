@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TabReel — Image editor</title>
+<link rel="icon" href="../icons/icon32.png">
+<link rel="stylesheet" href="../lib/ui.css">
+<link rel="stylesheet" href="editor.css">
+</head>
+<body>
+<header class="bar">
+  <div class="brand"><img src="../icons/icon48.png" alt="">TabReel</div>
+  <div class="tools" id="tools"></div>
+  <div class="group">
+    <button class="btn icon" id="undo" title="Undo (⌘Z)"><svg viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/></svg></button>
+    <button class="btn icon" id="redo" title="Redo (⇧⌘Z)"><svg viewBox="0 0 24 24"><path d="m15 14 5-5-5-5"/><path d="M20 9H9a5 5 0 0 0 0 10h3"/></svg></button>
+    <button class="btn icon" id="delete" title="Delete selected (Del)"><svg viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg></button>
+  </div>
+  <div class="group zoom">
+    <button class="btn icon" id="zoom-out" title="Zoom out">−</button>
+    <button class="btn" id="zoom-label" title="Fit to window">100%</button>
+    <button class="btn icon" id="zoom-in" title="Zoom in">+</button>
+  </div>
+  <div class="spacer"></div>
+  <label class="btn" title="Open an image from your computer">Open<input type="file" id="open" accept="image/*" hidden></label>
+  <button class="btn" id="copy">Copy</button>
+  <button class="btn primary" id="download">Download</button>
+</header>
+
+<div class="layout">
+  <main id="stage" class="stage">
+    <div id="empty" class="empty hidden">
+      <h2>No image yet</h2>
+      <p>Capture one from the TabReel button, paste one (⌘V), drop a file here, or</p>
+      <label class="btn primary">Open an image<input type="file" id="open2" accept="image/*" hidden></label>
+    </div>
+    <div id="wrap" class="wrap">
+      <canvas id="bg"></canvas>
+      <canvas id="fg"></canvas>
+      <textarea id="text-edit" class="text-edit hidden" spellcheck="false"></textarea>
+    </div>
+  </main>
+
+  <aside class="side">
+    <section class="section" id="style-panel">
+      <h3 id="style-title">Style</h3>
+      <p class="muted" id="style-hint">Pick a tool above, or click an annotation to change it.</p>
+
+      <div data-group="stroke">
+        <div class="field"><span>Colour</span>
+          <div class="row"><input type="color" id="s-color"><div class="swatches" data-for="s-color"></div></div>
+        </div>
+        <label class="field"><span>Thickness <b id="s-width-v"></b></span><input type="range" id="s-width" min="1" max="40"></label>
+        <label class="field"><span>Opacity <b id="s-opacity-v"></b></span><input type="range" id="s-opacity" min="10" max="100"></label>
+      </div>
+
+      <div data-group="fill">
+        <div class="field"><span>Fill</span>
+          <div class="row">
+            <label class="check" style="margin:0"><input type="checkbox" id="s-fill-on"> Fill</label>
+            <input type="color" id="s-fill">
+          </div>
+        </div>
+      </div>
+
+      <div data-group="text">
+        <label class="field"><span>Font</span>
+          <div class="row"><select id="t-font"></select><button class="btn icon" id="t-fonts" title="Add the fonts installed on this computer">＋</button></div>
+        </label>
+        <div class="field"><span>Size</span>
+          <div class="row">
+            <button class="btn icon" id="t-smaller" title="Smaller">A−</button>
+            <input type="number" id="t-size" min="6" max="400">
+            <button class="btn icon" id="t-bigger" title="Bigger">A+</button>
+            <button class="btn icon" id="t-bold" title="Bold"><b>B</b></button>
+            <button class="btn icon" id="t-italic" title="Italic"><i>I</i></button>
+          </div>
+        </div>
+        <div class="field"><span>Text colour</span>
+          <div class="row"><input type="color" id="t-color"><div class="swatches" data-for="t-color"></div></div>
+        </div>
+        <div class="field"><span>Background</span>
+          <div class="row">
+            <label class="check" style="margin:0"><input type="checkbox" id="t-bg-on"> Background</label>
+            <input type="color" id="t-bg">
+          </div>
+        </div>
+        <p class="muted small">Click to place text. Double-click text to edit it.</p>
+      </div>
+
+      <div data-group="redact">
+        <label class="field"><span>Effect</span>
+          <select id="r-mode"><option value="pixelate">Pixelate</option><option value="blur">Blur</option><option value="solid">Solid box</option></select>
+        </label>
+        <label class="field"><span>Strength</span><input type="range" id="r-strength" min="4" max="40"></label>
+      </div>
+
+      <div data-group="crop">
+        <label class="field"><span>Aspect ratio</span>
+          <select id="c-ratio">
+            <option value="0">Free</option><option value="1">1:1</option><option value="1.7778">16:9</option>
+            <option value="1.3333">4:3</option><option value="0.5625">9:16</option><option value="0.75">3:4</option>
+          </select>
+        </label>
+        <p class="muted small" id="c-size">Drag on the image to choose the area to keep.</p>
+        <div class="row"><button class="btn" id="c-cancel">Cancel</button><button class="btn primary" id="c-apply" disabled>Apply crop</button></div>
+      </div>
+    </section>
+
+    <section class="section">
+      <h3>Image</h3>
+      <div class="field"><span>Resize (pixels)</span>
+        <div class="row">
+          <input type="number" id="rs-w" min="1" title="Width">
+          <span class="flex0">×</span>
+          <input type="number" id="rs-h" min="1" title="Height">
+          <button class="btn" id="rs-apply">Apply</button>
+        </div>
+        <label class="check"><input type="checkbox" id="rs-lock" checked> Keep proportions</label>
+      </div>
+      <div class="field"><span>Frame padding <b id="f-pad-v"></b></span><input type="range" id="f-pad" min="0" max="200" value="0"></div>
+      <div class="row frame-row">
+        <label class="field"><span>Backdrop</span><input type="color" id="f-bg" value="#ececf4"></label>
+        <label class="field"><span>Corners</span><input type="range" id="f-radius" min="0" max="60" value="0"></label>
+        <label class="check"><input type="checkbox" id="f-shadow"> Shadow</label>
+      </div>
+    </section>
+
+    <section class="section">
+      <h3>Device mode</h3>
+      <div id="device-panel"></div>
+      <canvas id="device-preview" class="device-preview hidden"></canvas>
+    </section>
+
+    <section class="section">
+      <h3>Export</h3>
+      <div class="row">
+        <label class="field"><span>Format</span>
+          <select id="x-format">
+            <option value="png">PNG</option>
+            <option value="png8">PNG — compressed (8-bit)</option>
+            <option value="jpeg">JPEG</option>
+            <option value="webp">WebP</option>
+            <option value="avif" hidden>AVIF</option>
+            <option value="gif">GIF</option>
+            <option value="bmp">BMP</option>
+            <option value="pdf">PDF</option>
+          </select>
+        </label>
+        <label class="field"><span>Size</span>
+          <select id="x-scale">
+            <option value="1">100%</option><option value="0.75">75%</option><option value="0.5">50%</option>
+            <option value="0.25">25%</option><option value="2">200%</option>
+          </select>
+        </label>
+      </div>
+      <label class="field" data-x="quality"><span>Quality <b id="x-quality-v"></b></span><input type="range" id="x-quality" min="10" max="100" value="85"></label>
+      <div class="row" data-x="colors">
+        <label class="field"><span>Colours</span>
+          <select id="x-colors"><option>256</option><option>128</option><option>64</option><option>32</option><option>16</option></select>
+        </label>
+        <label class="check"><input type="checkbox" id="x-dither" checked> Dither</label>
+      </div>
+      <div data-x="pdf">
+        <div class="row">
+          <label class="field"><span>Page</span>
+            <select id="x-page"><option value="fit">Fit to image</option><option value="a4">A4</option><option value="letter">Letter</option></select>
+          </label>
+          <label class="check"><input type="checkbox" id="x-split" checked> Split long images</label>
+        </div>
+      </div>
+      <label class="field"><span>File name</span><input type="text" id="x-name"></label>
+      <div class="estimate" id="x-estimate">—</div>
+    </section>
+  </aside>
+</div>
+<script type="module" src="editor.js"></script>
+</body>
+</html>

@@ -1,0 +1,41 @@
+{
+  "manifest_version": 3,
+  "name": "TabReel — Screenshot & Screen Recorder",
+  "short_name": "TabReel",
+  "version": "1.0.0",
+  "description": "Capture full-page, visible or selected-area screenshots and recordings. Annotate, then export as PNG, JPG, PDF, GIF, MP4 or WebP.",
+  "minimum_chrome_version": "116",
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "action": {
+    "default_title": "TabReel",
+    "default_popup": "popup/popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png"
+    }
+  },
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "tabCapture",
+    "desktopCapture",
+    "offscreen",
+    "storage",
+    "unlimitedStorage"
+  ],
+  "commands": {
+    "_execute_action": {
+      "suggested_key": { "default": "Alt+Shift+R" },
+      "description": "Open TabReel, or stop the current recording"
+    }
+  }
+}

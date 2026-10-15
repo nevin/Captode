@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>TabReel</title>
+<link rel="stylesheet" href="../lib/ui.css">
+<link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <header>
+    <div class="brand"><img src="../icons/icon48.png" alt="">TabReel</div>
+    <div class="seg" role="tablist">
+      <button role="tab" data-kind="image" class="on">Screenshot</button>
+      <button role="tab" data-kind="video">Video</button>
+    </div>
+  </header>
+
+  <div id="error" class="error hidden"></div>
+
+  <main>
+    <div class="modes" id="modes-image">
+      <button class="mode" data-mode="full">
+        <svg viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M8 6h8M8 10h8M8 14h8M8 18h5"/></svg>
+        <b>Full page</b><small>The whole page, top to bottom</small>
+      </button>
+      <button class="mode" data-mode="visible">
+        <svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 8h20"/></svg>
+        <b>Visible area</b><small>What you can see right now</small>
+      </button>
+      <button class="mode" data-mode="area">
+        <svg viewBox="0 0 24 24"><path d="M4 8V4h4M16 4h4v4M20 16v4h-4M8 20H4v-4"/><rect x="8" y="8" width="8" height="8" rx="1"/></svg>
+        <b>Selected area</b><small>Drag to choose a region</small>
+      </button>
+    </div>
+
+    <div class="modes hidden" id="modes-video">
+      <button class="mode" data-mode="screen">
+        <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+        <b>Full screen</b><small>Your whole screen or a window</small>
+      </button>
+      <button class="mode" data-mode="visible">
+        <svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><circle cx="12" cy="12" r="3"/></svg>
+        <b>Visible area</b><small>This tab, as you see it</small>
+      </button>
+      <button class="mode" data-mode="area">
+        <svg viewBox="0 0 24 24"><path d="M4 8V4h4M16 4h4v4M20 16v4h-4M8 20H4v-4"/><circle cx="12" cy="12" r="3"/></svg>
+        <b>Selected area</b><small>Record only part of this tab</small>
+      </button>
+
+      <div class="opts">
+        <label class="field"><span>Frame rate</span>
+          <select id="fps">
+            <option value="15">15 fps</option>
+            <option value="24">24 fps</option>
+            <option value="30" selected>30 fps</option>
+            <option value="60">60 fps</option>
+          </select>
+        </label>
+        <label class="check"><input type="checkbox" id="audio"> Record audio</label>
+        <label class="check"><input type="checkbox" id="countdown" checked> 3-second countdown</label>
+        <p class="muted hint">Click the TabReel icon again (or press Alt+Shift+R) to stop.</p>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <label class="check" title="Export screenshots and videos inside a phone frame">
+      <input type="checkbox" id="device"> Device mode
+    </label>
+    <span class="muted" id="ver"></span>
+  </footer>
+  <script type="module" src="popup.js"></script>
+</body>
+</html>

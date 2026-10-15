@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TabReel — Screen recorder</title>
+<link rel="icon" href="../icons/icon32.png">
+<link rel="stylesheet" href="../lib/ui.css">
+<style>
+  body { min-height: 100vh; display: grid; place-items: center; padding: 16px; }
+  .card { width: min(440px, 100%); padding: 28px; text-align: center; box-shadow: var(--shadow); }
+  .card h1 { font-size: 20px; margin: 14px 0 6px; }
+  .card p { margin: 0 0 20px; color: var(--muted); }
+  .dot { width: 12px; height: 12px; border-radius: 50%; background: var(--accent); display: inline-block; animation: pulse 1.2s infinite; }
+  @keyframes pulse { 50% { opacity: .3; } }
+  .time { font: 600 34px ui-monospace, monospace; margin: 8px 0 18px; }
+</style>
+</head>
+<body>
+  <div class="card panel">
+    <div class="brand" style="justify-content:center"><img src="../icons/icon48.png" alt="">TabReel</div>
+    <div id="pick">
+      <h1>Record your screen</h1>
+      <p>Choose the whole screen, a window or a tab. Click the TabReel icon, or press Stop here, to finish.</p>
+      <button class="btn primary" id="choose">Choose what to record</button>
+      <p id="err" class="hidden" style="color:var(--accent);margin:14px 0 0"></p>
+    </div>
+    <div id="live" class="hidden">
+      <h1><span class="dot"></span> Recording</h1>
+      <div class="time" id="time">0:00</div>
+      <button class="btn primary" id="stop">Stop recording</button>
+    </div>
+    <div id="saving" class="hidden"><h1>Saving…</h1></div>
+  </div>
+  <script type="module" src="screen.js"></script>
+</body>
+</html>

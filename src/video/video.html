@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TabReel — Recording</title>
+<link rel="icon" href="../icons/icon32.png">
+<link rel="stylesheet" href="../lib/ui.css">
+<link rel="stylesheet" href="video.css">
+</head>
+<body>
+<header class="bar">
+  <div class="brand"><img src="../icons/icon48.png" alt="">TabReel</div>
+  <div class="muted" id="info"></div>
+  <div class="spacer"></div>
+  <button class="btn" id="dl-original">Download original (WebM)</button>
+</header>
+
+<div class="layout">
+  <main class="stage">
+    <div class="preview">
+      <video id="player" controls playsinline></video>
+      <canvas id="live" class="hidden"></canvas>
+      <img id="out-img" class="hidden" alt="Exported animation">
+      <video id="out-video" class="hidden" controls playsinline></video>
+    </div>
+    <div id="empty" class="empty hidden"><h2>Recording not found</h2><p class="muted">It may be more than a day old. Start a new one from the TabReel button.</p></div>
+  </main>
+
+  <aside class="side">
+    <section class="section">
+      <h3>Trim</h3>
+      <div class="row">
+        <label class="field"><span>Start (s)</span><input type="number" id="t-start" min="0" step="0.1" value="0"></label>
+        <button class="btn icon set" id="t-start-set" title="Use the current position">⇤</button>
+        <label class="field"><span>End (s)</span><input type="number" id="t-end" min="0" step="0.1"></label>
+        <button class="btn icon set" id="t-end-set" title="Use the current position">⇥</button>
+      </div>
+    </section>
+
+    <section class="section">
+      <h3>Export</h3>
+      <div class="formats" id="formats">
+        <button data-f="mp4" class="on">MP4</button>
+        <button data-f="gif">GIF</button>
+        <button data-f="webp">WebP</button>
+        <button data-f="webm">WebM</button>
+      </div>
+      <div class="row">
+        <label class="field"><span>Resolution</span><select id="res"></select></label>
+        <label class="field"><span>Frame rate</span><select id="fps"></select></label>
+      </div>
+
+      <div data-for="mp4 webm">
+        <label class="field"><span>Quality</span>
+          <select id="v-quality">
+            <option value="0.16">High — visually lossless</option>
+            <option value="0.08" selected>Balanced</option>
+            <option value="0.04">Small file</option>
+            <option value="0.02">Smallest file</option>
+          </select>
+        </label>
+        <label class="check"><input type="checkbox" id="v-audio" checked> Include audio</label>
+      </div>
+
+      <div data-for="gif">
+        <div class="row">
+          <label class="field"><span>Colours</span>
+            <select id="g-colors"><option>256</option><option>128</option><option>64</option><option>32</option></select>
+          </label>
+          <label class="check"><input type="checkbox" id="g-dither"> Dither</label>
+        </div>
+      </div>
+
+      <div data-for="webp">
+        <label class="check"><input type="checkbox" id="w-lossless"> Lossless frames</label>
+        <label class="field" id="w-quality-f"><span>Quality <b id="w-quality-v"></b></span><input type="range" id="w-quality" min="10" max="100" value="80"></label>
+      </div>
+
+      <div data-for="gif webp">
+        <label class="check"><input type="checkbox" id="optimize" checked> Reduce file size losslessly</label>
+        <p class="muted small">Repeated frames are merged and only the pixels that change are stored. The animation looks exactly the same.</p>
+        <label class="check"><input type="checkbox" id="loop" checked> Loop forever</label>
+      </div>
+      <p class="muted small" data-for="mp4 webm">MP4 and WebM are converted in real time, so a 30-second clip takes about 30 seconds. Keep this tab in front while it runs.</p>
+
+      <div class="estimate" id="dims">—</div>
+    </section>
+
+    <section class="section">
+      <h3>Device mode</h3>
+      <div id="device-panel"></div>
+    </section>
+
+    <section class="section sticky">
+      <div id="progress-wrap" class="hidden">
+        <div class="progress"><div id="progress"></div></div>
+        <p class="muted small" id="status"></p>
+      </div>
+      <div id="result" class="result hidden">
+        <b id="r-size"></b>
+        <span class="muted" id="r-detail"></span>
+      </div>
+      <div class="row">
+        <button class="btn" id="cancel" disabled>Cancel</button>
+        <button class="btn primary" id="convert">Convert</button>
+        <button class="btn primary hidden" id="download">Download</button>
+      </div>
+    </section>
+  </aside>
+</div>
+<script type="module" src="video.js"></script>
+</body>
+</html>
