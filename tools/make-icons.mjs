@@ -1,4 +1,4 @@
-// Draws the TabReel icon (capture brackets around a record dot on a violet-to-coral
+// Draws the Captode icon (capture brackets around a record dot on a violet-to-coral
 // square) at every size the extension and the stores need. No dependencies.
 //   node tools/make-icons.mjs
 import { writeFileSync, mkdirSync } from 'node:fs';
@@ -8,8 +8,8 @@ import { fileURLToPath } from 'node:url';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 
-const A = [0x7b, 0x5c, 0xff];
-const B = [0xff, 0x4d, 0x6d];
+const A = [0x5b, 0x4b, 0xff];
+const B = [0xe5, 0x48, 0x4d];
 
 // Signed distance to a rounded box centred at the origin.
 function sdRoundBox(x, y, hw, hh, r) {

@@ -2,7 +2,7 @@
 // editor pages through IndexedDB, which every extension context shares and which
 // holds Blobs far larger than a runtime message comfortably can.
 
-const DB_NAME = 'tabreel';
+const DB_NAME = 'captode';
 const STORE = 'captures';
 
 function open() {

@@ -4,26 +4,26 @@
 /** Lets the user drag out a rectangle. Resolves to the rectangle or null on Esc. */
 export function pickArea(hint) {
   return new Promise((resolve) => {
-    const old = document.getElementById('__tabreel_pick');
+    const old = document.getElementById('__captode_pick');
     if (old) old.remove();
 
     const root = document.createElement('div');
-    root.id = '__tabreel_pick';
+    root.id = '__captode_pick';
     root.style.cssText =
       'position:fixed;inset:0;z-index:2147483647;cursor:crosshair;user-select:none;' +
       'background:rgba(15,15,25,.35);font:13px system-ui,sans-serif;';
     const box = document.createElement('div');
     box.style.cssText =
-      'position:fixed;display:none;border:2px solid #ff4d6d;box-sizing:border-box;' +
+      'position:fixed;display:none;border:2px solid #5b4bff;box-sizing:border-box;' +
       'box-shadow:0 0 0 9999px rgba(15,15,25,.35);background:transparent;';
     const label = document.createElement('div');
     label.style.cssText =
-      'position:fixed;display:none;padding:3px 7px;border-radius:5px;background:#ff4d6d;color:#fff;';
+      'position:fixed;display:none;padding:3px 7px;border-radius:5px;background:#5b4bff;color:#fff;';
     const tip = document.createElement('div');
     tip.textContent = hint + '  ·  Esc to cancel';
     tip.style.cssText =
       'position:fixed;top:16px;left:50%;transform:translateX(-50%);padding:8px 14px;border-radius:8px;' +
-      'background:#1d1b2e;color:#fff;box-shadow:0 6px 20px rgba(0,0,0,.3);pointer-events:none;';
+      'background:#17171c;color:#fff;box-shadow:0 6px 20px rgba(0,0,0,.3);pointer-events:none;';
     root.append(box, label, tip);
     document.documentElement.appendChild(root);
 
@@ -86,10 +86,10 @@ export function fullPagePrepare() {
     y: window.scrollY,
     behavior: de.style.scrollBehavior,
   };
-  window.__tabreelState = state;
+  window.__captodeState = state;
   de.style.scrollBehavior = 'auto';
   const style = document.createElement('style');
-  style.id = '__tabreel_fp';
+  style.id = '__captode_fp';
   style.textContent =
     'html::-webkit-scrollbar,body::-webkit-scrollbar{display:none!important}' +
     'html,body{scrollbar-width:none!important}';
@@ -107,12 +107,12 @@ export function fullPagePrepare() {
 /** Scrolls to (x, y), hiding fixed and sticky elements after the first tile. */
 export function fullPageScroll(x, y, hideFixed) {
   return new Promise((resolve) => {
-    if (hideFixed && !window.__tabreelHidden) {
-      window.__tabreelHidden = [];
+    if (hideFixed && !window.__captodeHidden) {
+      window.__captodeHidden = [];
       for (const el of document.querySelectorAll('body *')) {
         const pos = getComputedStyle(el).position;
         if (pos === 'fixed' || pos === 'sticky') {
-          window.__tabreelHidden.push([el, el.style.getPropertyValue('visibility'), el.style.getPropertyPriority('visibility')]);
+          window.__captodeHidden.push([el, el.style.getPropertyValue('visibility'), el.style.getPropertyPriority('visibility')]);
           el.style.setProperty('visibility', 'hidden', 'important');
         }
       }
@@ -124,13 +124,13 @@ export function fullPageScroll(x, y, hideFixed) {
 }
 
 export function fullPageRestore() {
-  for (const [el, value, prio] of window.__tabreelHidden || []) {
+  for (const [el, value, prio] of window.__captodeHidden || []) {
     if (value) el.style.setProperty('visibility', value, prio);
     else el.style.removeProperty('visibility');
   }
-  window.__tabreelHidden = null;
-  document.getElementById('__tabreel_fp')?.remove();
-  const s = window.__tabreelState;
+  window.__captodeHidden = null;
+  document.getElementById('__captode_fp')?.remove();
+  const s = window.__captodeState;
   if (s) {
     window.scrollTo(s.x, s.y);
     document.documentElement.style.scrollBehavior = s.behavior;
@@ -162,16 +162,16 @@ export function countdown(seconds) {
 
 /** Draws a dashed outline just outside the recorded area, so it is never recorded. */
 export function showOutline(rect) {
-  document.getElementById('__tabreel_outline')?.remove();
+  document.getElementById('__captode_outline')?.remove();
   if (!rect) return;
   const el = document.createElement('div');
-  el.id = '__tabreel_outline';
+  el.id = '__captode_outline';
   el.style.cssText =
-    'position:fixed;z-index:2147483646;pointer-events:none;border:2px dashed #ff4d6d;' +
+    'position:fixed;z-index:2147483646;pointer-events:none;border:2px dashed #e5484d;' +
     `left:${rect.x - 3}px;top:${rect.y - 3}px;width:${rect.w + 6}px;height:${rect.h + 6}px;box-sizing:border-box;`;
   document.documentElement.appendChild(el);
 }
 
 export function hideOutline() {
-  document.getElementById('__tabreel_outline')?.remove();
+  document.getElementById('__captode_outline')?.remove();
 }

@@ -1,4 +1,4 @@
-// TabReel service worker: runs captures, coordinates recordings and switches the
+// Captode service worker: runs captures, coordinates recordings and switches the
 // toolbar icon between "open the popup" and "stop recording".
 import { putCapture } from './lib/db.js';
 import {
@@ -33,7 +33,7 @@ async function openPage(path, tab) {
   });
 }
 
-async function badge(text, color = '#ff4d6d') {
+async function badge(text, color = '#e5484d') {
   await chrome.action.setBadgeBackgroundColor({ color });
   await chrome.action.setBadgeText({ text });
 }
@@ -112,7 +112,7 @@ async function captureFullPage(tab, meta) {
         const bmp = await captureVisible(tab.windowId);
         ctx.drawImage(bmp, Math.round(at.x * scale), Math.round(at.y * scale));
         bmp.close();
-        await badge(`${Math.round((++done / total) * 100)}%`, '#7b5cff');
+        await badge(`${Math.round((++done / total) * 100)}%`, '#5b4bff');
       }
     }
     return await canvas.convertToBlob({ type: 'image/png' });
@@ -157,7 +157,7 @@ async function startRecording({ mode, fps, audio, countdown: wantCountdown }, ta
   const streamId = await chrome.tabCapture.getMediaStreamId({ targetTabId: tab.id });
   await ensureOffscreen();
   const res = await chrome.runtime.sendMessage({
-    target: 'recorder', to: 'offscreen', type: 'rec-start', streamId, fps, audio, crop,
+    target: 'recorder', to: 'offscreen', type: 'rec-start', streamId, fps, audio, crop, title: tab.title,
   });
   if (!res?.ok) {
     await run(tab.id, hideOutline).catch(() => {});
@@ -169,13 +169,13 @@ async function startRecording({ mode, fps, audio, countdown: wantCountdown }, ta
 
 async function enterRecordingUi() {
   await chrome.action.setPopup({ popup: '' });
-  await chrome.action.setTitle({ title: 'TabReel — click to stop recording' });
+  await chrome.action.setTitle({ title: 'Captode — click to stop recording' });
   await badge('REC');
 }
 
 async function leaveRecordingUi() {
   await chrome.action.setPopup({ popup: 'popup/popup.html' });
-  await chrome.action.setTitle({ title: 'TabReel' });
+  await chrome.action.setTitle({ title: 'Captode' });
   await badge('');
 }
 

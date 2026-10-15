@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
-  "name": "TabReel — Screenshot & Screen Recorder",
-  "short_name": "TabReel",
+  "name": "Captode — Screenshot & Screen Recorder",
+  "short_name": "Captode",
   "version": "1.0.0",
   "description": "Capture full-page, visible or selected-area screenshots and recordings. Annotate, then export as PNG, JPG, PDF, GIF, MP4 or WebP.",
   "minimum_chrome_version": "116",
@@ -12,7 +12,7 @@
     "128": "icons/icon128.png"
   },
   "action": {
-    "default_title": "TabReel",
+    "default_title": "Captode",
     "default_popup": "popup/popup.html",
     "default_icon": {
       "16": "icons/icon16.png",
@@ -35,7 +35,7 @@
   "commands": {
     "_execute_action": {
       "suggested_key": { "default": "Alt+Shift+R" },
-      "description": "Open TabReel, or stop the current recording"
+      "description": "Open Captode, or stop the current recording"
     }
   }
 }

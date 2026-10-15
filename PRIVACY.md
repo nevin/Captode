@@ -1,6 +1,6 @@
-# TabReel privacy policy
+# Captode privacy policy
 
-TabReel does not collect, transmit, sell or share any data.
+Captode does not collect, transmit, sell or share any data.
 
 - Screenshots and recordings are made and edited entirely inside your browser.
 - Until you download them, captures are kept in the extension's own browser storage
@@ -8,13 +8,13 @@ TabReel does not collect, transmit, sell or share any data.
   after 24 hours.
 - Your settings (for example the export format and device-mode options) are kept in the
   browser's extension storage on your device.
-- TabReel makes no network requests and contains no analytics, advertising or tracking.
+- Captode makes no network requests and contains no analytics, advertising or tracking.
 
 ## Permissions
 
 | Permission | Why |
 | --- | --- |
-| `activeTab` | Capture the tab you are on when you click TabReel. |
+| `activeTab` | Capture the tab you are on when you click Captode. |
 | `scripting` | Show the area picker and countdown, and scroll the page for full-page screenshots. |
 | `tabCapture` | Record the current tab. |
 | `desktopCapture` | Record your whole screen or a window, when you choose Full screen. |

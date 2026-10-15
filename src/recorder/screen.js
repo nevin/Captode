@@ -34,7 +34,7 @@ async function choose() {
   session = record(stream, { fps, onEnded: stop });
   $('pick').classList.add('hidden');
   $('live').classList.remove('hidden');
-  document.title = '● Recording — TabReel';
+  document.title = '● Recording — Captode';
   chrome.runtime.sendMessage({ type: 'rec-started', kind: 'page' });
   ticker = setInterval(() => {
     const elapsed = (performance.now() - session.started) / 1000;

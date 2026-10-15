@@ -6,8 +6,10 @@ import { putCapture } from '../lib/db.js';
 let session = null;
 let ticker = 0;
 let audioContext = null;
+let title = '';
 
-async function start({ streamId, fps, audio, crop }) {
+async function start({ streamId, fps, audio, crop, title: tabTitle }) {
+  title = tabTitle || '';
   const media = { chromeMediaSource: 'tab', chromeMediaSourceId: streamId };
   const stream = await navigator.mediaDevices.getUserMedia({
     video: { mandatory: { ...media, maxWidth: 3840, maxHeight: 2160, maxFrameRate: fps } },
@@ -32,7 +34,7 @@ async function stop() {
   const { blob, meta } = await current.stop();
   audioContext?.close();
   audioContext = null;
-  const id = await putCapture(blob, meta);
+  const id = await putCapture(blob, { ...meta, title });
   chrome.runtime.sendMessage({ type: 'rec-done', id, kind: 'offscreen' });
 }
 

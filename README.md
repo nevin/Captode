@@ -1,9 +1,9 @@
-<p align="center"><img src="docs/logo.png" width="96" alt="TabReel logo"></p>
+<p align="center"><img src="docs/logo.png" width="96" alt="Captode logo"></p>
 
-# TabReel
+# Captode
 
 Screenshots and screen recordings of the current tab, with an editor to mark them up and
-export to the format you need. TabReel runs entirely in your browser. Nothing is uploaded.
+export to the format you need. Captode runs entirely in your browser. Nothing is uploaded.
 
 ## Features
 
@@ -36,14 +36,14 @@ The capture opens in the editor, where you can:
 - **Selected area:** drag a rectangle; only that part of the tab is recorded.
 
 You can pick the frame rate (15, 24, 30 or 60 fps), include audio, and start after a 3-second
-countdown. Click the TabReel icon (or press **Alt+Shift+R**) to stop. The recording then
+countdown. Click the Captode icon (or press **Alt+Shift+R**) to stop. The recording then
 opens in the video page, where you can:
 
 - Trim the start and end.
 - Export as **MP4**, **GIF**, **WebP** (animated) or **WebM**.
 - Choose the resolution (original, 2160p down to 240p) and the frame rate.
 - **Reduce file size losslessly** (GIF and WebP). Repeated frames are merged and only the
-  pixels that change are stored, so the animation looks exactly the same in fewer bytes.
+  pixels that change are stored, so the file is smaller with no visible quality loss.
   WebP can also use lossless frames.
 - Set the MP4 or WebM quality, from visually lossless to smallest file.
 
@@ -61,7 +61,7 @@ video inside a phone or tablet frame. You can choose:
 
 ## Install
 
-TabReel works in Chromium browsers: Chrome 116 or later, Edge, Brave, Opera and Arc.
+Captode works in Chromium browsers: Chrome 116 or later, Edge, Brave, Opera and Arc.
 MP4 export needs Chrome 126 or later.
 
 ### From source
@@ -99,14 +99,14 @@ tools/
 
 ```bash
 npm run icons     # redraw src/icons/*.png
-npm run package   # build dist/tabreel-<version>.zip for the stores
+npm run package   # build dist/captode-<version>.zip for the stores
 ```
 
 ## Publishing
 
 1. Bump `version` in `src/manifest.json`.
 2. Run `npm run package`.
-3. Upload `dist/tabreel-<version>.zip` to the
+3. Upload `dist/captode-<version>.zip` to the
    [Chrome Web Store developer dashboard](https://chrome.google.com/webstore/devconsole) and to
    [Microsoft Edge Add-ons](https://partner.microsoft.com/dashboard/microsoftedge/).
    Listing text, permission justifications and the privacy statement are in [`store/`](store/).
@@ -116,7 +116,7 @@ recording relies on.
 
 ## Privacy
 
-TabReel does not collect, send or store anything outside your browser. See [PRIVACY.md](PRIVACY.md).
+Captode does not collect, send or store anything outside your browser. See [PRIVACY.md](PRIVACY.md).
 
 ## License
 

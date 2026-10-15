@@ -21,8 +21,8 @@ export const DEFAULTS = {
   fit: 'width',
   frame: 'midnight',
   bg: 'gradient',
-  bg1: '#7b5cff',
-  bg2: '#ff4d6d',
+  bg1: '#5b4bff',
+  bg2: '#e5484d',
   padding: 12,
   statusBar: true,
   statusStyle: 'light',
@@ -270,31 +270,30 @@ export async function mountDevicePanel(el, onChange) {
   const map = (obj) => Object.fromEntries(Object.entries(obj).map(([k, v]) => [k, v.label]));
 
   el.innerHTML = `
-    <label class="check"><input type="checkbox" data-k="enabled"${o.enabled ? ' checked' : ''}> <b>Show in a device frame</b></label>
+    <label class="toggle"><span>Show in a device frame<small>Phone or tablet mock-up around the capture</small></span><input type="checkbox" data-k="enabled"${o.enabled ? ' checked' : ''}></label>
     <div class="dev-opts">
       <label class="field"><span>Device</span>${sel('device', map(DEVICES), o.device)}</label>
-      <div class="row">
-        <label class="field"><span>Orientation</span>${sel('orientation', { auto: 'Auto', portrait: 'Portrait', landscape: 'Landscape' }, o.orientation)}</label>
-        <label class="field"><span>Colour</span>${sel('frame', map(FRAMES), o.frame)}</label>
+      <div class="grid2">
+        <label class="field"><span>Orientation</span>${sel('orientation', { auto: 'Automatic', portrait: 'Portrait', landscape: 'Landscape' }, o.orientation)}</label>
+        <label class="field"><span>Finish</span>${sel('frame', map(FRAMES), o.frame)}</label>
       </div>
-      <label class="field"><span>Fit on screen</span>${sel('fit', { width: 'Fill width, from top', cover: 'Fill screen', contain: 'Show all' }, o.fit)}</label>
-      <label class="field"><span>Background</span>
-        <div class="row">${sel('bg', { gradient: 'Gradient', solid: 'Solid', none: 'Transparent' }, o.bg)}
+      <label class="field"><span>Fit on screen</span>${sel('fit', { width: 'Fill width, from the top', cover: 'Fill the screen', contain: 'Show everything' }, o.fit)}</label>
+      <div class="field"><span>Background</span>
+        <div class="row">${sel('bg', { gradient: 'Gradient', solid: 'Solid colour', none: 'Transparent' }, o.bg)}
           <input type="color" data-k="bg1" value="${o.bg1}" title="Background colour">
           <input type="color" data-k="bg2" value="${o.bg2}" title="Second gradient colour">
         </div>
-      </label>
-      <label class="field"><span>Padding</span><input type="range" min="0" max="30" data-k="padding" value="${o.padding}"></label>
-      <div class="row">
-        <label class="check"><input type="checkbox" data-k="statusBar"${o.statusBar ? ' checked' : ''}> Status bar</label>
-        ${sel('statusStyle', { light: 'Light', dark: 'Dark' }, o.statusStyle)}
       </div>
+      <label class="field"><span>Padding</span><input type="range" min="0" max="30" data-k="padding" value="${o.padding}"></label>
+      <label class="toggle"><span>Status bar</span><input type="checkbox" data-k="statusBar"${o.statusBar ? ' checked' : ''}></label>
+      <label class="field status-style"><span>Status bar style</span>${sel('statusStyle', { light: 'Light', dark: 'Dark' }, o.statusStyle)}</label>
     </div>`;
 
   const sync = () => {
     el.querySelector('.dev-opts').classList.toggle('hidden', !o.enabled);
     el.querySelector('[data-k="bg2"]').classList.toggle('hidden', o.bg !== 'gradient');
     el.querySelector('[data-k="bg1"]').classList.toggle('hidden', o.bg === 'none');
+    el.querySelector('.status-style').classList.toggle('hidden', !o.statusBar);
   };
   sync();
   el.addEventListener('input', (e) => {

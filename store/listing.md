@@ -1,8 +1,8 @@
-# Store listing — TabReel
+# Store listing — Captode
 
 Use this text for the Chrome Web Store and Microsoft Edge Add-ons.
 
-**Name:** TabReel — Screenshot & Screen Recorder
+**Name:** Captode — Screenshot & Screen Recorder
 
 **Short description (max 132 characters):**
 Capture full-page, visible or selected-area screenshots and recordings. Annotate, then export as PNG, JPG, PDF, GIF, MP4 or WebP.
@@ -13,7 +13,7 @@ Capture full-page, visible or selected-area screenshots and recordings. Annotate
 
 ## Description
 
-TabReel captures exactly what you need from any web page, then lets you mark it up and export
+Captode captures exactly what you need from any web page, then lets you mark it up and export
 it in the format you want. Everything happens in your browser. Nothing is uploaded.
 
 SCREENSHOTS
@@ -42,7 +42,7 @@ RECORD
 VIDEO EXPORT
 • MP4, GIF, animated WebP and WebM
 • Trim, choose the resolution and frame rate
-• Lossless size reduction for GIF and WebP: identical frames are merged and only changed pixels are stored
+• Lossless size reduction for GIF and WebP: repeated frames are merged and only changed pixels are stored, with no visible quality loss
 
 DEVICE MODE
 • Present any screenshot or recording inside a phone or tablet frame, with a gradient or transparent background
@@ -51,12 +51,12 @@ No account, no watermark, no tracking.
 
 ## Single purpose (Chrome Web Store)
 
-TabReel captures screenshots and screen recordings of the user's browser tab or screen, and
+Captode captures screenshots and screen recordings of the user's browser tab or screen, and
 lets the user edit and export them.
 
 ## Permission justifications
 
-- **activeTab:** Captures the tab the user is on when they invoke TabReel.
+- **activeTab:** Captures the tab the user is on when they invoke Captode.
 - **scripting:** Injects the area-selection overlay and countdown, and scrolls the page to stitch full-page screenshots.
 - **tabCapture:** Records the current tab when the user starts a tab recording.
 - **desktopCapture:** Lets the user pick a screen or window to record in Full screen mode.
@@ -66,7 +66,7 @@ lets the user edit and export them.
 
 **Remote code:** No. All code ships in the package.
 
-**Data usage:** TabReel does not collect or transmit user data. Tick "I do not collect" for every category.
+**Data usage:** Captode does not collect or transmit user data. Tick "I do not collect" for every category.
 
 ## Screenshots to prepare (1280 × 800)
 

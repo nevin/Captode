@@ -3,17 +3,20 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>TabReel — Recording</title>
+<title>Captode — Recording</title>
 <link rel="icon" href="../icons/icon32.png">
 <link rel="stylesheet" href="../lib/ui.css">
 <link rel="stylesheet" href="video.css">
 </head>
 <body>
-<header class="bar">
-  <div class="brand"><img src="../icons/icon48.png" alt="">TabReel</div>
-  <div class="muted" id="info"></div>
+<header class="topbar">
+  <div class="brand"><img src="../icons/icon48.png" alt="">Captode</div>
+  <div class="sep"></div>
+  <div class="doc"><b id="doc-name">Recording</b><span id="info">—</span></div>
   <div class="spacer"></div>
-  <button class="btn" id="dl-original">Download original (WebM)</button>
+  <button class="btn ghost" id="dl-original" title="Download the recording as it was captured">
+    <svg class="i" viewBox="0 0 24 24"><path d="M12 4v12M7 11l5 5 5-5M4 20h16"/></svg>Original WebM
+  </button>
 </header>
 
 <div class="layout">
@@ -23,30 +26,39 @@
       <canvas id="live" class="hidden"></canvas>
       <img id="out-img" class="hidden" alt="Exported animation">
       <video id="out-video" class="hidden" controls playsinline></video>
+      <div class="preview-label hidden" id="preview-label"></div>
     </div>
-    <div id="empty" class="empty hidden"><h2>Recording not found</h2><p class="muted">It may be more than a day old. Start a new one from the TabReel button.</p></div>
+    <div id="empty" class="empty hidden">
+      <div class="empty-card">
+        <h2>Recording not found</h2>
+        <p class="muted">Recordings are kept for a day. Start a new one with the Captode button in the toolbar.</p>
+      </div>
+    </div>
   </main>
 
-  <aside class="side">
+  <aside class="inspector">
     <section class="section">
-      <h3>Trim</h3>
-      <div class="row">
-        <label class="field"><span>Start (s)</span><input type="number" id="t-start" min="0" step="0.1" value="0"></label>
-        <button class="btn icon set" id="t-start-set" title="Use the current position">⇤</button>
-        <label class="field"><span>End (s)</span><input type="number" id="t-end" min="0" step="0.1"></label>
-        <button class="btn icon set" id="t-end-set" title="Use the current position">⇥</button>
+      <h3 class="section-title">Trim</h3>
+      <div class="trim">
+        <label class="field"><span>Start</span>
+          <div class="with-btn"><input type="number" id="t-start" min="0" step="0.1" value="0"><button class="btn ghost icon" id="t-start-set" data-tip="Use the playhead"><svg class="i" viewBox="0 0 24 24"><path d="M4 4v16M8 12h12M14 6l6 6-6 6"/></svg></button></div>
+        </label>
+        <label class="field"><span>End</span>
+          <div class="with-btn"><input type="number" id="t-end" min="0" step="0.1"><button class="btn ghost icon" id="t-end-set" data-tip="Use the playhead"><svg class="i" viewBox="0 0 24 24"><path d="M20 4v16M16 12H4M10 6l-6 6 6 6"/></svg></button></div>
+        </label>
       </div>
+      <p class="muted small" style="margin:0">Times in seconds. Play to a point, then use the playhead buttons.</p>
     </section>
 
     <section class="section">
-      <h3>Export</h3>
+      <h3 class="section-title">Format</h3>
       <div class="formats" id="formats">
-        <button data-f="mp4" class="on">MP4</button>
-        <button data-f="gif">GIF</button>
-        <button data-f="webp">WebP</button>
-        <button data-f="webm">WebM</button>
+        <button data-f="mp4" class="on"><b>MP4</b><small>Video</small></button>
+        <button data-f="gif"><b>GIF</b><small>Animation</small></button>
+        <button data-f="webp"><b>WebP</b><small>Animation</small></button>
+        <button data-f="webm"><b>WebM</b><small>Video</small></button>
       </div>
-      <div class="row">
+      <div class="grid2">
         <label class="field"><span>Resolution</span><select id="res"></select></label>
         <label class="field"><span>Frame rate</span><select id="fps"></select></label>
       </div>
@@ -54,59 +66,59 @@
       <div data-for="mp4 webm">
         <label class="field"><span>Quality</span>
           <select id="v-quality">
-            <option value="0.16">High — visually lossless</option>
+            <option value="0.16">Highest — visually lossless</option>
             <option value="0.08" selected>Balanced</option>
             <option value="0.04">Small file</option>
             <option value="0.02">Smallest file</option>
           </select>
         </label>
-        <label class="check"><input type="checkbox" id="v-audio" checked> Include audio</label>
+        <label class="toggle"><span>Include audio</span><input type="checkbox" id="v-audio" checked></label>
+        <p class="callout">MP4 and WebM convert in real time: a 30-second clip takes about 30 seconds. Keep this tab open in front while it runs.</p>
       </div>
 
       <div data-for="gif">
-        <div class="row">
+        <div class="grid2">
           <label class="field"><span>Colours</span>
             <select id="g-colors"><option>256</option><option>128</option><option>64</option><option>32</option></select>
           </label>
-          <label class="check"><input type="checkbox" id="g-dither"> Dither</label>
+          <label class="toggle dither"><span>Dither</span><input type="checkbox" id="g-dither"></label>
         </div>
       </div>
 
       <div data-for="webp">
-        <label class="check"><input type="checkbox" id="w-lossless"> Lossless frames</label>
+        <label class="toggle"><span>Lossless frames<small>Exact pixels, larger file</small></span><input type="checkbox" id="w-lossless"></label>
         <label class="field" id="w-quality-f"><span>Quality <b id="w-quality-v"></b></span><input type="range" id="w-quality" min="10" max="100" value="80"></label>
       </div>
 
       <div data-for="gif webp">
-        <label class="check"><input type="checkbox" id="optimize" checked> Reduce file size losslessly</label>
-        <p class="muted small">Repeated frames are merged and only the pixels that change are stored. The animation looks exactly the same.</p>
-        <label class="check"><input type="checkbox" id="loop" checked> Loop forever</label>
+        <label class="toggle"><span>Reduce size losslessly<small>Merge repeated frames and store only the pixels that change. No visible quality loss.</small></span><input type="checkbox" id="optimize" checked></label>
+        <label class="toggle"><span>Loop forever</span><input type="checkbox" id="loop" checked></label>
       </div>
-      <p class="muted small" data-for="mp4 webm">MP4 and WebM are converted in real time, so a 30-second clip takes about 30 seconds. Keep this tab in front while it runs.</p>
-
-      <div class="estimate" id="dims">—</div>
     </section>
 
-    <section class="section">
-      <h3>Device mode</h3>
+    <details class="section" id="device-section">
+      <summary class="section-title">Device frame</summary>
       <div id="device-panel"></div>
-    </section>
+    </details>
 
-    <section class="section sticky">
+    <div class="export-bar">
+      <div class="estimate" id="dims">—</div>
       <div id="progress-wrap" class="hidden">
         <div class="progress"><div id="progress"></div></div>
         <p class="muted small" id="status"></p>
       </div>
       <div id="result" class="result hidden">
-        <b id="r-size"></b>
-        <span class="muted" id="r-detail"></span>
+        <svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg>
+        <div><b id="r-size"></b><span class="muted small" id="r-detail"></span></div>
       </div>
       <div class="row">
-        <button class="btn" id="cancel" disabled>Cancel</button>
-        <button class="btn primary" id="convert">Convert</button>
-        <button class="btn primary hidden" id="download">Download</button>
+        <button class="btn hidden" id="cancel" disabled>Cancel</button>
+        <button class="btn primary block" id="convert">Convert</button>
+        <button class="btn primary block hidden" id="download">
+          <svg class="i" viewBox="0 0 24 24"><path d="M12 4v12M7 11l5 5 5-5M4 20h16"/></svg>Download
+        </button>
       </div>
-    </section>
+    </div>
   </aside>
 </div>
 <script type="module" src="video.js"></script>

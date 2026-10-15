@@ -1,5 +1,6 @@
 import { getCapture } from '../lib/db.js';
 import { GifEncoder } from '../lib/gif.js';
+import { buildPalette } from '../lib/quantize.js';
 import { WebpAnimEncoder } from '../lib/webp.js';
 import { mountDevicePanel, deviceRenderer } from '../lib/device.js';
 
@@ -94,6 +95,7 @@ function fillFps(reset = false) {
 
 function syncUi() {
   for (const b of document.querySelectorAll('#formats button')) b.classList.toggle('on', b.dataset.f === format);
+  $('#convert').textContent = `Convert to ${format.toUpperCase()}`;
   for (const el of document.querySelectorAll('[data-for]')) el.classList.toggle('hidden', !el.dataset.for.split(' ').includes(format));
   $('#w-quality-f').classList.toggle('hidden', $('#w-lossless').checked);
   $('#w-quality-v').textContent = $('#w-quality').value + '%';
@@ -103,7 +105,7 @@ function syncUi() {
   const p = plan();
   const { start, end } = trim();
   const frames = Math.max(1, Math.round((end - start) * p.fps));
-  $('#dims').textContent = `${p.width} × ${p.height} px · ${p.fps} fps · ${(end - start).toFixed(1)} s · ${frames} frames`;
+  $('#dims').innerHTML = `<span>${p.width} × ${p.height} · ${p.fps} fps · ${frames} frames</span><b>${(end - start).toFixed(1)} s</b>`;
   stale();
 }
 
@@ -116,19 +118,23 @@ function stale() {
   showPreview('player');
 }
 
+const PREVIEW_LABELS = { live: 'Converting…', 'out-img': 'Exported', 'out-video': 'Exported' };
+
 function showPreview(which) {
   for (const id of ['player', 'live', 'out-img', 'out-video']) $('#' + id).classList.toggle('hidden', id !== which);
+  $('#preview-label').textContent = PREVIEW_LABELS[which] || '';
+  $('#preview-label').classList.toggle('hidden', !PREVIEW_LABELS[which]);
 }
 
 $('#formats').addEventListener('click', (e) => {
-  const f = e.target.dataset.f;
+  const f = e.target.closest('button')?.dataset.f;
   if (!f || busy) return;
   format = f;
   fillResolutions(true);
   fillFps(true);
   syncUi();
 });
-document.querySelector('.side').addEventListener('input', (e) => {
+document.querySelector('.inspector').addEventListener('input', (e) => {
   if (e.target.closest('#device-panel')) return; // handled by the panel's own callback
   syncUi();
 });
@@ -183,19 +189,42 @@ async function convertFrames(p, { start, end }) {
     const transparent = !!p.renderer?.transparent;
     const loop = $('#loop').checked ? 0 : 1;
     const optimize = $('#optimize').checked;
+    const step = 1 / p.fps;
+    const count = Math.max(1, Math.round((end - start) * p.fps));
+    const at = (i) => Math.min(start + i * step, Math.max(start, end - 0.001));
+
+    // GIF: one palette for the whole clip, from frames sampled across it, so colours
+    // stay steady from frame to frame.
+    let palette = null;
+    if (format === 'gif') {
+      const samples = Math.min(count, 16);
+      const parts = [];
+      for (let k = 0; k < samples; k++) {
+        if (cancelled) throw new Error('cancelled');
+        await seek(v, at(Math.floor(((k + 0.5) * count) / samples)));
+        ctx.clearRect(0, 0, p.width, p.height);
+        draw(ctx, v);
+        const px = ctx.getImageData(0, 0, p.width, p.height).data;
+        const part = new Uint8ClampedArray(Math.ceil(px.length / 12) * 4);
+        for (let i = 0, o = 0; i < px.length; i += 12, o += 4) part.set(px.subarray(i, i + 4), o);
+        parts.push(part);
+        progress(0, 'Choosing colours…');
+      }
+      const all = new Uint8ClampedArray(parts.reduce((n, a) => n + a.length, 0));
+      let o = 0;
+      for (const part of parts) { all.set(part, o); o += part.length; }
+      palette = buildPalette(all, Math.max(2, Number($('#g-colors').value) - 1));
+    }
+
     const enc = format === 'gif'
-      ? new GifEncoder(p.width, p.height, {
-          colors: Number($('#g-colors').value), dither: $('#g-dither').checked, optimize, transparent, loop,
-        })
+      ? new GifEncoder(p.width, p.height, { palette, dither: $('#g-dither').checked, optimize, transparent, loop })
       : new WebpAnimEncoder(p.width, p.height, {
           quality: Number($('#w-quality').value) / 100, lossless: $('#w-lossless').checked, optimize, loop, alpha: transparent,
         });
 
-    const step = 1 / p.fps;
-    const count = Math.max(1, Math.round((end - start) * p.fps));
     for (let i = 0; i < count; i++) {
       if (cancelled) throw new Error('cancelled');
-      await seek(v, Math.min(start + i * step, Math.max(start, end - 0.001)));
+      await seek(v, at(i));
       ctx.clearRect(0, 0, p.width, p.height);
       draw(ctx, v);
       if (format === 'gif') enc.addFrame(ctx.getImageData(0, 0, p.width, p.height).data, 1000 / p.fps);
@@ -296,7 +325,9 @@ async function convert() {
   busy = true;
   cancelled = false;
   $('#convert').disabled = true;
+  $('#convert').classList.add('hidden');
   $('#cancel').disabled = false;
+  $('#cancel').classList.remove('hidden');
   $('#progress-wrap').classList.remove('hidden');
   $('#result').classList.add('hidden');
   progress(0, 'Starting…');
@@ -305,7 +336,7 @@ async function convert() {
     const p = plan();
     const range = trim();
     const blob = format === 'gif' || format === 'webp' ? await convertFrames(p, range) : await convertRealtime(p, range);
-    const base = (meta.title ? 'tabreel-' + meta.title : 'tabreel-recording').toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 50);
+    const base = (meta.title ? 'captode-' + meta.title : 'captode-recording').toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 50);
     const stamp = new Date().toISOString().slice(0, 19).replace(/[-:]/g, '').replace('T', '-');
     result = { blob, name: `${base}-${stamp}.${EXT[format]}` };
 
@@ -318,7 +349,7 @@ async function convert() {
       showPreview('out-video');
     }
     const pct = Math.round((1 - blob.size / source.size) * 100);
-    $('#r-size').textContent = `${EXT[format].toUpperCase()} · ${fmtBytes(blob.size)}`;
+    $('#r-size').textContent = `${EXT[format].toUpperCase()} ready · ${fmtBytes(blob.size)}`;
     $('#r-detail').textContent = `${p.width} × ${p.height} at ${p.fps} fps. ` +
       (pct >= 0 ? `${pct}% smaller than the recording.` : `${-pct}% larger than the recording.`);
     $('#result').classList.remove('hidden');
@@ -332,6 +363,8 @@ async function convert() {
     busy = false;
     $('#convert').disabled = false;
     $('#cancel').disabled = true;
+    $('#cancel').classList.add('hidden');
+    if (!result) $('#convert').classList.remove('hidden');
     if (result) $('#progress-wrap').classList.add('hidden');
   }
 }
@@ -347,7 +380,7 @@ function save(blob, name) {
 $('#convert').addEventListener('click', convert);
 $('#cancel').addEventListener('click', () => { cancelled = true; });
 $('#download').addEventListener('click', () => result && save(result.blob, result.name));
-$('#dl-original').addEventListener('click', () => source && save(source, `tabreel-recording-${Date.now()}.webm`));
+$('#dl-original').addEventListener('click', () => source && save(source, `captode-recording-${Date.now()}.webm`));
 
 // ---------- start ----------
 
@@ -368,6 +401,8 @@ $('#dl-original').addEventListener('click', () => source && save(source, `tabree
   $('#t-end').value = duration.toFixed(1);
   $('#t-start').max = $('#t-end').max = duration.toFixed(1);
   $('#info').textContent = `${player.videoWidth} × ${player.videoHeight} · ${fmtTime(duration)} · ${fmtBytes(source.size)}`;
+  if (meta.title) { $('#doc-name').textContent = meta.title; document.title = `${meta.title} — Captode`; }
+  if ((await chrome.storage.local.get('device')).device) $('#device-section').open = true;
   device = await mountDevicePanel($('#device-panel'), () => { fillResolutions(); syncUi(); });
   fillResolutions(true);
   fillFps(true);

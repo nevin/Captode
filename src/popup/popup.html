@@ -2,72 +2,76 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>TabReel</title>
+<title>Captode</title>
 <link rel="stylesheet" href="../lib/ui.css">
 <link rel="stylesheet" href="popup.css">
 </head>
 <body>
   <header>
-    <div class="brand"><img src="../icons/icon48.png" alt="">TabReel</div>
-    <div class="seg" role="tablist">
-      <button role="tab" data-kind="image" class="on">Screenshot</button>
-      <button role="tab" data-kind="video">Video</button>
-    </div>
+    <div class="brand"><img src="../icons/icon48.png" alt="">Captode</div>
+    <button class="btn ghost icon" id="open-editor" title="Open the editor">
+      <svg class="i" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></svg>
+    </button>
   </header>
 
-  <div id="error" class="error hidden"></div>
+  <div class="seg kind" role="tablist">
+    <button role="tab" data-kind="image" class="on">
+      <svg class="i" viewBox="0 0 24 24"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3z"/><circle cx="12" cy="13" r="3"/></svg>Screenshot
+    </button>
+    <button role="tab" data-kind="video">
+      <svg class="i" viewBox="0 0 24 24"><path d="m22 8-6 4 6 4V8z"/><rect x="2" y="6" width="14" height="12" rx="2"/></svg>Record
+    </button>
+  </div>
+
+  <div id="error" class="error hidden" role="alert"></div>
 
   <main>
+    <p class="hint-top" id="hint-image">Choose what to capture</p>
     <div class="modes" id="modes-image">
       <button class="mode" data-mode="full">
-        <svg viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M8 6h8M8 10h8M8 14h8M8 18h5"/></svg>
-        <b>Full page</b><small>The whole page, top to bottom</small>
+        <span class="ico"><svg class="i" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M9 6h6M9 10h6M9 14h6M9 18h3"/></svg></span>
+        <span class="txt"><b>Full page</b><small>The whole page, top to bottom</small></span>
       </button>
       <button class="mode" data-mode="visible">
-        <svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 8h20"/></svg>
-        <b>Visible area</b><small>What you can see right now</small>
+        <span class="ico"><svg class="i" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 8h20"/></svg></span>
+        <span class="txt"><b>Visible area</b><small>What's on screen right now</small></span>
       </button>
       <button class="mode" data-mode="area">
-        <svg viewBox="0 0 24 24"><path d="M4 8V4h4M16 4h4v4M20 16v4h-4M8 20H4v-4"/><rect x="8" y="8" width="8" height="8" rx="1"/></svg>
-        <b>Selected area</b><small>Drag to choose a region</small>
+        <span class="ico"><svg class="i" viewBox="0 0 24 24"><path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3"/><rect x="8" y="8" width="8" height="8" rx="1"/></svg></span>
+        <span class="txt"><b>Selected area</b><small>Drag to choose a region</small></span>
       </button>
     </div>
 
+    <p class="hint-top hidden" id="hint-video">Choose what to record</p>
     <div class="modes hidden" id="modes-video">
       <button class="mode" data-mode="screen">
-        <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
-        <b>Full screen</b><small>Your whole screen or a window</small>
+        <span class="ico"><svg class="i" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
+        <span class="txt"><b>Full screen</b><small>Your whole screen or a window</small></span>
       </button>
       <button class="mode" data-mode="visible">
-        <svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><circle cx="12" cy="12" r="3"/></svg>
-        <b>Visible area</b><small>This tab, as you see it</small>
+        <span class="ico"><svg class="i" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><circle cx="12" cy="12" r="3"/></svg></span>
+        <span class="txt"><b>This tab</b><small>Everything visible in this tab</small></span>
       </button>
       <button class="mode" data-mode="area">
-        <svg viewBox="0 0 24 24"><path d="M4 8V4h4M16 4h4v4M20 16v4h-4M8 20H4v-4"/><circle cx="12" cy="12" r="3"/></svg>
-        <b>Selected area</b><small>Record only part of this tab</small>
+        <span class="ico"><svg class="i" viewBox="0 0 24 24"><path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3"/><circle cx="12" cy="12" r="3"/></svg></span>
+        <span class="txt"><b>Selected area</b><small>Record only part of this tab</small></span>
       </button>
 
       <div class="opts">
-        <label class="field"><span>Frame rate</span>
-          <select id="fps">
-            <option value="15">15 fps</option>
-            <option value="24">24 fps</option>
-            <option value="30" selected>30 fps</option>
-            <option value="60">60 fps</option>
-          </select>
-        </label>
-        <label class="check"><input type="checkbox" id="audio"> Record audio</label>
-        <label class="check"><input type="checkbox" id="countdown" checked> 3-second countdown</label>
-        <p class="muted hint">Click the TabReel icon again (or press Alt+Shift+R) to stop.</p>
+        <div class="field"><span>Frame rate</span>
+          <div class="seg" id="fps">
+            <button data-fps="15">15</button><button data-fps="24">24</button><button data-fps="30">30</button><button data-fps="60">60 fps</button>
+          </div>
+        </div>
+        <label class="toggle"><span>Record audio<small>Sound from the tab or screen</small></span><input type="checkbox" id="audio"></label>
+        <label class="toggle"><span>Countdown<small>3 seconds before recording starts</small></span><input type="checkbox" id="countdown"></label>
       </div>
+      <p class="stop-hint">Stop: click the Captode icon or press <kbd>Alt</kbd><kbd>Shift</kbd><kbd>R</kbd></p>
     </div>
   </main>
 
   <footer>
-    <label class="check" title="Export screenshots and videos inside a phone frame">
-      <input type="checkbox" id="device"> Device mode
-    </label>
-    <span class="muted" id="ver"></span>
+    <label class="toggle"><span>Device frame<small>Export inside a phone or tablet</small></span><input type="checkbox" id="device"></label>
   </footer>
   <script type="module" src="popup.js"></script>
 </body>
