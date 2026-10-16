@@ -1,6 +1,7 @@
 // Shared set-up for Captode's browser tests: a copy of the extension that may
 // capture the local test site, a small web server for that site, and Chrome.
 import { spawn } from 'node:child_process';
+import { generateKeyPairSync, createHash } from 'node:crypto';
 import puppeteer from 'puppeteer';
 import { createServer } from 'node:http';
 import { cpSync, mkdtempSync, readFileSync, writeFileSync, rmSync, existsSync } from 'node:fs';
@@ -27,6 +28,8 @@ export async function serveSite() {
 /**
  * The extension as shipped, plus the test lab page and permission to capture the
  * local test site (the real extension relies on activeTab, which needs a click).
+ * It gets a key, so its id is known before Chrome starts: Chrome is then told to let
+ * it record tabs without that click (--allowlisted-extension-id), as a test switch.
  */
 function testCopy() {
   const dir = mkdtempSync(join(tmpdir(), 'captode-ext-'));
@@ -34,8 +37,12 @@ function testCopy() {
   cpSync(join(here, 'lab'), join(dir, 'lab'), { recursive: true });
   const m = JSON.parse(readFileSync(join(dir, 'manifest.json'), 'utf8'));
   m.host_permissions = ['<all_urls>'];
+  const der = generateKeyPairSync('rsa', { modulusLength: 2048 }).publicKey.export({ type: 'spki', format: 'der' });
+  m.key = der.toString('base64');
   writeFileSync(join(dir, 'manifest.json'), JSON.stringify(m, null, 2));
-  return dir;
+  // An extension's id: the first 128 bits of its key's SHA-256, written with a–p.
+  const id = [...createHash('sha256').update(der).digest('hex').slice(0, 32)].map((c) => String.fromCharCode(97 + parseInt(c, 16))).join('');
+  return { dir, id };
 }
 
 /**
@@ -55,7 +62,7 @@ const defaultFeatures = puppeteer.defaultArgs({ headless: true }).find((a) => a.
 
 export async function launch({ scheme = 'light', args = [] } = {}) {
   keepDisplayAwake();
-  const ext = testCopy();
+  const { dir: ext, id: expectedId } = testCopy();
   const profile = mkdtempSync(join(tmpdir(), 'captode-profile-'));
   const browser = await puppeteer.launch({
     executablePath: process.env.CHROME_PATH || undefined,
@@ -68,7 +75,7 @@ export async function launch({ scheme = 'light', args = [] } = {}) {
     // of disabled features (a second --disable-features flag would replace that list).
     ignoreDefaultArgs: [defaultFeatures],
     args: ['--window-size=1280,900', '--use-fake-ui-for-media-stream', '--autoplay-policy=no-user-gesture-required', '--no-sandbox',
-      `${defaultFeatures},CalculateNativeWinOcclusion`, ...args,
+      `${defaultFeatures},CalculateNativeWinOcclusion`, `--allowlisted-extension-id=${expectedId}`, ...args,
       // Extra Chrome options for reproducing a runner's setup, e.g. --force-prefers-reduced-motion.
       ...(process.env.CHROME_ARGS || '').split(' ').filter(Boolean)],
     defaultViewport: null,
@@ -169,6 +176,9 @@ export async function recordClip(page, { seconds = 3, audio = false, width = 128
 // ---------- assertions ----------
 
 export class Failure extends Error {}
+
+/** Thrown when a test can't run here (it's reported as skipped, never as passed). */
+export class Skip extends Error {}
 
 export function ok(cond, message) {
   if (!cond) throw new Failure(message);

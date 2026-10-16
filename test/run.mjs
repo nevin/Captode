@@ -4,7 +4,7 @@
 import { readdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { launch, serveSite, Failure } from './helpers.mjs';
+import { launch, serveSite, Failure, Skip } from './helpers.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const filter = process.argv[2] || '';
@@ -12,6 +12,7 @@ const files = readdirSync(here).filter((f) => f.endsWith('.test.mjs')).sort();
 const site = await serveSite();
 let passed = 0;
 const failed = [];
+const skipped = [];
 
 for (const file of files) {
   const mod = await import(pathToFileURL(join(here, file)).href); // a file:// URL, so Windows paths work
@@ -28,6 +29,11 @@ for (const file of files) {
         passed++;
         console.log(`  ✓ ${name} (${Date.now() - t0} ms)${note ? ` — ${note}` : ''}`);
       } catch (e) {
+        if (e instanceof Skip) {
+          skipped.push(`${file} › ${name}: ${e.message}`);
+          console.log(`  – ${name} (skipped: ${e.message})`);
+          continue;
+        }
         failed.push(`${file} › ${name}`);
         console.log(`  ✗ ${name}\n      ${e instanceof Failure ? e.message : e.stack}`);
       }
@@ -37,7 +43,8 @@ for (const file of files) {
   }
 }
 site.close();
-console.log(`\n${passed} passed, ${failed.length} failed`);
+console.log(`\n${passed} passed, ${failed.length} failed${skipped.length ? `, ${skipped.length} skipped` : ''}`);
+if (skipped.length) console.log(skipped.map((s) => `  – ${s}`).join('\n'));
 if (failed.length) {
   console.log(failed.map((f) => `  ✗ ${f}`).join('\n'));
   process.exit(1);
