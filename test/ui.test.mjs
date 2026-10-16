@@ -686,6 +686,62 @@ export const tests = {
     await cmp.close();
   },
 
+  async 'quick styles colour the selection and new annotations'({ browser, url }) {
+    const lab = await open(browser, url('lab/lab.html'));
+    const id = await lab.evaluate(async () => {
+      const { putCapture } = await import('/lib/db.js');
+      await chrome.storage.local.remove('editorDefaults');
+      const c = new OffscreenCanvas(800, 500);
+      c.getContext('2d').fillRect(0, 0, 10, 10);
+      return putCapture(await c.convertToBlob(), { title: 'Looks', mode: 'visible' });
+    });
+    await lab.close();
+    const ed = await open(browser, url(`editor/editor.html?id=${id}&reopen=1`), { width: 1400, height: 900 });
+    try {
+      await ed.waitForFunction(() => /px/.test(document.querySelector('#doc-dims').textContent), { polling: 100 });
+      const at = async (x, y) => {
+        const r = await ed.evaluate(() => { const b = document.querySelector('#wrap').getBoundingClientRect(); return { x: b.left, y: b.top, z: captodeEditor.zoom() }; });
+        return [r.x + x * r.z, r.y + y * r.z];
+      };
+      const draw = async (key, x1, y1, x2, y2) => {
+        await ed.keyboard.press(key);
+        await ed.mouse.move(...(await at(x1, y1)));
+        await ed.mouse.down();
+        await ed.mouse.move(...(await at(x2, y2)), { steps: 4 });
+        await ed.mouse.up();
+      };
+      await draw('a', 100, 100, 300, 200);
+      // The new arrow is selected: the Approved style recolours it.
+      await ed.click('[data-look="ok"]');
+      let objs = await ed.evaluate(() => captodeEditor.objects());
+      ok(objs[0].color === '#30a46c', `arrow colour ${objs[0].color}`);
+      // New annotations use it too, text with its label colours.
+      await ed.keyboard.press('Escape');
+      await draw('r', 400, 100, 600, 300);
+      await ed.keyboard.press('Escape');
+      await ed.keyboard.press('n');
+      await ed.mouse.click(...(await at(500, 400)));
+      objs = await ed.evaluate(() => captodeEditor.objects());
+      ok(objs[1].color === '#30a46c' && objs[2].color === '#30a46c', `new shapes: ${objs.map((o) => o.color)}`);
+      ok(await ed.$eval('[data-look="ok"]', (b) => b.getAttribute('aria-pressed')) === 'true', 'the style shows as current');
+      // Undo takes the restyle back.
+      await ed.keyboard.press('Escape');
+      await ed.keyboard.press('v');
+      const mod = process.platform === 'darwin' ? 'Meta' : 'Control';
+      const shortcut = async (key) => { await ed.keyboard.down(mod); await ed.keyboard.press(key); await ed.keyboard.up(mod); };
+      await shortcut('a');
+      await ed.click('[data-look="bug"]');
+      objs = await ed.evaluate(() => captodeEditor.objects());
+      ok(objs.every((o) => o.color === '#e5484d'), `everything selected is red: ${objs.map((o) => o.color)}`);
+      await shortcut('z');
+      objs = await ed.evaluate(() => captodeEditor.objects());
+      ok(objs.every((o) => o.color === '#30a46c'), `undone: ${objs.map((o) => o.color)}`);
+    } finally {
+      await ed.evaluate(() => chrome.storage.local.remove('editorDefaults')).catch(() => {});
+      await ed.close();
+    }
+  },
+
   async 'countdown shows the chosen seconds and Esc cancels it'({ browser, url }) {
     const p = await open(browser, url('popup/popup.html'), { width: 800, height: 600 });
     const r = await p.evaluate(async () => {

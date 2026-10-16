@@ -1620,6 +1620,56 @@ $('#m-clear').addEventListener('click', () => { review.measures = []; showMeasur
 $('#m-ratio').addEventListener('input', () => { syncRatioNote(); showMeasure(review.measures.at(-1) || null); renderFg(); });
 for (const id of ['g-on', 'g-step']) $('#' + id).addEventListener('input', () => renderFg());
 
+// ---------- quick styles ----------
+
+// Looks for every tool at once: a line colour, and text colours for labels.
+const LOOKS = [
+  { id: 'bug', name: 'Bug', line: '#e5484d', text: '#ffffff', bg: '#e5484d' },
+  { id: 'review', name: 'Review', line: '#f76b15', text: '#17171c', bg: '#ffc53d' },
+  { id: 'note', name: 'Note', line: '#0090ff', text: '#ffffff', bg: '#0090ff' },
+  { id: 'ok', name: 'Approved', line: '#30a46c', text: '#ffffff', bg: '#30a46c' },
+  { id: 'neutral', name: 'Neutral', line: '#17171c', text: '#ffffff', bg: '#17171c' },
+  { id: 'brand', name: 'Brand', line: '#5b4bff', text: '#ffffff', bg: '#5b4bff' },
+];
+
+/** Applies a look to an annotation; highlights, blurs and spotlights keep theirs. */
+function lookOn(o, look) {
+  if (o.type === 'text') { o.color = look.text; o.bg = look.bg; }
+  else if (o.type === 'step' || o.type === 'magnify') o.color = look.line;
+  else if (['pen', 'line', 'arrow', 'rect', 'ellipse'].includes(o.type)) o.color = look.line;
+}
+
+function applyLook(id) {
+  const look = LOOKS.find((l) => l.id === id);
+  if (!look) return;
+  defaults.stroke = { ...defaults.stroke, color: look.line };
+  defaults.text = { ...defaults.text, color: look.text, bg: look.bg };
+  defaults.callout = { ...defaults.callout, color: look.text, bg: look.bg };
+  defaults.step = { ...defaults.step, color: look.line };
+  defaults.magnify = { ...defaults.magnify, color: look.line };
+  defaults.look = id;
+  if (selection.length) {
+    for (const o of selection) lookOn(o, look);
+    if (editing) placeTextEditor();
+    renderFg();
+    commit();
+  }
+  showLooks();
+  syncStyleUi();
+  chrome.storage?.local.set({ editorDefaults: defaults });
+  toast(selection.length ? `${look.name} style applied to ${selection.length === 1 ? 'the selection' : `${selection.length} annotations`}` : `${look.name} style for new annotations`, { ms: 2200 });
+}
+
+function showLooks() {
+  $('#looks').innerHTML = LOOKS.map((l) => `<button type="button" data-look="${l.id}" class="${defaults.look === l.id ? 'on' : ''}" aria-pressed="${defaults.look === l.id}" title="${l.name}: lines ${l.line}, labels ${l.text} on ${l.bg}">` +
+    `<span class="dot" style="background:${l.line}"></span>${l.name}</button>`).join('');
+}
+$('#looks').addEventListener('click', (e) => {
+  const id = e.target.closest('[data-look]')?.dataset.look;
+  if (id) applyLook(id);
+});
+showLooks();
+
 // ---------- style panel ----------
 
 for (const box of document.querySelectorAll('.swatches')) {
@@ -1758,6 +1808,7 @@ function onStyleChange() {
   }
   $('#s-width-v').textContent = Math.round(Number($('#s-width').value)) + ' px';
   $('#s-opacity-v').textContent = $('#s-opacity').value + '%';
+  if (defaults.look) { defaults.look = null; showLooks(); } // colours chosen by hand
   chrome.storage?.local.set({ editorDefaults: defaults });
 }
 $('#style-panel').addEventListener('input', (e) => { if (e.target.id !== 'c-ratio' && e.target.id !== 'st-n') onStyleChange(); });
@@ -2286,6 +2337,7 @@ document.addEventListener('keydown', (e) => {
   if (globalThis.chrome?.storage) {
     const { editorDefaults } = await chrome.storage.local.get('editorDefaults');
     if (editorDefaults) Object.assign(defaults, editorDefaults);
+    showLooks();
     settings = await getSettings();
     frame.bg = backgroundColour(settings) || 'transparent';
     // The default format from Settings, or the one used last; and the options used last.
