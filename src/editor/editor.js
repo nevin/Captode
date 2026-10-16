@@ -2,7 +2,9 @@ import { recall, remember, rememberControls } from '../lib/remember.js';
 import { mountPresets } from '../lib/presets.js';
 import { getCapture, listCaptures, deleteCapture, restoreCapture, saveEdits } from '../lib/db.js';
 import { encodeOffThread } from '../lib/encoder.js';
-import { mountDevicePanel, renderInDevice } from '../lib/device.js';
+import { mountDevicePanel, renderInDevice, DEVICES, matchDevice } from '../lib/device.js';
+import { GROUPS as DEVICE_GROUPS } from '../lib/devices.js';
+import { zip } from '../lib/zip.js';
 import { getSettings, backgroundColour } from '../lib/settings.js';
 import { toast, enhance, tablist, openDialog, fmtBytes, ago } from '../lib/ui.js';
 
@@ -2069,13 +2071,12 @@ function smallPicture(width) {
   return c;
 }
 
-async function finalCanvas({ scaled = true } = {}) {
+async function finalCanvas({ scaled = true, deviceOpts = device?.get() } = {}) {
   let c = canvas(fullW(), fullH());
   const ctx = c.getContext('2d');
   paintImage(ctx);
   paintObjects(ctx);
-  const d = device?.get();
-  if (d?.enabled) c = renderInDevice(d, c);
+  if (deviceOpts?.enabled) c = renderInDevice(deviceOpts, c);
   const s = Number($('#x-scale').value);
   if (scaled && s !== 1) {
     const w = Math.max(1, Math.round(c.width * s));
@@ -2157,6 +2158,60 @@ async function updateDevicePreview() {
   prev.getContext('2d').drawImage(c, 0, 0);
 }
 $('#preview-edit').addEventListener('click', () => showPane('annotate'));
+
+// ---------- several devices ----------
+
+const MULTI_KEY = 'multiDevices';
+const MULTI_DEFAULT = ['none', 'iphone-17-pro', 'iphone-17-pro-max', 'ipad-pro-11', 'pixel-10', 'galaxy-s25'];
+
+async function openMulti() {
+  if (!base) return;
+  let chosen = MULTI_DEFAULT;
+  try { chosen = (await chrome.storage.local.get({ [MULTI_KEY]: MULTI_DEFAULT }))[MULTI_KEY]; } catch {}
+  const [w, h] = [fullW(), fullH()];
+  const best = DEVICES[matchDevice(w, h).id];
+  const item = (id, name, sub) => `<label><input type="checkbox" value="${id}"${chosen.includes(id) ? ' checked' : ''}>${name}${sub ? `<small>${sub}</small>` : ''}</label>`;
+  $('#multi-list').innerHTML =
+    item('none', 'No frame', `${w} × ${h}`) + item('auto', `Best match (${best.name})`, '') +
+    DEVICE_GROUPS.map(([label, test]) => `<div class="group">${label}</div>` +
+      Object.values(DEVICES).filter(test).map((d) => item(d.id, d.name, '')).join('')).join('');
+  $('#multi-status').textContent = '';
+  $('#multi-go').disabled = false;
+  openDialog($('#multi'));
+}
+
+async function exportMulti() {
+  const ids = [...$('#multi-list').querySelectorAll('input:checked')].map((i) => i.value);
+  if (!ids.length) { $('#multi-status').textContent = 'Choose at least one.'; return; }
+  try { chrome.storage.local.set({ [MULTI_KEY]: ids }); } catch {}
+  $('#multi-go').disabled = true;
+  const files = [];
+  const name = ($('#x-name').value || 'captode').trim().replace(/[\\/:*?"<>|]+/g, '-');
+  const ext = EXT[$('#x-format').value];
+  try {
+    for (const [i, id] of ids.entries()) {
+      const label = id === 'none' ? 'no frame' : id === 'auto' ? 'best match' : DEVICES[id].name;
+      $('#multi-status').textContent = `Making ${i + 1} of ${ids.length}: ${label}…`;
+      const opts = id === 'none' ? { enabled: false } : { ...device.get(), enabled: true, device: id };
+      const { blob } = await encode(await finalCanvas({ deviceOpts: opts }));
+      const slug = id === 'none' ? 'no-frame' : id === 'auto' ? `best-match-${matchDevice(fullW(), fullH()).id}` : id;
+      files.push({ name: `${name}-${slug}.${ext}`, data: new Uint8Array(await blob.arrayBuffer()) });
+    }
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(zip(files));
+    a.download = `${name}-devices.zip`;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 30000);
+    $('#multi').close();
+    toast(`Saved ${a.download} · ${files.length} image${files.length > 1 ? 's' : ''}`, { kind: 'success' });
+  } catch (e) {
+    $('#multi-status').textContent = `That didn't work: ${e.message}`;
+  } finally {
+    $('#multi-go').disabled = false;
+  }
+}
+$('#multi-open').addEventListener('click', openMulti);
+$('#multi-go').addEventListener('click', exportMulti);
 
 function fileName() {
   const n = ($('#x-name').value || 'captode').trim().replace(/[\\/:*?"<>|]+/g, '-');

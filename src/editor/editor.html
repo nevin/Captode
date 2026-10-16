@@ -332,6 +332,9 @@
       <section class="section">
         <h3 class="section-title">Device frame</h3>
         <div id="device-panel"></div>
+        <button class="btn block" id="multi-open" title="One image for each of several devices, in a zip">
+          <svg class="i" viewBox="0 0 24 24"><rect x="2" y="4" width="9" height="16" rx="2"/><rect x="13" y="7" width="9" height="13" rx="2"/></svg>Several devices…
+        </button>
       </section>
 
       <div class="export-bar">
@@ -349,6 +352,18 @@
     </div>
   </aside>
 </div>
+<dialog class="modal multi" id="multi" aria-labelledby="multi-title">
+  <div class="modal-body">
+    <h2 id="multi-title">Export for several devices</h2>
+    <p class="muted">One image for each, in a zip, in the format and with the options set in Export. Each keeps the capture's exact pixels.</p>
+    <div class="multi-list" id="multi-list" role="group" aria-labelledby="multi-title"></div>
+    <p class="muted small" id="multi-status" aria-live="polite"></p>
+    <div class="row actions">
+      <button class="btn" data-close>Cancel</button>
+      <button class="btn primary" id="multi-go">Download zip</button>
+    </div>
+  </div>
+</dialog>
 <dialog class="modal" id="shortcuts" aria-labelledby="shortcuts-title">
   <div class="modal-head">
     <h2 id="shortcuts-title">Keyboard shortcuts</h2>

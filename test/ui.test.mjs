@@ -742,6 +742,60 @@ export const tests = {
     }
   },
 
+  async 'several devices: one zip with an image for each device'({ browser, url }) {
+    const lab = await open(browser, url('lab/lab.html'));
+    const id = await lab.evaluate(async () => {
+      const { putCapture } = await import('/lib/db.js');
+      await chrome.storage.local.remove(['multiDevices', 'lastExport', 'settings', 'device', 'deviceOpts']);
+      const c = new OffscreenCanvas(1206, 2622);
+      c.getContext('2d').fillRect(0, 0, 10, 10);
+      return putCapture(await c.convertToBlob(), { title: 'Multi', mode: 'visible' });
+    });
+    await lab.close();
+    const ed = await open(browser, url(`editor/editor.html?id=${id}&reopen=1`), { width: 1400, height: 900 });
+    try {
+      await ed.waitForFunction(() => /px/.test(document.querySelector('#doc-dims').textContent), { polling: 100 });
+      // Keep the download in the page, to look inside it.
+      await ed.evaluate(() => { HTMLAnchorElement.prototype.click = function () { window.__download = { name: this.download, href: this.href }; }; });
+      await ed.evaluate(() => document.querySelector('[data-pane="export"]').click());
+      await ed.click('#multi-open');
+      await ed.waitForFunction(() => document.querySelector('#multi').open && document.querySelectorAll('#multi-list input').length > 40, { polling: 100 });
+      await ed.evaluate(() => {
+        for (const i of document.querySelectorAll('#multi-list input')) i.checked = ['none', 'iphone-17-pro', 'ipad-pro-11'].includes(i.value);
+      });
+      await ed.click('#multi-go');
+      await ed.waitForFunction(() => window.__download, { polling: 100, timeout: 60000 });
+      const z = await ed.evaluate(async () => {
+        const { name, href } = window.__download;
+        const b = new Uint8Array(await (await fetch(href)).arrayBuffer());
+        const v = new DataView(b.buffer);
+        const files = [];
+        for (let p = 0; v.getUint32(p, true) === 0x04034b50;) {
+          const size = v.getUint32(p + 18, true), n = v.getUint16(p + 26, true);
+          const fname = new TextDecoder().decode(b.subarray(p + 30, p + 30 + n));
+          const data = b.subarray(p + 30 + n, p + 30 + n + size);
+          const dv = new DataView(data.buffer, data.byteOffset);
+          files.push({ name: fname, w: dv.getUint32(16), h: dv.getUint32(20) });
+          p += 30 + n + size;
+        }
+        return { name, files };
+      });
+      ok(/^captode-multi-.*-devices\.zip$/.test(z.name), `zip name ${z.name}`);
+      ok(z.files.length === 3, `files: ${JSON.stringify(z.files)}`);
+      const [none, phone, tablet] = z.files;
+      ok(/-no-frame\.png$/.test(none.name) && none.w === 1206 && none.h === 2622, `no frame: ${JSON.stringify(none)}`);
+      ok(/-iphone-17-pro\.png$/.test(phone.name) && phone.w > 1206 && phone.h > 2622, `phone: ${JSON.stringify(phone)}`);
+      ok(/-ipad-pro-11\.png$/.test(tablet.name) && tablet.w > tablet.h * 0.6, `tablet: ${JSON.stringify(tablet)}`);
+      ok(!(await ed.$eval('#multi', (d) => d.open)), 'the dialog closes');
+      // The choice is remembered.
+      const saved = await ed.evaluate(async () => (await chrome.storage.local.get('multiDevices')).multiDevices);
+      ok(saved.join() === 'none,iphone-17-pro,ipad-pro-11', `remembered ${saved}`);
+    } finally {
+      await ed.evaluate(() => chrome.storage.local.remove(['multiDevices'])).catch(() => {});
+      await ed.close();
+    }
+  },
+
   async 'countdown shows the chosen seconds and Esc cancels it'({ browser, url }) {
     const p = await open(browser, url('popup/popup.html'), { width: 800, height: 600 });
     const r = await p.evaluate(async () => {
