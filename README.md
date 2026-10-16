@@ -109,9 +109,11 @@ opens in the video page, where you can:
 ### Device mode
 
 Turn on **Device mode** in the popup, the editor or the video page to export a screenshot or
-video inside a real phone or tablet: 44 devices, including iPhone 13 mini to iPhone 17 Pro Max,
-iPhone SE, iPad mini to iPad Pro 13″, Pixel 7 to Pixel 10 Pro XL, Galaxy S24 to S25 Ultra,
-Galaxy Z Flip and Fold, and Pixel and Galaxy tablets.
+video inside a real phone or tablet: 63 devices, including iPhone 13 mini to iPhone 18 Pro Max
+and the iPhone Duo, iPhone SE, iPad mini to iPad Pro 13″, Pixel 7 to Pixel 11 Pro XL and the
+Pixel 11 Pro Fold, Galaxy S24 to S26 Ultra, Galaxy Z Flip and Fold (including the Fold8 and
+Fold8 Ultra), and Pixel and Galaxy tablets. Sizes come from the manufacturers' published
+specifications (see the sources in `src/lib/devices.js`).
 
 Each device uses its published screen resolution, pixel density and body size, so its
 proportions and bezels are real. The frame is sized around the capture, so the capture keeps

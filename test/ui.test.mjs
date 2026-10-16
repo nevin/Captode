@@ -351,13 +351,13 @@ export const tests = {
       ok(v.kept, `${k}: the capture's pixels were changed`);
       ok(v.wide === k.endsWith('landscape'), `${k}: wrong orientation`);
     }
-    ok(r.match[0].id === 'iphone-17-pro' && r.match[0].exact && !r.match[0].landscape, `1206 × 2622 matched ${JSON.stringify(r.match[0])}`);
+    ok(r.match[0].id === 'iphone-18-pro' && r.match[0].exact && !r.match[0].landscape, `1206 × 2622 matched ${JSON.stringify(r.match[0])}`);
     ok(r.match[1].landscape && r.match[1].exact && /pixel/.test(r.match[1].id), `2424 × 1080 matched ${JSON.stringify(r.match[1])}`);
     ok(!r.match[2].exact && r.match[2].id === 'iphone-16', `a full page 1179 px wide matched ${JSON.stringify(r.match[2])}`);
     ok(r.legacy[0] === 'iphone-17-pro auto' && r.legacy[1] === 'auto auto', `older settings: ${r.legacy}`);
     ok(r.desk.exact && r.desk.screen[0] === 1280, `a desktop capture keeps its pixels: ${JSON.stringify(r.desk)}`);
     ok(r.deviceSize.screen.join() === '1206,2622' && !r.deviceSize.exact, `device resolution: ${JSON.stringify(r.deviceSize)}`);
-    ok(/iPhone 17 Pro: 1206 × 2622 px.*matches this capture exactly.*kept exactly/.test(r.describe), r.describe);
+    ok(/iPhone 18 Pro: 1206 × 2622 px.*matches this capture exactly.*kept exactly/.test(r.describe), r.describe);
     return `${Object.keys(r.out).length} layouts exact; ${JSON.stringify(r.counts)}`;
   },
 
@@ -383,7 +383,7 @@ export const tests = {
       active: document.querySelector('.dev-search').getAttribute('aria-activedescendant'),
       focus: document.activeElement.className,
     }));
-    ok((await state()).name === 'Best match: iPhone 17 Pro', `button: ${(await state()).name}`);
+    ok((await state()).name === 'Best match: iPhone 18 Pro', `button: ${(await state()).name}`);
     await ed.click('.dev-pick-btn');
     let st = await state();
     ok(st.open === 'true' && st.focus === 'dev-search' && st.options.length > 40, `opened: ${JSON.stringify({ ...st, options: st.options.length })}`);
@@ -393,7 +393,7 @@ export const tests = {
     ok(st.options.length === 6 && st.options.every((o) => /iPad/.test(o)), `iPad filter: ${st.options}`);
     await ed.click('[data-filter="all"]');
     await ed.focus('.dev-search');
-    await ed.keyboard.type('galaxy fold');
+    await ed.keyboard.type('fold6');
     st = await state();
     ok(st.options.join() === 'Galaxy Z Fold6 (folded),Galaxy Z Fold6 (open)', `search: ${st.options}`);
     await ed.keyboard.press('ArrowDown');
