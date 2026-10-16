@@ -39,9 +39,11 @@ export function measureText(m, ratio) {
 }
 
 /**
- * The edge nearest (x, y) along `axis` in a picture of `w` × `h` pixels: where the
- * colour changes most within `r` pixels, or the point itself where nothing changes
- * clearly. `read(x, y, w, h)` returns RGBA pixels.
+ * The edge nearest (x, y) along `axis` in a picture of `w` × `h` pixels, within `r`
+ * pixels, or the point itself where nothing changes clearly. An edge is where the
+ * colour changes most locally (so a soft, anti-aliased edge counts once, at its
+ * middle); the nearest clear one wins, not the strongest, as in design tools.
+ * `read(x, y, w, h)` returns RGBA pixels.
  */
 export function edgeNear(read, w, h, x, y, axis, r) {
   const at0 = axis === 'x' ? x : y;
@@ -49,14 +51,21 @@ export function edgeNear(read, w, h, x, y, axis, r) {
   const hi = Math.min(axis === 'x' ? w : h, at0 + r);
   if (hi - lo < 2 || x < 0 || y < 0 || x > w || y > h) return at0;
   const row = axis === 'x' ? read(lo, Math.min(h - 1, Math.max(0, y)), hi - lo, 1) : read(Math.min(w - 1, Math.max(0, x)), lo, 1, hi - lo);
-  let best = 0, at = at0;
+  // d[i]: the change between pixel i - 1 and i, that is, at the boundary lo + i.
+  const d = new Float32Array(hi - lo + 1);
+  let strongest = 0;
   for (let i = 1; i < hi - lo; i++) {
-    const d = Math.abs(row[i * 4] - row[i * 4 - 4]) + Math.abs(row[i * 4 + 1] - row[i * 4 - 3]) + Math.abs(row[i * 4 + 2] - row[i * 4 - 2]);
-    // The boundary between the two pixels; nearer ones win a tie.
-    const pos = lo + i;
-    if (d > best || (d === best && d && Math.abs(pos - at0) < Math.abs(at - at0))) { best = d; at = pos; }
+    d[i] = Math.abs(row[i * 4] - row[i * 4 - 4]) + Math.abs(row[i * 4 + 1] - row[i * 4 - 3]) + Math.abs(row[i * 4 + 2] - row[i * 4 - 2]);
+    strongest = Math.max(strongest, d[i]);
   }
-  return best >= 30 ? at : at0;
+  const clear = Math.max(30, strongest * 0.35);
+  let at = at0, best = Infinity;
+  for (let i = 1; i < hi - lo; i++) {
+    if (d[i] < clear || d[i] < d[i - 1] || d[i] < d[i + 1]) continue; // not a clear peak
+    const dist = Math.abs(lo + i - at0);
+    if (dist < best) { best = dist; at = lo + i; }
+  }
+  return at;
 }
 
 /**

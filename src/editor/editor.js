@@ -2,10 +2,10 @@ import { recall, remember, rememberControls } from '../lib/remember.js';
 import { mountPresets } from '../lib/presets.js';
 import { getCapture, listCaptures, deleteCapture, restoreCapture, saveEdits } from '../lib/db.js';
 import { encodeOffThread } from '../lib/encoder.js';
-import { mountDevicePanel, renderInDevice, DEVICES, matchDevice } from '../lib/device.js';
-import { GROUPS as DEVICE_GROUPS } from '../lib/devices.js';
-import { zip } from '../lib/zip.js';
-import { buildReviewPage } from './review-page.js';
+import { mountDevicePanel, renderInDevice } from '../lib/device.js';
+import { createLayers } from './layers.js';
+import { mountMultiExport } from './multi-export.js';
+import { mountShare } from './share.js';
 import { luminance, contrast, contrastHtml, hexOf, measureText as measureWords, edgeNear as edgeIn, measureFrom, drawMeasures } from '../lib/review.js';
 import { getSettings, backgroundColour } from '../lib/settings.js';
 import { toast, enhance, tablist, openDialog, fmtBytes, ago } from '../lib/ui.js';
@@ -685,7 +685,7 @@ function renderFg() {
   }
   fctx.restore();
   updateButtons();
-  scheduleLayers();
+  layers.schedule();
 }
 
 function layout() {
@@ -1553,109 +1553,21 @@ $('#m-clear').addEventListener('click', () => { review.measures = []; showMeasur
 $('#m-ratio').addEventListener('input', () => { syncRatioNote(); showMeasure(review.measures.at(-1) || null); renderFg(); });
 for (const id of ['g-on', 'g-step']) $('#' + id).addEventListener('input', () => renderFg());
 
-// ---------- annotations list: keyboard and screen readers ----------
+// ---------- annotations list: keyboard and screen readers (layers.js) ----------
 
-const escHtml = (t) => String(t).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-
-/** An annotation in words: what it is and where. */
-function describe(o) {
-  const r = Math.round;
-  if (o.type === 'text') {
-    const words = (o.text || '').trim().replace(/\s+/g, ' ');
-    return `${o.tail ? 'Callout' : 'Text'} “${words.length > 60 ? words.slice(0, 59) + '…' : words || 'empty'}”`;
-  }
-  if (o.type === 'step') return `Step ${o.n}${o.note ? `: ${o.note}` : ''}`;
-  if (o.type === 'line' || o.type === 'arrow') return `${NAMES[o.type]} from ${r(o.x1)}, ${r(o.y1)} to ${r(o.x2)}, ${r(o.y2)}`;
-  const b = bounds(o);
-  return `${NAMES[o.type] || o.type}, ${r(b.w)} × ${r(b.h)} at ${r(b.x)}, ${r(b.y)}`;
-}
-
-/** Says something to screen readers, without showing it. */
-function announce(message) {
-  const el = $('#announce');
-  el.textContent = '';
-  requestAnimationFrame(() => { el.textContent = message; });
-}
-const announceSoon = debounce(announce, 500);
-
-const layerList = () => [...objects].reverse(); // front first
-let activeLayer = 0;
-let layersSig = '';
-let layersFrame = 0;
-
-/** Redraws the list when what it shows has changed (coalesced to a frame). */
-function scheduleLayers() {
-  if (layersFrame) return;
-  layersFrame = requestAnimationFrame(() => { layersFrame = 0; renderLayers(); });
-}
-
-function renderLayers() {
-  const list = layerList();
-  if (selection.length && !isSelected(list[activeLayer])) activeLayer = Math.max(0, list.findIndex(isSelected));
-  activeLayer = Math.min(activeLayer, Math.max(0, list.length - 1));
-  const rows = list.map((o, i) => ({ text: describe(o), on: isSelected(o), color: o.type === 'text' ? o.bg || o.color : o.color || '#888' }));
-  const sig = JSON.stringify(rows) + activeLayer;
-  if (sig === layersSig) return;
-  layersSig = sig;
-  const ul = $('#layers');
-  ul.innerHTML = rows.map((row, i) =>
-    `<li role="option" id="layer-${i}" data-i="${i}" aria-selected="${row.on}" class="${i === activeLayer ? 'active' : ''}">` +
-    `<span class="sw" style="background:${escHtml(row.color)}"></span><span>${escHtml(row.text)}</span></li>`).join('');
-  if (list.length) ul.setAttribute('aria-activedescendant', `layer-${activeLayer}`);
-  else ul.removeAttribute('aria-activedescendant');
-  $('#layers-count').textContent = list.length ? `(${list.length})` : '';
-}
-
-function chooseLayer(i, { add = false, toggle = false } = {}) {
-  const list = layerList();
-  const o = list[i];
-  if (!o) return;
-  activeLayer = i;
-  if (toggle) select(isSelected(o) ? selection.filter((x) => x !== o) : [...selection, o]);
-  else if (add) select([...new Set([...selection, o])]);
-  else select([o]);
-  syncStyleUi();
-  renderFg();
-  renderLayers();
-  $(`#layer-${i}`)?.scrollIntoView({ block: 'nearest' });
-}
-
-$('#layers').addEventListener('click', (e) => {
-  const li = e.target.closest('[role="option"]');
-  if (li) chooseLayer(Number(li.dataset.i), { toggle: e.shiftKey || e.metaKey || e.ctrlKey });
+const layers = createLayers({
+  objects: () => objects,
+  selection: () => selection,
+  selected: () => selected,
+  isSelected,
+  select,
+  bounds,
+  names: NAMES,
+  changed: () => { syncStyleUi(); renderFg(); },
+  move: (dx, dy) => { for (const o of selection) moveObj(o, dx, dy); renderFg(); commitSoon(); },
+  editText,
 });
-$('#layers').addEventListener('focus', () => renderLayers());
-$('#layers').addEventListener('keydown', (e) => {
-  const n = objects.length;
-  if (!n) return;
-  const handled = () => { e.preventDefault(); e.stopPropagation(); };
-  if (e.altKey && e.key.startsWith('Arrow')) {
-    // Move what's selected.
-    handled();
-    if (!selection.length) return;
-    const s = e.shiftKey ? 10 : 1;
-    const d = { ArrowLeft: [-s, 0], ArrowRight: [s, 0], ArrowUp: [0, -s], ArrowDown: [0, s] }[e.key];
-    for (const o of selection) moveObj(o, ...d);
-    renderFg();
-    commitSoon();
-    const b = bounds(selection[0]);
-    announceSoon(`Moved to ${Math.round(b.x)}, ${Math.round(b.y)}`);
-    return;
-  }
-  const to = { ArrowDown: activeLayer + 1, ArrowUp: activeLayer - 1, Home: 0, End: n - 1 }[e.key];
-  if (to !== undefined) {
-    handled();
-    chooseLayer(Math.max(0, Math.min(n - 1, to)), { add: e.shiftKey });
-    return;
-  }
-  if (e.key === ' ') { handled(); chooseLayer(activeLayer, { toggle: true }); return; }
-  if (e.key === 'Enter') {
-    handled();
-    chooseLayer(activeLayer);
-    if (selected?.type === 'text') editText(selected);
-  }
-  // Delete, Escape, undo and the other shortcuts work as they do on the canvas.
-});
+const { describe, announce, announceSoon } = layers;
 
 // ---------- quick styles ----------
 
@@ -2194,127 +2106,31 @@ async function updateDevicePreview() {
 }
 $('#preview-edit').addEventListener('click', () => showPane('annotate'));
 
-// ---------- several devices ----------
+// ---------- several devices (multi-export.js) ----------
 
-const MULTI_KEY = 'multiDevices';
-const MULTI_DEFAULT = ['none', 'iphone-17-pro', 'iphone-17-pro-max', 'ipad-pro-11', 'pixel-10', 'galaxy-s25'];
-
-async function openMulti() {
-  if (!base) return;
-  let chosen = MULTI_DEFAULT;
-  try { chosen = (await chrome.storage.local.get({ [MULTI_KEY]: MULTI_DEFAULT }))[MULTI_KEY]; } catch {}
-  const [w, h] = [fullW(), fullH()];
-  const best = DEVICES[matchDevice(w, h).id];
-  const item = (id, name, sub) => `<label><input type="checkbox" value="${id}"${chosen.includes(id) ? ' checked' : ''}>${name}${sub ? `<small>${sub}</small>` : ''}</label>`;
-  $('#multi-list').innerHTML =
-    item('none', 'No frame', `${w} × ${h}`) + item('auto', `Best match (${best.name})`, '') +
-    DEVICE_GROUPS.map(([label, test]) => `<div class="group">${label}</div>` +
-      Object.values(DEVICES).filter(test).map((d) => item(d.id, d.name, '')).join('')).join('');
-  $('#multi-status').textContent = '';
-  $('#multi-go').disabled = false;
-  openDialog($('#multi'));
-}
-
-async function exportMulti() {
-  const ids = [...$('#multi-list').querySelectorAll('input:checked')].map((i) => i.value);
-  if (!ids.length) { $('#multi-status').textContent = 'Choose at least one.'; return; }
-  try { chrome.storage.local.set({ [MULTI_KEY]: ids }); } catch {}
-  $('#multi-go').disabled = true;
-  const files = [];
-  const name = ($('#x-name').value || 'captode').trim().replace(/[\\/:*?"<>|]+/g, '-');
-  const ext = EXT[$('#x-format').value];
-  try {
-    for (const [i, id] of ids.entries()) {
-      const label = id === 'none' ? 'no frame' : id === 'auto' ? 'best match' : DEVICES[id].name;
-      $('#multi-status').textContent = `Making ${i + 1} of ${ids.length}: ${label}…`;
-      const opts = id === 'none' ? { enabled: false } : { ...device.get(), enabled: true, device: id };
-      const { blob } = await encode(await finalCanvas({ deviceOpts: opts }));
-      const slug = id === 'none' ? 'no-frame' : id === 'auto' ? `best-match-${matchDevice(fullW(), fullH()).id}` : id;
-      files.push({ name: `${name}-${slug}.${ext}`, data: new Uint8Array(await blob.arrayBuffer()) });
-    }
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(zip(files));
-    a.download = `${name}-devices.zip`;
-    a.click();
-    setTimeout(() => URL.revokeObjectURL(a.href), 30000);
-    $('#multi').close();
-    toast(`Saved ${a.download} · ${files.length} image${files.length > 1 ? 's' : ''}`, { kind: 'success' });
-  } catch (e) {
-    $('#multi-status').textContent = `That didn't work: ${e.message}`;
-  } finally {
-    $('#multi-go').disabled = false;
-  }
-}
-$('#multi-open').addEventListener('click', openMulti);
-$('#multi-go').addEventListener('click', exportMulti);
-
-// ---------- share for review ----------
-
-const stepsInOrder = () => objects.filter((o) => o.type === 'step').sort((a, b) => a.n - b.n);
-
-function openShare() {
-  if (!base) return;
-  if (editing) finishText();
-  $('#sh-title').value = $('#sh-title').value || meta.title || 'Screenshot';
-  const steps = stepsInOrder();
-  $('#sh-none').classList.toggle('hidden', !!steps.length);
-  $('#sh-steps').innerHTML = steps.map((o, i) =>
-    `<label><span class="n" style="background:${o.color}">${o.n}</span><textarea data-i="${i}" rows="1" aria-label="Note for step ${o.n}" placeholder="What is step ${o.n} about?"></textarea></label>`).join('');
-  // Notes are kept on the steps, so they come back with the capture.
-  steps.forEach((o, i) => { $('#sh-steps').querySelector(`[data-i="${i}"]`).value = o.note || ''; });
-  openDialog($('#share'));
-  $('#sh-title').focus();
-}
-
-const blobToDataUrl = (blob) => new Promise((resolve, reject) => {
-  const r = new FileReader();
-  r.onload = () => resolve(r.result);
-  r.onerror = () => reject(r.error);
-  r.readAsDataURL(blob);
+mountMultiExport({
+  hasImage: () => !!base,
+  size: () => [fullW(), fullH()],
+  deviceOptions: () => device.get(),
+  render: (deviceOpts) => finalCanvas({ deviceOpts }),
+  encode: (c) => encode(c),
+  extension: () => EXT[$('#x-format').value],
+  stem: () => ($('#x-name').value || 'captode').trim().replace(/[\\/:*?"<>|]+/g, '-'),
 });
 
-async function exportShare(e) {
-  e.preventDefault();
-  const steps = stepsInOrder();
-  steps.forEach((o, i) => { o.note = $('#sh-steps').querySelector(`[data-i="${i}"]`).value.trim(); });
-  commit(); // the notes are part of the edits
-  $('#sh-go').disabled = true;
-  try {
-    // The annotated image without a device frame, as PNG: the page is for looking closely.
-    const c = await finalCanvas({ scaled: false, deviceOpts: { enabled: false } });
-    const { blob } = await encodeOffThread(c, 'png', {}, 'export', 0);
-    const W = fullW(), H = fullH();
-    const title = $('#sh-title').value.trim() || 'Screenshot';
-    const html = buildReviewPage({
-      title,
-      summary: $('#sh-summary').value.trim(),
-      image: await blobToDataUrl(blob),
-      width: c.width,
-      height: c.height,
-      steps: steps.map((o) => ({ n: o.n, x: (o.x + frame.padding) / W, y: (o.y + frame.padding) / H, color: o.color, note: o.note })),
-      labels: objects.filter((o) => o.type === 'text' && o.text.trim()).map((o) => o.text.trim()),
-      facts: [
-        ['Page', meta.url || ''],
-        ['Captured', new Date(meta.created || Date.now()).toLocaleString()],
-        ['Size', `${base.width} × ${base.height} px${meta.dpr ? ` (${Math.round(meta.dpr * 100) / 100}× pixel ratio)` : ''}`],
-        ['Browser', navigator.userAgentData?.brands?.filter((b) => !/not.a.brand/i.test(b.brand)).map((b) => `${b.brand} ${b.version}`).join(', ') || ''],
-      ],
-    });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(new Blob([html], { type: 'text/html' }));
-    a.download = `${title.replace(/[\\/:*?"<>|]+/g, '-').slice(0, 80)}-review.html`;
-    a.click();
-    setTimeout(() => URL.revokeObjectURL(a.href), 30000);
-    $('#share').close();
-    toast(`Saved ${a.download}`, { kind: 'success' });
-  } catch (err) {
-    toast('Could not make the review page: ' + err.message, { kind: 'error', ms: 5000 });
-  } finally {
-    $('#sh-go').disabled = false;
-  }
-}
-$('#share-open').addEventListener('click', openShare);
-$('#share-form').addEventListener('submit', exportShare);
+// ---------- share for review (share.js) ----------
+
+mountShare({
+  hasImage: () => !!base,
+  finishEditing: () => { if (editing) finishText(); },
+  objects: () => objects,
+  meta: () => meta,
+  padding: () => frame.padding,
+  size: () => [fullW(), fullH()],
+  imageSize: () => [base.width, base.height],
+  render: () => finalCanvas({ scaled: false, deviceOpts: { enabled: false } }),
+  commit: () => commit(),
+});
 
 function fileName() {
   const n = ($('#x-name').value || 'captode').trim().replace(/[\\/:*?"<>|]+/g, '-');
