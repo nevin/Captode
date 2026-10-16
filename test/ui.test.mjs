@@ -681,17 +681,22 @@ export const tests = {
     ok(Math.abs(back.o.x1 - start.o.x1) < 0.01 && Math.abs(back.o.y2 - start.o.y2) < 0.01, 'rotating right then left moved the rectangle');
     await click('flip-h'); await click('flip-h'); await click('flip-v'); await click('flip-v');
     ok((await state()).hash === start.hash, 'flipping twice changed the image');
-    // Zoom at the pointer: the image point under it stays put.
-    const pt = [w.x + 400, w.y + 300];
+    // Zoom at the pointer: the image point under it stays put. The Ctrl+wheel event goes
+    // straight to the page: how a runner's Chrome turns synthetic wheel input into
+    // pinch gestures varies.
+    await ed.evaluate(() => document.querySelector('#zoom-label').click());
+    await sleep(100);
+    const r0 = await ed.evaluate(() => { const r = document.querySelector('#wrap').getBoundingClientRect(); return { x: r.x, y: r.y }; });
+    const pt = [r0.x + 400, r0.y + 300];
     const under = () => ed.evaluate(([x, y]) => { const r = document.querySelector('#wrap').getBoundingClientRect(); const z = parseFloat(document.querySelector('#zoom-label').textContent) / 100; return [(x - r.left) / z, (y - r.top) / z]; }, pt);
     const a = await under();
-    await ed.mouse.move(...pt);
-    await ed.keyboard.down('Control');
-    for (let i = 0; i < 3; i++) await ed.mouse.wheel({ deltaY: -50 });
-    await ed.keyboard.up('Control');
-    await sleep(100);
+    const info = await ed.evaluate(([x, y]) => {
+      const stage = document.querySelector('#stage');
+      for (let i = 0; i < 3; i++) stage.dispatchEvent(new WheelEvent('wheel', { deltaY: -50, clientX: x, clientY: y, ctrlKey: true, bubbles: true, cancelable: true }));
+      return { zoom: document.querySelector('#zoom-label').textContent, scroll: [stage.scrollLeft, stage.scrollTop], max: [stage.scrollWidth - stage.clientWidth, stage.scrollHeight - stage.clientHeight] };
+    }, pt);
     const b = await under();
-    ok(Math.hypot(a[0] - b[0], a[1] - b[1]) < 3, `point under the pointer moved from ${a.map(Math.round)} to ${b.map(Math.round)}`);
+    ok(Math.hypot(a[0] - b[0], a[1] - b[1]) < 3, `point under the pointer moved from ${a.map(Math.round)} to ${b.map(Math.round)} (${JSON.stringify(info)})`);
     await ed.evaluate(() => { window.onbeforeunload = null; });
     await ed.close();
   },
