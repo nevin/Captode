@@ -9,7 +9,7 @@ const locales = join(dirname(fileURLToPath(import.meta.url)), '..', 'src', '_loc
 const keys = Object.keys(JSON.parse(readFileSync(join(locales, 'en', 'messages.json'), 'utf8')));
 const messages = (lang) => JSON.parse(readFileSync(join(locales, lang, 'messages.json'), 'utf8'));
 
-/** Chrome's interface language: --lang on Windows and Linux, AppleLanguages on macOS. */
+/** Chrome's interface language: --lang on Windows, AppleLanguages on macOS, LANGUAGE on Linux. */
 const languageArgs = (lang) => [`--lang=${lang}`, ...(process.platform === 'darwin' ? ['-AppleLanguages', `(${lang})`] : [])];
 
 /** All text a person or screen reader would meet: content, titles, labels, placeholders. */
@@ -24,7 +24,7 @@ const pageText = (page) => page.evaluate(() => {
 
 /** Opens Captode's pages in `lang` and checks them. */
 async function checkLanguage(lang) {
-  const env = await launch({ args: languageArgs(lang) });
+  const env = await launch({ args: languageArgs(lang), env: { LANGUAGE: lang } });
   const { browser, url } = env;
   const m = messages(lang);
   const leaks = [];

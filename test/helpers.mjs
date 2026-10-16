@@ -60,12 +60,13 @@ function keepDisplayAwake() {
 
 const defaultFeatures = puppeteer.defaultArgs({ headless: true }).find((a) => a.startsWith('--disable-features='));
 
-export async function launch({ scheme = 'light', args = [] } = {}) {
+export async function launch({ scheme = 'light', args = [], env } = {}) {
   keepDisplayAwake();
   const { dir: ext, id: expectedId } = testCopy();
   const profile = mkdtempSync(join(tmpdir(), 'captode-profile-'));
   const browser = await puppeteer.launch({
     executablePath: process.env.CHROME_PATH || undefined,
+    ...(env && { env: { ...process.env, ...env } }),
     headless: true,
     pipe: true,
     enableExtensions: true,
