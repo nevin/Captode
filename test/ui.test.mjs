@@ -618,4 +618,40 @@ export const tests = {
     await ed.evaluate(() => { window.onbeforeunload = null; });
     await ed.close();
   },
+
+  async 'editor: edits are kept with the capture and come back on reopening'({ editor }) {
+    const ed = await editor();
+    await ed.evaluate(() => document.querySelector('#zoom-label').click());
+    await sleep(100);
+    const w = await ed.evaluate(() => { const r = document.querySelector('#wrap').getBoundingClientRect(); return { x: r.x, y: r.y }; });
+    const at = (x, y) => [w.x + x, w.y + y];
+    await ed.keyboard.press('r');
+    await ed.mouse.move(...at(100, 100)); await ed.mouse.down(); await ed.mouse.move(...at(300, 200), { steps: 3 }); await ed.mouse.up();
+    await ed.keyboard.press('n');
+    await ed.mouse.click(...at(500, 300));
+    // Crop too, so the stored image changes.
+    await ed.keyboard.press('c');
+    await ed.mouse.move(...at(50, 50)); await ed.mouse.down(); await ed.mouse.move(...at(900, 600), { steps: 3 }); await ed.mouse.up();
+    await ed.keyboard.press('Enter');
+    await sleep(1200); // saved shortly after the last change
+    const before = await ed.evaluate(() => ({ size: captodeEditor.size(), n: captodeEditor.objects().length }));
+    ed.on('dialog', (d) => d.accept()); // "leave without downloading?"
+    await ed.reload({ waitUntil: 'load' });
+    await ed.waitForFunction(() => window.captodeEditor?.size(), { polling: 100, timeout: 20000 });
+    await ed.waitForFunction(() => captodeEditor.objects().length > 0, { polling: 100, timeout: 10000 }).catch(() => {});
+    const after = await ed.evaluate(() => ({ size: captodeEditor.size(), n: captodeEditor.objects().length, toast: document.body.innerText.includes('Your edits are back') }));
+    ok(after.n === before.n && after.size.join() === before.size.join(), `before ${JSON.stringify(before)}, after reopening ${JSON.stringify(after)}`);
+    ok(after.toast, 'no message that the edits were restored');
+    // Undo all goes back to the original capture (not the restored edits)…
+    await ed.evaluate(() => document.querySelector('#undo-all').click());
+    const orig = await ed.evaluate(() => ({ size: captodeEditor.size(), n: captodeEditor.objects().length }));
+    ok(orig.n === 0 && orig.size[0] > before.size[0], `Undo all gave ${JSON.stringify(orig)}`);
+    // …and that is saved too.
+    await sleep(1200);
+    await ed.reload({ waitUntil: 'load' });
+    await ed.waitForFunction(() => window.captodeEditor?.size(), { polling: 100, timeout: 20000 });
+    await sleep(500);
+    ok((await ed.evaluate(() => captodeEditor.objects().length)) === 0, 'reopening after Undo all brought edits back');
+    await ed.close();
+  },
 };

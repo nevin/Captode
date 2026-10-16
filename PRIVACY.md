@@ -9,9 +9,9 @@ them. It does not collect, transmit, sell or share any personal or sensitive dat
 
 - **Screenshots and recordings** are made, edited and exported entirely inside your
   browser, on your device. Nothing is uploaded anywhere.
-- **Until you download them**, captures are kept in the extension's own browser storage
-  (IndexedDB) so the editor and video pages can open them, and so you can reopen a recent
-  capture. They are deleted automatically after 24 hours, and you can remove any of them
+- **Until you download them**, captures (and the edits you make to them) are kept in the
+  extension's own browser storage (IndexedDB) so the editor and video pages can open them,
+  and so you can reopen a recent capture where you left off. They are deleted automatically after 24 hours, and you can remove any of them
   sooner from the editor's Recent captures list.
 - **Your settings** (theme, export background, default formats, device-frame and
   recording options) are kept in the browser's extension storage on your device.

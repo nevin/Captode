@@ -1,4 +1,4 @@
-import { getCapture, listCaptures, deleteCapture } from '../lib/db.js';
+import { getCapture, listCaptures, deleteCapture, saveEdits } from '../lib/db.js';
 import { encodeOffThread } from '../lib/encoder.js';
 import { mountDevicePanel, renderInDevice } from '../lib/device.js';
 import { getSettings, backgroundColour } from '../lib/settings.js';
@@ -142,6 +142,52 @@ function commit() {
   trimHistory();
   updateButtons();
   refreshExport();
+  if (captureId) persistSoon();
+}
+
+// ---------- keeping edits ----------
+// Edits to a capture are saved with it (on this device, like the capture), so
+// reopening it from Recent captures or reloading the page brings them back.
+
+let captureId = null;  // the stored capture being edited, if any
+let loadedBase = null; // the image as stored, to tell whether it has been cropped or resized
+let savedImage = { base: null, blob: null };
+
+async function persist() {
+  if (!captureId || !base) return;
+  const id = captureId;
+  if (atOriginal() || (base === loadedBase && !objects.length && !frame.padding && !frame.radius)) {
+    await saveEdits(id, null);
+    return;
+  }
+  let image = null;
+  if (base !== loadedBase) {
+    if (savedImage.base !== base) savedImage = { base, blob: await base.convertToBlob({ type: 'image/png' }) };
+    image = savedImage.blob;
+  }
+  await saveEdits(id, { objects: objects.map(({ _editing, ...o }) => structuredClone(o)), frame: { ...frame }, base: image, saved: Date.now() });
+}
+const persistSoon = debounce(() => persist().catch(() => {}), 700);
+// Don't lose the last moments of work when the tab is hidden or closed.
+document.addEventListener('visibilitychange', () => { if (document.hidden && captureId) persist().catch(() => {}); });
+addEventListener('pagehide', () => { if (captureId) persist().catch(() => {}); });
+
+/** Puts back edits saved with the capture, as one undoable step after the original. */
+async function restoreEdits(edits) {
+  if (edits.base) {
+    const bmp = await createImageBitmap(edits.base);
+    const c = canvas(bmp.width, bmp.height);
+    c.getContext('2d').drawImage(bmp, 0, 0);
+    base = c;
+  }
+  objects = edits.objects || [];
+  Object.assign(frame, edits.frame || {});
+  syncFrameUi();
+  layout();
+  fitZoom();
+  commit();
+  dirty = false;
+  toast('Your edits are back', { action: { label: 'Start over', run: undoAll }, ms: 5000 });
 }
 const commitSoon = debounce(commit, 400);
 
@@ -1771,10 +1817,12 @@ async function loadBlob(blob, info = {}) {
   if (info.title) document.title = `${info.title} — Captode`;
   $('#doc-name').textContent = info.title || 'Screenshot';
   $('#doc-name').title = info.url || info.title || '';
+  captureId = null;
   layout();
   fitZoom();
   commit();
   original = history[0];
+  loadedBase = base;
   updateButtons();
 }
 
@@ -1804,6 +1852,7 @@ async function renderRecent() {
       <button class="btn ghost icon remove" data-tip="Remove" aria-label="Remove ${title.replace(/"/g, '')}"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>`;
     a.querySelector('.thumb').append(thumb);
     if (it.kind === 'video') a.querySelector('.thumb').insertAdjacentHTML('beforeend', '<span class="badge">Video</span>');
+    else if (it.edited) a.querySelector('.thumb').insertAdjacentHTML('beforeend', '<span class="badge">Edited</span>');
     a.querySelector('b').textContent = title;
     a.querySelector('small').textContent = `${ago(it.created)} · ${fmtBytes(it.size)}`;
     a.querySelector('.remove').addEventListener('click', async (e) => {
@@ -1870,6 +1919,8 @@ document.addEventListener('keydown', (e) => {
   const rec = id && globalThis.chrome?.runtime ? await getCapture(id) : null;
   if (rec) {
     await loadBlob(rec.blob, rec.meta);
+    captureId = id;
+    if (rec.edits) await restoreEdits(rec.edits);
     if (rec.meta?.truncated) toast('This page is very long, so only its top part was captured.', { ms: 6000 });
     // Only a capture that has just been taken, not one reopened from Recent captures.
     if (settings.autoCopy && !new URLSearchParams(location.search).has('reopen')) {

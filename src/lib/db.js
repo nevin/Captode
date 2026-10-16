@@ -59,11 +59,33 @@ export async function listCaptures(limit = 12) {
         resolve(out.slice(0, limit));
         return;
       }
-      const { blob, meta = {}, created = 0 } = c.value;
-      if (blob) out.push({ id: c.key, kind: blob.type.startsWith('video/') ? 'video' : 'image', meta, created, size: blob.size, blob });
+      const { blob, meta = {}, created = 0, edits } = c.value;
+      if (blob) out.push({ id: c.key, kind: blob.type.startsWith('video/') ? 'video' : 'image', meta, created, size: blob.size, blob, edited: !!edits?.objects?.length || !!edits?.base });
       c.continue();
     };
     req.onerror = () => { db.close(); resolve(out); };
+  });
+}
+
+/**
+ * Keeps the editor's work on a capture with it: `{ objects, frame, base, saved }`,
+ * where `base` is the edited image (a Blob) if it was cropped or resized, else null.
+ * Pass null to drop them.
+ */
+export async function saveEdits(id, edits) {
+  const db = await open();
+  await new Promise((resolve, reject) => {
+    const t = db.transaction(STORE, 'readwrite');
+    const store = t.objectStore(STORE);
+    const req = store.get(id);
+    req.onsuccess = () => {
+      if (!req.result) return;
+      const rec = { ...req.result };
+      if (edits) rec.edits = edits; else delete rec.edits;
+      store.put(rec, id);
+    };
+    t.oncomplete = () => { db.close(); resolve(); };
+    t.onerror = () => { db.close(); reject(t.error); };
   });
 }
 
