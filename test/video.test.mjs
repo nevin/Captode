@@ -264,8 +264,9 @@ export const tests = {
       // Compression costs a few levels; the wrong colour matrix cost up to 40.
       ok(r.worst <= 8, `${f}: ${r.where}`);
       if (f === 'mp4') {
-        // nclx: sRGB primaries (1) and transfer (13), BT.709 matrix (1), limited range.
-        ok(r.colr && String.fromCharCode(...r.colr.slice(0, 4)) === 'nclx' && r.colr.slice(4, 11).join() === '0,1,0,13,0,1,0', `MP4 colour tag ${r.colr}`);
+        // nclx: sRGB primaries (1) and transfer (13), and the matrix the encoder used:
+        // BT.709 (1) for hardware encoders, BT.601 (6) for Chrome's software H.264.
+        ok(r.colr && String.fromCharCode(...r.colr.slice(0, 4)) === 'nclx' && /^0,1,0,13,0,[16],0$/.test(r.colr.slice(4, 11).join()), `MP4 colour tag ${r.colr}`);
       }
       if (f === 'webm') ok(r.webmColour, 'WebM has no Colour element');
       notes.push(`${f} ±${r.worst}`);
