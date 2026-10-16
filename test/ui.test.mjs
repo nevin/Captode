@@ -500,6 +500,34 @@ export const tests = {
     await ed.close();
   },
 
+  async 'popup shows the video size in pixels for the current tab'({ browser, url, page }) {
+    const want = await page.evaluate(() => [Math.round(innerWidth * devicePixelRatio), Math.round(innerHeight * devicePixelRatio)]);
+    const pop = await browser.newPage();
+    // As when the popup opens over the test page: that page is the active tab.
+    await pop.evaluateOnNewDocument((pageUrl) => {
+      const query = chrome.tabs.query.bind(chrome.tabs);
+      chrome.tabs.query = (q) => (q?.active ? query({ url: pageUrl }) : query(q));
+    }, page.url());
+    await pop.setViewport({ width: 340, height: 700 });
+    await pop.goto(url('popup/popup.html'));
+    await pop.evaluate(() => chrome.storage.local.set({ kind: 'video' }));
+    await pop.reload();
+    await prepare(pop);
+    const even = (n) => Math.max(2, Math.round(n / 2) * 2);
+    const hint = async (v) => {
+      await pop.select('#size', v);
+      return pop.$eval('#size-hint', (e) => e.textContent);
+    };
+    await pop.waitForFunction(() => / px$/.test(document.querySelector('#size-hint').textContent), { polling: 100 });
+    ok(await hint('page') === `${even(want[0])} × ${even(want[1])} px`, `page size: ${await hint('page')}`);
+    ok(await hint('0.5x') === `${even(want[0] / 2)} × ${even(want[1] / 2)} px`, `50%: ${await hint('0.5x')}`);
+    const h720 = await hint('720p');
+    ok(h720.includes(want[0] <= want[1] ? '720 ×' : '× 720'), `720p: ${h720}`);
+    await pop.select('#size', 'page');
+    await pop.evaluate(() => chrome.storage.local.remove('videoSize'));
+    await pop.close();
+  },
+
   async 'countdown shows the chosen seconds and Esc cancels it'({ browser, url }) {
     const p = await open(browser, url('popup/popup.html'), { width: 800, height: 600 });
     const r = await p.evaluate(async () => {

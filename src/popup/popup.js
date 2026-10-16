@@ -1,8 +1,10 @@
 import { enhance, tablist, showShortcut } from '../lib/ui.js';
+import { outputSize } from '../lib/recorder.js';
 
 const $ = (s) => document.querySelector(s);
 const selectTab = tablist($('.kind'), (t) => { setKind(t.dataset.kind); chrome.storage.local.set({ kind: t.dataset.kind }); });
 let kind = 'image';
+let tabPixels = null; // this tab's page area in pixels, once known
 let fps = '30';
 
 const settings = await chrome.storage.local.get({ kind: 'image', fps: '30', audio: false, countdown: true, countdownSeconds: null, device: false, videoSize: 'page' });
@@ -54,7 +56,24 @@ if (blocked) {
 }
 enhance();
 showShortcut(document.querySelector('.shortcut-keys'));
+showSizes();
 
+/**
+ * The size each choice gives for this tab: its page area as recorded (CSS pixels
+ * times the screen's pixel ratio). Shown under the choice; full-screen recordings
+ * start from the screen's size instead.
+ */
+async function showSizes() {
+  if (blocked) return;
+  try {
+    const [{ result: [w, h, dpr] }] = await chrome.scripting.executeScript({
+      target: { tabId: activeTab.id },
+      func: () => [innerWidth, innerHeight, devicePixelRatio],
+    });
+    tabPixels = [Math.round(w * dpr), Math.round(h * dpr)];
+  } catch { return; } // the page can't be scripted: keep the plain hints
+  setSize($('#size').value);
+}
 function setKind(k) {
   kind = k;
   for (const b of document.querySelectorAll('.kind button')) b.classList.toggle('on', b.dataset.kind === k);
@@ -147,5 +166,11 @@ function setSize(v) {
   select.value = v;
   if (select.value !== v) select.value = 'page'; // a size this version doesn't offer
   const group = select.value === 'page' ? 'page' : select.value.endsWith('x') ? 'scale' : 'res';
-  $('#size-hint').textContent = SIZE_HINTS[group];
+  if (tabPixels) {
+    const { width, height } = outputSize(...tabPixels, select.value);
+    $('#size-hint').textContent = `${width} × ${height} px`;
+    $('#size-hint').title = `${SIZE_HINTS[group]}. For this tab; full-screen recordings start from your screen's size.`;
+  } else {
+    $('#size-hint').textContent = SIZE_HINTS[group];
+  }
 }
