@@ -88,8 +88,34 @@ export async function launch({ scheme = 'light', args = [] } = {}) {
 }
 
 /** Opens an extension page (or any URL) in a new tab, logging its errors. */
+// Every page the tests use behaves as if its window were focused, and waits are done
+// from here rather than by a timer in the page. On CI runners (Windows especially) the
+// browser window is never really focused: the clipboard then waits for focus, and the
+// page's own timers can stall, so Puppeteer's in-page polling never saw a condition
+// that was already true.
+async function waitFor(page, fn, opts = {}, ...args) {
+  const timeout = opts.timeout ?? 30000;
+  const end = Date.now() + timeout;
+  let last = null;
+  for (;;) {
+    // The page may still be loading (or navigating): an error then just means "not yet".
+    const ok = await page.evaluate(fn, ...args).catch((e) => { last = e; return false; });
+    if (ok) return ok;
+    if (Date.now() > end) throw new Error(`Waiting failed: ${timeout}ms exceeded${last ? ` (last error: ${last.message})` : ''}`);
+    await sleep(opts.polling ?? 100);
+  }
+}
+
+export async function prepare(page) {
+  if (page.__prepared) return page;
+  page.__prepared = true;
+  page.waitForFunction = (fn, opts, ...args) => waitFor(page, fn, opts, ...args);
+  try { await (await page.createCDPSession()).send('Emulation.setFocusEmulationEnabled', { enabled: true }); } catch {}
+  return page;
+}
+
 export async function open(browser, url, { width = 1280, height = 900 } = {}) {
-  const page = await browser.newPage();
+  const page = await prepare(await browser.newPage());
   page.on('pageerror', (e) => console.log(`    page error (${url}): ${e.message}`));
   await page.setViewport({ width, height });
   await page.goto(url);
@@ -98,7 +124,7 @@ export async function open(browser, url, { width = 1280, height = 900 } = {}) {
 
 export async function waitForTab(browser, match, ms = 30000) {
   const t = await browser.waitForTarget((t) => t.type() === 'page' && match(t.url()), { timeout: ms });
-  return t.page();
+  return prepare(await t.page());
 }
 
 /** Records a synthetic clip in the page and stores it as a capture. Returns its id. */

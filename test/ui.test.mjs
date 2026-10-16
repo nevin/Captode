@@ -1,5 +1,5 @@
 // The interface: popup states, editor flows, settings and themes.
-import { open, waitForTab, ok, sleep, near } from './helpers.mjs';
+import { open, waitForTab, prepare, ok, sleep, near } from './helpers.mjs';
 
 const theme = (page) => page.evaluate(() => [document.documentElement.dataset.theme || 'system', getComputedStyle(document.body).backgroundColor]);
 
@@ -18,7 +18,7 @@ export async function setup({ browser, url, site }) {
       await ctl.evaluate((tabId) => chrome.runtime.sendMessage({ type: 'capture-image', mode: 'visible', tabId }), tabId);
       try {
         const t = await browser.waitForTarget((t) => !before.has(t) && t.type() === 'page' && t.url().includes('editor.html?id='), { timeout: 15000 });
-        ed = await t.page();
+        ed = await prepare(await t.page());
       } catch (e) {
         const lastError = await ctl.evaluate(async () => (await chrome.storage.session.get('lastError')).lastError);
         if (attempt) throw new Error(`no editor opened after capturing (last error: ${lastError})`);
@@ -64,7 +64,7 @@ export const tests = {
     ok(await ed.evaluate(() => document.querySelector('#shortcuts').open), 'shortcuts sheet did not open');
     await ed.keyboard.press('Escape');
     await ed.click('#copy');
-    for (let t = 0; t < 30 && (await guarded()); t++) await sleep(100); // copying takes a moment
+    for (let t = 0; t < 100 && (await guarded()); t++) await sleep(100); // copying takes a moment
     ok(!(await guarded()), 'copying should count as saving: ' + await ed.evaluate(() => document.querySelector('.toast')?.textContent));
     await ed.close();
   },
