@@ -921,6 +921,20 @@ export const tests = {
     }
   },
 
+  async 'after an update, the popup says what is new, once'({ browser, url }) {
+    const pop = await open(browser, url('popup/popup.html'), { width: 340, height: 700 });
+    ok(await pop.$eval('#whats-new', (e) => e.classList.contains('hidden')), 'nothing new on a fresh install');
+    await pop.evaluate(() => chrome.storage.local.set({ whatsNew: '1.2.0' }));
+    await pop.reload();
+    await pop.waitForFunction(() => !document.querySelector('#whats-new').classList.contains('hidden'), { polling: 100 });
+    await pop.click('#whats-new-close');
+    ok(!(await pop.evaluate(async () => (await chrome.storage.local.get('whatsNew')).whatsNew)), 'dismissed for good');
+    await pop.reload();
+    await sleep(300);
+    ok(await pop.$eval('#whats-new', (e) => e.classList.contains('hidden')), 'not shown again');
+    await pop.close();
+  },
+
   async 'countdown shows the chosen seconds and Esc cancels it'({ browser, url }) {
     const p = await open(browser, url('popup/popup.html'), { width: 800, height: 600 });
     const r = await p.evaluate(async () => {

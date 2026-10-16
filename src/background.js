@@ -323,6 +323,17 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   }
 });
 
+// After an update that adds features, the popup says what's new, once.
+const WHATS_NEW = '1.2.0';
+chrome.runtime.onInstalled.addListener(({ reason, previousVersion }) => {
+  const older = (a, b) => {
+    const x = a.split('.').map(Number), y = b.split('.').map(Number);
+    for (let i = 0; i < 3; i++) if ((x[i] || 0) !== (y[i] || 0)) return (x[i] || 0) < (y[i] || 0);
+    return false;
+  };
+  if (reason === 'update' && previousVersion && older(previousVersion, WHATS_NEW)) chrome.storage.local.set({ whatsNew: WHATS_NEW });
+});
+
 chrome.runtime.onStartup.addListener(async () => {
   await setRec(null);
   await leaveRecordingUi();

@@ -297,6 +297,8 @@ details.section[open] > summary::after { transform: rotate(-135deg); margin-top:
 .banner > div { flex: 1; min-width: 0; }
 .banner b { display: block; font-weight: 600; margin-bottom: 1px; }
 .banner.warn { background: var(--warn-soft); border-color: transparent; }
+.banner.new { background: var(--accent-soft); border-color: transparent; }
+.banner.new > .i { color: var(--accent); }
 .banner.warn > .i { color: var(--warn); }
 .banner.error { background: var(--rec-soft); border-color: transparent; }
 .banner.error > .i { color: var(--rec); }

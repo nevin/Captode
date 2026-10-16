@@ -45,6 +45,11 @@ if (lastError) {
 }
 $('#error-close').addEventListener('click', () => $('#error').classList.add('hidden'));
 
+// Once, after an update with new features.
+const { whatsNew } = await chrome.storage.local.get('whatsNew');
+if (whatsNew && !lastError) $('#whats-new').classList.remove('hidden');
+$('#whats-new-close').addEventListener('click', () => { $('#whats-new').classList.add('hidden'); chrome.storage.local.remove('whatsNew'); });
+
 // Chrome doesn't let extensions capture its own pages or the Web Store, so say so
 // up front instead of failing after a click. Recording the whole screen still works.
 const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
