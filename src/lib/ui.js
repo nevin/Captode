@@ -1,5 +1,7 @@
 // Shared interface helpers: notifications, accessible tabs and tooltips, dialogs.
 
+import { t } from './i18n.js';
+
 const ICONS = {
   success: '<path d="m5 12 5 5 9-10"/>',
   error: '<circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.01"/>',
@@ -98,13 +100,13 @@ export function fmtBytes(n) {
 }
 
 /** "2 minutes ago" style text for a timestamp. */
-export function ago(t) {
-  const s = Math.round((Date.now() - t) / 1000);
-  if (s < 45) return 'Just now';
+export function ago(time) {
+  const s = Math.round((Date.now() - time) / 1000);
+  if (s < 45) return t('ago_just_now');
   const m = Math.round(s / 60);
-  if (m < 60) return `${m} min ago`;
+  if (m < 60) return t('ago_minutes', m);
   const h = Math.round(m / 60);
-  return `${h} hr ago`;
+  return t('ago_hours', h);
 }
 
 const platform = navigator.userAgentData?.platform || navigator.platform || '';
@@ -124,7 +126,7 @@ export async function showShortcut(el) {
   } catch { /* commands API unavailable */ }
   el.textContent = '';
   if (!key) {
-    el.textContent = 'no shortcut set';
+    el.textContent = t('shortcut_none');
     return;
   }
   // "Ctrl+Shift+R" splits on "+"; macOS symbols ("⌥⇧R") are one character each.

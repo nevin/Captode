@@ -2,6 +2,8 @@
 // words, front to back, chosen with the arrow keys and moved with Alt and the arrows.
 // Changes elsewhere in the editor are announced through `announce`.
 
+import { t } from '../lib/i18n.js';
+
 const $ = (s) => document.querySelector(s);
 const escHtml = (t) => String(t).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
@@ -17,12 +19,13 @@ export function createLayers(ed) {
     const r = Math.round;
     if (o.type === 'text') {
       const words = (o.text || '').trim().replace(/\s+/g, ' ');
-      return `${o.tail ? 'Callout' : 'Text'} “${words.length > 60 ? words.slice(0, 59) + '…' : words || 'empty'}”`;
+      const quoted = words.length > 60 ? words.slice(0, 59) + '…' : words || t('layer_empty');
+      return t(o.tail ? 'layer_callout' : 'layer_text', quoted);
     }
-    if (o.type === 'step') return `Step ${o.n}${o.note ? `: ${o.note}` : ''}`;
-    if (o.type === 'line' || o.type === 'arrow') return `${ed.names[o.type]} from ${r(o.x1)}, ${r(o.y1)} to ${r(o.x2)}, ${r(o.y2)}`;
+    if (o.type === 'step') return o.note ? t('layer_step_note', [o.n, o.note]) : t('layer_step', o.n);
+    if (o.type === 'line' || o.type === 'arrow') return t('layer_line', [ed.names[o.type], `${r(o.x1)}, ${r(o.y1)}`, `${r(o.x2)}, ${r(o.y2)}`]);
     const b = ed.bounds(o);
-    return `${ed.names[o.type] || o.type}, ${r(b.w)} × ${r(b.h)} at ${r(b.x)}, ${r(b.y)}`;
+    return t('layer_shape', [ed.names[o.type] || o.type, `${r(b.w)} × ${r(b.h)}`, `${r(b.x)}, ${r(b.y)}`]);
   }
 
   /** Says something to screen readers, without showing it. */
@@ -91,7 +94,7 @@ export function createLayers(ed) {
       const s = e.shiftKey ? 10 : 1;
       ed.move(...{ ArrowLeft: [-s, 0], ArrowRight: [s, 0], ArrowUp: [0, -s], ArrowDown: [0, s] }[e.key]);
       const b = ed.bounds(ed.selection()[0]);
-      announceSoon(`Moved to ${Math.round(b.x)}, ${Math.round(b.y)}`);
+      announceSoon(t('announce_moved', [Math.round(b.x), Math.round(b.y)]));
       return;
     }
     const to = { ArrowDown: active + 1, ArrowUp: active - 1, Home: 0, End: n - 1 }[e.key];

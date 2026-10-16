@@ -4,6 +4,9 @@
 import { getCapture, listCaptures } from '../lib/db.js';
 import { enhance, toast } from '../lib/ui.js';
 import { tagPng } from '../lib/srgb.js';
+import { t, localize } from '../lib/i18n.js';
+
+localize();
 
 const $ = (s) => document.querySelector(s);
 const params = new URLSearchParams(location.search);
@@ -17,9 +20,9 @@ let diffDone = null; // the last difference: { changed, total, box }
 
 async function fill() {
   const items = (await listCaptures(30)).filter((it) => it.kind === 'image');
-  const options = '<option value="">Choose a capture…</option>' + items.map((it) => {
-    const t = (it.meta.title || 'Screenshot').replace(/</g, '&lt;');
-    return `<option value="${it.id}">${t} · ${new Date(it.created).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</option>`;
+  const options = `<option value="">${t('compare_choose')}</option>` + items.map((it) => {
+    const title = (it.meta.title || t('popup_screenshot')).replace(/</g, '&lt;');
+    return `<option value="${it.id}">${title} · ${new Date(it.created).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</option>`;
   }).join('');
   for (const s of ['a', 'b']) $(`#sel-${s}`).innerHTML = options;
   return items;
@@ -50,7 +53,7 @@ for (const s of ['a', 'b']) {
       await setSide(s, { bitmap: await createImageBitmap(f), title: f.name });
       $(`#sel-${s}`).value = '';
     } catch {
-      toast(`${f.name} couldn't be opened as an image`, { kind: 'error' });
+      toast(t('compare_not_image', f.name), { kind: 'error' });
     }
   });
 }
@@ -103,7 +106,7 @@ async function redraw() {
   bctx.imageSmoothingQuality = 'high';
   bctx.drawImage(sides.b.bitmap, p.x, p.y, p.w, p.h);
   const b = sides.b.bitmap;
-  $('#match-note').textContent = b.width === W ? 'Both are the same width' : `Scale B to A's width (×${(W / b.width).toFixed(2)})`;
+  $('#match-note').textContent = b.width === W ? t('compare_same_width') : t('compare_scale_b', (W / b.width).toFixed(2));
   $('#info').textContent = `A: ${sides.a.title} (${W} × ${H}) · B: ${sides.b.title} (${b.width} × ${b.height})`;
   layoutView();
   if (mode === 'diff') await computeDiff();
@@ -138,11 +141,11 @@ async function computeDiff() {
   diffWorker?.terminate();
   const worker = new Worker('diff-worker.js');
   diffWorker = worker;
-  $('#stats').textContent = 'Comparing…';
+  $('#stats').textContent = t('compare_comparing');
   const [a, b] = await Promise.all([createImageBitmap($('#can-a')), createImageBitmap($('#can-b'))]);
   const result = await new Promise((resolve, reject) => {
     worker.onmessage = ({ data }) => {
-      if (data.type === 'progress') { if (run === diffRun) $('#stats').textContent = `Comparing… ${Math.round(data.f * 100)}%`; }
+      if (data.type === 'progress') { if (run === diffRun) $('#stats').textContent = t('compare_comparing_pct', Math.round(data.f * 100)); }
       else resolve(data);
     };
     worker.onerror = (e) => reject(new Error(e.message));
@@ -157,8 +160,8 @@ async function computeDiff() {
   diffDone = { changed, total: W * H, box };
   const pct = (changed / (W * H)) * 100;
   $('#stats').innerHTML = changed
-    ? `<b>${pct < 0.01 ? '<0.01' : pct.toFixed(2)}%</b> of pixels differ (${changed.toLocaleString()})<br>Changes within ${box.w} × ${box.h} px at ${box.x}, ${box.y}`
-    : '<b>No differences</b> at this tolerance';
+    ? t('compare_differ', [`<b>${pct < 0.01 ? '<0.01' : pct.toFixed(2)}%</b>`, changed.toLocaleString()]) + '<br>' + t('compare_within', [`${box.w} × ${box.h}`, `${box.x}, ${box.y}`])
+    : t('compare_none');
 }
 
 // ---------- controls ----------

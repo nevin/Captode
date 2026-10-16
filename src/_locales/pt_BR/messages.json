@@ -1,0 +1,1736 @@
+{
+  "extName": {
+    "message": "Captode — Capturas e gravador de tela"
+  },
+  "extDescription": {
+    "message": "Capture a página inteira, a área visível ou uma seleção, grave a tela, faça anotações e salve como imagem, PDF ou vídeo."
+  },
+  "commandAction": {
+    "message": "Abrir o Captode ou parar a gravação atual"
+  },
+  "popup_editor_and_recent_captures": {
+    "message": "Editor e capturas recentes"
+  },
+  "popup_settings": {
+    "message": "Configurações"
+  },
+  "popup_screenshot": {
+    "message": "Captura"
+  },
+  "popup_record": {
+    "message": "Gravar"
+  },
+  "popup_capture_type": {
+    "message": "Tipo de captura"
+  },
+  "popup_the_last_capture_didn_t": {
+    "message": "A última captura não funcionou"
+  },
+  "popup_dismiss": {
+    "message": "Fechar"
+  },
+  "popup_new_in_captode_1_2": {
+    "message": "Novidades do Captode 1.2"
+  },
+  "popup_a_review_tab_to_measure": {
+    "message": "Uma guia Revisar para medir, verificar o contraste e mostrar uma grade; Comparar; Compartilhar para revisão; predefinições de exportação; e 63 dispositivos reais."
+  },
+  "popup_this_page_can_t_be": {
+    "message": "Esta página não pode ser capturada"
+  },
+  "popup_chrome_protects_its_own_pages": {
+    "message": "O Chrome protege as próprias páginas e a Chrome Web Store. Abra um site para capturá-lo ou grave a tela inteira."
+  },
+  "popup_choose_what_to_capture": {
+    "message": "Escolha o que capturar"
+  },
+  "popup_full_page": {
+    "message": "Página inteira"
+  },
+  "popup_the_whole_page_top_to": {
+    "message": "A página toda, de cima a baixo"
+  },
+  "popup_visible_area": {
+    "message": "Área visível"
+  },
+  "popup_what_s_on_screen_right": {
+    "message": "O que está na tela agora"
+  },
+  "popup_selected_area": {
+    "message": "Área selecionada"
+  },
+  "popup_drag_to_choose_a_region": {
+    "message": "Arraste para escolher uma região"
+  },
+  "popup_choose_what_to_record": {
+    "message": "Escolha o que gravar"
+  },
+  "popup_full_screen": {
+    "message": "Tela inteira"
+  },
+  "popup_your_whole_screen_or_a": {
+    "message": "A tela inteira ou uma janela"
+  },
+  "popup_this_tab": {
+    "message": "Esta guia"
+  },
+  "popup_everything_visible_in_this_tab": {
+    "message": "Tudo o que está visível nesta guia"
+  },
+  "popup_record_only_part_of_this": {
+    "message": "Grave só parte desta guia"
+  },
+  "popup_frame_rate": {
+    "message": "Quadros por segundo"
+  },
+  "popup_just_the_page_as_shown": {
+    "message": "Só a página, como aparece"
+  },
+  "popup_video_size": {
+    "message": "Tamanho do vídeo"
+  },
+  "popup_page_size": {
+    "message": "Como aparece"
+  },
+  "popup_scale": {
+    "message": "Escala"
+  },
+  "popup_resolution": {
+    "message": "Resolução"
+  },
+  "popup_sound_from_the_tab_or": {
+    "message": "Som da guia ou da tela"
+  },
+  "popup_record_audio": {
+    "message": "Gravar áudio"
+  },
+  "popup_time_to_get_ready_first": {
+    "message": "Tempo para se preparar"
+  },
+  "popup_countdown": {
+    "message": "Contagem regressiva"
+  },
+  "popup_shorter_countdown": {
+    "message": "Contagem mais curta"
+  },
+  "popup_longer_countdown": {
+    "message": "Contagem mais longa"
+  },
+  "popup_stop_click_the_captode_icon": {
+    "message": "Para parar: clique no ícone do Captode ou pressione"
+  },
+  "popup_export_inside_a_phone_or": {
+    "message": "Exporte dentro de um celular ou tablet"
+  },
+  "popup_device_frame": {
+    "message": "Moldura de dispositivo"
+  },
+  "settings_changes_are_saved_automatically": {
+    "message": "As alterações são salvas automaticamente"
+  },
+  "settings_appearance": {
+    "message": "Aparência"
+  },
+  "settings_how_captode_s_own_pages": {
+    "message": "A aparência das páginas do Captode."
+  },
+  "settings_system": {
+    "message": "Sistema"
+  },
+  "settings_match_your_browser_and_computer": {
+    "message": "Igual ao navegador e ao computador"
+  },
+  "settings_light": {
+    "message": "Claro"
+  },
+  "settings_always_light": {
+    "message": "Sempre claro"
+  },
+  "settings_dark": {
+    "message": "Escuro"
+  },
+  "settings_always_dark": {
+    "message": "Sempre escuro"
+  },
+  "settings_theme": {
+    "message": "Tema"
+  },
+  "settings_export_background": {
+    "message": "Fundo na exportação"
+  },
+  "settings_the_background_behind_device_frames": {
+    "message": "O fundo atrás das molduras de dispositivo e em volta das capturas com margem nos arquivos baixados. Você ainda pode mudá-lo em cada exportação."
+  },
+  "settings_transparent": {
+    "message": "Transparente"
+  },
+  "settings_no_background": {
+    "message": "Sem fundo"
+  },
+  "settings_white": {
+    "message": "Branco"
+  },
+  "settings_plain_white": {
+    "message": "Branco liso"
+  },
+  "settings_custom_colour": {
+    "message": "Cor personalizada"
+  },
+  "settings_pick_any_colour": {
+    "message": "Escolha qualquer cor"
+  },
+  "settings_colour": {
+    "message": "Cor"
+  },
+  "settings_hex_colour": {
+    "message": "Cor hexadecimal"
+  },
+  "settings_jpeg_bmp_pdf_mp4_and": {
+    "message": "JPEG, BMP, PDF, MP4 e WebM não aceitam transparência. Com Transparente escolhido, eles recebem fundo branco."
+  },
+  "settings_defaults": {
+    "message": "Padrões"
+  },
+  "settings_screenshot_format": {
+    "message": "Formato das capturas"
+  },
+  "settings_the_last_one_used": {
+    "message": "O último usado"
+  },
+  "settings_png_8_compressed": {
+    "message": "PNG-8 (compactado)"
+  },
+  "settings_recording_format": {
+    "message": "Formato das gravações"
+  },
+  "settings_show_captures_in_a_phone": {
+    "message": "Mostrar capturas em moldura de celular ou tablet por padrão"
+  },
+  "settings_each_new_screenshot_is_copied": {
+    "message": "Cada nova captura é copiada assim que abre, pronta para colar"
+  },
+  "settings_copy_screenshots_to_the_clipboard": {
+    "message": "Copiar capturas para a área de transferência"
+  },
+  "settings_keyboard_shortcut": {
+    "message": "Atalho de teclado"
+  },
+  "settings_open_captode_or_stop_a": {
+    "message": "Abrir o Captode ou parar uma gravação:"
+  },
+  "settings_change_shortcut": {
+    "message": "Alterar atalho"
+  },
+  "settings_about": {
+    "message": "Sobre"
+  },
+  "settings_everything_happens_on_your_computer": {
+    "message": "Tudo acontece no seu computador. O Captode não tem conta nem servidor e nunca envia suas capturas."
+  },
+  "settings_help_and_guide": {
+    "message": "Ajuda e guia"
+  },
+  "settings_report_a_problem": {
+    "message": "Informar um problema"
+  },
+  "settings_privacy_policy": {
+    "message": "Política de privacidade"
+  },
+  "settings_reset_all_settings": {
+    "message": "Redefinir todas as configurações"
+  },
+  "settings_reset_all_settings_2": {
+    "message": "Redefinir todas as configurações?"
+  },
+  "settings_theme_export_background_default_formats": {
+    "message": "Tema, fundo na exportação, formatos padrão, moldura de dispositivo e opções de gravação voltam a ser como eram ao instalar o Captode. Suas capturas não são afetadas."
+  },
+  "settings_cancel": {
+    "message": "Cancelar"
+  },
+  "settings_reset": {
+    "message": "Redefinir"
+  },
+  "editor_untitled": {
+    "message": "Sem título"
+  },
+  "editor_keyboard_shortcuts": {
+    "message": "Atalhos de teclado ?"
+  },
+  "editor_compare_this_image_with_another": {
+    "message": "Comparar esta imagem com outra captura ou um design"
+  },
+  "editor_compare": {
+    "message": "Comparar"
+  },
+  "editor_open_an_image_from_your": {
+    "message": "Abrir uma imagem do computador"
+  },
+  "editor_open": {
+    "message": "Abrir"
+  },
+  "editor_copy_the_image_to_the": {
+    "message": "Copiar a imagem para a área de transferência (⌘⇧C)"
+  },
+  "editor_copy": {
+    "message": "Copiar"
+  },
+  "editor_download_s": {
+    "message": "Baixar (⌘S)"
+  },
+  "editor_download": {
+    "message": "Baixar"
+  },
+  "editor_undo_all_changes": {
+    "message": "Desfazer todas as alterações"
+  },
+  "editor_undo_z": {
+    "message": "Desfazer ⌘Z"
+  },
+  "editor_redo_z": {
+    "message": "Refazer ⇧⌘Z"
+  },
+  "editor_delete": {
+    "message": "Excluir ⌫"
+  },
+  "editor_tools": {
+    "message": "Ferramentas"
+  },
+  "editor_start_with_an_image": {
+    "message": "Comece com uma imagem"
+  },
+  "editor_capture_one_with_the_captode": {
+    "message": "Capture uma com o botão do Captode na barra de ferramentas, cole uma com <kbd>⌘</kbd> <kbd>V</kbd> ou solte um arquivo aqui."
+  },
+  "editor_choose_an_image": {
+    "message": "Escolher uma imagem"
+  },
+  "editor_kept_on_this_device_for": {
+    "message": "Guardadas neste dispositivo por 24 horas"
+  },
+  "editor_recent_captures": {
+    "message": "Capturas recentes"
+  },
+  "editor_the_image_being_edited": {
+    "message": "A imagem em edição"
+  },
+  "editor_export_preview": {
+    "message": "Prévia da exportação"
+  },
+  "editor_back_to_editing": {
+    "message": "Voltar à edição"
+  },
+  "editor_zoom_out": {
+    "message": "Diminuir zoom −"
+  },
+  "editor_fit_or_actual_size_0": {
+    "message": "Ajustar ou tamanho real 0"
+  },
+  "editor_zoom_in": {
+    "message": "Aumentar zoom +"
+  },
+  "editor_annotate": {
+    "message": "Anotar"
+  },
+  "editor_adjust": {
+    "message": "Ajustar"
+  },
+  "editor_review": {
+    "message": "Revisar"
+  },
+  "editor_export": {
+    "message": "Exportar"
+  },
+  "editor_inspector": {
+    "message": "Inspetor"
+  },
+  "editor_quick_styles": {
+    "message": "Estilos rápidos"
+  },
+  "editor_colours_for_every_tool_at": {
+    "message": "Cores para todas as ferramentas de uma vez e para o que estiver selecionado."
+  },
+  "editor_style": {
+    "message": "Estilo"
+  },
+  "editor_pick_a_tool_from_the": {
+    "message": "Escolha uma ferramenta na barra ou clique em algo que você adicionou para alterá-lo."
+  },
+  "editor_draw_a_straight_line_or": {
+    "message": "Desenhar uma linha reta ou um quadrado"
+  },
+  "editor_drag": {
+    "message": "+ arrastar"
+  },
+  "editor_edit_text": {
+    "message": "Editar texto"
+  },
+  "editor_double_click": {
+    "message": "Clique duplo"
+  },
+  "editor_nudge_the_selection": {
+    "message": "Mover a seleção um pouco"
+  },
+  "editor_zoom": {
+    "message": "Zoom"
+  },
+  "editor_scroll": {
+    "message": "+ rolar"
+  },
+  "editor_thickness": {
+    "message": "Espessura"
+  },
+  "editor_opacity": {
+    "message": "Opacidade"
+  },
+  "editor_line": {
+    "message": "Linha"
+  },
+  "editor_solid": {
+    "message": "Contínua"
+  },
+  "editor_dashed": {
+    "message": "Tracejada"
+  },
+  "editor_dotted": {
+    "message": "Pontilhada"
+  },
+  "editor_arrow_heads": {
+    "message": "Pontas de seta"
+  },
+  "editor_at_the_end": {
+    "message": "No final"
+  },
+  "editor_both_ends": {
+    "message": "Nas duas pontas"
+  },
+  "editor_fill": {
+    "message": "Preenchimento"
+  },
+  "editor_font": {
+    "message": "Fonte"
+  },
+  "editor_add_installed_fonts": {
+    "message": "Adicionar fontes instaladas"
+  },
+  "editor_size": {
+    "message": "Tamanho"
+  },
+  "editor_smaller": {
+    "message": "Menor"
+  },
+  "editor_font_size": {
+    "message": "Tamanho da fonte"
+  },
+  "editor_bigger": {
+    "message": "Maior"
+  },
+  "editor_bold": {
+    "message": "Negrito"
+  },
+  "editor_italic": {
+    "message": "Itálico"
+  },
+  "editor_text_colour": {
+    "message": "Cor do texto"
+  },
+  "editor_background": {
+    "message": "Fundo"
+  },
+  "editor_next_number": {
+    "message": "Próximo número"
+  },
+  "editor_click_to_add_a_step": {
+    "message": "Clique para adicionar um passo: cada um continua a numeração do anterior. Arraste para mover um."
+  },
+  "editor_dim_the_rest": {
+    "message": "Escurecer o resto"
+  },
+  "editor_rounded_corners": {
+    "message": "Cantos arredondados"
+  },
+  "editor_everything_outside_the_spotlights_is": {
+    "message": "Tudo fora dos destaques fica escurecido. Desenhe vários para iluminar mais de uma área."
+  },
+  "editor_magnification": {
+    "message": "Ampliação"
+  },
+  "editor_border": {
+    "message": "Borda"
+  },
+  "editor_effect": {
+    "message": "Efeito"
+  },
+  "editor_pixelate": {
+    "message": "Pixelizar"
+  },
+  "editor_blur": {
+    "message": "Desfocar"
+  },
+  "editor_solid_box": {
+    "message": "Caixa sólida"
+  },
+  "editor_strength": {
+    "message": "Intensidade"
+  },
+  "editor_arrange": {
+    "message": "Organizar"
+  },
+  "editor_bring_to_front": {
+    "message": "Trazer para a frente ⌘]"
+  },
+  "editor_send_to_back": {
+    "message": "Enviar para trás ⌘["
+  },
+  "editor_duplicate_d": {
+    "message": "Duplicar ⌘D"
+  },
+  "editor_align": {
+    "message": "Alinhar"
+  },
+  "editor_align_left": {
+    "message": "Alinhar à esquerda"
+  },
+  "editor_align_centres": {
+    "message": "Alinhar os centros"
+  },
+  "editor_align_right": {
+    "message": "Alinhar à direita"
+  },
+  "editor_align_top": {
+    "message": "Alinhar no topo"
+  },
+  "editor_align_middles": {
+    "message": "Alinhar no meio"
+  },
+  "editor_align_bottom": {
+    "message": "Alinhar embaixo"
+  },
+  "editor_space_evenly_across": {
+    "message": "Distribuir na horizontal"
+  },
+  "editor_space_evenly_down": {
+    "message": "Distribuir na vertical"
+  },
+  "editor_aspect_ratio": {
+    "message": "Proporção"
+  },
+  "editor_freeform": {
+    "message": "Livre"
+  },
+  "editor_square_1_1": {
+    "message": "Quadrado (1:1)"
+  },
+  "editor_widescreen_16_9": {
+    "message": "Widescreen (16:9)"
+  },
+  "editor_standard_4_3": {
+    "message": "Padrão (4:3)"
+  },
+  "editor_portrait_9_16": {
+    "message": "Retrato (9:16)"
+  },
+  "editor_portrait_3_4": {
+    "message": "Retrato (3:4)"
+  },
+  "editor_drag_on_the_image_to": {
+    "message": "Arraste sobre a imagem para escolher a área que será mantida."
+  },
+  "editor_apply_crop": {
+    "message": "Aplicar corte"
+  },
+  "editor_annotations": {
+    "message": "Anotações"
+  },
+  "editor_front_to_back_arrow_keys": {
+    "message": "Da frente para trás. As setas escolhem uma (Shift: várias); Alt com as setas move (Shift: 10 px); Enter edita o texto; Delete remove."
+  },
+  "editor_image_size": {
+    "message": "Tamanho da imagem"
+  },
+  "editor_width": {
+    "message": "Largura"
+  },
+  "editor_keep_proportions": {
+    "message": "Manter proporções"
+  },
+  "editor_height": {
+    "message": "Altura"
+  },
+  "editor_resize": {
+    "message": "Redimensionar"
+  },
+  "editor_rotate_and_flip": {
+    "message": "Girar e espelhar"
+  },
+  "editor_rotate_left": {
+    "message": "Girar para a esquerda"
+  },
+  "editor_rotate_right": {
+    "message": "Girar para a direita"
+  },
+  "editor_flip_horizontally": {
+    "message": "Espelhar na horizontal"
+  },
+  "editor_flip_vertically": {
+    "message": "Espelhar na vertical"
+  },
+  "editor_frame": {
+    "message": "Moldura"
+  },
+  "editor_padding": {
+    "message": "Margem"
+  },
+  "editor_backdrop": {
+    "message": "Fundo"
+  },
+  "editor_shown_when_there_is_padding": {
+    "message": "Aparece quando há margem"
+  },
+  "editor_drop_shadow": {
+    "message": "Sombra"
+  },
+  "editor_measure": {
+    "message": "Medir"
+  },
+  "editor_drag_across_the_image_with": {
+    "message": "Arraste sobre a imagem com a ferramenta Medir (U). As linhas se endireitam e as pontas se encaixam nas bordas; segure Alt para evitar os dois."
+  },
+  "editor_no_measurements_yet": {
+    "message": "Nenhuma medida ainda"
+  },
+  "editor_pixel_ratio": {
+    "message": "Densidade de pixels"
+  },
+  "editor_automatic": {
+    "message": "Automático"
+  },
+  "editor_clear_all": {
+    "message": "Limpar tudo"
+  },
+  "editor_colours_and_contrast": {
+    "message": "Cores e contraste"
+  },
+  "editor_click_the_image_with_the": {
+    "message": "Clique na imagem com o conta-gotas (I). Escolha qual cor definir em seguida."
+  },
+  "editor_text": {
+    "message": "Texto"
+  },
+  "editor_not_picked": {
+    "message": "Não escolhida"
+  },
+  "editor_colour_to_set_next": {
+    "message": "Cor a definir em seguida"
+  },
+  "editor_pick_two_colours_to_check": {
+    "message": "Escolha duas cores para verificar o contraste"
+  },
+  "editor_copy_colours": {
+    "message": "Copiar cores"
+  },
+  "editor_swap": {
+    "message": "Trocar"
+  },
+  "editor_spacing_grid": {
+    "message": "Grade de espaçamento"
+  },
+  "editor_over_the_image_only_not": {
+    "message": "Só sobre a imagem; não é exportada"
+  },
+  "editor_show_a_grid": {
+    "message": "Mostrar uma grade"
+  },
+  "editor_every": {
+    "message": "A cada"
+  },
+  "editor_format": {
+    "message": "Formato"
+  },
+  "editor_png_compressed": {
+    "message": "PNG — compactado"
+  },
+  "editor_quality": {
+    "message": "Qualidade"
+  },
+  "editor_colours": {
+    "message": "Cores"
+  },
+  "editor_auto": {
+    "message": "Auto"
+  },
+  "editor_dither": {
+    "message": "Pontilhamento"
+  },
+  "editor_lossy_compression": {
+    "message": "Compactação com perdas"
+  },
+  "editor_same_as_the_image": {
+    "message": "Igual à imagem"
+  },
+  "editor_us_letter": {
+    "message": "Carta (EUA)"
+  },
+  "editor_continue_tall_images_onto_more": {
+    "message": "Continuar imagens altas em mais páginas"
+  },
+  "editor_split_long_images": {
+    "message": "Dividir imagens longas"
+  },
+  "editor_100_original_size": {
+    "message": "100% — tamanho original"
+  },
+  "editor_size_limit": {
+    "message": "Limite de tamanho"
+  },
+  "editor_no_limit": {
+    "message": "Sem limite"
+  },
+  "editor_file_name": {
+    "message": "Nome do arquivo"
+  },
+  "editor_one_image_for_each_of": {
+    "message": "Uma imagem para cada um de vários dispositivos, em um zip"
+  },
+  "editor_several_devices": {
+    "message": "Vários dispositivos…"
+  },
+  "editor_share_for_review": {
+    "message": "Compartilhar para revisão"
+  },
+  "editor_a_single_web_page_with": {
+    "message": "Uma única página web com a imagem, uma nota para cada passo e a origem. Anexe a um chamado ou envie no chat: abre em qualquer navegador."
+  },
+  "editor_share_for_review_2": {
+    "message": "Compartilhar para revisão…"
+  },
+  "editor_copy_the_image_to_the_2": {
+    "message": "Copiar a imagem para a área de transferência, como PNG (⌘⇧C)"
+  },
+  "editor_export_for_several_devices": {
+    "message": "Exportar para vários dispositivos"
+  },
+  "editor_one_image_for_each_in": {
+    "message": "Uma imagem para cada, em um zip, no formato e com as opções de Exportar. Cada uma mantém os pixels exatos da captura."
+  },
+  "editor_download_zip": {
+    "message": "Baixar zip"
+  },
+  "editor_title": {
+    "message": "Título"
+  },
+  "editor_optional": {
+    "message": "opcional"
+  },
+  "editor_summary": {
+    "message": "Resumo"
+  },
+  "editor_what_should_reviewers_look_at": {
+    "message": "O que os revisores devem observar?"
+  },
+  "editor_add_numbered_steps_n_to": {
+    "message": "Adicione passos numerados (N) à imagem para escrever uma nota em cada um."
+  },
+  "editor_download_review_page": {
+    "message": "Baixar página de revisão"
+  },
+  "editor_keyboard_shortcuts_2": {
+    "message": "Atalhos de teclado"
+  },
+  "editor_close": {
+    "message": "Fechar"
+  },
+  "editor_select_and_move": {
+    "message": "Selecionar e mover"
+  },
+  "editor_pan": {
+    "message": "Mover vista"
+  },
+  "editor_or_hold": {
+    "message": ", ou segure"
+  },
+  "editor_crop": {
+    "message": "Cortar"
+  },
+  "editor_pen": {
+    "message": "Caneta"
+  },
+  "editor_highlighter": {
+    "message": "Marca-texto"
+  },
+  "editor_arrow": {
+    "message": "Seta"
+  },
+  "editor_rectangle": {
+    "message": "Retângulo"
+  },
+  "editor_ellipse": {
+    "message": "Elipse"
+  },
+  "editor_callout_speech_bubble": {
+    "message": "Balão (de fala)"
+  },
+  "editor_step_number": {
+    "message": "Número do passo"
+  },
+  "editor_spotlight": {
+    "message": "Destaque"
+  },
+  "editor_magnifier": {
+    "message": "Lupa"
+  },
+  "editor_colour_picker": {
+    "message": "Conta-gotas"
+  },
+  "editor_spacing_grid_on_or_off": {
+    "message": "Mostrar ou ocultar a grade"
+  },
+  "editor_blur_or_pixelate": {
+    "message": "Desfocar ou pixelizar"
+  },
+  "editor_editing": {
+    "message": "Edição"
+  },
+  "editor_undo": {
+    "message": "Desfazer"
+  },
+  "editor_redo": {
+    "message": "Refazer"
+  },
+  "editor_toolbar_button": {
+    "message": "Botão da barra de ferramentas"
+  },
+  "editor_delete_selection": {
+    "message": "Excluir a seleção"
+  },
+  "editor_select_several": {
+    "message": "Selecionar vários"
+  },
+  "editor_click_or_drag_a_box": {
+    "message": "+ clique, ou arraste uma caixa"
+  },
+  "editor_select_all": {
+    "message": "Selecionar tudo"
+  },
+  "editor_duplicate": {
+    "message": "Duplicar"
+  },
+  "editor_copy_paste_annotations": {
+    "message": "Copiar / colar anotações"
+  },
+  "editor_bring_to_front_send_to": {
+    "message": "Trazer para a frente / enviar para trás"
+  },
+  "editor_deselect": {
+    "message": "Desmarcar"
+  },
+  "editor_nudge_10_px_with": {
+    "message": "Mover um pouco (10 px com ⇧)"
+  },
+  "editor_straight_line_or_square": {
+    "message": "Linha reta ou quadrado"
+  },
+  "editor_move_or_resize_without_snapping": {
+    "message": "Mover ou redimensionar sem encaixe"
+  },
+  "editor_view_and_file": {
+    "message": "Visualização e arquivo"
+  },
+  "editor_zoom_in_out": {
+    "message": "Aumentar / diminuir zoom"
+  },
+  "editor_fit_to_window": {
+    "message": "Ajustar à janela"
+  },
+  "editor_copy_image": {
+    "message": "Copiar imagem"
+  },
+  "editor_paste_an_image": {
+    "message": "Colar uma imagem"
+  },
+  "editor_this_list": {
+    "message": "Esta lista"
+  },
+  "video_recording": {
+    "message": "Gravação"
+  },
+  "video_download_the_recording_as_it": {
+    "message": "Baixar a gravação como foi capturada"
+  },
+  "video_original_webm": {
+    "message": "WebM original"
+  },
+  "video_exported_animation": {
+    "message": "Animação exportada"
+  },
+  "video_measuring_layer_over_the_paused": {
+    "message": "Camada de medição sobre o quadro pausado"
+  },
+  "video_play_or_pause_space": {
+    "message": "Reproduzir ou pausar Espaço"
+  },
+  "video_trim_start": {
+    "message": "Início do corte"
+  },
+  "video_start_i": {
+    "message": "Início I"
+  },
+  "video_trim_end": {
+    "message": "Fim do corte"
+  },
+  "video_end_o": {
+    "message": "Fim O"
+  },
+  "video_recording_not_found": {
+    "message": "Gravação não encontrada"
+  },
+  "video_recordings_are_kept_for_a": {
+    "message": "As gravações ficam guardadas por um dia. Comece uma nova com o botão do Captode na barra de ferramentas."
+  },
+  "video_trim": {
+    "message": "Cortar"
+  },
+  "video_start": {
+    "message": "Início"
+  },
+  "video_start_at_the_playhead_i": {
+    "message": "Começar no cursor de reprodução I"
+  },
+  "video_end": {
+    "message": "Fim"
+  },
+  "video_end_at_the_playhead_o": {
+    "message": "Terminar no cursor de reprodução O"
+  },
+  "video_drag_the_handles_on_the": {
+    "message": "Arraste as alças da linha do tempo, ou reproduza até um ponto e pressione <kbd>I</kbd> para o início e <kbd>O</kbd> para o fim."
+  },
+  "video_video": {
+    "message": "Vídeo"
+  },
+  "video_animation": {
+    "message": "Animação"
+  },
+  "video_highest_visually_lossless": {
+    "message": "Máxima — sem perda visível"
+  },
+  "video_balanced": {
+    "message": "Equilibrada"
+  },
+  "video_small_file": {
+    "message": "Arquivo pequeno"
+  },
+  "video_smallest_file": {
+    "message": "Arquivo mínimo"
+  },
+  "video_this_recording_has_no_sound": {
+    "message": "Esta gravação não tem som"
+  },
+  "video_include_audio": {
+    "message": "Incluir áudio"
+  },
+  "video_lets_colours_shift_slightly_where": {
+    "message": "Deixa as cores mudarem um pouco onde isso compacta melhor. Geralmente 30–50% menor; valores altos adicionam granulação visível."
+  },
+  "video_exact_pixels_larger_file": {
+    "message": "Pixels exatos, arquivo maior"
+  },
+  "video_lossless_frames": {
+    "message": "Quadros sem perdas"
+  },
+  "video_merge_repeated_frames_and_store": {
+    "message": "Junta quadros repetidos e guarda só os pixels que mudam. Cada quadro fica exatamente igual."
+  },
+  "video_reduce_size_losslessly": {
+    "message": "Reduzir o tamanho sem perdas"
+  },
+  "video_tiny_changes_from_recording_noise": {
+    "message": "Mudanças mínimas do ruído da gravação (2 níveis em 255) não contam como movimento. Arquivos bem menores, sem diferença visível."
+  },
+  "video_ignore_flicker": {
+    "message": "Ignorar cintilação"
+  },
+  "video_loop_forever": {
+    "message": "Repetir sem parar"
+  },
+  "video_review_a_frame": {
+    "message": "Revisar um quadro"
+  },
+  "video_measure_or_pick_colours_on": {
+    "message": "Meça ou escolha cores no quadro exibido. O vídeo pausa; nada disso é exportado."
+  },
+  "video_off": {
+    "message": "Desligado"
+  },
+  "video_review_tool": {
+    "message": "Ferramenta de revisão"
+  },
+  "video_change_settings_and_export_again": {
+    "message": "Alterar configurações e exportar de novo"
+  },
+  "video_edit": {
+    "message": "Editar"
+  },
+  "compare_choose_two_images": {
+    "message": "Escolha duas imagens"
+  },
+  "compare_download_the_difference_image_as": {
+    "message": "Baixar a imagem de diferenças como PNG"
+  },
+  "compare_difference_image": {
+    "message": "Imagem de diferenças"
+  },
+  "compare_divide_between_a_and_b": {
+    "message": "Divisória entre A e B"
+  },
+  "compare_compare_two_images": {
+    "message": "Comparar duas imagens"
+  },
+  "compare_pick_two_captures_on_the": {
+    "message": "Escolha duas capturas à direita ou abra arquivos de imagem: um design exportado e uma captura do que foi construído, ou uma página antes e depois de uma mudança."
+  },
+  "compare_images": {
+    "message": "Imagens"
+  },
+  "compare_open_an_image_file_for": {
+    "message": "Abrir um arquivo de imagem para A"
+  },
+  "compare_open_an_image_file_for_2": {
+    "message": "Abrir um arquivo de imagem para B"
+  },
+  "compare_swap_a_and_b": {
+    "message": "Trocar A e B"
+  },
+  "compare_view": {
+    "message": "Visualização"
+  },
+  "compare_slider": {
+    "message": "Controle deslizante"
+  },
+  "compare_side_by_side": {
+    "message": "Lado a lado"
+  },
+  "compare_overlay": {
+    "message": "Sobreposição"
+  },
+  "compare_difference": {
+    "message": "Diferença"
+  },
+  "compare_b_s_opacity": {
+    "message": "Opacidade de B"
+  },
+  "compare_tolerance": {
+    "message": "Tolerância"
+  },
+  "compare_fit": {
+    "message": "Ajustar"
+  },
+  "compare_line_up": {
+    "message": "Alinhar"
+  },
+  "compare_scale_b_to_a_s": {
+    "message": "Ajustar B à largura de A"
+  },
+  "compare_match_widths": {
+    "message": "Igualar larguras"
+  },
+  "compare_move_b_across": {
+    "message": "Mover B na horizontal"
+  },
+  "compare_move_b_down": {
+    "message": "Mover B na vertical"
+  },
+  "compare_in_a_s_pixels_with": {
+    "message": "Em pixels de A. Com a visualização em foco, Alt e as setas movem B um pixel por vez (Shift: 10)."
+  },
+  "screen_record_your_screen": {
+    "message": "Grave sua tela"
+  },
+  "screen_choose_your_whole_screen_a": {
+    "message": "Escolha a tela inteira, uma janela ou uma guia. Para parar, clique no ícone do Captode ou volte aqui."
+  },
+  "screen_recording_starts_in": {
+    "message": "A gravação começa em"
+  },
+  "screen_stop_recording": {
+    "message": "Parar gravação"
+  },
+  "screen_saving_your_recording": {
+    "message": "Salvando a gravação…"
+  },
+  "editor_zoom_keys": {
+    "message": "<kbd>+</kbd> <kbd>−</kbd>, ou <kbd>⌘</kbd> + rolar no ponteiro"
+  },
+  "popup_size_hint_scale": {
+    "message": "A página, ampliada ou reduzida"
+  },
+  "popup_size_hint_res": {
+    "message": "Lado menor, mesmo formato"
+  },
+  "popup_seconds_short": {
+    "message": "$1 s"
+  },
+  "popup_countdown_off_hint": {
+    "message": "A gravação começa na hora"
+  },
+  "popup_size_hint_title": {
+    "message": "$1. Para esta guia; gravações de tela inteira partem do tamanho da sua tela."
+  },
+  "popup_one_second": {
+    "message": "1 segundo"
+  },
+  "popup_n_seconds": {
+    "message": "$1 segundos"
+  },
+  "settings_saved": {
+    "message": "Salvo"
+  },
+  "settings_version": {
+    "message": "Versão $1"
+  },
+  "settings_reset_done": {
+    "message": "Configurações redefinidas"
+  },
+  "settings_restored": {
+    "message": "Configurações restauradas"
+  },
+  "ago_just_now": {
+    "message": "Agora mesmo"
+  },
+  "ago_minutes": {
+    "message": "Há $1 min"
+  },
+  "ago_hours": {
+    "message": "Há $1 h"
+  },
+  "shortcut_none": {
+    "message": "nenhum atalho definido"
+  },
+  "finish_midnight": {
+    "message": "Meia-noite"
+  },
+  "finish_titanium": {
+    "message": "Titânio natural"
+  },
+  "finish_silver": {
+    "message": "Prata"
+  },
+  "finish_gold": {
+    "message": "Dourado"
+  },
+  "finish_blue": {
+    "message": "Azul"
+  },
+  "dev_info_device": {
+    "message": "$1: $2 px, $3 a $4×"
+  },
+  "dev_info_matches": {
+    "message": "corresponde exatamente a esta captura"
+  },
+  "dev_info_closest": {
+    "message": "o mais próximo desta captura"
+  },
+  "dev_info_exact": {
+    "message": "os $1 pixels da captura são mantidos exatamente"
+  },
+  "dev_info_scaled": {
+    "message": "a captura aparece a $1%"
+  },
+  "dev_show": {
+    "message": "Mostrar em moldura de dispositivo"
+  },
+  "dev_show_hint": {
+    "message": "Um celular ou tablet real em volta da captura"
+  },
+  "dev_device": {
+    "message": "Dispositivo"
+  },
+  "dev_preview": {
+    "message": "Prévia da captura no dispositivo"
+  },
+  "dev_orientation": {
+    "message": "Orientação"
+  },
+  "dev_portrait": {
+    "message": "Retrato"
+  },
+  "dev_landscape": {
+    "message": "Paisagem"
+  },
+  "dev_finish": {
+    "message": "Acabamento"
+  },
+  "dev_size_exact": {
+    "message": "Os pixels da própria captura (exatos)"
+  },
+  "dev_size_device": {
+    "message": "A resolução de tela do dispositivo"
+  },
+  "dev_fit": {
+    "message": "Encaixe na tela"
+  },
+  "dev_fit_width": {
+    "message": "Preencher a largura, a partir do topo"
+  },
+  "dev_fit_cover": {
+    "message": "Preencher a tela"
+  },
+  "dev_fit_contain": {
+    "message": "Mostrar tudo"
+  },
+  "dev_change_default": {
+    "message": "Alterar padrão"
+  },
+  "dev_background_colour": {
+    "message": "Cor de fundo"
+  },
+  "dev_status_bar": {
+    "message": "Barra de status"
+  },
+  "dev_status_above": {
+    "message": "Acima da página"
+  },
+  "dev_status_over": {
+    "message": "Sobre a página"
+  },
+  "dev_none": {
+    "message": "Nenhuma"
+  },
+  "dev_status_text": {
+    "message": "Texto da barra de status"
+  },
+  "dev_dark_on_light": {
+    "message": "Texto escuro"
+  },
+  "dev_light_on_dark": {
+    "message": "Texto claro"
+  },
+  "picker_all": {
+    "message": "Todos"
+  },
+  "picker_android": {
+    "message": "Android"
+  },
+  "picker_tablets": {
+    "message": "Tablets"
+  },
+  "picker_search": {
+    "message": "Pesquisar dispositivos"
+  },
+  "picker_kind": {
+    "message": "Tipo de dispositivo"
+  },
+  "picker_devices": {
+    "message": "Dispositivos"
+  },
+  "picker_best_match": {
+    "message": "Mais adequado"
+  },
+  "picker_best_match_is": {
+    "message": "Mais adequado: $1"
+  },
+  "picker_best_match_full": {
+    "message": "Mais adequado para a captura"
+  },
+  "picker_recent": {
+    "message": "Recentes"
+  },
+  "picker_none": {
+    "message": "Nenhum dispositivo corresponde"
+  },
+  "group_android_tablets": {
+    "message": "Tablets Android"
+  },
+  "preset_chat": {
+    "message": "Slack ou Teams (PNG, até 5 MB)"
+  },
+  "preset_issue": {
+    "message": "Chamado no Jira ou GitHub (PNG, até 10 MB)"
+  },
+  "preset_email": {
+    "message": "E-mail (JPEG, até 1 MB)"
+  },
+  "preset_review": {
+    "message": "Revisão de design (PNG exato, sem limite)"
+  },
+  "preset_mockup": {
+    "message": "Mockup em celular (PNG transparente)"
+  },
+  "preset_web": {
+    "message": "Site ou documentação (WebP)"
+  },
+  "preset_chat_gif": {
+    "message": "GIF para chat (480p, 15 fps)"
+  },
+  "preset_share_mp4": {
+    "message": "Para compartilhar em qualquer lugar (MP4, 1080p)"
+  },
+  "preset_original": {
+    "message": "Qualidade máxima (MP4, tamanho original)"
+  },
+  "preset_docs_webp": {
+    "message": "Documentação e ajuda (WebP, 720p, 20 fps)"
+  },
+  "preset_mockup_mp4": {
+    "message": "Vídeo em mockup de celular (MP4)"
+  },
+  "preset_label": {
+    "message": "Predefinição"
+  },
+  "preset_delete": {
+    "message": "Excluir esta predefinição"
+  },
+  "preset_name_placeholder": {
+    "message": "Dê um nome"
+  },
+  "preset_name": {
+    "message": "Nome da predefinição"
+  },
+  "preset_save": {
+    "message": "Salvar"
+  },
+  "preset_custom": {
+    "message": "Personalizado"
+  },
+  "preset_builtin": {
+    "message": "Incluídas"
+  },
+  "preset_yours": {
+    "message": "Suas"
+  },
+  "preset_save_current": {
+    "message": "Salvar as configurações atuais como predefinição…"
+  },
+  "error_protected_page": {
+    "message": "Esta página não pode ser capturada. As páginas do navegador e a loja de extensões são protegidas."
+  },
+  "pick_capture_hint": {
+    "message": "Arraste para selecionar a área a capturar  ·  Esc para cancelar"
+  },
+  "pick_record_hint": {
+    "message": "Arraste para selecionar a área a gravar  ·  Esc para cancelar"
+  },
+  "countdown_hint": {
+    "message": "A gravação começa em instantes · Esc para cancelar"
+  },
+  "error_recording_start": {
+    "message": "Não foi possível começar a gravar."
+  },
+  "action_stop_title": {
+    "message": "Captode — clique para parar a gravação"
+  },
+  "screen_nothing_shared": {
+    "message": "Nada foi compartilhado, então nada foi gravado."
+  },
+  "screen_mac_permission": {
+    "message": "Se você escolheu uma tela, permita o Chrome em Ajustes do Sistema → Privacidade e Segurança → Gravação de Tela e reinicie o Chrome."
+  },
+  "screen_title_recording": {
+    "message": "● Gravando — Captode"
+  },
+  "screen_title": {
+    "message": "Captode — Gravador de tela"
+  },
+  "screen_title_countdown": {
+    "message": "Gravação em $1… — Captode"
+  },
+  "tool_pan": {
+    "message": "Mover vista (ou segure Espaço)"
+  },
+  "tool_callout": {
+    "message": "Balão"
+  },
+  "name_redact": {
+    "message": "Desfocar / pixelizar"
+  },
+  "edits_back": {
+    "message": "Suas edições voltaram"
+  },
+  "start_over": {
+    "message": "Recomeçar"
+  },
+  "all_undone": {
+    "message": "Todas as alterações foram desfeitas"
+  },
+  "announce_undone": {
+    "message": "Desfeito"
+  },
+  "announce_redone": {
+    "message": "Refeito"
+  },
+  "announce_added_step": {
+    "message": "Passo $1 adicionado"
+  },
+  "announce_added": {
+    "message": "Adicionado: $1"
+  },
+  "deleted_one": {
+    "message": "Anotação excluída"
+  },
+  "deleted_many": {
+    "message": "$1 anotações excluídas"
+  },
+  "copied_one": {
+    "message": "Anotação copiada"
+  },
+  "copied_many": {
+    "message": "$1 anotações copiadas"
+  },
+  "copy_failed": {
+    "message": "Não foi possível copiar: $1"
+  },
+  "announce_moved": {
+    "message": "Movido para $1, $2"
+  },
+  "ratio_note": {
+    "message": "As medidas estão em pixels CSS: pixels da imagem ÷ $1."
+  },
+  "colours_copied": {
+    "message": "Cores copiadas"
+  },
+  "colours_copy_failed": {
+    "message": "Não foi possível copiar as cores"
+  },
+  "look_new": {
+    "message": "Estilo $1 para novas anotações"
+  },
+  "look_applied_one": {
+    "message": "Estilo $1 aplicado à seleção"
+  },
+  "look_applied_many": {
+    "message": "Estilo $1 aplicado a $2 anotações"
+  },
+  "look_title": {
+    "message": "$1: linhas $2, rótulos $3 sobre $4"
+  },
+  "align_to_image": {
+    "message": "Alinhar à imagem"
+  },
+  "style_mixed": {
+    "message": "$1 itens selecionados"
+  },
+  "style_selected": {
+    "message": "Selecionado: $1"
+  },
+  "step_number": {
+    "message": "Número"
+  },
+  "fonts_unavailable": {
+    "message": "Este navegador não consegue listar as fontes instaladas."
+  },
+  "fonts_added": {
+    "message": "$1 fontes instaladas adicionadas"
+  },
+  "fonts_denied": {
+    "message": "O acesso às fontes não foi permitido."
+  },
+  "crop_size": {
+    "message": "$1 px — arraste dentro para mover, Enter para aplicar."
+  },
+  "proportions_unlocked": {
+    "message": "Proporções livres"
+  },
+  "resized_to": {
+    "message": "Redimensionado para $1"
+  },
+  "format_png": {
+    "message": "Sem perdas, texto nítido, mantém a transparência."
+  },
+  "format_png8": {
+    "message": "PNG compactado com até 256 cores. Geralmente 60–80% menor."
+  },
+  "format_jpeg": {
+    "message": "Arquivos pequenos, ideal para fotos. Sem transparência."
+  },
+  "format_webp": {
+    "message": "Menor que PNG e JPEG, mantém a transparência."
+  },
+  "format_avif": {
+    "message": "Os menores arquivos, para navegadores modernos."
+  },
+  "format_gif": {
+    "message": "Até 256 cores. Abre em qualquer lugar."
+  },
+  "format_bmp": {
+    "message": "Sem compactação, para programas antigos."
+  },
+  "format_pdf": {
+    "message": "Para compartilhar e imprimir. Páginas longas podem ocupar várias páginas."
+  },
+  "fit_too_big": {
+    "message": "Não é possível ficar abaixo do limite; este é o menor tamanho possível."
+  },
+  "fit_quality": {
+    "message": "qualidade $1%"
+  },
+  "fit_lossy": {
+    "message": "perdas $1"
+  },
+  "fit_colours": {
+    "message": "$1 cores"
+  },
+  "fit_size": {
+    "message": "tamanho $1%"
+  },
+  "fit_note": {
+    "message": "Para caber no limite: $1."
+  },
+  "estimate_working": {
+    "message": "Calculando o tamanho do arquivo…"
+  },
+  "encode_failed": {
+    "message": "Não foi possível codificar: $1"
+  },
+  "saved_file_size": {
+    "message": "Salvo $1 · $2"
+  },
+  "export_failed": {
+    "message": "Falha na exportação: $1"
+  },
+  "copied_auto": {
+    "message": "Captura copiada para a área de transferência"
+  },
+  "copied_image": {
+    "message": "Copiado para a área de transferência"
+  },
+  "remove": {
+    "message": "Remover"
+  },
+  "remove_named": {
+    "message": "Remover $1"
+  },
+  "removed_named": {
+    "message": "$1 removido"
+  },
+  "needs_extension": {
+    "message": "Disponível quando executado como extensão."
+  },
+  "truncated": {
+    "message": "Esta página é muito longa, então só a parte de cima foi capturada."
+  },
+  "layer_empty": {
+    "message": "vazio"
+  },
+  "layer_callout": {
+    "message": "Balão “$1”"
+  },
+  "layer_text": {
+    "message": "Texto “$1”"
+  },
+  "layer_step": {
+    "message": "Passo $1"
+  },
+  "layer_step_note": {
+    "message": "Passo $1: $2"
+  },
+  "layer_line": {
+    "message": "$1 de $2 até $3"
+  },
+  "layer_shape": {
+    "message": "$1, $2 em $3"
+  },
+  "multi_no_frame": {
+    "message": "Sem moldura"
+  },
+  "multi_best_match": {
+    "message": "Mais adequado ($1)"
+  },
+  "multi_choose_one": {
+    "message": "Escolha pelo menos um."
+  },
+  "multi_making": {
+    "message": "Criando $1 de $2: $3…"
+  },
+  "multi_saved_one": {
+    "message": "Salvo $1 · 1 imagem"
+  },
+  "multi_saved_many": {
+    "message": "Salvo $1 · $2 imagens"
+  },
+  "multi_failed": {
+    "message": "Não funcionou: $1"
+  },
+  "share_page": {
+    "message": "Página"
+  },
+  "share_captured": {
+    "message": "Capturada em"
+  },
+  "share_size_ratio": {
+    "message": "$1 px (densidade $2×)"
+  },
+  "share_browser": {
+    "message": "Navegador"
+  },
+  "saved_file": {
+    "message": "Salvo $1"
+  },
+  "share_failed": {
+    "message": "Não foi possível criar a página de revisão: $1"
+  },
+  "wcag_pass": {
+    "message": "$1 aprovado"
+  },
+  "wcag_fail": {
+    "message": "$1 reprovado"
+  },
+  "contrast_label": {
+    "message": "Contraste"
+  },
+  "contrast_normal": {
+    "message": "Texto normal"
+  },
+  "contrast_large": {
+    "message": "Texto grande e interface"
+  },
+  "measure_box": {
+    "message": "$1 px · $2 px de comprimento"
+  },
+  "measure_box_short": {
+    "message": "$1 px · $2 px"
+  },
+  "share_note_label": {
+    "message": "Nota do passo $1"
+  },
+  "share_note_placeholder": {
+    "message": "Sobre o que é o passo $1?"
+  },
+  "export_reading": {
+    "message": "Lendo a gravação…"
+  },
+  "export_frame": {
+    "message": "Codificando o quadro $1 de $2"
+  },
+  "export_finishing": {
+    "message": "Finalizando…"
+  },
+  "export_colours": {
+    "message": "Escolhendo as cores…"
+  },
+  "res_original": {
+    "message": "Original ($1)"
+  },
+  "export_format": {
+    "message": "Exportar $1"
+  },
+  "video_dims": {
+    "message": "$1 · $2 fps · $3 quadros"
+  },
+  "preview_converting": {
+    "message": "Convertendo…"
+  },
+  "preview_exported": {
+    "message": "Exportado"
+  },
+  "trim_selected": {
+    "message": "$1 s selecionados"
+  },
+  "no_mp4": {
+    "message": "Este navegador não consegue gerar MP4. Atualize o Chrome (versão 126 ou mais recente) ou exporte WebM."
+  },
+  "no_webm": {
+    "message": "Este navegador não consegue gerar WebM."
+  },
+  "export_realtime": {
+    "message": "Convertendo… $1 de $2"
+  },
+  "export_done": {
+    "message": "Pronto"
+  },
+  "export_stopped": {
+    "message": "A exportação parou"
+  },
+  "export_starting": {
+    "message": "Começando…"
+  },
+  "export_realtime_note": {
+    "message": "Este navegador precisa exportar em tempo real. Mantenha esta guia aberta e em primeiro plano."
+  },
+  "result_ready": {
+    "message": "$1 pronto · $2"
+  },
+  "result_dims": {
+    "message": "$1 a $2 fps."
+  },
+  "result_larger": {
+    "message": "$1× o tamanho da gravação. Uma resolução ou taxa de quadros menor deixa o arquivo menor."
+  },
+  "result_smaller": {
+    "message": "$1% menor que a gravação."
+  },
+  "automatic_value": {
+    "message": "Auto ($1)"
+  },
+  "compare_not_image": {
+    "message": "Não foi possível abrir $1 como imagem"
+  },
+  "compare_same_width": {
+    "message": "As duas têm a mesma largura"
+  },
+  "compare_scale_b": {
+    "message": "Ajustar B à largura de A (×$1)"
+  },
+  "compare_comparing": {
+    "message": "Comparando…"
+  },
+  "compare_comparing_pct": {
+    "message": "Comparando… $1%"
+  },
+  "compare_choose": {
+    "message": "Escolha uma captura…"
+  },
+  "compare_differ": {
+    "message": "$1 dos pixels diferem ($2)"
+  },
+  "compare_within": {
+    "message": "Mudanças dentro de $1 px em $2"
+  },
+  "compare_none": {
+    "message": "<b>Nenhuma diferença</b> com esta tolerância"
+  },
+  "page_no_note": {
+    "message": "Sem nota"
+  },
+  "page_full_size": {
+    "message": "Clique para ver em tamanho real"
+  },
+  "page_steps": {
+    "message": "Passos"
+  },
+  "page_labels": {
+    "message": "Rótulos na imagem"
+  },
+  "page_about": {
+    "message": "Sobre esta captura"
+  },
+  "page_made_with": {
+    "message": "Feito com o Captode"
+  },
+  "download_format": {
+    "message": "Baixar $1"
+  },
+  "ratio_from_capture": {
+    "message": "A densidade é $1, segundo a captura."
+  },
+  "ratio_unknown": {
+    "message": "A densidade é 1× (desconhecida para esta imagem)."
+  },
+  "look_bug": {
+    "message": "Bug"
+  },
+  "look_review": {
+    "message": "Revisão"
+  },
+  "look_note": {
+    "message": "Nota"
+  },
+  "look_ok": {
+    "message": "Aprovado"
+  },
+  "look_neutral": {
+    "message": "Neutro"
+  },
+  "look_brand": {
+    "message": "Marca"
+  }
+}

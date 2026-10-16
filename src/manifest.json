@@ -1,9 +1,10 @@
 {
   "manifest_version": 3,
-  "name": "Captode — Screenshot & Screen Recorder",
+  "name": "__MSG_extName__",
   "short_name": "Captode",
   "version": "1.2.0",
-  "description": "Take full-page, visible or selected-area screenshots and screen recordings, mark them up, and save them as images, PDFs or videos.",
+  "description": "__MSG_extDescription__",
+  "default_locale": "en",
   "homepage_url": "https://github.com/nevin/Captode",
   "minimum_chrome_version": "116",
   "icons": {
@@ -37,7 +38,7 @@
       "suggested_key": {
         "default": "Alt+Shift+R"
       },
-      "description": "Open Captode, or stop the current recording"
+      "description": "__MSG_commandAction__"
     }
   },
   "options_page": "settings/settings.html",

@@ -2,6 +2,11 @@
 // note for each step, and where the capture came from. It needs nothing else to
 // open (no server, no account), so it can be attached to a ticket or sent in chat.
 
+import { t } from '../lib/i18n.js';
+
+/** The language the page is written in. */
+const lang = () => { try { return chrome.i18n.getUILanguage(); } catch { return 'en'; } };
+
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
 /**
@@ -10,15 +15,15 @@ const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '
  */
 export function buildReviewPage({ title, summary, image, width, height, steps, labels, facts }) {
   const markers = steps.map((s, i) =>
-    `<a class="marker" href="#step-${i}" data-i="${i}" style="left:${(s.x * 100).toFixed(3)}%;top:${(s.y * 100).toFixed(3)}%;--c:${esc(s.color)}" aria-label="Step ${esc(s.n)}"></a>`).join('');
+    `<a class="marker" href="#step-${i}" data-i="${i}" style="left:${(s.x * 100).toFixed(3)}%;top:${(s.y * 100).toFixed(3)}%;--c:${esc(s.color)}" aria-label="${esc(t('layer_step', s.n))}"></a>`).join('');
   const notes = steps.map((s, i) =>
-    `<li id="step-${i}" data-i="${i}" tabindex="-1"><span class="n" style="--c:${esc(s.color)}">${esc(s.n)}</span><div>${s.note ? esc(s.note).replace(/\n/g, '<br>') : '<span class="muted">No note</span>'}</div></li>`).join('');
+    `<li id="step-${i}" data-i="${i}" tabindex="-1"><span class="n" style="--c:${esc(s.color)}">${esc(s.n)}</span><div>${s.note ? esc(s.note).replace(/\n/g, '<br>') : `<span class="muted">${esc(t('page_no_note'))}</span>`}</div></li>`).join('');
   const factRows = facts.filter(([, v]) => v).map(([k, v]) => {
     const value = /^https?:\/\//.test(v) ? `<a href="${esc(v)}" rel="noopener noreferrer">${esc(v)}</a>` : esc(v);
     return `<div><dt>${esc(k)}</dt><dd>${value}</dd></div>`;
   }).join('');
   return `<!doctype html>
-<html lang="en">
+<html lang="${esc(lang())}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -64,19 +69,19 @@ footer { text-align: center; padding: 0 16px 32px; color: var(--muted); font-siz
   ${summary ? `<p class="summary">${esc(summary)}</p>` : ''}
 </header>
 <main>
-  <figure id="fig" title="Click to see it full size">
+  <figure id="fig" title="${esc(t('page_full_size'))}">
     <div class="shot">
       <img src="${image}" width="${width}" height="${height}" alt="${esc(title)}">
       ${markers}
     </div>
   </figure>
   <aside>
-    ${steps.length ? `<section><h2>Steps</h2><ol id="notes">${notes}</ol></section>` : ''}
-    ${labels.length ? `<section><h2>Labels on the image</h2><ul class="labels">${labels.map((l) => `<li>${esc(l)}</li>`).join('')}</ul></section>` : ''}
-    <section><h2>About this capture</h2><dl>${factRows}</dl></section>
+    ${steps.length ? `<section><h2>${esc(t('page_steps'))}</h2><ol id="notes">${notes}</ol></section>` : ''}
+    ${labels.length ? `<section><h2>${esc(t('page_labels'))}</h2><ul class="labels">${labels.map((l) => `<li>${esc(l)}</li>`).join('')}</ul></section>` : ''}
+    <section><h2>${esc(t('page_about'))}</h2><dl>${factRows}</dl></section>
   </aside>
 </main>
-<footer>Made with Captode</footer>
+<footer>${esc(t('page_made_with'))}</footer>
 <script>
   // Steps and their markers light up together; the image toggles full size.
   const fig = document.getElementById('fig');

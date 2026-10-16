@@ -13,6 +13,8 @@
 // which agree. Viewports: as Chrome's DevTools has them where it lists the device, else
 // the pixels divided by the platform's usual scale (which manufacturers don't publish).
 
+import { t } from './i18n.js';
+
 /**
  * Families: what devices of one design share. Lengths are in points (dp on Android).
  * - radius: the screen's corner radius
@@ -154,7 +156,7 @@ export const GROUPS = [
   ['iPad', (d) => d.os === 'ipados'],
   ['Google Pixel', (d) => d.brand === 'Google' && d.type === 'phone'],
   ['Samsung Galaxy', (d) => d.brand === 'Samsung' && d.type === 'phone'],
-  ['Android tablets', (d) => d.os === 'android' && d.type === 'tablet'],
+  [t('group_android_tablets'), (d) => d.os === 'android' && d.type === 'tablet'],
 ];
 
 /** Earlier versions' generic devices. */

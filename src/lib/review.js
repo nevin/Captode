@@ -1,5 +1,7 @@
 // Measuring and colour checks, shared by the image editor and the video page.
 
+import { t } from './i18n.js';
+
 /** WCAG 2 relative luminance of a #rrggbb colour. */
 export function luminance(hex) {
   const v = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255)
@@ -16,10 +18,10 @@ export function contrast(a, b) {
 /** The contrast readout: the ratio, and AA and AAA for normal and large text, as HTML. */
 export function contrastHtml(a, b) {
   const ratio = contrast(a, b);
-  const mark = (ok, label) => `<span class="${ok ? 'pass' : 'fail'}">${label} ${ok ? 'pass' : 'fail'}</span>`;
-  return `Contrast <b>${ratio.toFixed(2)} : 1</b><br>` +
-    `Normal text: ${mark(ratio >= 4.5, 'AA')} · ${mark(ratio >= 7, 'AAA')}<br>` +
-    `Large text and UI: ${mark(ratio >= 3, 'AA')} · ${mark(ratio >= 4.5, 'AAA')}`;
+  const mark = (ok, label) => `<span class="${ok ? 'pass' : 'fail'}">${t(ok ? 'wcag_pass' : 'wcag_fail', label)}</span>`;
+  return `${t('contrast_label')} <b>${ratio.toFixed(2)} : 1</b><br>` +
+    `${t('contrast_normal')}: ${mark(ratio >= 4.5, 'AA')} · ${mark(ratio >= 7, 'AAA')}<br>` +
+    `${t('contrast_large')}: ${mark(ratio >= 3, 'AA')} · ${mark(ratio >= 4.5, 'AAA')}`;
 }
 
 export const hexOf = (d) => '#' + [d[0], d[1], d[2]].map((v) => v.toString(16).padStart(2, '0')).join('');
@@ -35,7 +37,15 @@ export function measureText(m, ratio) {
   const dx = Math.abs(m.x2 - m.x1), dy = Math.abs(m.y2 - m.y1);
   const c = (v) => cssLength(v, ratio);
   if (dx < 0.5 || dy < 0.5) return `${c(Math.max(dx, dy))} px`;
-  return `${c(dx)} × ${c(dy)} px · ${c(Math.hypot(dx, dy))} px long`;
+  return t('measure_box', [`${c(dx)} × ${c(dy)}`, c(Math.hypot(dx, dy))]);
+}
+
+/** A measurement's label on the image: "120 px", or "120 × 40 px · 126 px". */
+export function measureLabel(m, ratio) {
+  const dx = Math.abs(m.x2 - m.x1), dy = Math.abs(m.y2 - m.y1);
+  const c = (v) => cssLength(v, ratio);
+  if (dx < 0.5 || dy < 0.5) return `${c(Math.max(dx, dy))} px`;
+  return t('measure_box_short', [`${c(dx)} × ${c(dy)}`, c(Math.hypot(dx, dy))]);
 }
 
 /**

@@ -1,5 +1,8 @@
 import { enhance, tablist, showShortcut } from '../lib/ui.js';
 import { outputSize } from '../lib/recorder.js';
+import { t, localize } from '../lib/i18n.js';
+
+localize();
 
 const $ = (s) => document.querySelector(s);
 const selectTab = tablist($('.kind'), (t) => { setKind(t.dataset.kind); chrome.storage.local.set({ kind: t.dataset.kind }); });
@@ -28,9 +31,9 @@ $('#device').checked = settings.device;
 // DevTools' device mode isn't recorded with the black around it), scaled, or a standard
 // resolution with the page's own shape.
 const SIZE_HINTS = {
-  page: 'Just the page, as shown',
-  scale: 'The page, scaled up or down',
-  res: 'Shorter side, same shape',
+  page: t('popup_just_the_page_as_shown'),
+  scale: t('popup_size_hint_scale'),
+  res: t('popup_size_hint_res'),
 };
 setSize(settings.videoSize);
 setKind(settings.kind);
@@ -157,12 +160,12 @@ for (const b of document.querySelectorAll('.mode')) {
 function setCountdown(n, save = true) {
   countdown = Math.max(0, Math.min(MAX_COUNTDOWN, Math.round(n) || 0));
   const out = $('#countdown');
-  out.textContent = countdown ? `${countdown} s` : 'Off';
+  out.textContent = countdown ? t('popup_seconds_short', countdown) : t('video_off');
   out.setAttribute('aria-valuenow', countdown);
-  out.setAttribute('aria-valuetext', countdown ? `${countdown} second${countdown > 1 ? 's' : ''}` : 'Off');
+  out.setAttribute('aria-valuetext', countdown === 1 ? t('popup_one_second') : countdown ? t('popup_n_seconds', countdown) : t('video_off'));
   $('#countdown-less').disabled = countdown === 0;
   $('#countdown-more').disabled = countdown === MAX_COUNTDOWN;
-  $('#countdown-hint').textContent = countdown ? 'Time to get ready first' : 'Recording starts straight away';
+  $('#countdown-hint').textContent = countdown ? t('popup_time_to_get_ready_first') : t('popup_countdown_off_hint');
   if (save) chrome.storage.local.set({ countdownSeconds: countdown });
 }
 
@@ -174,7 +177,7 @@ function setSize(v) {
   if (tabPixels) {
     const { width, height } = outputSize(...tabPixels, select.value);
     $('#size-hint').textContent = `${width} × ${height} px`;
-    $('#size-hint').title = `${SIZE_HINTS[group]}. For this tab; full-screen recordings start from your screen's size.`;
+    $('#size-hint').title = t('popup_size_hint_title', SIZE_HINTS[group]);
   } else {
     $('#size-hint').textContent = SIZE_HINTS[group];
   }

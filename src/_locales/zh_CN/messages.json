@@ -1,0 +1,1736 @@
+{
+  "extName": {
+    "message": "Captode — 截图与屏幕录制"
+  },
+  "extDescription": {
+    "message": "截取整个页面、可见区域或选定区域，录制屏幕，添加标注，并保存为图片、PDF 或视频。"
+  },
+  "commandAction": {
+    "message": "打开 Captode 或停止当前录制"
+  },
+  "popup_editor_and_recent_captures": {
+    "message": "编辑器和最近的截图"
+  },
+  "popup_settings": {
+    "message": "设置"
+  },
+  "popup_screenshot": {
+    "message": "截图"
+  },
+  "popup_record": {
+    "message": "录制"
+  },
+  "popup_capture_type": {
+    "message": "截图类型"
+  },
+  "popup_the_last_capture_didn_t": {
+    "message": "上次截图未成功"
+  },
+  "popup_dismiss": {
+    "message": "关闭"
+  },
+  "popup_new_in_captode_1_2": {
+    "message": "Captode 1.2 新功能"
+  },
+  "popup_a_review_tab_to_measure": {
+    "message": "用于测量、检查对比度和显示网格的“审查”标签页；对比；分享以供审查；导出预设；以及 63 款真实设备。"
+  },
+  "popup_this_page_can_t_be": {
+    "message": "无法截取此页面"
+  },
+  "popup_chrome_protects_its_own_pages": {
+    "message": "Chrome 会保护自身页面和 Chrome 应用商店。请打开一个网站进行截图，或录制整个屏幕。"
+  },
+  "popup_choose_what_to_capture": {
+    "message": "选择要截取的内容"
+  },
+  "popup_full_page": {
+    "message": "整个页面"
+  },
+  "popup_the_whole_page_top_to": {
+    "message": "从上到下的整个页面"
+  },
+  "popup_visible_area": {
+    "message": "可见区域"
+  },
+  "popup_what_s_on_screen_right": {
+    "message": "当前屏幕上显示的内容"
+  },
+  "popup_selected_area": {
+    "message": "选定区域"
+  },
+  "popup_drag_to_choose_a_region": {
+    "message": "拖动以选择区域"
+  },
+  "popup_choose_what_to_record": {
+    "message": "选择要录制的内容"
+  },
+  "popup_full_screen": {
+    "message": "整个屏幕"
+  },
+  "popup_your_whole_screen_or_a": {
+    "message": "整个屏幕或一个窗口"
+  },
+  "popup_this_tab": {
+    "message": "此标签页"
+  },
+  "popup_everything_visible_in_this_tab": {
+    "message": "此标签页中可见的所有内容"
+  },
+  "popup_record_only_part_of_this": {
+    "message": "只录制此标签页的一部分"
+  },
+  "popup_frame_rate": {
+    "message": "帧率"
+  },
+  "popup_just_the_page_as_shown": {
+    "message": "仅页面本身，与显示一致"
+  },
+  "popup_video_size": {
+    "message": "视频尺寸"
+  },
+  "popup_page_size": {
+    "message": "页面尺寸"
+  },
+  "popup_scale": {
+    "message": "缩放"
+  },
+  "popup_resolution": {
+    "message": "分辨率"
+  },
+  "popup_sound_from_the_tab_or": {
+    "message": "标签页或屏幕的声音"
+  },
+  "popup_record_audio": {
+    "message": "录制音频"
+  },
+  "popup_time_to_get_ready_first": {
+    "message": "留出准备时间"
+  },
+  "popup_countdown": {
+    "message": "倒计时"
+  },
+  "popup_shorter_countdown": {
+    "message": "缩短倒计时"
+  },
+  "popup_longer_countdown": {
+    "message": "延长倒计时"
+  },
+  "popup_stop_click_the_captode_icon": {
+    "message": "停止：点击 Captode 图标或按"
+  },
+  "popup_export_inside_a_phone_or": {
+    "message": "放入手机或平板外框中导出"
+  },
+  "popup_device_frame": {
+    "message": "设备外框"
+  },
+  "settings_changes_are_saved_automatically": {
+    "message": "更改会自动保存"
+  },
+  "settings_appearance": {
+    "message": "外观"
+  },
+  "settings_how_captode_s_own_pages": {
+    "message": "Captode 页面的外观。"
+  },
+  "settings_system": {
+    "message": "跟随系统"
+  },
+  "settings_match_your_browser_and_computer": {
+    "message": "与浏览器和电脑保持一致"
+  },
+  "settings_light": {
+    "message": "浅色"
+  },
+  "settings_always_light": {
+    "message": "始终为浅色"
+  },
+  "settings_dark": {
+    "message": "深色"
+  },
+  "settings_always_dark": {
+    "message": "始终为深色"
+  },
+  "settings_theme": {
+    "message": "主题"
+  },
+  "settings_export_background": {
+    "message": "导出背景"
+  },
+  "settings_the_background_behind_device_frames": {
+    "message": "下载的文件中设备外框后面以及带边距截图周围的背景。每次导出时仍可单独更改。"
+  },
+  "settings_transparent": {
+    "message": "透明"
+  },
+  "settings_no_background": {
+    "message": "无背景"
+  },
+  "settings_white": {
+    "message": "白色"
+  },
+  "settings_plain_white": {
+    "message": "纯白"
+  },
+  "settings_custom_colour": {
+    "message": "自定义颜色"
+  },
+  "settings_pick_any_colour": {
+    "message": "任选一种颜色"
+  },
+  "settings_colour": {
+    "message": "颜色"
+  },
+  "settings_hex_colour": {
+    "message": "十六进制颜色"
+  },
+  "settings_jpeg_bmp_pdf_mp4_and": {
+    "message": "JPEG、BMP、PDF、MP4 和 WebM 不支持透明。选择“透明”时，它们会使用白色背景。"
+  },
+  "settings_defaults": {
+    "message": "默认设置"
+  },
+  "settings_screenshot_format": {
+    "message": "截图格式"
+  },
+  "settings_the_last_one_used": {
+    "message": "上次使用的格式"
+  },
+  "settings_png_8_compressed": {
+    "message": "PNG-8（压缩）"
+  },
+  "settings_recording_format": {
+    "message": "录制格式"
+  },
+  "settings_show_captures_in_a_phone": {
+    "message": "默认在手机或平板外框中显示截图"
+  },
+  "settings_each_new_screenshot_is_copied": {
+    "message": "每张新截图打开时即被复制，可直接粘贴"
+  },
+  "settings_copy_screenshots_to_the_clipboard": {
+    "message": "将截图复制到剪贴板"
+  },
+  "settings_keyboard_shortcut": {
+    "message": "键盘快捷键"
+  },
+  "settings_open_captode_or_stop_a": {
+    "message": "打开 Captode 或停止录制："
+  },
+  "settings_change_shortcut": {
+    "message": "更改快捷键"
+  },
+  "settings_about": {
+    "message": "关于"
+  },
+  "settings_everything_happens_on_your_computer": {
+    "message": "一切都在你的电脑上完成。Captode 没有账号、没有服务器，也从不上传你的截图。"
+  },
+  "settings_help_and_guide": {
+    "message": "帮助与指南"
+  },
+  "settings_report_a_problem": {
+    "message": "报告问题"
+  },
+  "settings_privacy_policy": {
+    "message": "隐私政策"
+  },
+  "settings_reset_all_settings": {
+    "message": "重置所有设置"
+  },
+  "settings_reset_all_settings_2": {
+    "message": "要重置所有设置吗？"
+  },
+  "settings_theme_export_background_default_formats": {
+    "message": "主题、导出背景、默认格式、设备外框和录制选项都将恢复为安装 Captode 时的状态。你的截图不受影响。"
+  },
+  "settings_cancel": {
+    "message": "取消"
+  },
+  "settings_reset": {
+    "message": "重置"
+  },
+  "editor_untitled": {
+    "message": "未命名"
+  },
+  "editor_keyboard_shortcuts": {
+    "message": "键盘快捷键 ?"
+  },
+  "editor_compare_this_image_with_another": {
+    "message": "将此图片与其他截图或设计稿对比"
+  },
+  "editor_compare": {
+    "message": "对比"
+  },
+  "editor_open_an_image_from_your": {
+    "message": "从电脑打开图片"
+  },
+  "editor_open": {
+    "message": "打开"
+  },
+  "editor_copy_the_image_to_the": {
+    "message": "将图片复制到剪贴板（⌘⇧C）"
+  },
+  "editor_copy": {
+    "message": "复制"
+  },
+  "editor_download_s": {
+    "message": "下载（⌘S）"
+  },
+  "editor_download": {
+    "message": "下载"
+  },
+  "editor_undo_all_changes": {
+    "message": "撤销所有更改"
+  },
+  "editor_undo_z": {
+    "message": "撤销 ⌘Z"
+  },
+  "editor_redo_z": {
+    "message": "重做 ⇧⌘Z"
+  },
+  "editor_delete": {
+    "message": "删除 ⌫"
+  },
+  "editor_tools": {
+    "message": "工具"
+  },
+  "editor_start_with_an_image": {
+    "message": "从一张图片开始"
+  },
+  "editor_capture_one_with_the_captode": {
+    "message": "使用工具栏中的 Captode 按钮截图，用 <kbd>⌘</kbd> <kbd>V</kbd> 粘贴图片，或将文件拖放到此处。"
+  },
+  "editor_choose_an_image": {
+    "message": "选择图片"
+  },
+  "editor_kept_on_this_device_for": {
+    "message": "在此设备上保留 24 小时"
+  },
+  "editor_recent_captures": {
+    "message": "最近的截图"
+  },
+  "editor_the_image_being_edited": {
+    "message": "正在编辑的图片"
+  },
+  "editor_export_preview": {
+    "message": "导出预览"
+  },
+  "editor_back_to_editing": {
+    "message": "返回编辑"
+  },
+  "editor_zoom_out": {
+    "message": "缩小 −"
+  },
+  "editor_fit_or_actual_size_0": {
+    "message": "适合窗口或实际大小 0"
+  },
+  "editor_zoom_in": {
+    "message": "放大 +"
+  },
+  "editor_annotate": {
+    "message": "标注"
+  },
+  "editor_adjust": {
+    "message": "调整"
+  },
+  "editor_review": {
+    "message": "审查"
+  },
+  "editor_export": {
+    "message": "导出"
+  },
+  "editor_inspector": {
+    "message": "检查器"
+  },
+  "editor_quick_styles": {
+    "message": "快捷样式"
+  },
+  "editor_colours_for_every_tool_at": {
+    "message": "一次性为所有工具和所选内容设置颜色。"
+  },
+  "editor_style": {
+    "message": "样式"
+  },
+  "editor_pick_a_tool_from_the": {
+    "message": "从工具栏选择工具，或点击已添加的内容进行修改。"
+  },
+  "editor_draw_a_straight_line_or": {
+    "message": "画直线或正方形"
+  },
+  "editor_drag": {
+    "message": "+ 拖动"
+  },
+  "editor_edit_text": {
+    "message": "编辑文字"
+  },
+  "editor_double_click": {
+    "message": "双击"
+  },
+  "editor_nudge_the_selection": {
+    "message": "微移所选内容"
+  },
+  "editor_zoom": {
+    "message": "缩放"
+  },
+  "editor_scroll": {
+    "message": "+ 滚动"
+  },
+  "editor_thickness": {
+    "message": "粗细"
+  },
+  "editor_opacity": {
+    "message": "不透明度"
+  },
+  "editor_line": {
+    "message": "线条"
+  },
+  "editor_solid": {
+    "message": "实线"
+  },
+  "editor_dashed": {
+    "message": "虚线"
+  },
+  "editor_dotted": {
+    "message": "点线"
+  },
+  "editor_arrow_heads": {
+    "message": "箭头"
+  },
+  "editor_at_the_end": {
+    "message": "仅末端"
+  },
+  "editor_both_ends": {
+    "message": "两端"
+  },
+  "editor_fill": {
+    "message": "填充"
+  },
+  "editor_font": {
+    "message": "字体"
+  },
+  "editor_add_installed_fonts": {
+    "message": "添加已安装的字体"
+  },
+  "editor_size": {
+    "message": "大小"
+  },
+  "editor_smaller": {
+    "message": "更小"
+  },
+  "editor_font_size": {
+    "message": "字号"
+  },
+  "editor_bigger": {
+    "message": "更大"
+  },
+  "editor_bold": {
+    "message": "粗体"
+  },
+  "editor_italic": {
+    "message": "斜体"
+  },
+  "editor_text_colour": {
+    "message": "文字颜色"
+  },
+  "editor_background": {
+    "message": "背景"
+  },
+  "editor_next_number": {
+    "message": "下一个编号"
+  },
+  "editor_click_to_add_a_step": {
+    "message": "点击添加步骤：编号会接着上一个递增。拖动可移动步骤。"
+  },
+  "editor_dim_the_rest": {
+    "message": "调暗其余部分"
+  },
+  "editor_rounded_corners": {
+    "message": "圆角"
+  },
+  "editor_everything_outside_the_spotlights_is": {
+    "message": "聚光区域以外的部分都会变暗。绘制多个可突出多个区域。"
+  },
+  "editor_magnification": {
+    "message": "放大倍数"
+  },
+  "editor_border": {
+    "message": "边框"
+  },
+  "editor_effect": {
+    "message": "效果"
+  },
+  "editor_pixelate": {
+    "message": "像素化"
+  },
+  "editor_blur": {
+    "message": "模糊"
+  },
+  "editor_solid_box": {
+    "message": "纯色遮挡"
+  },
+  "editor_strength": {
+    "message": "强度"
+  },
+  "editor_arrange": {
+    "message": "排列"
+  },
+  "editor_bring_to_front": {
+    "message": "置于顶层 ⌘]"
+  },
+  "editor_send_to_back": {
+    "message": "置于底层 ⌘["
+  },
+  "editor_duplicate_d": {
+    "message": "复制一份 ⌘D"
+  },
+  "editor_align": {
+    "message": "对齐"
+  },
+  "editor_align_left": {
+    "message": "左对齐"
+  },
+  "editor_align_centres": {
+    "message": "居中对齐"
+  },
+  "editor_align_right": {
+    "message": "右对齐"
+  },
+  "editor_align_top": {
+    "message": "顶部对齐"
+  },
+  "editor_align_middles": {
+    "message": "垂直居中"
+  },
+  "editor_align_bottom": {
+    "message": "底部对齐"
+  },
+  "editor_space_evenly_across": {
+    "message": "水平均匀分布"
+  },
+  "editor_space_evenly_down": {
+    "message": "垂直均匀分布"
+  },
+  "editor_aspect_ratio": {
+    "message": "宽高比"
+  },
+  "editor_freeform": {
+    "message": "自由"
+  },
+  "editor_square_1_1": {
+    "message": "正方形（1:1）"
+  },
+  "editor_widescreen_16_9": {
+    "message": "宽屏（16:9）"
+  },
+  "editor_standard_4_3": {
+    "message": "标准（4:3）"
+  },
+  "editor_portrait_9_16": {
+    "message": "竖屏（9:16）"
+  },
+  "editor_portrait_3_4": {
+    "message": "竖屏（3:4）"
+  },
+  "editor_drag_on_the_image_to": {
+    "message": "在图片上拖动，选择要保留的区域。"
+  },
+  "editor_apply_crop": {
+    "message": "应用裁剪"
+  },
+  "editor_annotations": {
+    "message": "标注"
+  },
+  "editor_front_to_back_arrow_keys": {
+    "message": "从前到后排列。方向键选择（Shift：多选）；Alt 加方向键移动（Shift：10 px）；Enter 编辑文字；Delete 删除。"
+  },
+  "editor_image_size": {
+    "message": "图片尺寸"
+  },
+  "editor_width": {
+    "message": "宽度"
+  },
+  "editor_keep_proportions": {
+    "message": "保持比例"
+  },
+  "editor_height": {
+    "message": "高度"
+  },
+  "editor_resize": {
+    "message": "调整尺寸"
+  },
+  "editor_rotate_and_flip": {
+    "message": "旋转和翻转"
+  },
+  "editor_rotate_left": {
+    "message": "向左旋转"
+  },
+  "editor_rotate_right": {
+    "message": "向右旋转"
+  },
+  "editor_flip_horizontally": {
+    "message": "水平翻转"
+  },
+  "editor_flip_vertically": {
+    "message": "垂直翻转"
+  },
+  "editor_frame": {
+    "message": "边框"
+  },
+  "editor_padding": {
+    "message": "边距"
+  },
+  "editor_backdrop": {
+    "message": "背景"
+  },
+  "editor_shown_when_there_is_padding": {
+    "message": "有边距时显示"
+  },
+  "editor_drop_shadow": {
+    "message": "投影"
+  },
+  "editor_measure": {
+    "message": "测量"
+  },
+  "editor_drag_across_the_image_with": {
+    "message": "使用测量工具（U）在图片上拖动。线条会自动拉直，端点会吸附到边缘；按住 Alt 可取消这两项。"
+  },
+  "editor_no_measurements_yet": {
+    "message": "还没有测量"
+  },
+  "editor_pixel_ratio": {
+    "message": "像素比"
+  },
+  "editor_automatic": {
+    "message": "自动"
+  },
+  "editor_clear_all": {
+    "message": "全部清除"
+  },
+  "editor_colours_and_contrast": {
+    "message": "颜色和对比度"
+  },
+  "editor_click_the_image_with_the": {
+    "message": "使用取色器（I）点击图片。选择接下来要设置的颜色。"
+  },
+  "editor_text": {
+    "message": "文字"
+  },
+  "editor_not_picked": {
+    "message": "未选取"
+  },
+  "editor_colour_to_set_next": {
+    "message": "接下来设置的颜色"
+  },
+  "editor_pick_two_colours_to_check": {
+    "message": "选取两种颜色以检查对比度"
+  },
+  "editor_copy_colours": {
+    "message": "复制颜色"
+  },
+  "editor_swap": {
+    "message": "交换"
+  },
+  "editor_spacing_grid": {
+    "message": "间距网格"
+  },
+  "editor_over_the_image_only_not": {
+    "message": "仅显示在图片上，不会导出"
+  },
+  "editor_show_a_grid": {
+    "message": "显示网格"
+  },
+  "editor_every": {
+    "message": "间隔"
+  },
+  "editor_format": {
+    "message": "格式"
+  },
+  "editor_png_compressed": {
+    "message": "PNG — 压缩"
+  },
+  "editor_quality": {
+    "message": "质量"
+  },
+  "editor_colours": {
+    "message": "颜色数"
+  },
+  "editor_auto": {
+    "message": "自动"
+  },
+  "editor_dither": {
+    "message": "抖动"
+  },
+  "editor_lossy_compression": {
+    "message": "有损压缩"
+  },
+  "editor_same_as_the_image": {
+    "message": "与图片相同"
+  },
+  "editor_us_letter": {
+    "message": "美国信纸"
+  },
+  "editor_continue_tall_images_onto_more": {
+    "message": "将过高的图片延续到更多页"
+  },
+  "editor_split_long_images": {
+    "message": "拆分长图"
+  },
+  "editor_100_original_size": {
+    "message": "100% — 原始尺寸"
+  },
+  "editor_size_limit": {
+    "message": "大小上限"
+  },
+  "editor_no_limit": {
+    "message": "无上限"
+  },
+  "editor_file_name": {
+    "message": "文件名"
+  },
+  "editor_one_image_for_each_of": {
+    "message": "为多台设备各生成一张图片，打包成 zip"
+  },
+  "editor_several_devices": {
+    "message": "多台设备…"
+  },
+  "editor_share_for_review": {
+    "message": "分享以供审查"
+  },
+  "editor_a_single_web_page_with": {
+    "message": "一个独立网页，包含图片、每个步骤的备注和来源。可附加到工单或在聊天中发送，任何浏览器都能打开。"
+  },
+  "editor_share_for_review_2": {
+    "message": "分享以供审查…"
+  },
+  "editor_copy_the_image_to_the_2": {
+    "message": "将图片以 PNG 格式复制到剪贴板（⌘⇧C）"
+  },
+  "editor_export_for_several_devices": {
+    "message": "为多台设备导出"
+  },
+  "editor_one_image_for_each_in": {
+    "message": "每台设备一张图片，打包成 zip，使用“导出”中设置的格式和选项。每张都保留截图的精确像素。"
+  },
+  "editor_download_zip": {
+    "message": "下载 zip"
+  },
+  "editor_title": {
+    "message": "标题"
+  },
+  "editor_optional": {
+    "message": "可选"
+  },
+  "editor_summary": {
+    "message": "摘要"
+  },
+  "editor_what_should_reviewers_look_at": {
+    "message": "审查者应该关注什么？"
+  },
+  "editor_add_numbered_steps_n_to": {
+    "message": "在图片上添加编号步骤（N），即可为每个步骤写备注。"
+  },
+  "editor_download_review_page": {
+    "message": "下载审查页面"
+  },
+  "editor_keyboard_shortcuts_2": {
+    "message": "键盘快捷键"
+  },
+  "editor_close": {
+    "message": "关闭"
+  },
+  "editor_select_and_move": {
+    "message": "选择和移动"
+  },
+  "editor_pan": {
+    "message": "平移"
+  },
+  "editor_or_hold": {
+    "message": "，或按住"
+  },
+  "editor_crop": {
+    "message": "裁剪"
+  },
+  "editor_pen": {
+    "message": "画笔"
+  },
+  "editor_highlighter": {
+    "message": "荧光笔"
+  },
+  "editor_arrow": {
+    "message": "箭头"
+  },
+  "editor_rectangle": {
+    "message": "矩形"
+  },
+  "editor_ellipse": {
+    "message": "椭圆"
+  },
+  "editor_callout_speech_bubble": {
+    "message": "标注气泡（对话框）"
+  },
+  "editor_step_number": {
+    "message": "步骤编号"
+  },
+  "editor_spotlight": {
+    "message": "聚光"
+  },
+  "editor_magnifier": {
+    "message": "放大镜"
+  },
+  "editor_colour_picker": {
+    "message": "取色器"
+  },
+  "editor_spacing_grid_on_or_off": {
+    "message": "显示或隐藏间距网格"
+  },
+  "editor_blur_or_pixelate": {
+    "message": "模糊或像素化"
+  },
+  "editor_editing": {
+    "message": "编辑"
+  },
+  "editor_undo": {
+    "message": "撤销"
+  },
+  "editor_redo": {
+    "message": "重做"
+  },
+  "editor_toolbar_button": {
+    "message": "工具栏按钮"
+  },
+  "editor_delete_selection": {
+    "message": "删除所选内容"
+  },
+  "editor_select_several": {
+    "message": "多选"
+  },
+  "editor_click_or_drag_a_box": {
+    "message": "+ 点击，或拖出选框"
+  },
+  "editor_select_all": {
+    "message": "全选"
+  },
+  "editor_duplicate": {
+    "message": "复制一份"
+  },
+  "editor_copy_paste_annotations": {
+    "message": "复制 / 粘贴标注"
+  },
+  "editor_bring_to_front_send_to": {
+    "message": "置于顶层 / 置于底层"
+  },
+  "editor_deselect": {
+    "message": "取消选择"
+  },
+  "editor_nudge_10_px_with": {
+    "message": "微移（按 ⇧ 时 10 px）"
+  },
+  "editor_straight_line_or_square": {
+    "message": "直线或正方形"
+  },
+  "editor_move_or_resize_without_snapping": {
+    "message": "移动或调整大小时不吸附"
+  },
+  "editor_view_and_file": {
+    "message": "视图和文件"
+  },
+  "editor_zoom_in_out": {
+    "message": "放大 / 缩小"
+  },
+  "editor_fit_to_window": {
+    "message": "适合窗口"
+  },
+  "editor_copy_image": {
+    "message": "复制图片"
+  },
+  "editor_paste_an_image": {
+    "message": "粘贴图片"
+  },
+  "editor_this_list": {
+    "message": "此列表"
+  },
+  "video_recording": {
+    "message": "录制内容"
+  },
+  "video_download_the_recording_as_it": {
+    "message": "按截取时的原样下载录制内容"
+  },
+  "video_original_webm": {
+    "message": "原始 WebM"
+  },
+  "video_exported_animation": {
+    "message": "导出的动画"
+  },
+  "video_measuring_layer_over_the_paused": {
+    "message": "暂停帧上的测量图层"
+  },
+  "video_play_or_pause_space": {
+    "message": "播放或暂停 Space"
+  },
+  "video_trim_start": {
+    "message": "剪辑起点"
+  },
+  "video_start_i": {
+    "message": "起点 I"
+  },
+  "video_trim_end": {
+    "message": "剪辑终点"
+  },
+  "video_end_o": {
+    "message": "终点 O"
+  },
+  "video_recording_not_found": {
+    "message": "找不到录制内容"
+  },
+  "video_recordings_are_kept_for_a": {
+    "message": "录制内容会保留一天。点击工具栏中的 Captode 按钮开始新的录制。"
+  },
+  "video_trim": {
+    "message": "剪辑"
+  },
+  "video_start": {
+    "message": "起点"
+  },
+  "video_start_at_the_playhead_i": {
+    "message": "从播放头开始 I"
+  },
+  "video_end": {
+    "message": "终点"
+  },
+  "video_end_at_the_playhead_o": {
+    "message": "在播放头结束 O"
+  },
+  "video_drag_the_handles_on_the": {
+    "message": "拖动时间轴上的手柄，或播放到某一位置后按 <kbd>I</kbd> 设为起点、按 <kbd>O</kbd> 设为终点。"
+  },
+  "video_video": {
+    "message": "视频"
+  },
+  "video_animation": {
+    "message": "动画"
+  },
+  "video_highest_visually_lossless": {
+    "message": "最高 — 视觉无损"
+  },
+  "video_balanced": {
+    "message": "均衡"
+  },
+  "video_small_file": {
+    "message": "较小文件"
+  },
+  "video_smallest_file": {
+    "message": "最小文件"
+  },
+  "video_this_recording_has_no_sound": {
+    "message": "此录制内容没有声音"
+  },
+  "video_include_audio": {
+    "message": "包含音频"
+  },
+  "video_lets_colours_shift_slightly_where": {
+    "message": "允许颜色在更易压缩的地方略有变化。通常可缩小 30–50%；数值越高，颗粒感越明显。"
+  },
+  "video_exact_pixels_larger_file": {
+    "message": "像素精确，文件更大"
+  },
+  "video_lossless_frames": {
+    "message": "无损帧"
+  },
+  "video_merge_repeated_frames_and_store": {
+    "message": "合并重复的帧，只保存发生变化的像素。每一帧看起来完全一样。"
+  },
+  "video_reduce_size_losslessly": {
+    "message": "无损缩小文件"
+  },
+  "video_tiny_changes_from_recording_noise": {
+    "message": "录制噪点造成的细微变化（255 级中的 2 级）不算作运动。文件小得多，看不出差别。"
+  },
+  "video_ignore_flicker": {
+    "message": "忽略闪烁"
+  },
+  "video_loop_forever": {
+    "message": "无限循环"
+  },
+  "video_review_a_frame": {
+    "message": "审查一帧"
+  },
+  "video_measure_or_pick_colours_on": {
+    "message": "在当前显示的帧上测量或取色。视频会暂停；这里的内容都不会导出。"
+  },
+  "video_off": {
+    "message": "关"
+  },
+  "video_review_tool": {
+    "message": "审查工具"
+  },
+  "video_change_settings_and_export_again": {
+    "message": "更改设置并重新导出"
+  },
+  "video_edit": {
+    "message": "编辑"
+  },
+  "compare_choose_two_images": {
+    "message": "选择两张图片"
+  },
+  "compare_download_the_difference_image_as": {
+    "message": "将差异图下载为 PNG"
+  },
+  "compare_difference_image": {
+    "message": "差异图"
+  },
+  "compare_divide_between_a_and_b": {
+    "message": "A 与 B 之间的分隔线"
+  },
+  "compare_compare_two_images": {
+    "message": "对比两张图片"
+  },
+  "compare_pick_two_captures_on_the": {
+    "message": "在右侧选择两张截图，或打开图片文件：例如导出的设计稿与实现效果的截图，或改动前后的页面。"
+  },
+  "compare_images": {
+    "message": "图片"
+  },
+  "compare_open_an_image_file_for": {
+    "message": "为 A 打开图片文件"
+  },
+  "compare_open_an_image_file_for_2": {
+    "message": "为 B 打开图片文件"
+  },
+  "compare_swap_a_and_b": {
+    "message": "交换 A 和 B"
+  },
+  "compare_view": {
+    "message": "视图"
+  },
+  "compare_slider": {
+    "message": "滑块"
+  },
+  "compare_side_by_side": {
+    "message": "并排"
+  },
+  "compare_overlay": {
+    "message": "叠加"
+  },
+  "compare_difference": {
+    "message": "差异"
+  },
+  "compare_b_s_opacity": {
+    "message": "B 的不透明度"
+  },
+  "compare_tolerance": {
+    "message": "容差"
+  },
+  "compare_fit": {
+    "message": "适合窗口"
+  },
+  "compare_line_up": {
+    "message": "对齐"
+  },
+  "compare_scale_b_to_a_s": {
+    "message": "将 B 缩放到 A 的宽度"
+  },
+  "compare_match_widths": {
+    "message": "统一宽度"
+  },
+  "compare_move_b_across": {
+    "message": "水平移动 B"
+  },
+  "compare_move_b_down": {
+    "message": "垂直移动 B"
+  },
+  "compare_in_a_s_pixels_with": {
+    "message": "以 A 的像素为单位。视图获得焦点时，按 Alt 加方向键可将 B 每次移动 1 像素（Shift：10）。"
+  },
+  "screen_record_your_screen": {
+    "message": "录制屏幕"
+  },
+  "screen_choose_your_whole_screen_a": {
+    "message": "选择整个屏幕、一个窗口或一个标签页。要停止录制，请点击 Captode 图标或回到此处。"
+  },
+  "screen_recording_starts_in": {
+    "message": "录制将在以下时间后开始"
+  },
+  "screen_stop_recording": {
+    "message": "停止录制"
+  },
+  "screen_saving_your_recording": {
+    "message": "正在保存录制内容…"
+  },
+  "editor_zoom_keys": {
+    "message": "<kbd>+</kbd> <kbd>−</kbd>，或在指针处按 <kbd>⌘</kbd> + 滚动"
+  },
+  "popup_size_hint_scale": {
+    "message": "页面放大或缩小"
+  },
+  "popup_size_hint_res": {
+    "message": "短边长度，保持比例"
+  },
+  "popup_seconds_short": {
+    "message": "$1 秒"
+  },
+  "popup_countdown_off_hint": {
+    "message": "录制会立即开始"
+  },
+  "popup_size_hint_title": {
+    "message": "$1。以此标签页为准；整个屏幕的录制以屏幕尺寸为准。"
+  },
+  "popup_one_second": {
+    "message": "1 秒"
+  },
+  "popup_n_seconds": {
+    "message": "$1 秒"
+  },
+  "settings_saved": {
+    "message": "已保存"
+  },
+  "settings_version": {
+    "message": "版本 $1"
+  },
+  "settings_reset_done": {
+    "message": "已重置设置"
+  },
+  "settings_restored": {
+    "message": "已恢复设置"
+  },
+  "ago_just_now": {
+    "message": "刚刚"
+  },
+  "ago_minutes": {
+    "message": "$1 分钟前"
+  },
+  "ago_hours": {
+    "message": "$1 小时前"
+  },
+  "shortcut_none": {
+    "message": "未设置快捷键"
+  },
+  "finish_midnight": {
+    "message": "午夜色"
+  },
+  "finish_titanium": {
+    "message": "原色钛金属"
+  },
+  "finish_silver": {
+    "message": "银色"
+  },
+  "finish_gold": {
+    "message": "金色"
+  },
+  "finish_blue": {
+    "message": "蓝色"
+  },
+  "dev_info_device": {
+    "message": "$1：$2 px，$3，$4×"
+  },
+  "dev_info_matches": {
+    "message": "与此截图完全匹配"
+  },
+  "dev_info_closest": {
+    "message": "与此截图最接近"
+  },
+  "dev_info_exact": {
+    "message": "截图的 $1 像素完全保留"
+  },
+  "dev_info_scaled": {
+    "message": "截图以 $1% 显示"
+  },
+  "dev_show": {
+    "message": "在设备外框中显示"
+  },
+  "dev_show_hint": {
+    "message": "在截图外加上真实的手机或平板外框"
+  },
+  "dev_device": {
+    "message": "设备"
+  },
+  "dev_preview": {
+    "message": "截图在设备中的预览"
+  },
+  "dev_orientation": {
+    "message": "方向"
+  },
+  "dev_portrait": {
+    "message": "竖屏"
+  },
+  "dev_landscape": {
+    "message": "横屏"
+  },
+  "dev_finish": {
+    "message": "配色"
+  },
+  "dev_size_exact": {
+    "message": "截图本身的像素（精确）"
+  },
+  "dev_size_device": {
+    "message": "设备的屏幕分辨率"
+  },
+  "dev_fit": {
+    "message": "屏幕适配"
+  },
+  "dev_fit_width": {
+    "message": "填满宽度，从顶部开始"
+  },
+  "dev_fit_cover": {
+    "message": "填满屏幕"
+  },
+  "dev_fit_contain": {
+    "message": "完整显示"
+  },
+  "dev_change_default": {
+    "message": "更改默认值"
+  },
+  "dev_background_colour": {
+    "message": "背景颜色"
+  },
+  "dev_status_bar": {
+    "message": "状态栏"
+  },
+  "dev_status_above": {
+    "message": "在页面上方"
+  },
+  "dev_status_over": {
+    "message": "覆盖在页面上"
+  },
+  "dev_none": {
+    "message": "无"
+  },
+  "dev_status_text": {
+    "message": "状态栏文字"
+  },
+  "dev_dark_on_light": {
+    "message": "浅底深字"
+  },
+  "dev_light_on_dark": {
+    "message": "深底浅字"
+  },
+  "picker_all": {
+    "message": "全部"
+  },
+  "picker_android": {
+    "message": "Android"
+  },
+  "picker_tablets": {
+    "message": "平板"
+  },
+  "picker_search": {
+    "message": "搜索设备"
+  },
+  "picker_kind": {
+    "message": "设备类型"
+  },
+  "picker_devices": {
+    "message": "设备"
+  },
+  "picker_best_match": {
+    "message": "最佳匹配"
+  },
+  "picker_best_match_is": {
+    "message": "最佳匹配：$1"
+  },
+  "picker_best_match_full": {
+    "message": "与截图最匹配的设备"
+  },
+  "picker_recent": {
+    "message": "最近使用"
+  },
+  "picker_none": {
+    "message": "没有匹配的设备"
+  },
+  "group_android_tablets": {
+    "message": "Android 平板"
+  },
+  "preset_chat": {
+    "message": "Slack 或 Teams（PNG，最大 5 MB）"
+  },
+  "preset_issue": {
+    "message": "Jira 或 GitHub 工单（PNG，最大 10 MB）"
+  },
+  "preset_email": {
+    "message": "电子邮件（JPEG，最大 1 MB）"
+  },
+  "preset_review": {
+    "message": "设计审查（精确 PNG，无上限）"
+  },
+  "preset_mockup": {
+    "message": "手机样机（透明 PNG）"
+  },
+  "preset_web": {
+    "message": "网站或文档（WebP）"
+  },
+  "preset_chat_gif": {
+    "message": "聊天用 GIF（480p，15 fps）"
+  },
+  "preset_share_mp4": {
+    "message": "随处分享（MP4，1080p）"
+  },
+  "preset_original": {
+    "message": "最高质量（MP4，原始尺寸）"
+  },
+  "preset_docs_webp": {
+    "message": "文档和帮助页（WebP，720p，20 fps）"
+  },
+  "preset_mockup_mp4": {
+    "message": "手机样机视频（MP4）"
+  },
+  "preset_label": {
+    "message": "预设"
+  },
+  "preset_delete": {
+    "message": "删除此预设"
+  },
+  "preset_name_placeholder": {
+    "message": "为预设命名"
+  },
+  "preset_name": {
+    "message": "预设名称"
+  },
+  "preset_save": {
+    "message": "保存"
+  },
+  "preset_custom": {
+    "message": "自定义"
+  },
+  "preset_builtin": {
+    "message": "内置"
+  },
+  "preset_yours": {
+    "message": "我的预设"
+  },
+  "preset_save_current": {
+    "message": "将当前设置保存为预设…"
+  },
+  "error_protected_page": {
+    "message": "无法截取此页面。浏览器页面和扩展程序商店受到保护。"
+  },
+  "pick_capture_hint": {
+    "message": "拖动选择要截取的区域  ·  按 Esc 取消"
+  },
+  "pick_record_hint": {
+    "message": "拖动选择要录制的区域  ·  按 Esc 取消"
+  },
+  "countdown_hint": {
+    "message": "即将开始录制 · 按 Esc 取消"
+  },
+  "error_recording_start": {
+    "message": "无法开始录制。"
+  },
+  "action_stop_title": {
+    "message": "Captode — 点击停止录制"
+  },
+  "screen_nothing_shared": {
+    "message": "没有共享任何内容，因此没有录制。"
+  },
+  "screen_mac_permission": {
+    "message": "如果你确实选择了屏幕，请在“系统设置 → 隐私与安全性 → 录屏与系统录音”中允许 Chrome，然后重启 Chrome。"
+  },
+  "screen_title_recording": {
+    "message": "● 正在录制 — Captode"
+  },
+  "screen_title": {
+    "message": "Captode — 屏幕录制"
+  },
+  "screen_title_countdown": {
+    "message": "$1 秒后开始录制… — Captode"
+  },
+  "tool_pan": {
+    "message": "平移（或按住 Space）"
+  },
+  "tool_callout": {
+    "message": "标注气泡"
+  },
+  "name_redact": {
+    "message": "模糊 / 像素化"
+  },
+  "edits_back": {
+    "message": "你的编辑已恢复"
+  },
+  "start_over": {
+    "message": "重新开始"
+  },
+  "all_undone": {
+    "message": "已撤销所有更改"
+  },
+  "announce_undone": {
+    "message": "已撤销"
+  },
+  "announce_redone": {
+    "message": "已重做"
+  },
+  "announce_added_step": {
+    "message": "已添加步骤 $1"
+  },
+  "announce_added": {
+    "message": "已添加：$1"
+  },
+  "deleted_one": {
+    "message": "已删除标注"
+  },
+  "deleted_many": {
+    "message": "已删除 $1 个标注"
+  },
+  "copied_one": {
+    "message": "已复制标注"
+  },
+  "copied_many": {
+    "message": "已复制 $1 个标注"
+  },
+  "copy_failed": {
+    "message": "无法复制：$1"
+  },
+  "announce_moved": {
+    "message": "已移动到 $1, $2"
+  },
+  "ratio_note": {
+    "message": "尺寸以 CSS 像素为单位：图片像素 ÷ $1。"
+  },
+  "colours_copied": {
+    "message": "已复制颜色"
+  },
+  "colours_copy_failed": {
+    "message": "无法复制颜色"
+  },
+  "look_new": {
+    "message": "新标注使用“$1”样式"
+  },
+  "look_applied_one": {
+    "message": "已将“$1”样式应用到所选内容"
+  },
+  "look_applied_many": {
+    "message": "已将“$1”样式应用到 $2 个标注"
+  },
+  "look_title": {
+    "message": "$1：线条 $2，标签 $3（背景 $4）"
+  },
+  "align_to_image": {
+    "message": "与图片对齐"
+  },
+  "style_mixed": {
+    "message": "已选择 $1 项"
+  },
+  "style_selected": {
+    "message": "已选择：$1"
+  },
+  "step_number": {
+    "message": "编号"
+  },
+  "fonts_unavailable": {
+    "message": "此浏览器无法列出已安装的字体。"
+  },
+  "fonts_added": {
+    "message": "已添加 $1 种已安装字体"
+  },
+  "fonts_denied": {
+    "message": "未获准访问字体。"
+  },
+  "crop_size": {
+    "message": "$1 px — 在框内拖动可移动，按 Enter 应用。"
+  },
+  "proportions_unlocked": {
+    "message": "不锁定比例"
+  },
+  "resized_to": {
+    "message": "已调整为 $1"
+  },
+  "format_png": {
+    "message": "无损，文字清晰，保留透明度。"
+  },
+  "format_png8": {
+    "message": "最多 256 色的压缩 PNG。通常小 60–80%。"
+  },
+  "format_jpeg": {
+    "message": "文件小，适合照片。不支持透明。"
+  },
+  "format_webp": {
+    "message": "比 PNG 和 JPEG 更小，保留透明度。"
+  },
+  "format_avif": {
+    "message": "文件最小，适用于新版浏览器。"
+  },
+  "format_gif": {
+    "message": "最多 256 色。随处可打开。"
+  },
+  "format_bmp": {
+    "message": "未压缩，适用于旧版软件。"
+  },
+  "format_pdf": {
+    "message": "适合分享和打印。长页面可分为多页。"
+  },
+  "fit_too_big": {
+    "message": "无法压到上限以下；这已是最小尺寸。"
+  },
+  "fit_quality": {
+    "message": "质量 $1%"
+  },
+  "fit_lossy": {
+    "message": "有损 $1"
+  },
+  "fit_colours": {
+    "message": "$1 色"
+  },
+  "fit_size": {
+    "message": "尺寸 $1%"
+  },
+  "fit_note": {
+    "message": "为符合上限：$1。"
+  },
+  "estimate_working": {
+    "message": "正在计算文件大小…"
+  },
+  "encode_failed": {
+    "message": "无法编码：$1"
+  },
+  "saved_file_size": {
+    "message": "已保存 $1 · $2"
+  },
+  "export_failed": {
+    "message": "导出失败：$1"
+  },
+  "copied_auto": {
+    "message": "已将截图复制到剪贴板"
+  },
+  "copied_image": {
+    "message": "已复制到剪贴板"
+  },
+  "remove": {
+    "message": "移除"
+  },
+  "remove_named": {
+    "message": "移除 $1"
+  },
+  "removed_named": {
+    "message": "已移除 $1"
+  },
+  "needs_extension": {
+    "message": "以扩展程序方式运行时可用。"
+  },
+  "truncated": {
+    "message": "此页面非常长，只截取了顶部部分。"
+  },
+  "layer_empty": {
+    "message": "空"
+  },
+  "layer_callout": {
+    "message": "标注气泡“$1”"
+  },
+  "layer_text": {
+    "message": "文字“$1”"
+  },
+  "layer_step": {
+    "message": "步骤 $1"
+  },
+  "layer_step_note": {
+    "message": "步骤 $1：$2"
+  },
+  "layer_line": {
+    "message": "$1，从 $2 到 $3"
+  },
+  "layer_shape": {
+    "message": "$1，$2，位于 $3"
+  },
+  "multi_no_frame": {
+    "message": "无外框"
+  },
+  "multi_best_match": {
+    "message": "最佳匹配（$1）"
+  },
+  "multi_choose_one": {
+    "message": "请至少选择一项。"
+  },
+  "multi_making": {
+    "message": "正在生成第 $1 个（共 $2 个）：$3…"
+  },
+  "multi_saved_one": {
+    "message": "已保存 $1 · 1 张图片"
+  },
+  "multi_saved_many": {
+    "message": "已保存 $1 · $2 张图片"
+  },
+  "multi_failed": {
+    "message": "未能完成：$1"
+  },
+  "share_page": {
+    "message": "页面"
+  },
+  "share_captured": {
+    "message": "截取时间"
+  },
+  "share_size_ratio": {
+    "message": "$1 px（像素比 $2×）"
+  },
+  "share_browser": {
+    "message": "浏览器"
+  },
+  "saved_file": {
+    "message": "已保存 $1"
+  },
+  "share_failed": {
+    "message": "无法生成审查页面：$1"
+  },
+  "wcag_pass": {
+    "message": "$1 通过"
+  },
+  "wcag_fail": {
+    "message": "$1 未通过"
+  },
+  "contrast_label": {
+    "message": "对比度"
+  },
+  "contrast_normal": {
+    "message": "普通文字"
+  },
+  "contrast_large": {
+    "message": "大号文字和界面元素"
+  },
+  "measure_box": {
+    "message": "$1 px · 长 $2 px"
+  },
+  "measure_box_short": {
+    "message": "$1 px · $2 px"
+  },
+  "share_note_label": {
+    "message": "步骤 $1 的备注"
+  },
+  "share_note_placeholder": {
+    "message": "步骤 $1 是关于什么的？"
+  },
+  "export_reading": {
+    "message": "正在读取录制内容…"
+  },
+  "export_frame": {
+    "message": "正在编码第 $1 帧（共 $2 帧）"
+  },
+  "export_finishing": {
+    "message": "正在完成…"
+  },
+  "export_colours": {
+    "message": "正在选择颜色…"
+  },
+  "res_original": {
+    "message": "原始（$1）"
+  },
+  "export_format": {
+    "message": "导出 $1"
+  },
+  "video_dims": {
+    "message": "$1 · $2 fps · $3 帧"
+  },
+  "preview_converting": {
+    "message": "正在转换…"
+  },
+  "preview_exported": {
+    "message": "已导出"
+  },
+  "trim_selected": {
+    "message": "已选 $1 秒"
+  },
+  "no_mp4": {
+    "message": "此浏览器无法生成 MP4。请将 Chrome 更新到 126 或更高版本，或导出为 WebM。"
+  },
+  "no_webm": {
+    "message": "此浏览器无法生成 WebM。"
+  },
+  "export_realtime": {
+    "message": "正在转换… $1 / $2"
+  },
+  "export_done": {
+    "message": "完成"
+  },
+  "export_stopped": {
+    "message": "导出已停止"
+  },
+  "export_starting": {
+    "message": "正在开始…"
+  },
+  "export_realtime_note": {
+    "message": "此浏览器需要实时导出。请保持此标签页打开并位于前台。"
+  },
+  "result_ready": {
+    "message": "$1 已就绪 · $2"
+  },
+  "result_dims": {
+    "message": "$1，$2 fps。"
+  },
+  "result_larger": {
+    "message": "是录制内容的 $1 倍大小。降低分辨率或帧率可以缩小文件。"
+  },
+  "result_smaller": {
+    "message": "比录制内容小 $1%。"
+  },
+  "automatic_value": {
+    "message": "自动（$1）"
+  },
+  "compare_not_image": {
+    "message": "无法将 $1 作为图片打开"
+  },
+  "compare_same_width": {
+    "message": "两张图片宽度相同"
+  },
+  "compare_scale_b": {
+    "message": "将 B 缩放到 A 的宽度（×$1）"
+  },
+  "compare_comparing": {
+    "message": "正在对比…"
+  },
+  "compare_comparing_pct": {
+    "message": "正在对比… $1%"
+  },
+  "compare_choose": {
+    "message": "选择截图…"
+  },
+  "compare_differ": {
+    "message": "$1 的像素不同（$2）"
+  },
+  "compare_within": {
+    "message": "变化位于 $2，范围 $1 px"
+  },
+  "compare_none": {
+    "message": "在此容差下<b>没有差异</b>"
+  },
+  "page_no_note": {
+    "message": "无备注"
+  },
+  "page_full_size": {
+    "message": "点击查看原尺寸"
+  },
+  "page_steps": {
+    "message": "步骤"
+  },
+  "page_labels": {
+    "message": "图片上的标签"
+  },
+  "page_about": {
+    "message": "关于此截图"
+  },
+  "page_made_with": {
+    "message": "由 Captode 制作"
+  },
+  "download_format": {
+    "message": "下载 $1"
+  },
+  "ratio_from_capture": {
+    "message": "像素比为 $1（来自截图）。"
+  },
+  "ratio_unknown": {
+    "message": "像素比为 1×（此图片未知）。"
+  },
+  "look_bug": {
+    "message": "缺陷"
+  },
+  "look_review": {
+    "message": "审查"
+  },
+  "look_note": {
+    "message": "备注"
+  },
+  "look_ok": {
+    "message": "已通过"
+  },
+  "look_neutral": {
+    "message": "中性"
+  },
+  "look_brand": {
+    "message": "品牌"
+  }
+}

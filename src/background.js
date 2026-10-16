@@ -5,6 +5,7 @@ import {
   pickArea, fullPagePrepare, fullPageScroll, fullPageRestore,
   countdown, showOutline, hideOutline,
 } from './content/page.js';
+import { t } from './lib/i18n.js';
 
 const OFFSCREEN = 'recorder/offscreen.html';
 
@@ -41,7 +42,7 @@ async function badge(text, color = '#e5484d') {
 function explain(err) {
   const m = String(err?.message || err);
   if (/cannot be scripted|Cannot access|chrome:\/\/|extensions gallery|webstore/i.test(m)) {
-    return 'This page cannot be captured. Browser pages and the extension store are protected.';
+    return t('error_protected_page');
   }
   return m;
 }
@@ -59,7 +60,7 @@ async function captureImage(mode, tab) {
     const vw = await run(tab.id, () => innerWidth).catch(() => 0);
     if (vw) meta.dpr = bmp.width / vw;
   } else if (mode === 'area') {
-    const rect = await run(tab.id, pickArea, 'Drag to select the area to capture');
+    const rect = await run(tab.id, pickArea, t('pick_capture_hint'));
     if (!rect) return;
     const bmp = await captureVisible(tab.windowId);
     const s = bmp.width / rect.vw;
@@ -212,7 +213,7 @@ async function startRecording({ mode, fps, audio, size = 'page', countdown: want
   let aspect = null;
   let pageWidth = null; // CSS pixels, so the video page can measure in them
   if (mode === 'area') {
-    const rect = await run(tab.id, pickArea, 'Drag to select the area to record');
+    const rect = await run(tab.id, pickArea, t('pick_record_hint'));
     if (!rect) return;
     crop = { x: rect.x / rect.vw, y: rect.y / rect.vh, w: rect.w / rect.vw, h: rect.h / rect.vh };
     aspect = rect.vw / rect.vh;
@@ -224,7 +225,7 @@ async function startRecording({ mode, fps, audio, size = 'page', countdown: want
     if (view) { aspect = view[0] / view[1]; pageWidth = view[0]; }
   }
   const seconds = countdownSeconds(wantCountdown);
-  if (seconds && !(await run(tab.id, countdown, seconds))) {
+  if (seconds && !(await run(tab.id, countdown, seconds, t('countdown_hint')))) {
     await run(tab.id, hideOutline); // cancelled with Esc
     return;
   }
@@ -236,7 +237,7 @@ async function startRecording({ mode, fps, audio, size = 'page', countdown: want
   });
   if (!res?.ok) {
     await run(tab.id, hideOutline).catch(() => {});
-    throw new Error(res?.error || 'Could not start recording.');
+    throw new Error(res?.error || t('error_recording_start'));
   }
   await setRec({ state: 'recording', kind: 'offscreen', tabId: tab.id, outline: !!crop });
   await enterRecordingUi();
@@ -244,7 +245,7 @@ async function startRecording({ mode, fps, audio, size = 'page', countdown: want
 
 async function enterRecordingUi() {
   await chrome.action.setPopup({ popup: '' });
-  await chrome.action.setTitle({ title: 'Captode — click to stop recording' });
+  await chrome.action.setTitle({ title: t('action_stop_title') });
   await badge('REC');
 }
 

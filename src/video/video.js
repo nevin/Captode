@@ -9,7 +9,10 @@ import { mountDevicePanel, deviceRenderer, frameDrawer } from '../lib/device.js'
 import { toast, enhance, fmtBytes } from '../lib/ui.js';
 import { demuxWebm, muxWebm } from '../lib/webm.js';
 import { sourceColourSpace, outputColour } from '../lib/video-colour.js';
-import { contrastHtml, hexOf, measureText, edgeNear, measureFrom, drawMeasures } from '../lib/review.js';
+import { contrastHtml, hexOf, measureLabel, measureText, edgeNear, measureFrom, drawMeasures } from '../lib/review.js';
+import { t, localize } from '../lib/i18n.js';
+
+localize();
 
 const $ = (s) => document.querySelector(s);
 const player = $('#player');
@@ -82,7 +85,7 @@ function fillResolutions(reset = false) {
   const short = Math.min(r.width, r.height);
   const keep = reset ? '' : $('#res').value;
   const def = format === 'gif' || format === 'webp' ? 480 : 0;
-  $('#res').innerHTML = `<option value="0" title="${even(r.width)} × ${even(r.height)}">Original (${even(short)}p)</option>` +
+  $('#res').innerHTML = `<option value="0" title="${even(r.width)} × ${even(r.height)}">${t('res_original', `${even(short)}p`)}</option>` +
     RES.filter((p) => p < short).map((p) => `<option value="${p}">${p}p</option>`).join('');
   const values = [...$('#res').options].map((o) => o.value);
   $('#res').value = values.includes(keep) && keep !== '' ? keep : values.includes(String(def)) ? String(def) : '0';
@@ -99,12 +102,12 @@ function fillFps(reset = false) {
 
 function syncUi() {
   for (const b of document.querySelectorAll('#formats button')) b.classList.toggle('on', b.dataset.f === format);
-  $('#convert').textContent = `Export ${format.toUpperCase()}`;
+  $('#convert').textContent = t('export_format', format.toUpperCase());
   for (const el of document.querySelectorAll('[data-for]')) el.classList.toggle('hidden', !el.dataset.for.split(' ').includes(format));
   $('#w-quality-f').classList.toggle('hidden', $('#w-lossless').checked);
   $('#denoise-row').classList.toggle('hidden', !$('#optimize').checked);
   $('#w-quality-v').textContent = $('#w-quality').value + '%';
-  $('#g-lossy-v').textContent = Number($('#g-lossy').value) ? $('#g-lossy').value : 'Off';
+  $('#g-lossy-v').textContent = Number($('#g-lossy').value) ? $('#g-lossy').value : t('video_off');
   $('#v-audio').disabled = !meta.hasAudio;
   $('#v-audio-note').classList.toggle('hidden', Boolean(meta.hasAudio));
   if (!meta.hasAudio) $('#v-audio').checked = false;
@@ -113,7 +116,7 @@ function syncUi() {
   const p = plan();
   const { start, end } = trim();
   const frames = Math.max(1, Math.round((end - start) * p.fps));
-  $('#dims').innerHTML = `<span>${p.width} × ${p.height} · ${p.fps} fps · ${frames} frames</span><b>${(end - start).toFixed(1)} s</b>`;
+  $('#dims').innerHTML = `<span>${t('video_dims', [`${p.width} × ${p.height}`, p.fps, frames])}</span><b>${(end - start).toFixed(1)} s</b>`;
   stale();
 }
 
@@ -127,7 +130,7 @@ function stale() {
   showPreview('player');
 }
 
-const PREVIEW_LABELS = { live: 'Converting…', 'out-img': 'Exported', 'out-video': 'Exported' };
+const PREVIEW_LABELS = { live: t('preview_converting'), 'out-img': t('preview_exported'), 'out-video': t('preview_exported') };
 
 function showPreview(which) {
   for (const id of ['player', 'live', 'out-img', 'out-video']) $('#' + id).classList.toggle('hidden', id !== which);
@@ -174,7 +177,7 @@ function drawTimeline() {
   $('#range').style.width = `calc(${pct(end)} - ${pct(start)})`;
   $('#shade-l').style.width = pct(start);
   $('#shade-r').style.width = `calc(100% - ${pct(end)})`;
-  $('#tc-len').textContent = `${(end - start).toFixed(1)} s selected`;
+  $('#tc-len').textContent = t('trim_selected', (end - start).toFixed(1));
   for (const [h, v] of [['#h-start', start], ['#h-end', end]]) {
     $(h).setAttribute('aria-valuemin', '0');
     $(h).setAttribute('aria-valuemax', duration.toFixed(1));
@@ -337,7 +340,7 @@ async function convertFrames(p, { start, end }) {
         const part = new Uint8ClampedArray(Math.ceil(px.length / 12) * 4);
         for (let i = 0, o = 0; i < px.length; i += 12, o += 4) part.set(px.subarray(i, i + 4), o);
         parts.push(part);
-        progress(0, 'Choosing colours…');
+        progress(0, t('export_colours'));
       }
       const all = new Uint8ClampedArray(parts.reduce((n, a) => n + a.length, 0));
       let o = 0;
@@ -362,10 +365,10 @@ async function convertFrames(p, { start, end }) {
         lctx.clearRect(0, 0, p.width, p.height);
         lctx.drawImage(c, 0, 0);
       }
-      progress((i + 1) / count, `Encoding frame ${i + 1} of ${count}`);
+      progress((i + 1) / count, t('export_frame', [i + 1, count]));
       if (i % 4 === 0) await new Promise((r) => setTimeout(r));
     }
-    progress(1, 'Finishing…');
+    progress(1, t('export_finishing'));
     return enc.finish();
   } finally {
     v.remove();
@@ -391,8 +394,8 @@ async function convertRealtime(p, { start, end }) {
   const mimeType = pickMime(format, withAudio, p.width, p.height);
   if (!mimeType) {
     throw new Error(format === 'mp4'
-      ? 'This browser cannot write MP4. Update Chrome (version 126 or later), or export WebM.'
-      : 'This browser cannot write WebM.');
+      ? t('no_mp4')
+      : t('no_webm'));
   }
   const v = makeWorkVideo();
   const live = $('#live');
@@ -429,19 +432,19 @@ async function convertRealtime(p, { start, end }) {
       const finish = () => { v.pause(); resolve(); };
       v.addEventListener('ended', finish, { once: true });
       const tick = (_now, md) => {
-        const t = md?.mediaTime ?? v.currentTime;
+        const at = md?.mediaTime ?? v.currentTime;
         draw(ctx, v);
-        progress((t - start) / (end - start), `Converting… ${fmtTime(Math.max(0, t - start))} of ${fmtTime(end - start)}`);
-        if (cancelled || t >= end - 0.5 / p.fps) finish();
+        progress((at - start) / (end - start), t('export_realtime', [fmtTime(Math.max(0, at - start)), fmtTime(end - start)]));
+        if (cancelled || at >= end - 0.5 / p.fps) finish();
         else v.requestVideoFrameCallback(tick);
       };
       v.requestVideoFrameCallback(tick);
     });
     rec.stop();
     await stopped;
-    stream.getTracks().forEach((t) => t.stop());
+    stream.getTracks().forEach((track) => track.stop());
     if (cancelled) throw new Error('cancelled');
-    progress(1, 'Done');
+    progress(1, t('export_done'));
     return new Blob(chunks, { type: mimeType.split(';')[0] });
   } finally {
     audioCtx?.close();
@@ -480,12 +483,12 @@ function convertInWorker(p, { start, end }) {
     worker = new Worker(new URL('./export-worker.js', import.meta.url), { type: 'module' });
     abortWorker = () => reject(new Error('cancelled'));
     worker.onmessage = ({ data }) => {
-      if (data.type === 'progress') progress(data.f, data.text);
+      if (data.type === 'progress') progress(data.f, [].concat(data.what).length > 1 ? t(data.what[0], data.what.slice(1)) : t(data.what));
       else if (data.type === 'preview') { lctx.clearRect(0, 0, live.width, live.height); lctx.drawImage(data.bitmap, 0, 0); data.bitmap.close(); }
       else if (data.type === 'done') resolve(data.blob);
       else if (data.type === 'error') reject(Object.assign(new Error(data.message), { fallback: data.fallback }));
     };
-    worker.onerror = (e) => reject(Object.assign(new Error(e.message || 'The export stopped'), { fallback: true }));
+    worker.onerror = (e) => reject(Object.assign(new Error(e.message || t('export_stopped')), { fallback: true }));
     worker.postMessage({ type: 'start', job });
   }).finally(() => {
     worker?.terminate();
@@ -504,7 +507,7 @@ async function convert() {
   $('#cancel').classList.remove('hidden');
   $('#progress-wrap').classList.remove('hidden');
   $('#result').classList.add('hidden');
-  progress(0, 'Starting…');
+  progress(0, t('export_starting'));
   player.pause();
   try {
     const p = plan();
@@ -518,7 +521,7 @@ async function convert() {
       if (format === 'gif' || format === 'webp') {
         blob = await convertFrames(p, range);
       } else {
-        progress(0, 'This browser needs to export in real time. Keep this tab open and in front.');
+        progress(0, t('export_realtime_note'));
         blob = await convertRealtime(p, range);
       }
     }
@@ -536,10 +539,10 @@ async function convert() {
     }
     const change = Math.round((1 - blob.size / source.size) * 100);
     const larger = change < 0;
-    $('#r-size').textContent = `${EXT[format].toUpperCase()} ready · ${fmtBytes(blob.size)}`;
-    $('#r-detail').textContent = `${p.width} × ${p.height} at ${p.fps} fps. ` + (larger
-      ? `${(blob.size / source.size).toFixed(1)}× the size of the recording. A lower resolution or frame rate makes it smaller.`
-      : `${change}% smaller than the recording.`);
+    $('#r-size').textContent = t('result_ready', [EXT[format].toUpperCase(), fmtBytes(blob.size)]);
+    $('#r-detail').textContent = t('result_dims', [`${p.width} × ${p.height}`, p.fps]) + ' ' + (larger
+      ? t('result_larger', (blob.size / source.size).toFixed(1))
+      : t('result_smaller', change));
     $('#result').classList.toggle('larger', larger);
     $('#result').classList.remove('hidden');
     $('#convert').classList.add('hidden');
@@ -547,7 +550,7 @@ async function convert() {
     $('#redo-export').classList.remove('hidden');
     $('#download').focus();
   } catch (e) {
-    if (e.message !== 'cancelled') { $('#status').textContent = 'Export failed: ' + e.message; toast('Export failed: ' + e.message, { kind: 'error', ms: 5000 }); }
+    if (e.message !== 'cancelled') { $('#status').textContent = t('export_failed', e.message); toast(t('export_failed', e.message), { kind: 'error', ms: 5000 }); }
     else $('#progress-wrap').classList.add('hidden');
     showPreview('player');
   } finally {
@@ -576,7 +579,7 @@ $('#cancel').addEventListener('click', () => {
 $('#download').addEventListener('click', () => {
   if (!result) return;
   save(result.blob, result.name);
-  toast(`Saved ${result.name} · ${fmtBytes(result.blob.size)}`, { kind: 'success' });
+  toast(t('saved_file_size', [result.name, fmtBytes(result.blob.size)]), { kind: 'success' });
 });
 $('#redo-export').addEventListener('click', () => stale());
 window.addEventListener('beforeunload', (e) => { if (busy) e.preventDefault(); });
@@ -643,7 +646,7 @@ function drawOverlay() {
   const k = o.width / player.videoWidth; // canvas pixels per video pixel
   ctx.setTransform(k, 0, 0, k, 0, 0);
   const list = rv.drag ? [...rv.measures, rv.drag.m] : rv.measures;
-  drawMeasures(ctx, list, devicePixelRatio / k, (m) => measureText(m, rvRatio()).replace(' long', ''));
+  drawMeasures(ctx, list, devicePixelRatio / k, (m) => measureLabel(m, rvRatio()));
 }
 
 function setReviewTool(t) {
@@ -669,20 +672,20 @@ const frameEdge = (x, y, axis) => edgeNear((x0, y0, w, h) => rv.frame.getContext
 
 function showReview() {
   const last = rv.measures.at(-1);
-  $('#rv-m').innerHTML = last ? `<b>${measureText(last, rvRatio())}</b>` : 'No measurements yet';
+  $('#rv-m').innerHTML = last ? `<b>${measureText(last, rvRatio())}</b>` : t('editor_no_measurements_yet');
   $('#rv-clear').disabled = !rv.measures.length;
   for (const b of document.querySelectorAll('#review-section .pick-slot')) {
     const i = Number(b.dataset.slot), c = rv.colours[i];
     b.classList.toggle('on', i === rv.slot);
     b.setAttribute('aria-checked', String(i === rv.slot));
     b.querySelector('.pick-swatch').style.background = c || '';
-    b.querySelector('.pick-hex').textContent = c ? c.toUpperCase() : 'Not picked';
+    b.querySelector('.pick-hex').textContent = c ? c.toUpperCase() : t('editor_not_picked');
   }
   const [a, b] = rv.colours;
   if (a && b) $('#rv-c').innerHTML = contrastHtml(a, b);
-  else $('#rv-c').textContent = 'Pick two colours to check their contrast';
+  else $('#rv-c').textContent = t('editor_pick_two_colours_to_check');
   const auto = meta.dpr ? `${Math.round(meta.dpr * 100) / 100}×` : '1×';
-  $('#rv-ratio').options[0].textContent = `Automatic (${auto})`;
+  $('#rv-ratio').options[0].textContent = t('automatic_value', auto);
 }
 
 $('#rv-tools').addEventListener('click', (e) => {

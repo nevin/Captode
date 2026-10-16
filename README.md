@@ -128,6 +128,11 @@ pixel for pixel. You can choose:
 - the finish, padding, and a transparent, white or custom-colour background (the default is set in Settings)
 - a status bar above or over the page, or none
 
+### Languages
+
+Captode follows Chrome's language: English, Spanish, Portuguese (Brazil), French, German,
+Italian, Japanese, Korean and Simplified Chinese.
+
 ### Settings
 
 Open **Settings** from the gear in the popup (or right-click the icon → Options) to choose:
@@ -289,6 +294,21 @@ has a thin light outline so it stays visible on dark toolbars. Edit these, then 
 `npm run bench` compares sizes, PSNR and SSIM with `test/bench-baseline.json`, kept per
 operating system. After an intended change, save new numbers with
 `npm run bench -- --update`.
+
+### Translations
+
+Text lives in `src/_locales/<language>/messages.json` (Chrome's format). Pages keep their
+English text in the HTML and mark it with `data-i18n` attributes, which `src/lib/i18n.js`
+swaps for the browser's language; scripts use `t('key', values)`. After adding or changing a
+message, add it to every language and run:
+
+```
+npm run i18n
+```
+
+It checks that every language has every message with the same `$1` placeholders and markup.
+`test/i18n.test.mjs` opens every page in German and Japanese and fails if a message key, rather
+than text, ever shows.
 
 ## Publishing
 

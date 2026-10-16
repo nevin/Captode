@@ -1,11 +1,14 @@
 import { getSettings, saveSettings, DEFAULT_SETTINGS } from '../lib/settings.js';
 import { toast, enhance, openDialog, showShortcut } from '../lib/ui.js';
+import { t, localize } from '../lib/i18n.js';
+
+localize();
 
 const $ = (s) => document.querySelector(s);
 let settings = await getSettings();
 const { device } = await chrome.storage.local.get({ device: false });
 
-const saved = () => toast('Saved', { kind: 'success', ms: 1400 });
+const saved = () => toast(t('settings_saved'), { kind: 'success', ms: 1400 });
 
 async function update(patch) {
   settings = await saveSettings(patch);
@@ -46,7 +49,7 @@ $('#autoCopy').addEventListener('change', (e) => update({ autoCopy: e.target.che
 $('#device').checked = device;
 $('#device').addEventListener('change', async (e) => { await chrome.storage.local.set({ device: e.target.checked }); saved(); });
 $('#shortcuts').addEventListener('click', () => chrome.tabs.create({ url: 'chrome://extensions/shortcuts' }));
-$('#version').textContent = `Version ${chrome.runtime.getManifest().version}`;
+$('#version').textContent = t('settings_version', chrome.runtime.getManifest().version);
 $('#reset').addEventListener('click', () => openDialog($('#reset-dialog')));
 const RESET_KEYS = ['settings', 'device', 'fps', 'audio', 'countdown', 'countdownSeconds', 'videoSize', 'kind', 'deviceOpts', 'deviceRecent', 'editorDefaults', 'exportPresets', 'lastExport'];
 $('#reset-yes').addEventListener('click', async () => {
@@ -56,16 +59,16 @@ $('#reset-yes').addEventListener('click', async () => {
   $('#device').checked = false;
   render();
   $('#reset-dialog').close();
-  toast('Settings reset', {
+  toast(t('settings_reset_done'), {
     kind: 'success', ms: 8000,
     action: {
-      label: 'Undo',
+      label: t('editor_undo'),
       run: async () => {
         await chrome.storage.local.set(before);
         settings = await getSettings();
         $('#device').checked = !!before.device;
         render();
-        toast('Settings restored', { kind: 'success' });
+        toast(t('settings_restored'), { kind: 'success' });
       },
     },
   });

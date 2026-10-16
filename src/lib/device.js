@@ -6,15 +6,16 @@
 import { getSettings } from './settings.js';
 import { DEVICES, LEGACY, DEFAULT_DEVICE, matchDevice } from './devices.js';
 import { createDevicePicker } from './device-picker.js';
+import { t } from './i18n.js';
 
 export { DEVICES, matchDevice };
 
 export const FRAMES = {
-  midnight: { label: 'Midnight', body: ['#2a2b33', '#111217'], rim: '#4a4b55' },
-  titanium: { label: 'Natural titanium', body: ['#a8a39b', '#7d786f'], rim: '#c4bfb6' },
-  silver: { label: 'Silver', body: ['#f3f4f6', '#c9ccd3'], rim: '#a8acb5' },
-  gold: { label: 'Gold', body: ['#f6ead6', '#d9c29c'], rim: '#bfa57c' },
-  blue: { label: 'Blue', body: ['#4b5d7e', '#25324a'], rim: '#6d7fa1' },
+  midnight: { label: t('finish_midnight'), body: ['#2a2b33', '#111217'], rim: '#4a4b55' },
+  titanium: { label: t('finish_titanium'), body: ['#a8a39b', '#7d786f'], rim: '#c4bfb6' },
+  silver: { label: t('finish_silver'), body: ['#f3f4f6', '#c9ccd3'], rim: '#a8acb5' },
+  gold: { label: t('finish_gold'), body: ['#f6ead6', '#d9c29c'], rim: '#bfa57c' },
+  blue: { label: t('finish_blue'), body: ['#4b5d7e', '#25324a'], rim: '#6d7fa1' },
 };
 
 export const DEFAULTS = {
@@ -379,9 +380,9 @@ export function describe(opts, srcW, srcH) {
   const [pw, ph] = info.landscape ? [d.px[1], d.px[0]] : d.px;
   const [vw, vh] = info.landscape ? [d.viewport[1], d.viewport[0]] : d.viewport;
   const dpr = Math.round(d.dpr * 100) / 100;
-  const parts = [`${d.name}: ${pw} × ${ph} px, ${vw} × ${vh} ${d.os === 'android' ? 'dp' : 'pt'} at ${dpr}×`];
-  if (info.matched) parts.push(info.matchExact ? 'matches this capture exactly' : 'closest to this capture');
-  parts.push(info.exact ? `the capture's ${srcW} × ${srcH} pixels are kept exactly` : `the capture is shown at ${Math.round(info.scale * 100)}%`);
+  const parts = [t('dev_info_device', [d.name, `${pw} × ${ph}`, `${vw} × ${vh} ${d.os === 'android' ? 'dp' : 'pt'}`, dpr])];
+  if (info.matched) parts.push(info.matchExact ? t('dev_info_matches') : t('dev_info_closest'));
+  parts.push(info.exact ? t('dev_info_exact', `${srcW} × ${srcH}`) : t('dev_info_scaled', Math.round(info.scale * 100)));
   return parts.join(' · ');
 }
 
@@ -408,26 +409,26 @@ export async function mountDevicePanel(el, onChange, { source, picture } = {}) {
   const map = (obj) => Object.entries(obj).map(([k, v]) => [k, v.label]);
 
   el.innerHTML = `
-    <label class="toggle"><span>Show in a device frame<small>A real phone or tablet around the capture</small></span><input type="checkbox" data-k="enabled"${o.enabled ? ' checked' : ''}></label>
+    <label class="toggle"><span>${t('dev_show')}<small>${t('dev_show_hint')}</small></span><input type="checkbox" data-k="enabled"${o.enabled ? ' checked' : ''}></label>
     <div class="dev-opts">
-      <div class="field"><span class="dev-pick-label">Device</span><div class="dev-pick-slot"></div></div>
-      <canvas class="dev-thumb hidden" role="img" aria-label="Preview of the capture in the device"></canvas>
+      <div class="field"><span class="dev-pick-label">${t('dev_device')}</span><div class="dev-pick-slot"></div></div>
+      <canvas class="dev-thumb hidden" role="img" aria-label="${t('dev_preview')}"></canvas>
       <p class="dev-info" aria-live="polite"></p>
       <div class="grid2">
-        <label class="field"><span>Orientation</span>${sel('orientation', [['auto', 'Automatic'], ['portrait', 'Portrait'], ['landscape', 'Landscape']], o.orientation)}</label>
-        <label class="field"><span>Finish</span>${sel('frame', map(FRAMES), o.frame)}</label>
+        <label class="field"><span>${t('dev_orientation')}</span>${sel('orientation', [['auto', t('editor_automatic')], ['portrait', t('dev_portrait')], ['landscape', t('dev_landscape')]], o.orientation)}</label>
+        <label class="field"><span>${t('dev_finish')}</span>${sel('frame', map(FRAMES), o.frame)}</label>
       </div>
-      <label class="field"><span>Size</span>${sel('size', [['exact', 'The capture’s own pixels (exact)'], ['device', 'The device’s screen resolution']], o.size)}</label>
-      <label class="field"><span>Fit on screen</span>${sel('fit', [['width', 'Fill width, from the top'], ['cover', 'Fill the screen'], ['contain', 'Show everything']], o.fit)}</label>
-      <div class="field"><span>Background <a href="#" class="settings-link">Change default</a></span>
-        <div class="row">${sel('bg', [['none', 'Transparent'], ['white', 'White'], ['custom', 'Custom colour']], o.bg)}
-          <input type="color" data-k="bg1" value="${o.bg1}" title="Background colour">
+      <label class="field"><span>${t('editor_size')}</span>${sel('size', [['exact', t('dev_size_exact')], ['device', t('dev_size_device')]], o.size)}</label>
+      <label class="field"><span>${t('dev_fit')}</span>${sel('fit', [['width', t('dev_fit_width')], ['cover', t('dev_fit_cover')], ['contain', t('dev_fit_contain')]], o.fit)}</label>
+      <div class="field"><span>${t('editor_background')} <a href="#" class="settings-link">${t('dev_change_default')}</a></span>
+        <div class="row">${sel('bg', [['none', t('settings_transparent')], ['white', t('settings_white')], ['custom', t('settings_custom_colour')]], o.bg)}
+          <input type="color" data-k="bg1" value="${o.bg1}" title="${t('dev_background_colour')}">
         </div>
       </div>
-      <label class="field"><span>Padding</span><input type="range" min="0" max="30" data-k="padding" value="${o.padding}"></label>
+      <label class="field"><span>${t('editor_padding')}</span><input type="range" min="0" max="30" data-k="padding" value="${o.padding}"></label>
       <div class="grid2">
-        <label class="field"><span>Status bar</span>${sel('statusBar', [['auto', 'Automatic'], ['above', 'Above the page'], ['over', 'Over the page'], ['none', 'None']], o.statusBar)}</label>
-        <label class="field status-style"><span>Status bar text</span>${sel('statusStyle', [['light', 'Dark on light'], ['dark', 'Light on dark']], o.statusStyle)}</label>
+        <label class="field"><span>${t('dev_status_bar')}</span>${sel('statusBar', [['auto', t('editor_automatic')], ['above', t('dev_status_above')], ['over', t('dev_status_over')], ['none', t('dev_none')]], o.statusBar)}</label>
+        <label class="field status-style"><span>${t('dev_status_text')}</span>${sel('statusStyle', [['light', t('dev_dark_on_light')], ['dark', t('dev_light_on_dark')]], o.statusStyle)}</label>
       </div>
     </div>`;
 

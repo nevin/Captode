@@ -3,6 +3,7 @@
 import { buildReviewPage } from './review-page.js';
 import { encodeOffThread } from '../lib/encoder.js';
 import { toast, openDialog } from '../lib/ui.js';
+import { t } from '../lib/i18n.js';
 
 const $ = (s) => document.querySelector(s);
 
@@ -24,11 +25,11 @@ export function mountShare(ed) {
   function open() {
     if (!ed.hasImage()) return;
     ed.finishEditing();
-    $('#sh-title').value = $('#sh-title').value || ed.meta().title || 'Screenshot';
+    $('#sh-title').value = $('#sh-title').value || ed.meta().title || t('popup_screenshot');
     const list = steps();
     $('#sh-none').classList.toggle('hidden', !!list.length);
     $('#sh-steps').innerHTML = list.map((o, i) =>
-      `<label><span class="n" style="background:${o.color}">${o.n}</span><textarea data-i="${i}" rows="1" aria-label="Note for step ${o.n}" placeholder="What is step ${o.n} about?"></textarea></label>`).join('');
+      `<label><span class="n" style="background:${o.color}">${o.n}</span><textarea data-i="${i}" rows="1" aria-label="${t('share_note_label', o.n)}" placeholder="${t('share_note_placeholder', o.n)}"></textarea></label>`).join('');
     // Notes are kept on the steps, so they come back with the capture.
     list.forEach((o, i) => { $('#sh-steps').querySelector(`[data-i="${i}"]`).value = o.note || ''; });
     openDialog($('#share'));
@@ -49,7 +50,7 @@ export function mountShare(ed) {
       const [iw, ih] = ed.imageSize();
       const meta = ed.meta();
       const p = ed.padding();
-      const title = $('#sh-title').value.trim() || 'Screenshot';
+      const title = $('#sh-title').value.trim() || t('popup_screenshot');
       const html = buildReviewPage({
         title,
         summary: $('#sh-summary').value.trim(),
@@ -59,10 +60,10 @@ export function mountShare(ed) {
         steps: list.map((o) => ({ n: o.n, x: (o.x + p) / W, y: (o.y + p) / H, color: o.color, note: o.note })),
         labels: ed.objects().filter((o) => o.type === 'text' && o.text.trim()).map((o) => o.text.trim()),
         facts: [
-          ['Page', meta.url || ''],
-          ['Captured', new Date(meta.created || Date.now()).toLocaleString()],
-          ['Size', `${iw} × ${ih} px${meta.dpr ? ` (${Math.round(meta.dpr * 100) / 100}× pixel ratio)` : ''}`],
-          ['Browser', navigator.userAgentData?.brands?.filter((b) => !/not.a.brand/i.test(b.brand)).map((b) => `${b.brand} ${b.version}`).join(', ') || ''],
+          [t('share_page'), meta.url || ''],
+          [t('share_captured'), new Date(meta.created || Date.now()).toLocaleString()],
+          [t('editor_size'), meta.dpr ? t('share_size_ratio', [`${iw} × ${ih}`, Math.round(meta.dpr * 100) / 100]) : `${iw} × ${ih} px`],
+          [t('share_browser'), navigator.userAgentData?.brands?.filter((b) => !/not.a.brand/i.test(b.brand)).map((b) => `${b.brand} ${b.version}`).join(', ') || ''],
         ],
       });
       const a = document.createElement('a');
@@ -71,9 +72,9 @@ export function mountShare(ed) {
       a.click();
       setTimeout(() => URL.revokeObjectURL(a.href), 30000);
       $('#share').close();
-      toast(`Saved ${a.download}`, { kind: 'success' });
+      toast(t('saved_file', a.download), { kind: 'success' });
     } catch (err) {
-      toast('Could not make the review page: ' + err.message, { kind: 'error', ms: 5000 });
+      toast(t('share_failed', err.message), { kind: 'error', ms: 5000 });
     } finally {
       $('#sh-go').disabled = false;
     }

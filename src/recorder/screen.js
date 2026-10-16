@@ -2,6 +2,9 @@
 // picking a screen needs a page the browser can show its picker over.
 import { record } from '../lib/recorder.js';
 import { putCapture } from '../lib/db.js';
+import { t, localize } from '../lib/i18n.js';
+
+localize();
 
 const params = new URLSearchParams(location.search);
 const fps = Number(params.get('fps')) || 30;
@@ -32,8 +35,7 @@ async function choose() {
     // system's Screen Recording permission, which looks the same from here.
     const mac = /mac/i.test(navigator.userAgentData?.platform || navigator.platform || '');
     $('err').textContent = e.name === 'NotAllowedError'
-      ? 'Nothing was shared, so nothing was recorded.' +
-        (mac ? ' If you did choose a screen, allow Chrome under System Settings → Privacy & Security → Screen Recording, then restart Chrome.' : '')
+      ? t('screen_nothing_shared') + (mac ? ' ' + t('screen_mac_permission') : '')
       : e.message;
     $('err').classList.remove('hidden');
     return;
@@ -46,7 +48,7 @@ async function choose() {
   }
   session = await record(stream, { fps, size, onEnded: stop });
   $('live').classList.remove('hidden');
-  document.title = '● Recording — Captode';
+  document.title = t('screen_title_recording');
   chrome.runtime.sendMessage({ type: 'rec-started', kind: 'page' });
   ticker = setInterval(() => {
     const elapsed = (performance.now() - session.started) / 1000;
@@ -72,7 +74,7 @@ function countdown(seconds, stream) {
       cancelCountdown = null;
       chrome.action.setBadgeText({ text: '' });
       $('counting').classList.add('hidden');
-      document.title = 'Captode — Screen recorder';
+      document.title = t('screen_title');
       resolve(go);
     };
     const onEnded = () => finish(false);
@@ -82,7 +84,7 @@ function countdown(seconds, stream) {
     const tick = () => {
       if (n === 0) return finish(true);
       $('count').textContent = n;
-      document.title = `Recording in ${n}… — Captode`;
+      document.title = t('screen_title_countdown', n);
       chrome.action.setBadgeText({ text: String(n) });
       n--;
       timer = setTimeout(tick, 1000);

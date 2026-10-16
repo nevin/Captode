@@ -245,7 +245,8 @@ details.section[open] > summary::after { transform: rotate(-135deg); margin-top:
 
 .tabs { display: flex; gap: 2px; padding: 8px 12px 0; border-bottom: 1px solid var(--line); background: var(--panel); position: sticky; top: 0; z-index: 2; }
 .tabs button {
-  height: 36px; padding: 0 12px; border: 0; background: none; cursor: pointer; color: var(--muted);
+  white-space: nowrap;
+  height: 36px; padding: 0 9px; border: 0; background: none; cursor: pointer; color: var(--muted);
   font-weight: 500; border-bottom: 2px solid transparent; margin-bottom: -1px;
 }
 .tabs button:hover { color: var(--text); }

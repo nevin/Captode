@@ -4,6 +4,7 @@ import { DEVICES, matchDevice } from '../lib/device.js';
 import { GROUPS } from '../lib/devices.js';
 import { zip } from '../lib/zip.js';
 import { toast, openDialog } from '../lib/ui.js';
+import { t } from '../lib/i18n.js';
 
 const $ = (s) => document.querySelector(s);
 const KEY = 'multiDevices';
@@ -24,7 +25,7 @@ export function mountMultiExport(ed) {
     const best = DEVICES[matchDevice(w, h).id];
     const item = (id, name, sub) => `<label><input type="checkbox" value="${id}"${chosen.includes(id) ? ' checked' : ''}>${name}${sub ? `<small>${sub}</small>` : ''}</label>`;
     $('#multi-list').innerHTML =
-      item('none', 'No frame', `${w} × ${h}`) + item('auto', `Best match (${best.name})`, '') +
+      item('none', t('multi_no_frame'), `${w} × ${h}`) + item('auto', t('multi_best_match', best.name), '') +
       GROUPS.map(([label, test]) => `<div class="group">${label}</div>` +
         Object.values(DEVICES).filter(test).map((d) => item(d.id, d.name, '')).join('')).join('');
     $('#multi-status').textContent = '';
@@ -34,15 +35,15 @@ export function mountMultiExport(ed) {
 
   async function save() {
     const ids = [...$('#multi-list').querySelectorAll('input:checked')].map((i) => i.value);
-    if (!ids.length) { $('#multi-status').textContent = 'Choose at least one.'; return; }
+    if (!ids.length) { $('#multi-status').textContent = t('multi_choose_one'); return; }
     try { chrome.storage.local.set({ [KEY]: ids }); } catch {}
     $('#multi-go').disabled = true;
     const files = [];
     const name = ed.stem();
     try {
       for (const [i, id] of ids.entries()) {
-        const label = id === 'none' ? 'no frame' : id === 'auto' ? 'best match' : DEVICES[id].name;
-        $('#multi-status').textContent = `Making ${i + 1} of ${ids.length}: ${label}…`;
+        const label = id === 'none' ? t('multi_no_frame') : id === 'auto' ? t('picker_best_match') : DEVICES[id].name;
+        $('#multi-status').textContent = t('multi_making', [i + 1, ids.length, label]);
         const opts = id === 'none' ? { enabled: false } : { ...ed.deviceOptions(), enabled: true, device: id };
         const { blob } = await ed.encode(await ed.render(opts));
         const slug = id === 'none' ? 'no-frame' : id === 'auto' ? `best-match-${matchDevice(...ed.size()).id}` : id;
@@ -54,9 +55,9 @@ export function mountMultiExport(ed) {
       a.click();
       setTimeout(() => URL.revokeObjectURL(a.href), 30000);
       $('#multi').close();
-      toast(`Saved ${a.download} · ${files.length} image${files.length > 1 ? 's' : ''}`, { kind: 'success' });
+      toast(files.length === 1 ? t('multi_saved_one', a.download) : t('multi_saved_many', [a.download, files.length]), { kind: 'success' });
     } catch (e) {
-      $('#multi-status').textContent = `That didn't work: ${e.message}`;
+      $('#multi-status').textContent = t('multi_failed', e.message);
     } finally {
       $('#multi-go').disabled = false;
     }

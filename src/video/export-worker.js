@@ -19,7 +19,8 @@ import { sourceColourSpace, outputColour } from '../lib/video-colour.js';
 class Unsupported extends Error {}
 
 const post = (msg, transfer) => self.postMessage(msg, transfer || []);
-const progress = (f, text) => post({ type: 'progress', f, text });
+// `what`: a message key, or [key, ...values]; the page translates it (workers can't).
+const progress = (f, what) => post({ type: 'progress', f, what });
 
 self.onmessage = async ({ data }) => {
   if (data.type !== 'start') return;
@@ -261,7 +262,7 @@ async function exportAudio(src, format, start, end) {
  */
 async function run(job) {
   if (typeof VideoDecoder === 'undefined') throw new Unsupported('WebCodecs is not available.');
-  progress(0, 'Reading the recording…');
+  progress(0, 'export_reading');
   let src;
   try {
     src = demuxWebm(await job.blob.arrayBuffer());
@@ -332,10 +333,10 @@ async function run(job) {
         vf.close();
         await drain(encoder);
         preview();
-        progress((k + 1) / count, `Encoding frame ${k + 1} of ${count}`);
+        progress((k + 1) / count, ['export_frame', k + 1, count]);
       },
     });
-    progress(1, 'Finishing…');
+    progress(1, 'export_finishing');
     await encoder.flush();
     encoder.close();
     if (failure) throw failure;
@@ -361,7 +362,7 @@ async function run(job) {
       const part = new Uint8ClampedArray(Math.ceil(px.length / 12) * 4);
       for (let i = 0, o = 0; i < px.length; i += 12, o += 4) part.set(px.subarray(i, i + 4), o);
       parts.push(part);
-      progress(0, 'Choosing colours…');
+      progress(0, 'export_colours');
     };
     // Key frames decode on their own, so when there are enough of them in range,
     // sample those instead of decoding the whole clip an extra time.
@@ -393,10 +394,10 @@ async function run(job) {
       paint(frame);
       await enc.addFrame(canvas, frameUs / 1000);
       preview();
-      progress((k + 1) / count, `Encoding frame ${k + 1} of ${count}`);
+      progress((k + 1) / count, ['export_frame', k + 1, count]);
     },
   });
-  progress(1, 'Finishing…');
+  progress(1, 'export_finishing');
   return enc.finish();
 }
 
@@ -432,11 +433,11 @@ async function exportGif(src, { start, fps, count, frameUs, palette, transparent
         preview();
         mapped.push(pool.run({ op: 'map', rgba, width: W, height: H, dither, transparentIndex }, [rgba.buffer]));
         while (mapped.length > limit) await takeOne();
-        progress((k + 1) / count, `Encoding frame ${k + 1} of ${count}`);
+        progress((k + 1) / count, ['export_frame', k + 1, count]);
       },
     });
     while (mapped.length) await takeOne();
-    progress(1, 'Finishing…');
+    progress(1, 'export_finishing');
     return await enc.finish();
   } finally {
     pool.close();

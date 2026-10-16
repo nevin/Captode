@@ -20,7 +20,7 @@ export function pickArea(hint) {
     label.style.cssText =
       'position:fixed;display:none;padding:3px 7px;border-radius:5px;background:#5b4bff;color:#fff;';
     const tip = document.createElement('div');
-    tip.textContent = hint + '  ·  Esc to cancel';
+    tip.textContent = hint; // with how to cancel, in the browser's language
     tip.style.cssText =
       'position:fixed;top:16px;left:50%;transform:translateX(-50%);padding:8px 14px;border-radius:8px;' +
       'background:#17171c;color:#fff;box-shadow:0 6px 20px rgba(0,0,0,.3);pointer-events:none;';
@@ -146,7 +146,7 @@ export function fullPageRestore() {
  * Shows a countdown (…3, 2, 1) and resolves true once it has left the screen, or
  * false if the user pressed Esc to cancel.
  */
-export function countdown(seconds) {
+export function countdown(seconds, hintText = 'Recording starts soon · Esc to cancel') {
   return new Promise((resolve) => {
     const el = document.createElement('div');
     el.id = '__captode_countdown';
@@ -157,7 +157,7 @@ export function countdown(seconds) {
       'background:rgba(15,15,25,.25);';
     const num = document.createElement('div');
     const hint = document.createElement('div');
-    hint.textContent = 'Recording starts soon · Esc to cancel';
+    hint.textContent = hintText;
     hint.style.cssText = 'font:500 15px system-ui,sans-serif;margin-top:8px;padding:6px 12px;border-radius:999px;background:rgba(0,0,0,.45);text-shadow:none;';
     el.append(num, hint);
     document.documentElement.appendChild(el);

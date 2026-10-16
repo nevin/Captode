@@ -10,7 +10,8 @@
     "bench": "node test/bench.mjs",
     "icons": "node tools/brand.mjs",
     "store": "node tools/store-assets.mjs",
-    "package": "node tools/package.mjs"
+    "package": "node tools/package.mjs",
+    "i18n": "node tools/i18n-check.mjs"
   },
   "devDependencies": {
     "puppeteer": "24.43.1"

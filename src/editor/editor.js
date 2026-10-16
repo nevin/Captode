@@ -6,9 +6,12 @@ import { mountDevicePanel, renderInDevice } from '../lib/device.js';
 import { createLayers } from './layers.js';
 import { mountMultiExport } from './multi-export.js';
 import { mountShare } from './share.js';
-import { luminance, contrast, contrastHtml, hexOf, measureText as measureWords, edgeNear as edgeIn, measureFrom, drawMeasures } from '../lib/review.js';
+import { luminance, contrast, contrastHtml, hexOf, measureLabel, measureText as measureWords, edgeNear as edgeIn, measureFrom, drawMeasures } from '../lib/review.js';
 import { getSettings, backgroundColour } from '../lib/settings.js';
 import { toast, enhance, tablist, openDialog, fmtBytes, ago } from '../lib/ui.js';
+import { t, localize } from '../lib/i18n.js';
+
+localize();
 
 const $ = (s) => document.querySelector(s);
 const bg = $('#bg');
@@ -22,23 +25,23 @@ const mctx = new OffscreenCanvas(1, 1).getContext('2d'); // text measuring
 
 const svg = (d) => `<svg class="i" viewBox="0 0 24 24">${d}</svg>`;
 const TOOLS = [
-  ['select', 'Select and move', 'v', svg('<path d="m5 3 14 8-6 2-2 6z"/>')],
-  ['pan', 'Pan (or hold Space)', 'm', svg('<path d="M18 11V6a2 2 0 0 0-4 0v5"/><path d="M14 10V4a2 2 0 0 0-4 0v6"/><path d="M10 10.5V6a2 2 0 0 0-4 0v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.9-6-2.4l-3.6-3.6a2 2 0 0 1 2.8-2.8L7 15"/>')],
-  ['crop', 'Crop', 'c', svg('<path d="M6 2v14a2 2 0 0 0 2 2h14"/><path d="M18 22V8a2 2 0 0 0-2-2H2"/>')],
-  ['pen', 'Pen', 'p', svg('<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>')],
-  ['highlighter', 'Highlighter', 'h', svg('<path d="m9 11-6 6v3h9l3-3"/><path d="m22 12-4.6 4.6a2 2 0 0 1-2.8 0l-5.2-5.2a2 2 0 0 1 0-2.8L14 4"/>')],
-  ['line', 'Line', 'l', svg('<path d="M5 19 19 5"/>')],
-  ['arrow', 'Arrow', 'a', svg('<path d="M5 19 19 5"/><path d="M9 5h10v10"/>')],
-  ['rect', 'Rectangle', 'r', svg('<rect x="3" y="5" width="18" height="14" rx="1"/>')],
-  ['ellipse', 'Ellipse', 'e', svg('<ellipse cx="12" cy="12" rx="9" ry="7"/>')],
-  ['text', 'Text', 't', svg('<path d="M4 7V4h16v3M9 20h6M12 4v16"/>')],
-  ['callout', 'Callout', 'k', svg('<path d="M4 4h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1h-9l-5 4v-4H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z"/>')],
-  ['spotlight', 'Spotlight', 'f', svg('<rect x="3" y="3" width="18" height="18" rx="2" stroke-dasharray="2 2.5"/><rect x="8" y="8" width="8" height="8" rx="1.5"/>')],
-  ['magnify', 'Magnifier', 'z', svg('<circle cx="11" cy="11" r="7"/><path d="m20 20-4-4M8.5 11h5M11 8.5v5"/>')],
-  ['step', 'Step number', 'n', svg('<circle cx="12" cy="12" r="9"/><path d="M10.5 9.5 12.5 8v8"/>')],
-  ['measure', 'Measure', 'u', svg('<path d="M3 17 17 3l4 4L7 21z"/><path d="m7 13 2 2M10 10l2 2M13 7l2 2"/>')],
-  ['pick', 'Colour picker', 'i', svg('<path d="m2 22 1-1h3l9-9"/><path d="M3 21v-3l9-9"/><path d="m15 6 3.4-3.4a2.1 2.1 0 1 1 3 3L18 9l.4.4a2.1 2.1 0 1 1-3 3l-3.8-3.8a2.1 2.1 0 1 1 3-3z"/>')],
-  ['redact', 'Blur or pixelate', 'b', svg('<rect x="3" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="14" y="3" width="7" height="7" opacity=".4"/><rect x="3" y="14" width="7" height="7" opacity=".4"/>')],
+  ['select', t('editor_select_and_move'), 'v', svg('<path d="m5 3 14 8-6 2-2 6z"/>')],
+  ['pan', t('tool_pan'), 'm', svg('<path d="M18 11V6a2 2 0 0 0-4 0v5"/><path d="M14 10V4a2 2 0 0 0-4 0v6"/><path d="M10 10.5V6a2 2 0 0 0-4 0v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.9-6-2.4l-3.6-3.6a2 2 0 0 1 2.8-2.8L7 15"/>')],
+  ['crop', t('editor_crop'), 'c', svg('<path d="M6 2v14a2 2 0 0 0 2 2h14"/><path d="M18 22V8a2 2 0 0 0-2-2H2"/>')],
+  ['pen', t('editor_pen'), 'p', svg('<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>')],
+  ['highlighter', t('editor_highlighter'), 'h', svg('<path d="m9 11-6 6v3h9l3-3"/><path d="m22 12-4.6 4.6a2 2 0 0 1-2.8 0l-5.2-5.2a2 2 0 0 1 0-2.8L14 4"/>')],
+  ['line', t('editor_line'), 'l', svg('<path d="M5 19 19 5"/>')],
+  ['arrow', t('editor_arrow'), 'a', svg('<path d="M5 19 19 5"/><path d="M9 5h10v10"/>')],
+  ['rect', t('editor_rectangle'), 'r', svg('<rect x="3" y="5" width="18" height="14" rx="1"/>')],
+  ['ellipse', t('editor_ellipse'), 'e', svg('<ellipse cx="12" cy="12" rx="9" ry="7"/>')],
+  ['text', t('editor_text'), 't', svg('<path d="M4 7V4h16v3M9 20h6M12 4v16"/>')],
+  ['callout', t('tool_callout'), 'k', svg('<path d="M4 4h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1h-9l-5 4v-4H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z"/>')],
+  ['spotlight', t('editor_spotlight'), 'f', svg('<rect x="3" y="3" width="18" height="18" rx="2" stroke-dasharray="2 2.5"/><rect x="8" y="8" width="8" height="8" rx="1.5"/>')],
+  ['magnify', t('editor_magnifier'), 'z', svg('<circle cx="11" cy="11" r="7"/><path d="m20 20-4-4M8.5 11h5M11 8.5v5"/>')],
+  ['step', t('editor_step_number'), 'n', svg('<circle cx="12" cy="12" r="9"/><path d="M10.5 9.5 12.5 8v8"/>')],
+  ['measure', t('editor_measure'), 'u', svg('<path d="M3 17 17 3l4 4L7 21z"/><path d="m7 13 2 2M10 10l2 2M13 7l2 2"/>')],
+  ['pick', t('editor_colour_picker'), 'i', svg('<path d="m2 22 1-1h3l9-9"/><path d="M3 21v-3l9-9"/><path d="m15 6 3.4-3.4a2.1 2.1 0 1 1 3 3L18 9l.4.4a2.1 2.1 0 1 1-3 3l-3.8-3.8a2.1 2.1 0 1 1 3-3z"/>')],
+  ['redact', t('editor_blur_or_pixelate'), 'b', svg('<rect x="3" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="14" y="3" width="7" height="7" opacity=".4"/><rect x="3" y="14" width="7" height="7" opacity=".4"/>')],
 ];
 const FONTS = [
   'system-ui', 'Arial', 'Helvetica', 'Verdana', 'Tahoma', 'Trebuchet MS', 'Segoe UI', 'Roboto',
@@ -53,8 +56,9 @@ const GROUPS = {
   spotlight: ['spotlight'], magnify: ['magnify'],
 };
 const NAMES = {
-  pen: 'Pen', highlighter: 'Highlighter', line: 'Line', arrow: 'Arrow', rect: 'Rectangle',
-  ellipse: 'Ellipse', text: 'Text', callout: 'Callout', step: 'Step number', spotlight: 'Spotlight', magnify: 'Magnifier', redact: 'Blur / pixelate', crop: 'Crop',
+  pen: t('editor_pen'), highlighter: t('editor_highlighter'), line: t('editor_line'), arrow: t('editor_arrow'), rect: t('editor_rectangle'),
+  ellipse: t('editor_ellipse'), text: t('editor_text'), callout: t('tool_callout'), step: t('editor_step_number'), spotlight: t('editor_spotlight'),
+  magnify: t('editor_magnifier'), redact: t('name_redact'), crop: t('editor_crop'),
 };
 
 // ---------- state ----------
@@ -195,7 +199,7 @@ async function restoreEdits(edits) {
   fitZoom();
   commit();
   dirty = false;
-  toast('Your edits are back', { action: { label: 'Start over', run: undoAll }, ms: 5000 });
+  toast(t('edits_back'), { action: { label: t('start_over'), run: undoAll }, ms: 5000 });
 }
 const commitSoon = debounce(commit, 400);
 
@@ -212,7 +216,7 @@ function restore(s) {
   refreshExport();
 }
 
-function undo() { if (hIndex > 0) { restore(history[--hIndex]); announce('Undone'); } }
+function undo() { if (hIndex > 0) { restore(history[--hIndex]); announce(t('announce_undone')); } }
 
 /** Back to the image as it was opened. Itself undoable, so Undo brings the edits back. */
 function undoAll() {
@@ -222,10 +226,10 @@ function undoAll() {
   commit();
   history[hIndex].reverted = true;
   updateButtons();
-  toast('All changes undone', { action: { label: 'Undo', run: undo }, ms: 6000 });
+  toast(t('all_undone'), { action: { label: t('editor_undo'), run: undo }, ms: 6000 });
 }
 const atOriginal = () => history[hIndex] === original || !!history[hIndex]?.reverted;
-function redo() { if (hIndex < history.length - 1) { restore(history[++hIndex]); announce('Redone'); } }
+function redo() { if (hIndex < history.length - 1) { restore(history[++hIndex]); announce(t('announce_redone')); } }
 
 function updateButtons() {
   $('#undo').disabled = hIndex <= 0;
@@ -1130,7 +1134,7 @@ fg.addEventListener('pointerdown', (e) => {
     } else {
       select([{ type: 'step', ...propsFor('step'), n: nextStep(), x: pt.x, y: pt.y }]);
       objects.push(selected);
-      announce(`Added step ${selected.n}`);
+      announce(t('announce_added_step', selected.n));
       lastStep = selected;
       stepStart = null;
       drag = startMove(pt, true); // drag to place it exactly
@@ -1254,7 +1258,7 @@ function endDrag() {
       select([]);
     } else {
       commit();
-      announce(`Added: ${describe(o)}`);
+      announce(t('announce_added', describe(o)));
     }
     syncStyleUi();
   } else if (d.kind === 'callout') {
@@ -1381,7 +1385,7 @@ function deleteSelected() {
   syncStyleUi();
   renderFg();
   commit();
-  toast(n === 1 ? 'Annotation deleted' : `${n} annotations deleted`, { ms: 4000, action: { label: 'Undo', run: undo } });
+  toast(n === 1 ? t('deleted_one') : t('deleted_many', n), { ms: 4000, action: { label: t('editor_undo'), run: undo } });
 }
 
 const cloneObj = ({ _editing, ...o }) => structuredClone(o);
@@ -1408,9 +1412,9 @@ async function copySelected() {
   try {
     await navigator.clipboard.writeText(JSON.stringify({ [CLIP_TAG]: 1, items }));
     pasteCount = 0;
-    toast(`Copied ${items.length === 1 ? 'the annotation' : `${items.length} annotations`}`, { kind: 'success', ms: 1600 });
+    toast(items.length === 1 ? t('copied_one') : t('copied_many', items.length), { kind: 'success', ms: 1600 });
   } catch (e) {
-    toast('Could not copy: ' + e.message, { kind: 'error' });
+    toast(t('copy_failed', e.message), { kind: 'error' });
   }
 }
 function pasteAnnotations(text) {
@@ -1456,13 +1460,13 @@ document.addEventListener('keydown', (e) => {
     renderFg();
     commitSoon();
     const b = bounds(selection[0]);
-    announceSoon(`Moved to ${Math.round(b.x)}, ${Math.round(b.y)}`);
+    announceSoon(t('announce_moved', [Math.round(b.x), Math.round(b.y)]));
     return;
   }
   if (mod) return;
   if (e.key.toLowerCase() === 'g' && base) { $('#g-on').checked = !$('#g-on').checked; renderFg(); return; }
-  const t = TOOLS.find(([, , key]) => key === e.key.toLowerCase());
-  if (t) setTool(t[0]);
+  const hit = TOOLS.find(([, , key]) => key === e.key.toLowerCase());
+  if (hit) setTool(hit[0]);
   if (e.key === '+' || e.key === '=') zoomAt(zoom * 1.25, ...stageCentre());
   if (e.key === '-') zoomAt(zoom / 1.25, ...stageCentre());
   if (e.key === '0') fitZoom();
@@ -1477,14 +1481,15 @@ const pxRatio = () => ($('#m-ratio').value === 'auto' ? meta.dpr || 1 : Number($
 const measureText = (m) => measureWords(m, pxRatio());
 
 function showMeasure(m) {
-  $('#m-readout').innerHTML = m ? `<b>${measureText(m)}</b>` : 'No measurements yet';
+  $('#m-readout').innerHTML = m ? `<b>${measureText(m)}</b>` : t('editor_no_measurements_yet');
   $('#m-clear').disabled = !review.measures.length;
 }
 
 function syncRatioNote() {
-  const auto = meta.dpr ? `${Math.round(meta.dpr * 100) / 100}×, from the capture` : '1× (not known for this image)';
-  $('#m-ratio').options[0].textContent = `Automatic (${auto.split(',')[0]})`;
-  $('#m-ratio-note').textContent = `Sizes are in CSS pixels: image pixels ÷ ${Math.round(pxRatio() * 100) / 100}.${$('#m-ratio').value === 'auto' ? ` The ratio is ${auto}.` : ''}`;
+  const known = meta.dpr ? `${Math.round(meta.dpr * 100) / 100}×` : '';
+  $('#m-ratio').options[0].textContent = t('automatic_value', known || '1×');
+  $('#m-ratio-note').textContent = t('ratio_note', Math.round(pxRatio() * 100) / 100) +
+    ($('#m-ratio').value === 'auto' ? ' ' + (known ? t('ratio_from_capture', known) : t('ratio_unknown')) : '');
 }
 
 /** Measurements and the spacing grid, over the image (not exported). */
@@ -1506,7 +1511,7 @@ function drawReview(ctx, px) {
     ctx.restore();
   }
   const list = drag?.kind === 'measure' ? [...review.measures, drag.m] : review.measures;
-  drawMeasures(ctx, list, px, (m) => measureText(m).replace(' long', ''));
+  drawMeasures(ctx, list, px, (m) => measureLabel(m, pxRatio()));
 }
 
 /** The edge nearest (x, y) along `axis` in the image, within a few screen pixels. */
@@ -1535,7 +1540,7 @@ function showColours() {
   }
   $('#c-copy').disabled = !(a || b);
   $('#c-swap').disabled = !(a && b);
-  if (!a || !b) { $('#c-readout').textContent = 'Pick two colours to check their contrast'; return; }
+  if (!a || !b) { $('#c-readout').textContent = t('editor_pick_two_colours_to_check'); return; }
   $('#c-readout').innerHTML = contrastHtml(a, b);
 }
 
@@ -1547,7 +1552,7 @@ $('#c-swap').addEventListener('click', () => { review.colours.reverse(); showCol
 $('#c-copy').addEventListener('click', async () => {
   const [a, b] = review.colours;
   const lines = [a && `Text ${a.toUpperCase()}`, b && `Background ${b.toUpperCase()}`, a && b && `Contrast ${contrast(a, b).toFixed(2)}:1`].filter(Boolean);
-  try { await navigator.clipboard.writeText(lines.join('\n')); toast('Colours copied', { kind: 'success' }); } catch { toast('Could not copy the colours', { kind: 'error' }); }
+  try { await navigator.clipboard.writeText(lines.join('\n')); toast(t('colours_copied'), { kind: 'success' }); } catch { toast(t('colours_copy_failed'), { kind: 'error' }); }
 });
 $('#m-clear').addEventListener('click', () => { review.measures = []; showMeasure(null); renderFg(); });
 $('#m-ratio').addEventListener('input', () => { syncRatioNote(); showMeasure(review.measures.at(-1) || null); renderFg(); });
@@ -1573,12 +1578,12 @@ const { describe, announce, announceSoon } = layers;
 
 // Looks for every tool at once: a line colour, and text colours for labels.
 const LOOKS = [
-  { id: 'bug', name: 'Bug', line: '#e5484d', text: '#ffffff', bg: '#e5484d' },
-  { id: 'review', name: 'Review', line: '#f76b15', text: '#17171c', bg: '#ffc53d' },
-  { id: 'note', name: 'Note', line: '#0090ff', text: '#ffffff', bg: '#0090ff' },
-  { id: 'ok', name: 'Approved', line: '#30a46c', text: '#ffffff', bg: '#30a46c' },
-  { id: 'neutral', name: 'Neutral', line: '#17171c', text: '#ffffff', bg: '#17171c' },
-  { id: 'brand', name: 'Brand', line: '#5b4bff', text: '#ffffff', bg: '#5b4bff' },
+  { id: 'bug', name: t('look_bug'), line: '#e5484d', text: '#ffffff', bg: '#e5484d' },
+  { id: 'review', name: t('look_review'), line: '#f76b15', text: '#17171c', bg: '#ffc53d' },
+  { id: 'note', name: t('look_note'), line: '#0090ff', text: '#ffffff', bg: '#0090ff' },
+  { id: 'ok', name: t('look_ok'), line: '#30a46c', text: '#ffffff', bg: '#30a46c' },
+  { id: 'neutral', name: t('look_neutral'), line: '#17171c', text: '#ffffff', bg: '#17171c' },
+  { id: 'brand', name: t('look_brand'), line: '#5b4bff', text: '#ffffff', bg: '#5b4bff' },
 ];
 
 /** Applies a look to an annotation; highlights, blurs and spotlights keep theirs. */
@@ -1606,11 +1611,11 @@ function applyLook(id) {
   showLooks();
   syncStyleUi();
   chrome.storage?.local.set({ editorDefaults: defaults });
-  toast(selection.length ? `${look.name} style applied to ${selection.length === 1 ? 'the selection' : `${selection.length} annotations`}` : `${look.name} style for new annotations`, { ms: 2200 });
+  toast(!selection.length ? t('look_new', look.name) : selection.length === 1 ? t('look_applied_one', look.name) : t('look_applied_many', [look.name, selection.length]), { ms: 2200 });
 }
 
 function showLooks() {
-  $('#looks').innerHTML = LOOKS.map((l) => `<button type="button" data-look="${l.id}" class="${defaults.look === l.id ? 'on' : ''}" aria-pressed="${defaults.look === l.id}" title="${l.name}: lines ${l.line}, labels ${l.text} on ${l.bg}">` +
+  $('#looks').innerHTML = LOOKS.map((l) => `<button type="button" data-look="${l.id}" class="${defaults.look === l.id ? 'on' : ''}" aria-pressed="${defaults.look === l.id}" title="${t('look_title', [l.name, l.line, l.text, l.bg])}">` +
     `<span class="dot" style="background:${l.line}"></span>${l.name}</button>`).join('');
 }
 $('#looks').addEventListener('click', (e) => {
@@ -1648,12 +1653,12 @@ function syncStyleUi() {
   $('#style-hint').classList.toggle('hidden', !!type);
   $('#arrange').classList.toggle('hidden', !selection.length);
   for (const b of document.querySelectorAll('[data-align^="dist"]')) b.disabled = selection.length < 3;
-  $('#align-label').textContent = selection.length > 1 ? 'Align' : 'Align to the image';
+  $('#align-label').textContent = selection.length > 1 ? t('editor_align') : t('align_to_image');
   const n = selection.length;
-  $('#style-title').textContent = !type ? 'Annotate'
-    : type === 'mixed' ? `${n} items selected`
-    : n > 1 ? `${n} × ${NAMES[type].toLowerCase()}`
-    : n ? `Selected ${NAMES[type].toLowerCase()}` : NAMES[type];
+  $('#style-title').textContent = !type ? t('editor_annotate')
+    : type === 'mixed' ? t('style_mixed', n)
+    : n > 1 ? `${n} × ${NAMES[type]}`
+    : n ? t('style_selected', NAMES[type]) : NAMES[type];
   if (!type || type === 'crop' || type === 'mixed') return;
   const p = selection[0] || propsFor(type);
   $('#s-line-opts').classList.toggle('hidden', !DASHABLE.has(type));
@@ -1700,7 +1705,7 @@ function syncStyleUi() {
     $('#st-color').value = p.color;
     $('#st-size').value = p.size;
     $('#st-size-v').textContent = Math.round(p.size) + ' px';
-    $('#st-n-label').textContent = selected ? 'Number' : 'Next number';
+    $('#st-n-label').textContent = selected ? t('step_number') : t('editor_next_number');
     if (document.activeElement !== $('#st-n')) $('#st-n').value = selected ? p.n : nextStep();
   }
 }
@@ -1790,15 +1795,15 @@ for (const [id, d] of [['t-smaller', -1], ['t-bigger', 1]]) {
 }
 
 $('#t-fonts').addEventListener('click', async () => {
-  if (!window.queryLocalFonts) { toast('This browser cannot list installed fonts.', { kind: 'error' }); return; }
+  if (!window.queryLocalFonts) { toast(t('fonts_unavailable'), { kind: 'error' }); return; }
   try {
     const fonts = await window.queryLocalFonts();
     const have = new Set([...$('#t-font').options].map((o) => o.value));
     const families = [...new Set(fonts.map((f) => f.family))].filter((f) => !have.has(f)).sort();
     for (const f of families) $('#t-font').add(new Option(f));
-    toast(`Added ${families.length} installed fonts`, { kind: 'success' });
+    toast(t('fonts_added', families.length), { kind: 'success' });
   } catch {
-    toast('Font access was not allowed.', { kind: 'error' });
+    toast(t('fonts_denied'), { kind: 'error' });
   }
 });
 
@@ -1808,8 +1813,8 @@ function updateCropUi() {
   const ok = tool === 'crop' && crop && crop.w >= 2 && crop.h >= 2;
   $('#c-apply').disabled = !ok;
   $('#c-size').textContent = ok
-    ? `${Math.round(crop.w)} × ${Math.round(crop.h)} px — drag inside to move it, Enter to apply.`
-    : 'Drag on the image to choose the area to keep.';
+    ? t('crop_size', `${Math.round(crop.w)} × ${Math.round(crop.h)}`)
+    : t('editor_drag_on_the_image_to');
 }
 
 function applyCrop() {
@@ -1842,7 +1847,7 @@ $('#rs-lock-btn').addEventListener('click', () => {
   const on = !$('#rs-lock').checked;
   $('#rs-lock').checked = on;
   $('#rs-lock-btn').classList.toggle('on', on);
-  $('#rs-lock-btn').dataset.tip = on ? 'Keep proportions' : 'Proportions unlocked';
+  $('#rs-lock-btn').dataset.tip = on ? t('editor_keep_proportions') : t('proportions_unlocked');
 });
 for (const b of document.querySelectorAll('[data-pct]')) {
   b.addEventListener('click', () => {
@@ -1865,7 +1870,7 @@ $('#rs-apply').addEventListener('click', async () => {
   layout();
   fitZoom();
   commit();
-  toast(`Resized to ${w} × ${h}`, { kind: 'success' });
+  toast(t('resized_to', `${w} × ${h}`), { kind: 'success' });
 });
 
 /**
@@ -1971,14 +1976,14 @@ const EXPORT_CONTROLS = ['x-quality', 'x-colors', 'x-dither', 'x-lossy', 'x-page
 const EXT = { png: 'png', png8: 'png', jpeg: 'jpg', webp: 'webp', avif: 'avif', gif: 'gif', bmp: 'bmp', pdf: 'pdf' };
 
 const FORMAT_INFO = {
-  png: ['PNG', 'Lossless, sharp text, keeps transparency.'],
-  png8: ['PNG-8', 'Compressed PNG with up to 256 colours. Often 60–80% smaller.'],
-  jpeg: ['JPEG', 'Small files, best for photos. No transparency.'],
-  webp: ['WebP', 'Smaller than PNG and JPEG, keeps transparency.'],
-  avif: ['AVIF', 'The smallest files, for modern browsers.'],
-  gif: ['GIF', 'Up to 256 colours. Opens everywhere.'],
-  bmp: ['BMP', 'Uncompressed, for older software.'],
-  pdf: ['PDF', 'For sharing and printing. Long pages can span several pages.'],
+  png: ['PNG', t('format_png')],
+  png8: ['PNG-8', t('format_png8')],
+  jpeg: ['JPEG', t('format_jpeg')],
+  webp: ['WebP', t('format_webp')],
+  avif: ['AVIF', t('format_avif')],
+  gif: ['GIF', t('format_gif')],
+  bmp: ['BMP', t('format_bmp')],
+  pdf: ['PDF', t('format_pdf')],
 };
 
 function renderFormatTiles() {
@@ -2003,7 +2008,7 @@ function syncExportUi() {
   document.querySelector('[data-x="lossy"]').classList.toggle('hidden', f !== 'gif');
   $('#x-lossy-v').textContent = Number($('#x-lossy').value) ? $('#x-lossy').value : 'Off';
   $('#x-quality-v').textContent = $('#x-quality').value + '%';
-  const label = `Download ${FORMAT_INFO[f][0]}`;
+  const label = t('download_format', FORMAT_INFO[f][0]);
   for (const id of ['download', 'download2']) $('#' + id).lastChild.textContent = label;
 }
 
@@ -2057,20 +2062,20 @@ function encode(c, lane = 'export') {
 /** Says what was changed to fit the size limit, if anything. */
 function fittedNote(f) {
   if (!f) return '';
-  if (f.tooBig) return "Can't get under the size limit; this is as small as it goes.";
+  if (f.tooBig) return t('fit_too_big');
   const parts = [];
-  if (f.quality !== undefined) parts.push(`quality ${Math.round(f.quality * 100)}%`);
-  if (f.lossy) parts.push(`lossy ${f.lossy}`);
-  if (f.colors) parts.push(`${f.colors} colours`);
-  if (f.scale) parts.push(`${Math.round(f.scale * 100)}% size`);
-  return `To fit the limit: ${parts.join(', ')}.`;
+  if (f.quality !== undefined) parts.push(t('fit_quality', Math.round(f.quality * 100)));
+  if (f.lossy) parts.push(t('fit_lossy', f.lossy));
+  if (f.colors) parts.push(t('fit_colours', f.colors));
+  if (f.scale) parts.push(t('fit_size', Math.round(f.scale * 100)));
+  return t('fit_note', parts.join(', '));
 }
 
 let estimateRun = 0;
 const refreshExport = debounce(async () => {
   if (!base) return;
   const run = ++estimateRun;
-  $('#x-estimate').innerHTML = '<span>Working out the file size…</span>';
+  $('#x-estimate').innerHTML = `<span>${t('estimate_working')}</span>`;
   try {
     const c = await finalCanvas();
     const r = await encode(c, 'estimate');
@@ -2081,7 +2086,7 @@ const refreshExport = debounce(async () => {
     $('#x-fitted').classList.toggle('warn', !!r.fitted?.tooBig);
   } catch (e) {
     if (e.superseded) return;
-    if (run === estimateRun) $('#x-estimate').textContent = 'Could not encode: ' + e.message;
+    if (run === estimateRun) $('#x-estimate').textContent = t('encode_failed', e.message);
   }
   updateDevicePreview();
 }, 450);
@@ -2150,9 +2155,9 @@ async function download() {
     a.click();
     setTimeout(() => URL.revokeObjectURL(a.href), 30000);
     dirty = false;
-    toast(`Saved ${a.download} · ${fmtBytes(blob.size)}`, { kind: 'success' });
+    toast(t('saved_file_size', [a.download, fmtBytes(blob.size)]), { kind: 'success' });
   } catch (e) {
-    toast('Export failed: ' + e.message, { kind: 'error', ms: 5000 });
+    toast(t('export_failed', e.message), { kind: 'error', ms: 5000 });
   } finally {
     btns.forEach((b) => { b.disabled = false; });
   }
@@ -2170,10 +2175,10 @@ async function copyImage({ auto = false } = {}) {
       new Promise((_, reject) => setTimeout(() => reject(new Error('the clipboard did not respond. Try again.')), 8000)),
     ]);
     dirty = false;
-    toast(auto ? 'Screenshot copied to the clipboard' : 'Copied to the clipboard', { kind: 'success' });
+    toast(auto ? t('copied_auto') : t('copied_image'), { kind: 'success' });
     return true;
   } catch (e) {
-    if (!auto) toast('Could not copy: ' + e.message, { kind: 'error', ms: 4000 });
+    if (!auto) toast(t('copy_failed', e.message), { kind: 'error', ms: 4000 });
     return false;
   }
 }
@@ -2219,7 +2224,7 @@ async function loadBlob(blob, info = {}) {
   const slug = (info.title || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40);
   $('#x-name').value = ['captode', slug, stamp].filter(Boolean).join('-');
   if (info.title) document.title = `${info.title} — Captode`;
-  $('#doc-name').textContent = info.title || 'Screenshot';
+  $('#doc-name').textContent = info.title || t('popup_screenshot');
   $('#doc-name').title = info.url || info.title || '';
   captureId = null;
   layout();
@@ -2255,9 +2260,9 @@ async function renderRecent() {
     thumb.src = URL.createObjectURL(it.blob) + (it.kind === 'video' ? '#t=0.1' : '');
     if (it.kind === 'video') { thumb.muted = true; thumb.preload = 'metadata'; }
     thumb.alt = '';
-    const title = it.meta.title || (it.kind === 'video' ? 'Recording' : 'Screenshot');
+    const title = it.meta.title || (it.kind === 'video' ? t('video_recording') : t('popup_screenshot'));
     a.innerHTML = `<span class="thumb"></span><span class="meta"><b></b><small></small></span>
-      <button class="btn ghost icon remove" data-tip="Remove" aria-label="Remove ${title.replace(/"/g, '')}"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>`;
+      <button class="btn ghost icon remove" data-tip="${t('remove')}" aria-label="${t('remove_named', title.replace(/"/g, ''))}"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>`;
     a.querySelector('.thumb').append(thumb);
     if (it.kind === 'video') a.querySelector('.thumb').insertAdjacentHTML('beforeend', '<span class="badge">Video</span>');
     else if (it.edited) a.querySelector('.thumb').insertAdjacentHTML('beforeend', '<span class="badge">Edited</span>');
@@ -2267,7 +2272,7 @@ async function renderRecent() {
       e.preventDefault();
       const rec = await deleteCapture(it.id);
       await renderRecent();
-      toast(`Removed ${title}`, { ms: 6000, action: { label: 'Undo', run: async () => { await restoreCapture(it.id, rec); renderRecent(); } } });
+      toast(t('removed_named', title), { ms: 6000, action: { label: t('editor_undo'), run: async () => { await restoreCapture(it.id, rec); renderRecent(); } } });
     });
     $('#recent-list').append(a);
   }
@@ -2349,7 +2354,7 @@ document.addEventListener('keydown', (e) => {
       },
     });
   } else {
-    $('#device-panel').textContent = 'Available when running as the extension.';
+    $('#device-panel').textContent = t('needs_extension');
   }
   syncExportUi();
   syncFrameUi();
@@ -2362,7 +2367,7 @@ document.addEventListener('keydown', (e) => {
     await loadBlob(rec.blob, { ...rec.meta, created: rec.created });
     captureId = id;
     if (rec.edits) await restoreEdits(rec.edits);
-    if (rec.meta?.truncated) toast('This page is very long, so only its top part was captured.', { ms: 6000 });
+    if (rec.meta?.truncated) toast(t('truncated'), { ms: 6000 });
     // Only a capture that has just been taken, not one reopened from Recent captures.
     if (settings.autoCopy && !new URLSearchParams(location.search).has('reopen')) {
       window.history.replaceState(null, '', `?id=${id}&reopen=1`); // not again on reload (`history` here is the undo stack)

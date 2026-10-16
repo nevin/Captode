@@ -30,22 +30,22 @@
     <div class="brand"><img src="../icons/icon48.png" alt="">Captode</div>
     <div id="pick">
       <div class="icon"><svg class="i" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></div>
-      <h1>Record your screen</h1>
-      <p>Choose your whole screen, a window or a tab. To stop, click the Captode icon or come back here.</p>
-      <button class="btn rec" id="choose">Choose what to record</button>
+      <h1 data-i18n="screen_record_your_screen">Record your screen</h1>
+      <p data-i18n="screen_choose_your_whole_screen_a">Choose your whole screen, a window or a tab. To stop, click the Captode icon or come back here.</p>
+      <button class="btn rec" id="choose" data-i18n="popup_choose_what_to_record">Choose what to record</button>
       <p id="err" class="err hidden"></p>
     </div>
     <div id="counting" class="hidden">
-      <h1>Recording starts in</h1>
+      <h1 data-i18n="screen_recording_starts_in">Recording starts in</h1>
       <div class="time" id="count" role="timer" aria-live="polite">3</div>
-      <button class="btn" id="cancel">Cancel</button>
+      <button class="btn" id="cancel" data-i18n="settings_cancel">Cancel</button>
     </div>
     <div id="live" class="hidden">
-      <h1><span class="dot"></span>Recording</h1>
+      <h1 data-i18n="video_recording"><span class="dot"></span>Recording</h1>
       <div class="time" id="time">0:00</div>
-      <button class="btn rec" id="stop">Stop recording</button>
+      <button class="btn rec" id="stop" data-i18n="screen_stop_recording">Stop recording</button>
     </div>
-    <div id="saving" class="hidden"><h1>Saving your recording…</h1></div>
+    <div id="saving" class="hidden"><h1 data-i18n="screen_saving_your_recording">Saving your recording…</h1></div>
   </div>
   <script type="module" src="screen.js"></script>
 </body>

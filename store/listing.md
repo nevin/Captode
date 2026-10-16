@@ -10,6 +10,10 @@ Build the package with `npm run package` and upload `dist/captode-1.2.0.zip`.
 ## Package (uploaded zip)
 
 - Manifest V3, version 1.2.0, minimum Chrome 116.
+- Translated into Spanish, Portuguese (Brazil), French, German, Italian, Japanese, Korean and
+  Simplified Chinese. The Web Store shows the extension's name and short description in each of
+  these languages from the package; the detailed description below can be added per language
+  in the dashboard (optional).
 - Permissions: `activeTab`, `scripting`, `tabCapture`, `offscreen`, `storage`,
   `unlimitedStorage`. **No host permissions** and no content scripts: Captode only touches
   a page after the user invokes it, which avoids the extra review that broad host access

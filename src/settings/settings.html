@@ -13,103 +13,103 @@
 <header class="topbar">
   <div class="brand"><img src="../icons/icon48.png" alt="">Captode</div>
   <div class="sep"></div>
-  <div class="doc"><b>Settings</b><span>Changes are saved automatically</span></div>
+  <div class="doc"><b data-i18n="popup_settings">Settings</b><span data-i18n="settings_changes_are_saved_automatically">Changes are saved automatically</span></div>
 </header>
 
 <main class="page">
   <section class="card">
-    <h2>Appearance</h2>
-    <p class="muted">How Captode's own pages look.</p>
-    <div class="choices three" id="theme" role="radiogroup" aria-label="Theme">
+    <h2 data-i18n="settings_appearance">Appearance</h2>
+    <p class="muted" data-i18n="settings_how_captode_s_own_pages">How Captode's own pages look.</p>
+    <div class="choices three" id="theme" role="radiogroup" aria-label="Theme" data-i18n-aria-label="settings_theme">
       <button role="radio" data-v="system">
         <span class="preview sys"><span></span><span></span></span>
-        <b>System</b><small>Match your browser and computer</small>
+        <b data-i18n="settings_system">System</b><small data-i18n="settings_match_your_browser_and_computer">Match your browser and computer</small>
       </button>
       <button role="radio" data-v="light">
         <span class="preview light"><span></span></span>
-        <b>Light</b><small>Always light</small>
+        <b data-i18n="settings_light">Light</b><small data-i18n="settings_always_light">Always light</small>
       </button>
       <button role="radio" data-v="dark">
         <span class="preview dark"><span></span></span>
-        <b>Dark</b><small>Always dark</small>
+        <b data-i18n="settings_dark">Dark</b><small data-i18n="settings_always_dark">Always dark</small>
       </button>
     </div>
   </section>
 
   <section class="card">
-    <h2>Export background</h2>
-    <p class="muted">The background behind device frames and around padded screenshots in the files you download. You can still change it for a single export.</p>
-    <div class="choices three" id="background" role="radiogroup" aria-label="Export background">
+    <h2 data-i18n="settings_export_background">Export background</h2>
+    <p class="muted" data-i18n="settings_the_background_behind_device_frames">The background behind device frames and around padded screenshots in the files you download. You can still change it for a single export.</p>
+    <div class="choices three" id="background" role="radiogroup" aria-label="Export background" data-i18n-aria-label="settings_export_background">
       <button role="radio" data-v="transparent">
         <span class="swatch checker"></span>
-        <b>Transparent</b><small>No background</small>
+        <b data-i18n="settings_transparent">Transparent</b><small data-i18n="settings_no_background">No background</small>
       </button>
       <button role="radio" data-v="white">
         <span class="swatch" style="background:#fff"></span>
-        <b>White</b><small>Plain white</small>
+        <b data-i18n="settings_white">White</b><small data-i18n="settings_plain_white">Plain white</small>
       </button>
       <button role="radio" data-v="custom">
         <span class="swatch" id="custom-swatch"></span>
-        <b>Custom colour</b><small>Pick any colour</small>
+        <b data-i18n="settings_custom_colour">Custom colour</b><small data-i18n="settings_pick_any_colour">Pick any colour</small>
       </button>
     </div>
     <div class="row custom-row" id="custom-row">
-      <label class="field"><span>Colour</span>
-        <div class="row"><input type="color" id="bg-color"><input type="text" id="bg-hex" maxlength="7" spellcheck="false" aria-label="Hex colour"></div>
+      <label class="field"><span data-i18n="settings_colour">Colour</span>
+        <div class="row"><input type="color" id="bg-color"><input type="text" id="bg-hex" maxlength="7" spellcheck="false" aria-label="Hex colour" data-i18n-aria-label="settings_hex_colour"></div>
       </label>
     </div>
-    <p class="callout">JPEG, BMP, PDF, MP4 and WebM can't be transparent. With Transparent chosen, they get a white background.</p>
+    <p class="callout" data-i18n="settings_jpeg_bmp_pdf_mp4_and">JPEG, BMP, PDF, MP4 and WebM can't be transparent. With Transparent chosen, they get a white background.</p>
   </section>
 
   <section class="card">
-    <h2>Defaults</h2>
+    <h2 data-i18n="settings_defaults">Defaults</h2>
     <div class="grid2">
-      <label class="field"><span>Screenshot format</span>
+      <label class="field"><span data-i18n="settings_screenshot_format">Screenshot format</span>
         <select id="imageFormat">
-          <option value="last">The last one used</option><option value="png">PNG</option><option value="png8">PNG-8 (compressed)</option><option value="jpeg">JPEG</option>
+          <option value="last" data-i18n="settings_the_last_one_used">The last one used</option><option value="png">PNG</option><option value="png8" data-i18n="settings_png_8_compressed">PNG-8 (compressed)</option><option value="jpeg">JPEG</option>
           <option value="webp">WebP</option><option value="gif">GIF</option><option value="pdf">PDF</option><option value="bmp">BMP</option>
         </select>
       </label>
-      <label class="field"><span>Recording format</span>
-        <select id="videoFormat"><option value="last">The last one used</option><option value="mp4">MP4</option><option value="gif">GIF</option><option value="webp">WebP</option><option value="webm">WebM</option></select>
+      <label class="field"><span data-i18n="settings_recording_format">Recording format</span>
+        <select id="videoFormat"><option value="last" data-i18n="settings_the_last_one_used">The last one used</option><option value="mp4">MP4</option><option value="gif">GIF</option><option value="webp">WebP</option><option value="webm">WebM</option></select>
       </label>
     </div>
-    <label class="toggle"><span>Device frame<small>Show captures in a phone or tablet frame by default</small></span><input type="checkbox" id="device"></label>
-    <label class="toggle"><span>Copy screenshots to the clipboard<small>Each new screenshot is copied as soon as it opens, ready to paste</small></span><input type="checkbox" id="autoCopy"></label>
+    <label class="toggle"><span data-i18n="popup_device_frame">Device frame<small data-i18n="settings_show_captures_in_a_phone">Show captures in a phone or tablet frame by default</small></span><input type="checkbox" id="device"></label>
+    <label class="toggle"><span data-i18n="settings_copy_screenshots_to_the_clipboard">Copy screenshots to the clipboard<small data-i18n="settings_each_new_screenshot_is_copied">Each new screenshot is copied as soon as it opens, ready to paste</small></span><input type="checkbox" id="autoCopy"></label>
   </section>
 
   <section class="card">
-    <h2>Keyboard shortcut</h2>
+    <h2 data-i18n="settings_keyboard_shortcut">Keyboard shortcut</h2>
     <div class="row shortcut">
-      <p class="muted">Open Captode, or stop a recording: <span class="shortcut-keys"></span></p>
-      <button class="btn" id="shortcuts">Change shortcut</button>
+      <p class="muted" data-i18n="settings_open_captode_or_stop_a">Open Captode, or stop a recording: <span class="shortcut-keys"></span></p>
+      <button class="btn" id="shortcuts" data-i18n="settings_change_shortcut">Change shortcut</button>
     </div>
   </section>
 
   <section class="card">
-    <h2>About</h2>
+    <h2 data-i18n="settings_about">About</h2>
     <div class="about">
       <img src="../icons/icon128.png" alt="" width="44" height="44">
       <div><b>Captode</b><span class="muted" id="version"></span></div>
     </div>
-    <p class="muted privacy">Everything happens on your computer. Captode has no account and no server, and it never uploads your captures.</p>
+    <p class="muted privacy" data-i18n="settings_everything_happens_on_your_computer">Everything happens on your computer. Captode has no account and no server, and it never uploads your captures.</p>
     <div class="links">
-      <a class="btn" href="https://github.com/nevin/Captode#readme" target="_blank" rel="noopener">Help and guide</a>
-      <a class="btn" href="https://github.com/nevin/Captode/issues/new" target="_blank" rel="noopener">Report a problem</a>
-      <a class="btn" href="https://github.com/nevin/Captode/blob/main/PRIVACY.md" target="_blank" rel="noopener">Privacy policy</a>
+      <a class="btn" href="https://github.com/nevin/Captode#readme" target="_blank" rel="noopener" data-i18n="settings_help_and_guide">Help and guide</a>
+      <a class="btn" href="https://github.com/nevin/Captode/issues/new" target="_blank" rel="noopener" data-i18n="settings_report_a_problem">Report a problem</a>
+      <a class="btn" href="https://github.com/nevin/Captode/blob/main/PRIVACY.md" target="_blank" rel="noopener" data-i18n="settings_privacy_policy">Privacy policy</a>
       <span class="spacer"></span>
-      <button class="btn danger" id="reset">Reset all settings</button>
+      <button class="btn danger" id="reset" data-i18n="settings_reset_all_settings">Reset all settings</button>
     </div>
   </section>
 </main>
 
 <dialog class="modal confirm" id="reset-dialog" aria-labelledby="reset-title">
   <div class="modal-body">
-    <h2 id="reset-title">Reset all settings?</h2>
-    <p class="muted">Theme, export background, default formats, the device frame and recording options go back to how they were when you installed Captode. Your captures aren't affected.</p>
+    <h2 id="reset-title" data-i18n="settings_reset_all_settings_2">Reset all settings?</h2>
+    <p class="muted" data-i18n="settings_theme_export_background_default_formats">Theme, export background, default formats, the device frame and recording options go back to how they were when you installed Captode. Your captures aren't affected.</p>
     <div class="row actions">
-      <button class="btn" data-close>Cancel</button>
-      <button class="btn primary danger" id="reset-yes">Reset</button>
+      <button class="btn" data-close data-i18n="settings_cancel">Cancel</button>
+      <button class="btn primary danger" id="reset-yes" data-i18n="settings_reset">Reset</button>
     </div>
   </div>
 </dialog>

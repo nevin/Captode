@@ -3,16 +3,17 @@
 // ARIA combobox pattern: the search field keeps focus while the arrow keys move
 // through the list.
 import { DEVICES, GROUPS } from './devices.js';
+import { t } from './i18n.js';
 
 const RECENT_KEY = 'deviceRecent';
 const RECENT_MAX = 4;
 
 const FILTERS = [
-  ['all', 'All'],
+  ['all', t('picker_all')],
   ['iphone', 'iPhone', (d) => d.os === 'ios'],
   ['ipad', 'iPad', (d) => d.os === 'ipados'],
-  ['android', 'Android', (d) => d.os === 'android' && d.type === 'phone'],
-  ['tablet', 'Tablets', (d) => d.type === 'tablet'],
+  ['android', t('picker_android'), (d) => d.os === 'android' && d.type === 'phone'],
+  ['tablet', t('picker_tablets'), (d) => d.type === 'tablet'],
 ];
 
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -42,19 +43,19 @@ export function createDevicePicker({ value, onPick, autoLabel }) {
       <svg class="i" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
     </button>
     <div class="dev-pop hidden" id="${id}-pop">
-      <input type="search" class="dev-search" placeholder="Search devices" aria-label="Search devices"
+      <input type="search" class="dev-search" placeholder="${t('picker_search')}" aria-label="${t('picker_search')}"
         role="combobox" aria-expanded="true" aria-autocomplete="list" aria-controls="${id}-list" autocomplete="off" spellcheck="false">
-      <div class="dev-chips" role="group" aria-label="Kind of device">
+      <div class="dev-chips" role="group" aria-label="${t('picker_kind')}">
         ${FILTERS.map(([k, label]) => `<button type="button" data-filter="${k}" aria-pressed="${k === 'all'}">${label}</button>`).join('')}
       </div>
-      <ul class="dev-list" id="${id}-list" role="listbox" aria-label="Devices"></ul>
+      <ul class="dev-list" id="${id}-list" role="listbox" aria-label="${t('picker_devices')}"></ul>
     </div>`;
   const btn = el.querySelector('.dev-pick-btn');
   const pop = el.querySelector('.dev-pop');
   const search = el.querySelector('.dev-search');
   const list = el.querySelector('.dev-list');
 
-  const label = (v) => (v === 'auto' ? `Best match${autoLabel?.() ? `: ${autoLabel()}` : ''}` : DEVICES[v]?.name || v);
+  const label = (v) => (v === 'auto' ? (autoLabel?.() ? t('picker_best_match_is', autoLabel()) : t('picker_best_match')) : DEVICES[v]?.name || v);
   const showButton = () => { el.querySelector('.dev-pick-name').textContent = label(current); };
 
   const matches = (d) => {
@@ -75,10 +76,10 @@ export function createDevicePicker({ value, onPick, autoLabel }) {
         `<span>${esc(text)}</span>${sub ? `<small>${esc(sub)}</small>` : ''}</li>`);
     };
     const heading = (text) => rows.push(`<li role="presentation" class="dev-group">${esc(text)}</li>`);
-    if (!query && filter === 'all') add('auto', 'Best match for the capture', autoLabel?.() || '');
+    if (!query && filter === 'all') add('auto', t('picker_best_match_full'), autoLabel?.() || '');
     const recentDevices = recent.map((r) => DEVICES[r]).filter((d) => d && matches(d));
     if (!query && recentDevices.length) {
-      heading('Recent');
+      heading(t('picker_recent'));
       for (const d of recentDevices) add(d.id, d.name, size(d));
     }
     for (const [group, test] of GROUPS) {
@@ -87,7 +88,7 @@ export function createDevicePicker({ value, onPick, autoLabel }) {
       heading(group);
       for (const d of ds) add(d.id, d.name, size(d));
     }
-    if (!items.length) rows.push('<li role="presentation" class="dev-none">No devices match</li>');
+    if (!items.length) rows.push(`<li role="presentation" class="dev-none">${esc(t('picker_none'))}</li>`);
     list.innerHTML = rows.join('');
     active = Math.min(active, Math.max(0, items.length - 1));
     moveTo(active, false);

@@ -13,9 +13,9 @@
 <header class="topbar">
   <div class="brand"><img src="../icons/icon48.png" alt="">Captode</div>
   <div class="sep"></div>
-  <div class="doc"><b id="doc-name">Recording</b><span id="info">—</span></div>
+  <div class="doc"><b id="doc-name" data-i18n="video_recording">Recording</b><span id="info">—</span></div>
   <div class="spacer"></div>
-  <button class="btn ghost" id="dl-original" title="Download the recording as it was captured">
+  <button class="btn ghost" id="dl-original" title="Download the recording as it was captured" data-i18n-title="video_download_the_recording_as_it" data-i18n="video_original_webm">
     <svg class="i" viewBox="0 0 24 24"><path d="M12 4v12M7 11l5 5 5-5M4 20h16"/></svg>Original WebM
   </button>
 </header>
@@ -25,13 +25,13 @@
     <div class="preview">
       <video id="player" playsinline></video>
       <canvas id="live" class="hidden"></canvas>
-      <img id="out-img" class="hidden" alt="Exported animation">
+      <img id="out-img" class="hidden" alt="Exported animation" data-i18n-alt="video_exported_animation">
       <video id="out-video" class="hidden" controls playsinline></video>
       <div class="preview-label hidden" id="preview-label"></div>
-      <canvas id="rv-overlay" class="hidden" aria-label="Measuring layer over the paused frame"></canvas>
+      <canvas id="rv-overlay" class="hidden" aria-label="Measuring layer over the paused frame" data-i18n-aria-label="video_measuring_layer_over_the_paused"></canvas>
     </div>
     <div class="timeline" id="timeline">
-      <button class="btn icon" id="play" data-tip="Play or pause  Space">
+      <button class="btn icon" id="play" data-tip="Play or pause  Space" data-i18n-tip="video_play_or_pause_space">
         <svg class="i play" viewBox="0 0 24 24"><path d="M7 4v16l13-8z"/></svg>
         <svg class="i pause hidden" viewBox="0 0 24 24"><path d="M7 4v16M17 4v16"/></svg>
       </button>
@@ -41,109 +41,109 @@
         <div class="shade left" id="shade-l"></div>
         <div class="shade right" id="shade-r"></div>
         <div class="range" id="range"></div>
-        <div class="handle" id="h-start" role="slider" tabindex="0" aria-label="Trim start" data-tip="Start  I"></div>
-        <div class="handle" id="h-end" role="slider" tabindex="0" aria-label="Trim end" data-tip="End  O"></div>
+        <div class="handle" id="h-start" role="slider" tabindex="0" aria-label="Trim start" data-tip="Start  I" data-i18n-aria-label="video_trim_start" data-i18n-tip="video_start_i"></div>
+        <div class="handle" id="h-end" role="slider" tabindex="0" aria-label="Trim end" data-tip="End  O" data-i18n-aria-label="video_trim_end" data-i18n-tip="video_end_o"></div>
         <div class="playhead" id="playhead"></div>
       </div>
       <span class="tc muted" id="tc-len">0:00.0</span>
     </div>
     <div id="empty" class="empty hidden">
       <div class="empty-card">
-        <h2>Recording not found</h2>
-        <p class="muted">Recordings are kept for a day. Start a new one with the Captode button in the toolbar.</p>
+        <h2 data-i18n="video_recording_not_found">Recording not found</h2>
+        <p class="muted" data-i18n="video_recordings_are_kept_for_a">Recordings are kept for a day. Start a new one with the Captode button in the toolbar.</p>
       </div>
     </div>
   </main>
 
   <aside class="inspector">
     <section class="section">
-      <h3 class="section-title">Trim</h3>
+      <h3 class="section-title" data-i18n="video_trim">Trim</h3>
       <div class="trim">
-        <label class="field"><span>Start</span>
-          <div class="with-btn"><input type="number" id="t-start" min="0" step="0.1" value="0"><button class="btn ghost icon" id="t-start-set" data-tip="Start at the playhead  I"><svg class="i" viewBox="0 0 24 24"><path d="M4 4v16M8 12h12M14 6l6 6-6 6"/></svg></button></div>
+        <label class="field"><span data-i18n="video_start">Start</span>
+          <div class="with-btn"><input type="number" id="t-start" min="0" step="0.1" value="0"><button class="btn ghost icon" id="t-start-set" data-tip="Start at the playhead  I" data-i18n-tip="video_start_at_the_playhead_i"><svg class="i" viewBox="0 0 24 24"><path d="M4 4v16M8 12h12M14 6l6 6-6 6"/></svg></button></div>
         </label>
-        <label class="field"><span>End</span>
-          <div class="with-btn"><input type="number" id="t-end" min="0" step="0.1"><button class="btn ghost icon" id="t-end-set" data-tip="End at the playhead  O" data-tip-align="end"><svg class="i" viewBox="0 0 24 24"><path d="M20 4v16M16 12H4M10 6l-6 6 6 6"/></svg></button></div>
+        <label class="field"><span data-i18n="video_end">End</span>
+          <div class="with-btn"><input type="number" id="t-end" min="0" step="0.1"><button class="btn ghost icon" id="t-end-set" data-tip="End at the playhead  O" data-tip-align="end" data-i18n-tip="video_end_at_the_playhead_o"><svg class="i" viewBox="0 0 24 24"><path d="M20 4v16M16 12H4M10 6l-6 6 6 6"/></svg></button></div>
         </label>
       </div>
-      <p class="muted small" style="margin:0">Drag the handles on the timeline, or play to a point and press <kbd>I</kbd> for the start and <kbd>O</kbd> for the end.</p>
+      <p class="muted small" style="margin:0" data-i18n-html="video_drag_the_handles_on_the">Drag the handles on the timeline, or play to a point and press <kbd>I</kbd> for the start and <kbd>O</kbd> for the end.</p>
     </section>
 
     <section class="section">
       <div id="presets"></div>
-      <h3 class="section-title">Format</h3>
+      <h3 class="section-title" data-i18n="editor_format">Format</h3>
       <div class="formats" id="formats">
-        <button data-f="mp4" class="on"><b>MP4</b><small>Video</small></button>
-        <button data-f="gif"><b>GIF</b><small>Animation</small></button>
-        <button data-f="webp"><b>WebP</b><small>Animation</small></button>
-        <button data-f="webm"><b>WebM</b><small>Video</small></button>
+        <button data-f="mp4" class="on"><b>MP4</b><small data-i18n="video_video">Video</small></button>
+        <button data-f="gif"><b>GIF</b><small data-i18n="video_animation">Animation</small></button>
+        <button data-f="webp"><b>WebP</b><small data-i18n="video_animation">Animation</small></button>
+        <button data-f="webm"><b>WebM</b><small data-i18n="video_video">Video</small></button>
       </div>
       <div class="grid2">
-        <label class="field"><span>Resolution</span><select id="res"></select></label>
-        <label class="field"><span>Frame rate</span><select id="fps"></select></label>
+        <label class="field"><span data-i18n="popup_resolution">Resolution</span><select id="res"></select></label>
+        <label class="field"><span data-i18n="popup_frame_rate">Frame rate</span><select id="fps"></select></label>
       </div>
 
       <div data-for="mp4 webm">
-        <label class="field"><span>Quality</span>
+        <label class="field"><span data-i18n="editor_quality">Quality</span>
           <select id="v-quality">
-            <option value="0.16">Highest — visually lossless</option>
-            <option value="0.08" selected>Balanced</option>
-            <option value="0.04">Small file</option>
-            <option value="0.02">Smallest file</option>
+            <option value="0.16" data-i18n="video_highest_visually_lossless">Highest — visually lossless</option>
+            <option value="0.08" selected data-i18n="video_balanced">Balanced</option>
+            <option value="0.04" data-i18n="video_small_file">Small file</option>
+            <option value="0.02" data-i18n="video_smallest_file">Smallest file</option>
           </select>
         </label>
-        <label class="toggle"><span>Include audio<small id="v-audio-note">This recording has no sound</small></span><input type="checkbox" id="v-audio" checked></label>
+        <label class="toggle"><span data-i18n="video_include_audio">Include audio<small id="v-audio-note" data-i18n="video_this_recording_has_no_sound">This recording has no sound</small></span><input type="checkbox" id="v-audio" checked></label>
       </div>
 
       <div data-for="gif">
         <div class="grid2">
-          <label class="field"><span>Colours</span>
+          <label class="field"><span data-i18n="editor_colours">Colours</span>
             <select id="g-colors"><option>256</option><option>128</option><option>64</option><option>32</option></select>
           </label>
-          <label class="toggle dither"><span>Dither</span><input type="checkbox" id="g-dither"></label>
+          <label class="toggle dither"><span data-i18n="editor_dither">Dither</span><input type="checkbox" id="g-dither"></label>
         </div>
-        <label class="field"><span>Lossy compression <b id="g-lossy-v"></b></span><input type="range" id="g-lossy" min="0" max="100" step="5" value="0"></label>
-        <p class="muted small hint">Lets colours shift slightly where that compresses better. Often 30–50% smaller; higher values add visible grain.</p>
+        <label class="field"><span data-i18n="editor_lossy_compression">Lossy compression <b id="g-lossy-v"></b></span><input type="range" id="g-lossy" min="0" max="100" step="5" value="0"></label>
+        <p class="muted small hint" data-i18n="video_lets_colours_shift_slightly_where">Lets colours shift slightly where that compresses better. Often 30–50% smaller; higher values add visible grain.</p>
       </div>
 
       <div data-for="webp">
-        <label class="toggle"><span>Lossless frames<small>Exact pixels, larger file</small></span><input type="checkbox" id="w-lossless"></label>
-        <label class="field" id="w-quality-f"><span>Quality <b id="w-quality-v"></b></span><input type="range" id="w-quality" min="10" max="100" value="80"></label>
+        <label class="toggle"><span data-i18n="video_lossless_frames">Lossless frames<small data-i18n="video_exact_pixels_larger_file">Exact pixels, larger file</small></span><input type="checkbox" id="w-lossless"></label>
+        <label class="field" id="w-quality-f"><span data-i18n="editor_quality">Quality <b id="w-quality-v"></b></span><input type="range" id="w-quality" min="10" max="100" value="80"></label>
       </div>
 
       <div data-for="gif webp">
-        <label class="toggle"><span>Reduce size losslessly<small>Merge repeated frames and store only the pixels that change. Every frame looks exactly the same.</small></span><input type="checkbox" id="optimize" checked></label>
-        <label class="toggle" id="denoise-row"><span>Ignore flicker<small>Tiny changes from recording noise (2 levels in 255) don't count as motion. Much smaller files, no visible difference.</small></span><input type="checkbox" id="denoise" checked></label>
-        <label class="toggle"><span>Loop forever</span><input type="checkbox" id="loop" checked></label>
+        <label class="toggle"><span data-i18n="video_reduce_size_losslessly">Reduce size losslessly<small data-i18n="video_merge_repeated_frames_and_store">Merge repeated frames and store only the pixels that change. Every frame looks exactly the same.</small></span><input type="checkbox" id="optimize" checked></label>
+        <label class="toggle" id="denoise-row"><span data-i18n="video_ignore_flicker">Ignore flicker<small data-i18n="video_tiny_changes_from_recording_noise">Tiny changes from recording noise (2 levels in 255) don't count as motion. Much smaller files, no visible difference.</small></span><input type="checkbox" id="denoise" checked></label>
+        <label class="toggle"><span data-i18n="video_loop_forever">Loop forever</span><input type="checkbox" id="loop" checked></label>
       </div>
     </section>
 
     <details class="section" id="device-section">
-      <summary class="section-title">Device frame</summary>
+      <summary class="section-title" data-i18n="popup_device_frame">Device frame</summary>
       <div id="device-panel"></div>
     </details>
 
     <!-- Review: measuring and colours on a paused frame. Nothing here is exported. -->
     <details class="section" id="review-section">
-      <summary class="section-title">Review a frame</summary>
-      <p class="muted small">Measure or pick colours on the frame showing. The video pauses; nothing here is exported.</p>
-      <div class="seg" id="rv-tools" role="radiogroup" aria-label="Review tool">
-        <button data-rt="off" class="on" role="radio" aria-checked="true">Off</button>
-        <button data-rt="measure" role="radio" aria-checked="false">Measure</button>
-        <button data-rt="pick" role="radio" aria-checked="false" aria-label="Colour picker">Colours</button>
+      <summary class="section-title" data-i18n="video_review_a_frame">Review a frame</summary>
+      <p class="muted small" data-i18n="video_measure_or_pick_colours_on">Measure or pick colours on the frame showing. The video pauses; nothing here is exported.</p>
+      <div class="seg" id="rv-tools" role="radiogroup" aria-label="Review tool" data-i18n-aria-label="video_review_tool">
+        <button data-rt="off" class="on" role="radio" aria-checked="true" data-i18n="video_off">Off</button>
+        <button data-rt="measure" role="radio" aria-checked="false" data-i18n="editor_measure">Measure</button>
+        <button data-rt="pick" role="radio" aria-checked="false" aria-label="Colour picker" data-i18n-aria-label="editor_colour_picker" data-i18n="editor_colours">Colours</button>
       </div>
-      <div class="readout" id="rv-m" aria-live="polite">No measurements yet</div>
+      <div class="readout" id="rv-m" aria-live="polite" data-i18n="editor_no_measurements_yet">No measurements yet</div>
       <div class="grid2">
-        <label class="field"><span>Pixel ratio</span>
-          <select id="rv-ratio"><option value="auto">Automatic</option><option value="1">1×</option><option value="2">2×</option><option value="3">3×</option></select>
+        <label class="field"><span data-i18n="editor_pixel_ratio">Pixel ratio</span>
+          <select id="rv-ratio"><option value="auto" data-i18n="editor_automatic">Automatic</option><option value="1">1×</option><option value="2">2×</option><option value="3">3×</option></select>
         </label>
-        <div class="field"><span>&nbsp;</span><button class="btn" id="rv-clear" disabled>Clear all</button></div>
+        <div class="field"><span>&nbsp;</span><button class="btn" id="rv-clear" disabled data-i18n="editor_clear_all">Clear all</button></div>
       </div>
-      <div class="pick-pair" role="radiogroup" aria-label="Colour to set next">
-        <button class="pick-slot on" data-slot="0" role="radio" aria-checked="true"><span class="pick-swatch"></span><span><b>Text</b><small class="pick-hex">Not picked</small></span></button>
-        <button class="pick-slot" data-slot="1" role="radio" aria-checked="false"><span class="pick-swatch"></span><span><b>Background</b><small class="pick-hex">Not picked</small></span></button>
+      <div class="pick-pair" role="radiogroup" aria-label="Colour to set next" data-i18n-aria-label="editor_colour_to_set_next">
+        <button class="pick-slot on" data-slot="0" role="radio" aria-checked="true"><span class="pick-swatch"></span><span><b data-i18n="editor_text">Text</b><small class="pick-hex" data-i18n="editor_not_picked">Not picked</small></span></button>
+        <button class="pick-slot" data-slot="1" role="radio" aria-checked="false"><span class="pick-swatch"></span><span><b data-i18n="editor_background">Background</b><small class="pick-hex" data-i18n="editor_not_picked">Not picked</small></span></button>
       </div>
-      <div class="readout" id="rv-c" aria-live="polite">Pick two colours to check their contrast</div>
+      <div class="readout" id="rv-c" aria-live="polite" data-i18n="editor_pick_two_colours_to_check">Pick two colours to check their contrast</div>
     </details>
 
     <div class="export-bar">
@@ -157,10 +157,10 @@
         <div><b id="r-size"></b><span class="muted small" id="r-detail"></span></div>
       </div>
       <div class="row">
-        <button class="btn hidden" id="cancel" disabled>Cancel</button>
-        <button class="btn primary block" id="convert">Export</button>
-        <button class="btn hidden" id="redo-export" data-tip="Change settings and export again">Edit</button>
-        <button class="btn primary block hidden" id="download">
+        <button class="btn hidden" id="cancel" disabled data-i18n="settings_cancel">Cancel</button>
+        <button class="btn primary block" id="convert" data-i18n="editor_export">Export</button>
+        <button class="btn hidden" id="redo-export" data-tip="Change settings and export again" data-i18n-tip="video_change_settings_and_export_again" data-i18n="video_edit">Edit</button>
+        <button class="btn primary block hidden" id="download" data-i18n="editor_download">
           <svg class="i" viewBox="0 0 24 24"><path d="M12 4v12M7 11l5 5 5-5M4 20h16"/></svg>Download
         </button>
       </div>
