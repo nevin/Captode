@@ -322,7 +322,12 @@ export async function encodeImage(src, format, { quality = 0.85, colors = 256, d
     case 'png8': return toPng8(src, { colors, dither });
     case 'jpeg': return new Blob([tagJpeg(await jpegBytes(src, quality, { calibrate }))], { type: 'image/jpeg' });
     case 'webp': return src.convertToBlob({ type: 'image/webp', quality });
-    case 'avif': return src.convertToBlob({ type: 'image/avif', quality });
+    case 'avif': {
+      // Browsers without an AVIF encoder quietly return PNG instead.
+      const blob = await src.convertToBlob({ type: 'image/avif', quality });
+      if (blob.type !== 'image/avif') throw new Error('This browser cannot save AVIF.');
+      return blob;
+    }
     case 'gif': return toGif(src, { colors, dither, lossy });
     case 'bmp': return toBmp(src);
     case 'pdf': return toPdf(src, { page, split, quality, calibrate });

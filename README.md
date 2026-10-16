@@ -182,7 +182,8 @@ Everything runs in the browser; nothing is uploaded.
 
 Colours stay true for design and UX reviews: video exports keep the recording's exact
 colours and are tagged as sRGB, so QuickTime, browsers and chat apps show them the same
-way, and image exports (PNG, JPEG, PDF) are tagged as sRGB too.
+way, and image exports (PNG, JPEG, PDF) are tagged as sRGB too. Downloading the original
+recording (WebM) also writes its colours into the file.
 
 ## Supported platforms
 

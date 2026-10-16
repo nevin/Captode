@@ -305,4 +305,36 @@ export const tests = {
     await page.evaluate(() => chrome.storage.local.remove('lastExport'));
     await page.close();
   },
+
+  async 'the original WebM download keeps everything and says its colours'({ video }) {
+    await video.evaluate(() => { window.__download = null; HTMLAnchorElement.prototype.click = function () { window.__download = { name: this.download, href: this.href }; }; });
+    await video.click('#dl-original');
+    await video.waitForFunction(() => window.__download, { polling: 100 });
+    const r = await video.evaluate(async () => {
+      const { demuxWebm } = await import('/lib/webm.js');
+      const blob = await (await fetch(window.__download.href)).blob();
+      const bytes = new Uint8Array(await blob.arrayBuffer());
+      const colour = bytes.findIndex((b, i) => b === 0x55 && bytes[i + 1] === 0xb0) >= 0;
+      const original = demuxWebm(await (await fetch(document.querySelector('#player').src)).arrayBuffer());
+      const copy = demuxWebm(bytes.buffer);
+      const v = document.createElement('video');
+      v.muted = true;
+      v.src = URL.createObjectURL(blob);
+      await new Promise((res, rej) => { v.onloadedmetadata = res; v.onerror = () => rej(new Error('does not play')); });
+      if (!isFinite(v.duration)) { v.currentTime = 1e9; await new Promise((res) => { v.ontimeupdate = res; }); }
+      const sound = await new OfflineAudioContext(2, 48000, 48000).decodeAudioData(bytes.buffer.slice(0)).then((b) => b.duration, () => 0);
+      return {
+        name: window.__download.name, colour,
+        frames: [original.video.frames.length, copy.video.frames.length],
+        audioPackets: [original.audio?.frames.length, copy.audio?.frames.length],
+        size: [v.videoWidth, v.videoHeight, document.querySelector('#player').videoWidth, document.querySelector('#player').videoHeight],
+        duration: v.duration, sound,
+      };
+    });
+    ok(/^captode-recording-\d+\.webm$/.test(r.name), `file name ${r.name}`);
+    ok(r.colour, 'the colour space is written into the file');
+    ok(r.frames[0] === r.frames[1] && r.audioPackets[0] === r.audioPackets[1], `every frame and sound packet kept: ${JSON.stringify(r)}`);
+    ok(r.size[0] === r.size[2] && r.size[1] === r.size[3], `same size: ${r.size}`);
+    ok(r.duration > 7 && r.sound > 7, `plays for its full length, with sound: ${r.duration} s, sound ${r.sound} s`);
+  },
 };

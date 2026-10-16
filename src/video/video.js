@@ -7,6 +7,8 @@ import { mountPresets } from '../lib/presets.js';
 import { WebpAnimEncoder } from '../lib/webp.js';
 import { mountDevicePanel, deviceRenderer, frameDrawer } from '../lib/device.js';
 import { toast, enhance, fmtBytes } from '../lib/ui.js';
+import { demuxWebm, muxWebm } from '../lib/webm.js';
+import { sourceColourSpace, outputColour } from '../lib/video-colour.js';
 
 const $ = (s) => document.querySelector(s);
 const player = $('#player');
@@ -577,7 +579,33 @@ $('#download').addEventListener('click', () => {
 });
 $('#redo-export').addEventListener('click', () => stale());
 window.addEventListener('beforeunload', (e) => { if (busy) e.preventDefault(); });
-$('#dl-original').addEventListener('click', () => source && save(source, `captode-recording-${Date.now()}.webm`));
+/**
+ * The recording as it was captured, with its colours written into the file (Chrome
+ * leaves them out, so players other than Chrome's may guess them wrong). The video
+ * and sound are copied as they are; if anything about the file is unexpected, the
+ * original is saved untouched.
+ */
+async function taggedOriginal() {
+  try {
+    const src = demuxWebm(await source.arrayBuffer());
+    const v = src.video;
+    const colour = v && sourceColourSpace(v);
+    if (!colour || !['V_VP9', 'V_VP8'].includes(v.codecId)) return source;
+    const audio = src.audio?.codecId === 'A_OPUS'
+      ? { ...src.audio, frames: src.audio.frames.map((f) => ({ ...f, key: true })) }
+      : null;
+    if (src.audio && !audio) return source; // a sound format the writer doesn't know
+    return muxWebm({
+      video: { codecId: v.codecId, width: v.width || player.videoWidth, height: v.height || player.videoHeight, frames: v.frames, colour: outputColour(colour) },
+      audio,
+    });
+  } catch {
+    return source;
+  }
+}
+$('#dl-original').addEventListener('click', async () => {
+  if (source) save(await taggedOriginal(), `captode-recording-${Date.now()}.webm`);
+});
 
 // ---------- start ----------
 
