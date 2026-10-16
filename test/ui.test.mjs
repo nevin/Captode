@@ -702,7 +702,17 @@ export const tests = {
         wrapStyle: [wrap.style.width, wrap.style.height], wrapRect: [Math.round(r.width), Math.round(r.height)], display: getComputedStyle(wrap).display, stageClass: stage.className, errors,
         computed: (({ width, maxWidth, minWidth, boxSizing, zoom, transform, contain, contentVisibility }) => ({ width, maxWidth, minWidth, boxSizing, zoom, transform, contain, contentVisibility }))(getComputedStyle(wrap)),
         offset: [wrap.offsetWidth, wrap.offsetHeight], wraps: document.querySelectorAll('#wrap').length, hidden: document.hidden, dpr: devicePixelRatio, inner: [innerWidth, innerHeight],
-        stageRect: (({ width, height }) => [Math.round(width), Math.round(height)])(stage.getBoundingClientRect()), stageOverflow: getComputedStyle(stage).overflow };
+        stageRect: (({ width, height }) => [Math.round(width), Math.round(height)])(stage.getBoundingClientRect()), stageOverflow: getComputedStyle(stage).overflow,
+        attr: wrap.getAttribute('style'),
+        experiment: (() => {
+          const keep = wrap.getAttribute('style');
+          wrap.style.width = '3000px';
+          const plain = getComputedStyle(wrap).width;
+          wrap.style.setProperty('width', '3000px', 'important');
+          const important = getComputedStyle(wrap).width;
+          wrap.setAttribute('style', keep);
+          return { plain, important, after: getComputedStyle(wrap).width };
+        })() };
     }, pt);
     const b = await under();
     ok(Math.hypot(a[0] - b[0], a[1] - b[1]) < 3, `point under the pointer moved from ${a.map(Math.round)} to ${b.map(Math.round)} (${JSON.stringify(info)})`);
