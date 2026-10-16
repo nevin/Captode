@@ -826,8 +826,10 @@ export const tests = {
       await ed.type('#sh-summary', 'Spacing above the button is off.');
       await ed.type('#sh-steps [data-i="0"]', 'Header <b>too</b> tall');
       await ed.type('#sh-steps [data-i="1"]', 'Button should be 48 px');
-      await ed.click('#sh-go');
-      await ed.waitForFunction(() => window.__download, { polling: 100, timeout: 30000 });
+      // Pressed in the page: a mouse click can miss while the dialog settles on a slow runner.
+      await ed.evaluate(() => document.querySelector('#sh-go').click());
+      await ed.waitForFunction(() => window.__download || document.querySelector('.toast[data-kind="error"]:not(.hidden)'), { polling: 100, timeout: 30000 });
+      ok(await ed.evaluate(() => !!window.__download), await ed.evaluate(() => document.querySelector('.toast[data-kind="error"]:not(.hidden)')?.textContent));
       const page = await ed.evaluate(async () => ({ name: window.__download.name, html: await (await fetch(window.__download.href)).text() }));
       ok(page.name === 'Checkout page-review.html', `file name ${page.name}`);
       ok(page.html.includes('Spacing above the button is off.') && page.html.includes('Button should be 48 px'), 'the summary and notes are in the page');
