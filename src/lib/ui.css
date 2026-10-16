@@ -304,8 +304,11 @@ kbd {
 .settings-link:hover { text-decoration: underline; }
 .swatches button[data-c="transparent"] { background: repeating-conic-gradient(#d4d4dc 0 25%, #fff 0 50%) 0 0 / 8px 8px !important; }
 
+/* Reduced motion: no animations or transitions. (Shortening them instead gave every
+   element a tiny transition on all properties, so sizes read back straight after a change
+   were still the old ones.) */
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+  *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
 }
 dialog.modal:focus-visible { outline: none; }
 
