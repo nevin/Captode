@@ -1,4 +1,4 @@
-import { getCapture, listCaptures, deleteCapture, saveEdits } from '../lib/db.js';
+import { getCapture, listCaptures, deleteCapture, restoreCapture, saveEdits } from '../lib/db.js';
 import { encodeOffThread } from '../lib/encoder.js';
 import { mountDevicePanel, renderInDevice } from '../lib/device.js';
 import { getSettings, backgroundColour } from '../lib/settings.js';
@@ -1343,11 +1343,13 @@ $('#tools').addEventListener('click', (e) => {
 
 function deleteSelected() {
   if (!selection.length) return;
+  const n = selection.length;
   objects = objects.filter((o) => !isSelected(o));
   select([]);
   syncStyleUi();
   renderFg();
   commit();
+  toast(n === 1 ? 'Annotation deleted' : `${n} annotations deleted`, { ms: 4000, action: { label: 'Undo', run: undo } });
 }
 
 const cloneObj = ({ _editing, ...o }) => structuredClone(o);
@@ -2040,8 +2042,9 @@ async function renderRecent() {
     a.querySelector('small').textContent = `${ago(it.created)} · ${fmtBytes(it.size)}`;
     a.querySelector('.remove').addEventListener('click', async (e) => {
       e.preventDefault();
-      await deleteCapture(it.id);
-      renderRecent();
+      const rec = await deleteCapture(it.id);
+      await renderRecent();
+      toast(`Removed ${title}`, { ms: 6000, action: { label: 'Undo', run: async () => { await restoreCapture(it.id, rec); renderRecent(); } } });
     });
     $('#recent-list').append(a);
   }

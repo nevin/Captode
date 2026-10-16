@@ -48,13 +48,27 @@ $('#device').addEventListener('change', async (e) => { await chrome.storage.loca
 $('#shortcuts').addEventListener('click', () => chrome.tabs.create({ url: 'chrome://extensions/shortcuts' }));
 $('#version').textContent = `Version ${chrome.runtime.getManifest().version}`;
 $('#reset').addEventListener('click', () => openDialog($('#reset-dialog')));
+const RESET_KEYS = ['settings', 'device', 'fps', 'audio', 'countdown', 'countdownSeconds', 'videoSize', 'kind', 'deviceOpts', 'deviceRecent', 'editorDefaults', 'exportPresets', 'lastExport'];
 $('#reset-yes').addEventListener('click', async () => {
+  const before = await chrome.storage.local.get(RESET_KEYS);
+  await chrome.storage.local.remove(RESET_KEYS);
   settings = await saveSettings(DEFAULT_SETTINGS);
-  await chrome.storage.local.remove(['device', 'fps', 'audio', 'countdown', 'countdownSeconds', 'videoSize', 'kind', 'deviceOpts', 'editorDefaults']);
   $('#device').checked = false;
   render();
   $('#reset-dialog').close();
-  toast('Settings reset', { kind: 'success' });
+  toast('Settings reset', {
+    kind: 'success', ms: 8000,
+    action: {
+      label: 'Undo',
+      run: async () => {
+        await chrome.storage.local.set(before);
+        settings = await getSettings();
+        $('#device').checked = !!before.device;
+        render();
+        toast('Settings restored', { kind: 'success' });
+      },
+    },
+  });
 });
 enhance();
 showShortcut(document.querySelector('.shortcut-keys'));

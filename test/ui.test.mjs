@@ -411,6 +411,62 @@ export const tests = {
     await ed.close();
   },
 
+  async 'removing a capture, deleting annotations and resetting settings can all be undone'({ browser, url }) {
+    const lab = await open(browser, url('lab/lab.html'));
+    const id = await lab.evaluate(async () => {
+      const { putCapture } = await import('/lib/db.js');
+      const c = new OffscreenCanvas(400, 300);
+      c.getContext('2d').fillRect(0, 0, 50, 50);
+      return putCapture(await c.convertToBlob(), { title: 'Undo me', mode: 'visible' });
+    });
+    await lab.close();
+    // Recent captures: Remove, then Undo brings it back.
+    const ed = await open(browser, url('editor/editor.html'), { width: 1280, height: 900 });
+    const titles = () => ed.evaluate(() => [...document.querySelectorAll('.recent-item b')].map((b) => b.textContent));
+    await ed.waitForFunction(() => [...document.querySelectorAll('.recent-item b')].some((b) => b.textContent === 'Undo me'), { polling: 100 });
+    await ed.evaluate(() => [...document.querySelectorAll('.recent-item')].find((a) => a.querySelector('b').textContent === 'Undo me').querySelector('.remove').click());
+    await ed.waitForFunction(() => /Removed Undo me/.test(document.querySelector('.toast')?.textContent), { polling: 100 });
+    ok(!(await titles()).includes('Undo me'), 'the capture should be gone from the list');
+    await ed.click('.toast-action');
+    await ed.waitForFunction(() => [...document.querySelectorAll('.recent-item b')].some((b) => b.textContent === 'Undo me'), { polling: 100 });
+
+    // Deleting annotations says so, with Undo.
+    await ed.goto(url(`editor/editor.html?id=${id}&reopen=1`));
+    await ed.waitForFunction(() => /px/.test(document.querySelector('#doc-dims').textContent), { polling: 100 });
+    await ed.evaluate(() => document.querySelector('[data-tool="rect"]').click());
+    const box = await ed.$eval('#fg', (c) => { const r = c.getBoundingClientRect(); return { x: r.left, y: r.top }; });
+    await ed.mouse.move(box.x + 60, box.y + 60);
+    await ed.mouse.down();
+    await ed.mouse.move(box.x + 160, box.y + 140, { steps: 4 });
+    await ed.mouse.up();
+    ok((await ed.evaluate(() => captodeEditor.objects().length)) === 1, 'a rectangle was drawn');
+    await ed.evaluate(() => document.querySelector('#delete').click());
+    await ed.waitForFunction(() => /Annotation deleted/.test(document.querySelector('.toast')?.textContent), { polling: 100 });
+    ok((await ed.evaluate(() => captodeEditor.objects().length)) === 0, 'deleted');
+    await ed.click('.toast-action');
+    ok((await ed.evaluate(() => captodeEditor.objects().length)) === 1, 'Undo brings the annotation back');
+    await ed.close();
+
+    // Settings: Reset, then Undo puts them back.
+    const st = await open(browser, url('settings/settings.html'), { width: 900, height: 900 });
+    await st.evaluate(() => chrome.storage.local.set({ fps: '60', settings: { theme: 'dark', imageFormat: 'jpeg' } }));
+    await st.reload();
+    await st.waitForFunction(() => /Version/.test(document.querySelector('#version').textContent), { polling: 100 });
+    await st.evaluate(() => document.querySelector('#reset').click());
+    await st.waitForFunction(() => document.querySelector('#reset-dialog').open, { polling: 100 });
+    await st.click('#reset-yes');
+    await st.waitForFunction(() => /Settings reset/.test(document.querySelector('.toast')?.textContent), { polling: 100 });
+    const after = await st.evaluate(async () => (await chrome.storage.local.get(['fps', 'settings'])));
+    ok(!after.fps && after.settings.theme === 'system', `reset: ${JSON.stringify(after)}`);
+    await st.click('.toast-action');
+    await st.waitForFunction(() => /Settings restored/.test(document.querySelector('.toast')?.textContent), { polling: 100 });
+    const back = await st.evaluate(async () => (await chrome.storage.local.get(['fps', 'settings'])));
+    ok(back.fps === '60' && back.settings.theme === 'dark' && back.settings.imageFormat === 'jpeg', `restored: ${JSON.stringify(back)}`);
+    ok(await st.$eval('#imageFormat', (e) => e.value) === 'jpeg', 'the page shows the restored settings');
+    await st.evaluate(() => chrome.storage.local.remove(['fps', 'settings']));
+    await st.close();
+  },
+
   async 'countdown shows the chosen seconds and Esc cancels it'({ browser, url }) {
     const p = await open(browser, url('popup/popup.html'), { width: 800, height: 600 });
     const r = await p.evaluate(async () => {

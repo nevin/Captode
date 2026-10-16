@@ -89,8 +89,16 @@ export async function saveEdits(id, edits) {
   });
 }
 
+/** Deletes a capture. Resolves to the record, which `restoreCapture` can put back. */
 export async function deleteCapture(id) {
+  const rec = await getCapture(id);
   await tx('readwrite', (s) => s.delete(id));
+  return rec;
+}
+
+/** Puts back a capture removed with `deleteCapture`, under its old id. */
+export async function restoreCapture(id, rec) {
+  if (rec) await tx('readwrite', (s) => s.put(rec, id));
 }
 
 // Keep the store from growing forever: captures older than a day are dropped.
