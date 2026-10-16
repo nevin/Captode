@@ -126,61 +126,38 @@ function layoutView() {
   for (const el of document.querySelectorAll('.mode-opt')) el.classList.toggle('hidden', el.dataset.for !== mode);
 }
 
+let diffWorker = null;
+
 /**
  * Marks the pixels that differ by more than the tolerance in any channel: changed
- * pixels in pink over a faded A. Worked through in bands, so the page stays responsive.
+ * pixels in pink over a faded A. Done in a worker, so the page stays responsive;
+ * starting again stops one still running.
  */
 async function computeDiff() {
   const run = ++diffRun;
-  const tol = Number($('#tol').value);
-  const da = $('#can-a').getContext('2d', { willReadFrequently: true });
-  const db = $('#can-b').getContext('2d', { willReadFrequently: true });
+  diffWorker?.terminate();
+  const worker = new Worker('diff-worker.js');
+  diffWorker = worker;
+  $('#stats').textContent = 'Comparing…';
+  const [a, b] = await Promise.all([createImageBitmap($('#can-a')), createImageBitmap($('#can-b'))]);
+  const result = await new Promise((resolve, reject) => {
+    worker.onmessage = ({ data }) => {
+      if (data.type === 'progress') { if (run === diffRun) $('#stats').textContent = `Comparing… ${Math.round(data.f * 100)}%`; }
+      else resolve(data);
+    };
+    worker.onerror = (e) => reject(new Error(e.message));
+    worker.postMessage({ a, b, tol: Number($('#tol').value) }, [a, b]);
+  }).finally(() => { worker.terminate(); if (diffWorker === worker) diffWorker = null; });
+  if (run !== diffRun) { result.image?.close(); return; }
   const cd = $('#can-d');
   cd.width = W; cd.height = H;
-  const dctx = cd.getContext('2d');
-  $('#stats').textContent = 'Comparing…';
-  let changed = 0;
-  let x0 = W, y0 = H, x1 = -1, y1 = -1;
-  const band = Math.max(1, Math.floor(2e6 / W));
-  for (let y = 0; y < H; y += band) {
-    const h = Math.min(band, H - y);
-    const pa = da.getImageData(0, y, W, h).data;
-    const pb = db.getImageData(0, y, W, h).data;
-    const out = dctx.createImageData(W, h);
-    const o = out.data;
-    for (let i = 0; i < pa.length; i += 4) {
-      // Where B has no pixels (outside it), it counts as different.
-      const d = pb[i + 3] === 0 ? 255 : Math.max(Math.abs(pa[i] - pb[i]), Math.abs(pa[i + 1] - pb[i + 1]), Math.abs(pa[i + 2] - pb[i + 2]));
-      if (d > tol) {
-        o[i] = 255; o[i + 1] = 45; o[i + 2] = 135; o[i + 3] = 255;
-        changed++;
-        const p = i / 4, px = p % W, py = y + Math.floor(p / W);
-        if (px < x0) x0 = px;
-        if (px > x1) x1 = px;
-        if (py < y0) y0 = py;
-        if (py > y1) y1 = py;
-      } else {
-        // A, faded towards white.
-        const g = 0.299 * pa[i] + 0.587 * pa[i + 1] + 0.114 * pa[i + 2];
-        o[i] = o[i + 1] = o[i + 2] = Math.round(255 - (255 - g) * 0.25);
-        o[i + 3] = 255;
-      }
-    }
-    dctx.putImageData(out, 0, y);
-    await new Promise((r) => setTimeout(r));
-    if (run !== diffRun) return;
-  }
+  cd.getContext('2d').drawImage(result.image, 0, 0);
+  result.image.close();
+  const { changed, box } = result;
+  diffDone = { changed, total: W * H, box };
   const pct = (changed / (W * H)) * 100;
-  diffDone = { changed, total: W * H, box: x1 >= 0 ? { x: x0, y: y0, w: x1 - x0 + 1, h: y1 - y0 + 1 } : null };
-  if (diffDone.box) {
-    // Outline where the changes are.
-    dctx.strokeStyle = 'rgba(255,45,135,.9)';
-    dctx.lineWidth = Math.max(2, W / 600);
-    dctx.setLineDash([dctx.lineWidth * 4, dctx.lineWidth * 3]);
-    dctx.strokeRect(x0 - 4, y0 - 4, x1 - x0 + 9, y1 - y0 + 9);
-  }
   $('#stats').innerHTML = changed
-    ? `<b>${pct < 0.01 ? '<0.01' : pct.toFixed(2)}%</b> of pixels differ (${changed.toLocaleString()})<br>Changes within ${diffDone.box.w} × ${diffDone.box.h} px at ${x0}, ${y0}`
+    ? `<b>${pct < 0.01 ? '<0.01' : pct.toFixed(2)}%</b> of pixels differ (${changed.toLocaleString()})<br>Changes within ${box.w} × ${box.h} px at ${box.x}, ${box.y}`
     : '<b>No differences</b> at this tolerance';
 }
 
