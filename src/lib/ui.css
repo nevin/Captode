@@ -357,3 +357,6 @@ dialog.modal:focus-visible { outline: none; }
 .preset-field select { flex: 1; min-width: 0; }
 .preset-save { display: flex; gap: 6px; margin: -4px 0 12px; }
 .preset-save input { flex: 1; min-width: 0; }
+
+/* For screen readers only */
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }

@@ -58,7 +58,7 @@
       </div>
       <div id="wrap" class="wrap">
         <canvas id="bg"></canvas>
-        <canvas id="fg"></canvas>
+        <canvas id="fg" role="img" aria-label="The image being edited"></canvas>
         <textarea id="text-edit" class="text-edit hidden" spellcheck="false"></textarea>
       </div>
     </main>
@@ -211,6 +211,12 @@
           <div class="row" style="margin-top:12px"><button class="btn" id="c-cancel">Cancel</button><button class="btn primary" id="c-apply" disabled>Apply crop</button></div>
         </div>
       </section>
+
+      <section class="section layers-section">
+        <h3 class="section-title" id="layers-title">Annotations <span class="muted" id="layers-count"></span></h3>
+        <ul class="layers" id="layers" role="listbox" tabindex="0" aria-labelledby="layers-title" aria-multiselectable="true" aria-describedby="layers-help"></ul>
+        <p class="muted small" id="layers-help">Front to back. Arrow keys choose one (Shift: several); Alt with the arrows moves it (Shift: 10 px); Enter edits text; Delete removes.</p>
+      </section>
     </div>
 
     <!-- Adjust -->
@@ -360,6 +366,7 @@
     </div>
   </aside>
 </div>
+<div class="sr-only" id="announce" aria-live="polite"></div>
 <dialog class="modal multi" id="multi" aria-labelledby="multi-title">
   <div class="modal-body">
     <h2 id="multi-title">Export for several devices</h2>

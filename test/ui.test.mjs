@@ -849,6 +849,78 @@ export const tests = {
     }
   },
 
+  async 'annotations can be found, chosen and moved from the keyboard, and are announced'({ browser, url }) {
+    const lab = await open(browser, url('lab/lab.html'));
+    const id = await lab.evaluate(async () => {
+      const { putCapture } = await import('/lib/db.js');
+      const c = new OffscreenCanvas(800, 500);
+      c.getContext('2d').fillRect(0, 0, 10, 10);
+      return putCapture(await c.convertToBlob(), { title: 'Keyboard', mode: 'visible' });
+    });
+    await lab.close();
+    const ed = await open(browser, url(`editor/editor.html?id=${id}&reopen=1`), { width: 1400, height: 900 });
+    try {
+      await ed.waitForFunction(() => /px/.test(document.querySelector('#doc-dims').textContent), { polling: 100 });
+      const at = async (x, y) => {
+        const r = await ed.evaluate(() => { const b = document.querySelector('#wrap').getBoundingClientRect(); return { x: b.left, y: b.top, z: captodeEditor.zoom() }; });
+        return [r.x + x * r.z, r.y + y * r.z];
+      };
+      const said = () => ed.$eval('#announce', (e) => e.textContent);
+      await ed.keyboard.press('a');
+      await ed.mouse.move(...(await at(100, 100)));
+      await ed.mouse.down();
+      await ed.mouse.move(...(await at(300, 200)), { steps: 4 });
+      await ed.mouse.up();
+      await ed.waitForFunction(() => /^Added: Arrow from 100, 100 to 300, 200$/.test(document.querySelector('#announce').textContent), { polling: 50 });
+      await ed.keyboard.press('r');
+      await ed.mouse.move(...(await at(400, 100)));
+      await ed.mouse.down();
+      await ed.mouse.move(...(await at(600, 250)), { steps: 4 });
+      await ed.mouse.up();
+      await ed.keyboard.press('n');
+      await ed.mouse.click(...(await at(700, 400)));
+      await ed.waitForFunction(() => document.querySelector('#announce').textContent === 'Added step 1', { polling: 50 });
+      await ed.keyboard.press('Escape');
+      await ed.keyboard.press('v');
+      const items = () => ed.$$eval('#layers [role="option"]', (li) => li.map((l) => [l.textContent, l.getAttribute('aria-selected')]));
+      await ed.waitForFunction(() => document.querySelectorAll('#layers [role="option"]').length === 3, { polling: 50 });
+      let list = await items();
+      ok(list[0][0] === 'Step 1' && /^Rectangle, \d+ × \d+ at \d+, \d+$/.test(list[1][0]) && list[2][0] === 'Arrow from 100, 100 to 300, 200', `front to back: ${JSON.stringify(list)}`);
+      // Arrow keys choose; Alt + arrows move; Delete removes.
+      await ed.focus('#layers');
+      await ed.keyboard.press('End');
+      list = await items();
+      ok(list[2][1] === 'true' && list[0][1] === 'false', `End chooses the arrow: ${JSON.stringify(list)}`);
+      ok(await ed.$eval('#layers', (u) => u.getAttribute('aria-activedescendant')) === 'layer-2', 'the active item is announced');
+      await ed.keyboard.down('Alt');
+      await ed.keyboard.press('ArrowRight');
+      await ed.keyboard.down('Shift');
+      await ed.keyboard.press('ArrowDown');
+      await ed.keyboard.up('Shift');
+      await ed.keyboard.up('Alt');
+      const arrow = await ed.evaluate(() => captodeEditor.objects().find((o) => o.type === 'arrow'));
+      ok(arrow.x1 === 101 && arrow.y1 === 110, `moved by 1 across and 10 down: ${arrow.x1}, ${arrow.y1}`);
+      await ed.waitForFunction(() => /^Moved to /.test(document.querySelector('#announce').textContent), { polling: 50 });
+      ok(await ed.evaluate(() => document.activeElement.id) === 'layers', 'focus stays in the list');
+      await ed.keyboard.press('ArrowUp');
+      await ed.keyboard.down('Shift');
+      await ed.keyboard.press('ArrowUp');
+      await ed.keyboard.up('Shift');
+      list = await items();
+      ok(list[0][1] === 'true' && list[1][1] === 'true' && list[2][1] === 'false', `Shift adds to the choice: ${JSON.stringify(list)}`);
+      await ed.keyboard.press('Delete');
+      ok((await ed.evaluate(() => captodeEditor.objects().map((o) => o.type))).join() === 'arrow', 'Delete removes what is chosen');
+      await ed.waitForFunction(() => document.querySelectorAll('#layers [role="option"]').length === 1, { polling: 50 });
+      // A text box left before it had focus (another tool chosen at once) is not left behind empty.
+      await ed.keyboard.press('t');
+      await ed.mouse.click(...(await at(500, 400)));
+      await ed.evaluate(() => document.querySelector('[data-tool="rect"]').click());
+      ok((await ed.evaluate(() => captodeEditor.objects().map((o) => o.type))).join() === 'arrow', 'no empty text box remains');
+    } finally {
+      await ed.close();
+    }
+  },
+
   async 'countdown shows the chosen seconds and Esc cancels it'({ browser, url }) {
     const p = await open(browser, url('popup/popup.html'), { width: 800, height: 600 });
     const r = await p.evaluate(async () => {

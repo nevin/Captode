@@ -211,12 +211,12 @@ function restore(s) {
   refreshExport();
 }
 
-function undo() { if (hIndex > 0) restore(history[--hIndex]); }
+function undo() { if (hIndex > 0) { restore(history[--hIndex]); announce('Undone'); } }
 
 /** Back to the image as it was opened. Itself undoable, so Undo brings the edits back. */
 function undoAll() {
   if (!original || atOriginal()) return;
-  if (editing) ta.blur();
+  if (editing) finishText();
   restore(original);
   commit();
   history[hIndex].reverted = true;
@@ -224,7 +224,7 @@ function undoAll() {
   toast('All changes undone', { action: { label: 'Undo', run: undo }, ms: 6000 });
 }
 const atOriginal = () => history[hIndex] === original || !!history[hIndex]?.reverted;
-function redo() { if (hIndex < history.length - 1) restore(history[++hIndex]); }
+function redo() { if (hIndex < history.length - 1) { restore(history[++hIndex]); announce('Redone'); } }
 
 function updateButtons() {
   $('#undo').disabled = hIndex <= 0;
@@ -691,6 +691,7 @@ function renderFg() {
   }
   fctx.restore();
   updateButtons();
+  scheduleLayers();
 }
 
 function layout() {
@@ -1023,6 +1024,7 @@ function editText(o) {
   setTimeout(() => { ta.focus(); ta.select(); });
 }
 
+// Called on blur, and directly (a blur does nothing if the field never had focus).
 function finishText() {
   if (!editing) return;
   const o = editing;
@@ -1030,6 +1032,7 @@ function finishText() {
   o.text = ta.value.replace(/\s+$/, '');
   delete o._editing;
   ta.classList.add('hidden');
+  if (document.activeElement === ta) ta.blur();
   if (!o.text) {
     objects = objects.filter((x) => x !== o);
     select(selection.filter((x) => x !== o));
@@ -1051,7 +1054,7 @@ ta.addEventListener('keydown', (e) => {
 
 fg.addEventListener('pointerdown', (e) => {
   if (!base || e.button !== 0 || tool === 'pan' || spacePan) return; // panning: the stage handles it
-  if (editing) { ta.blur(); return; }
+  if (editing) { finishText(); return; }
   fg.setPointerCapture(e.pointerId);
   const pt = toImage(e);
 
@@ -1133,6 +1136,7 @@ fg.addEventListener('pointerdown', (e) => {
     } else {
       select([{ type: 'step', ...propsFor('step'), n: nextStep(), x: pt.x, y: pt.y }]);
       objects.push(selected);
+      announce(`Added step ${selected.n}`);
       lastStep = selected;
       stepStart = null;
       drag = startMove(pt, true); // drag to place it exactly
@@ -1266,7 +1270,10 @@ function endDrag() {
     if (tiny) {
       objects = objects.filter((x) => x !== o);
       select([]);
-    } else commit();
+    } else {
+      commit();
+      announce(`Added: ${describe(o)}`);
+    }
     syncStyleUi();
   } else if (d.kind === 'callout') {
     const o = d.o;
@@ -1360,7 +1367,7 @@ document.querySelector('.tabs').addEventListener('click', (e) => {
 // ---------- tools ----------
 
 function setTool(t) {
-  if (editing) ta.blur();
+  if (editing) finishText();
   tool = t;
   if (t !== 'crop') crop = null;
   if (t !== 'select' && selection.length && GROUPS[t] && selection.some((o) => o.type !== t)) select([]);
@@ -1466,6 +1473,8 @@ document.addEventListener('keydown', (e) => {
     for (const o of selection) moveObj(o, ...d);
     renderFg();
     commitSoon();
+    const b = bounds(selection[0]);
+    announceSoon(`Moved to ${Math.round(b.x)}, ${Math.round(b.y)}`);
     return;
   }
   if (mod) return;
@@ -1622,6 +1631,110 @@ $('#c-copy').addEventListener('click', async () => {
 $('#m-clear').addEventListener('click', () => { review.measures = []; showMeasure(null); renderFg(); });
 $('#m-ratio').addEventListener('input', () => { syncRatioNote(); showMeasure(review.measures.at(-1) || null); renderFg(); });
 for (const id of ['g-on', 'g-step']) $('#' + id).addEventListener('input', () => renderFg());
+
+// ---------- annotations list: keyboard and screen readers ----------
+
+const escHtml = (t) => String(t).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+/** An annotation in words: what it is and where. */
+function describe(o) {
+  const r = Math.round;
+  if (o.type === 'text') {
+    const words = (o.text || '').trim().replace(/\s+/g, ' ');
+    return `${o.tail ? 'Callout' : 'Text'} “${words.length > 60 ? words.slice(0, 59) + '…' : words || 'empty'}”`;
+  }
+  if (o.type === 'step') return `Step ${o.n}${o.note ? `: ${o.note}` : ''}`;
+  if (o.type === 'line' || o.type === 'arrow') return `${NAMES[o.type]} from ${r(o.x1)}, ${r(o.y1)} to ${r(o.x2)}, ${r(o.y2)}`;
+  const b = bounds(o);
+  return `${NAMES[o.type] || o.type}, ${r(b.w)} × ${r(b.h)} at ${r(b.x)}, ${r(b.y)}`;
+}
+
+/** Says something to screen readers, without showing it. */
+function announce(message) {
+  const el = $('#announce');
+  el.textContent = '';
+  requestAnimationFrame(() => { el.textContent = message; });
+}
+const announceSoon = debounce(announce, 500);
+
+const layerList = () => [...objects].reverse(); // front first
+let activeLayer = 0;
+let layersSig = '';
+let layersFrame = 0;
+
+/** Redraws the list when what it shows has changed (coalesced to a frame). */
+function scheduleLayers() {
+  if (layersFrame) return;
+  layersFrame = requestAnimationFrame(() => { layersFrame = 0; renderLayers(); });
+}
+
+function renderLayers() {
+  const list = layerList();
+  if (selection.length && !isSelected(list[activeLayer])) activeLayer = Math.max(0, list.findIndex(isSelected));
+  activeLayer = Math.min(activeLayer, Math.max(0, list.length - 1));
+  const rows = list.map((o, i) => ({ text: describe(o), on: isSelected(o), color: o.type === 'text' ? o.bg || o.color : o.color || '#888' }));
+  const sig = JSON.stringify(rows) + activeLayer;
+  if (sig === layersSig) return;
+  layersSig = sig;
+  const ul = $('#layers');
+  ul.innerHTML = rows.map((row, i) =>
+    `<li role="option" id="layer-${i}" data-i="${i}" aria-selected="${row.on}" class="${i === activeLayer ? 'active' : ''}">` +
+    `<span class="sw" style="background:${escHtml(row.color)}"></span><span>${escHtml(row.text)}</span></li>`).join('');
+  if (list.length) ul.setAttribute('aria-activedescendant', `layer-${activeLayer}`);
+  else ul.removeAttribute('aria-activedescendant');
+  $('#layers-count').textContent = list.length ? `(${list.length})` : '';
+}
+
+function chooseLayer(i, { add = false, toggle = false } = {}) {
+  const list = layerList();
+  const o = list[i];
+  if (!o) return;
+  activeLayer = i;
+  if (toggle) select(isSelected(o) ? selection.filter((x) => x !== o) : [...selection, o]);
+  else if (add) select([...new Set([...selection, o])]);
+  else select([o]);
+  syncStyleUi();
+  renderFg();
+  renderLayers();
+  $(`#layer-${i}`)?.scrollIntoView({ block: 'nearest' });
+}
+
+$('#layers').addEventListener('click', (e) => {
+  const li = e.target.closest('[role="option"]');
+  if (li) chooseLayer(Number(li.dataset.i), { toggle: e.shiftKey || e.metaKey || e.ctrlKey });
+});
+$('#layers').addEventListener('focus', () => renderLayers());
+$('#layers').addEventListener('keydown', (e) => {
+  const n = objects.length;
+  if (!n) return;
+  const handled = () => { e.preventDefault(); e.stopPropagation(); };
+  if (e.altKey && e.key.startsWith('Arrow')) {
+    // Move what's selected.
+    handled();
+    if (!selection.length) return;
+    const s = e.shiftKey ? 10 : 1;
+    const d = { ArrowLeft: [-s, 0], ArrowRight: [s, 0], ArrowUp: [0, -s], ArrowDown: [0, s] }[e.key];
+    for (const o of selection) moveObj(o, ...d);
+    renderFg();
+    commitSoon();
+    const b = bounds(selection[0]);
+    announceSoon(`Moved to ${Math.round(b.x)}, ${Math.round(b.y)}`);
+    return;
+  }
+  const to = { ArrowDown: activeLayer + 1, ArrowUp: activeLayer - 1, Home: 0, End: n - 1 }[e.key];
+  if (to !== undefined) {
+    handled();
+    chooseLayer(Math.max(0, Math.min(n - 1, to)), { add: e.shiftKey });
+    return;
+  }
+  if (e.key === ' ') { handled(); chooseLayer(activeLayer, { toggle: true }); return; }
+  if (e.key === 'Enter') {
+    handled();
+    chooseLayer(activeLayer);
+    if (selected?.type === 'text') editText(selected);
+  }
+  // Delete, Escape, undo and the other shortcuts work as they do on the canvas.
+});
 
 // ---------- quick styles ----------
 
@@ -2220,7 +2333,7 @@ const stepsInOrder = () => objects.filter((o) => o.type === 'step').sort((a, b) 
 
 function openShare() {
   if (!base) return;
-  if (editing) ta.blur();
+  if (editing) finishText();
   $('#sh-title').value = $('#sh-title').value || meta.title || 'Screenshot';
   const steps = stepsInOrder();
   $('#sh-none').classList.toggle('hidden', !!steps.length);
@@ -2289,7 +2402,7 @@ function fileName() {
 
 async function download() {
   if (!base) return;
-  if (editing) ta.blur();
+  if (editing) finishText();
   const btns = [$('#download'), $('#download2')];
   btns.forEach((b) => { b.disabled = true; });
   try {
