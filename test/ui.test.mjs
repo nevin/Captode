@@ -712,7 +712,10 @@ export const tests = {
           const important = getComputedStyle(wrap).width;
           wrap.setAttribute('style', keep);
           return { plain, important, after: getComputedStyle(wrap).width };
-        })() };
+        })(),
+        animations: wrap.getAnimations().map((x) => ({ type: x.constructor.name, name: x.animationName || x.transitionProperty || '', state: x.playState, t: x.currentTime })),
+        props: (({ position, float, flex, flexBasis, writingMode, aspectRatio, transitionProperty, transitionDuration, animationName }) => ({ position, float, flex, flexBasis, writingMode, aspectRatio, transitionProperty, transitionDuration, animationName }))(getComputedStyle(wrap)),
+        parent: getComputedStyle(wrap.parentElement).display, reduced: matchMedia('(prefers-reduced-motion: reduce)').matches };
     }, pt);
     const b = await under();
     ok(Math.hypot(a[0] - b[0], a[1] - b[1]) < 3, `point under the pointer moved from ${a.map(Math.round)} to ${b.map(Math.round)} (${JSON.stringify(info)})`);
