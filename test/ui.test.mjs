@@ -197,6 +197,61 @@ export const tests = {
     await pop.close();
   },
 
+  async 'recording keeps only the page when DevTools shows it phone-sized, at the chosen size'({ browser, url }) {
+    const lab = await open(browser, url('lab/lab.html'));
+    await lab.bringToFront();
+    // A tab capture of a 400 × 1000 page shown in device mode: black either side.
+    const run = (size, aspect) => lab.evaluate(async (size, aspect) => {
+      const { record } = await import('/lib/recorder.js');
+      const c = document.createElement('canvas'); c.width = 1600; c.height = 1000; document.body.append(c);
+      const g = c.getContext('2d');
+      let t = 0;
+      const draw = () => {
+        g.fillStyle = '#000'; g.fillRect(0, 0, 1600, 1000);
+        g.fillStyle = '#3a6'; g.fillRect(600, 0, 400, 1000);
+        g.fillStyle = '#fff'; g.fillRect(620 + (t++ % 200), 400, 100, 100);
+      };
+      draw();
+      const timer = setInterval(draw, 33);
+      const session = await record(c.captureStream(30), { fps: 30, aspect, size });
+      await new Promise((r) => setTimeout(r, 1500));
+      const { blob } = await session.stop();
+      clearInterval(timer); c.remove();
+      const v = document.createElement('video'); v.muted = true; v.src = URL.createObjectURL(blob);
+      await new Promise((r) => { v.onloadeddata = r; });
+      v.currentTime = 1; // a frame from the middle (the first may not be drawn yet)
+      await new Promise((r) => { v.onseeked = r; });
+      const k = new OffscreenCanvas(v.videoWidth, v.videoHeight).getContext('2d', { willReadFrequently: true });
+      k.drawImage(v, 0, 0);
+      const px = (x, y) => [...k.getImageData(x, y, 1, 1).data.slice(0, 3)];
+      return { w: v.videoWidth, h: v.videoHeight, reported: [session.width, session.height], left: px(3, 50), right: px(v.videoWidth - 4, v.videoHeight - 50) };
+    }, size, aspect);
+    const green = (p) => p[0] < 110 && p[1] > 130 && p[2] < 140;
+    let r = await run('page', 0.4);
+    ok(r.w === 400 && r.h === 1000, `page size ${r.w}×${r.h}`);
+    ok(green(r.left) && green(r.right), `edges should be the page, not black: ${r.left} ${r.right}`);
+    r = await run('0.5x', 0.4);
+    ok(r.w === 200 && r.h === 500 && green(r.left), `50%: ${r.w}×${r.h}`);
+    r = await run('1080p', 0.4);
+    ok(r.w === 1080 && r.h === 2700 && r.reported.join() === '1080,2700', `1080p (shorter side): ${r.w}×${r.h}`);
+    // A page as wide as the tab is recorded whole, black areas and all.
+    r = await run('page', 1.6);
+    ok(r.w === 1600 && r.h === 1000, `normal tab ${r.w}×${r.h}`);
+    await lab.close();
+
+    // The popup remembers the size and offers scaling and resolutions.
+    const pop = await open(browser, url('popup/popup.html'), { width: 340, height: 700 });
+    await pop.evaluate(() => chrome.storage.local.set({ kind: 'video', videoSize: 'nonsense' }));
+    await pop.reload();
+    await pop.waitForSelector('#modes-video:not(.hidden)');
+    ok(await pop.$eval('#size', (e) => e.value) === 'page', 'unknown sizes fall back to the page size');
+    await pop.select('#size', '720p');
+    const st = await pop.evaluate(async () => ({ stored: (await chrome.storage.local.get('videoSize')).videoSize, hint: document.querySelector('#size-hint').textContent, n: document.querySelectorAll('#size option').length }));
+    ok(st.stored === '720p' && /shorter side/i.test(st.hint) && st.n === 10, JSON.stringify(st));
+    await pop.evaluate(() => chrome.storage.local.remove('videoSize'));
+    await pop.close();
+  },
+
   async 'countdown shows the chosen seconds and Esc cancels it'({ browser, url }) {
     const p = await open(browser, url('popup/popup.html'), { width: 800, height: 600 });
     const r = await p.evaluate(async () => {

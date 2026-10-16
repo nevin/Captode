@@ -39,6 +39,9 @@ or install the zip from `npm run package`.
 4. **Record → This tab** with **Record audio** on, on a page playing sound. Stop with the
    toolbar icon. Check the recording plays with sound.
 5. **Record → Selected area**, stop with the keyboard shortcut shown in the popup.
+   Open DevTools, turn on device mode (a phone such as Pixel 7), and **Record → This tab**:
+   the video is phone-shaped with no black bars. Repeat with **Video size** at 200% and at
+   1080p: the video is twice as large, then 1080 px wide.
 6. **Record → Full screen**: pick a window in Chrome's picker, wait for the countdown
    (shown on the page and on the toolbar badge), record a few seconds, stop. Start again
    and press Cancel during the countdown: nothing is recorded. Then try again and press Cancel in the picker: Captode should say nothing

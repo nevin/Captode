@@ -6,6 +6,7 @@ import { putCapture } from '../lib/db.js';
 const params = new URLSearchParams(location.search);
 const fps = Number(params.get('fps')) || 30;
 const audio = params.get('audio') === '1';
+const size = params.get('size') || 'page';
 const countdownFrom = Math.max(0, Math.min(30, Number(params.get('countdown') ?? 3) || 0));
 const $ = (id) => document.getElementById(id);
 
@@ -43,7 +44,7 @@ async function choose() {
     $('pick').classList.remove('hidden');
     return;
   }
-  session = record(stream, { fps, onEnded: stop });
+  session = await record(stream, { fps, size, onEnded: stop });
   $('live').classList.remove('hidden');
   document.title = '● Recording — Captode';
   chrome.runtime.sendMessage({ type: 'rec-started', kind: 'page' });

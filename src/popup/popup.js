@@ -5,7 +5,7 @@ const selectTab = tablist($('.kind'), (t) => { setKind(t.dataset.kind); chrome.s
 let kind = 'image';
 let fps = '30';
 
-const settings = await chrome.storage.local.get({ kind: 'image', fps: '30', audio: false, countdown: true, countdownSeconds: null, device: false });
+const settings = await chrome.storage.local.get({ kind: 'image', fps: '30', audio: false, countdown: true, countdownSeconds: null, device: false, videoSize: 'page' });
 fps = String(settings.fps);
 $('#audio').checked = settings.audio;
 // Seconds of countdown before a recording starts (0 = none): a second at a time up
@@ -22,6 +22,15 @@ const stepCountdown = (by) => {
 let countdown = settings.countdownSeconds ?? (settings.countdown ? 3 : 0);
 setCountdown(countdown, false);
 $('#device').checked = settings.device;
+// How large recordings are: the page as shown (only the page, so a phone-sized page in
+// DevTools' device mode isn't recorded with the black around it), scaled, or a standard
+// resolution with the page's own shape.
+const SIZE_HINTS = {
+  page: 'Just the page, as shown',
+  scale: 'The page, scaled up or down',
+  res: 'Shorter side, same shape',
+};
+setSize(settings.videoSize);
 setKind(settings.kind);
 setFps(fps);
 
@@ -85,6 +94,7 @@ $('#countdown').addEventListener('keydown', (e) => {
   e.stopPropagation(); // digits here set the countdown, not the capture mode
   setCountdown(next);
 });
+$('#size').addEventListener('change', (e) => { setSize(e.target.value); chrome.storage.local.set({ videoSize: e.target.value }); });
 for (const id of ['audio', 'device']) {
   $('#' + id).addEventListener('change', (e) => chrome.storage.local.set({ [id]: e.target.checked }));
 }
@@ -113,7 +123,7 @@ for (const b of document.querySelectorAll('.mode')) {
       ? { type: 'capture-image', mode: b.dataset.mode, tabId: tab.id }
       : {
           type: 'record-start', mode: b.dataset.mode, tabId: tab.id,
-          fps: Number(fps), audio: $('#audio').checked, countdown,
+          fps: Number(fps), audio: $('#audio').checked, countdown, size: $('#size').value,
         };
     await chrome.runtime.sendMessage(msg);
     window.close();
@@ -130,4 +140,12 @@ function setCountdown(n, save = true) {
   $('#countdown-more').disabled = countdown === MAX_COUNTDOWN;
   $('#countdown-hint').textContent = countdown ? 'Time to get ready first' : 'Recording starts straight away';
   if (save) chrome.storage.local.set({ countdownSeconds: countdown });
+}
+
+function setSize(v) {
+  const select = $('#size');
+  select.value = v;
+  if (select.value !== v) select.value = 'page'; // a size this version doesn't offer
+  const group = select.value === 'page' ? 'page' : select.value.endsWith('x') ? 'scale' : 'res';
+  $('#size-hint').textContent = SIZE_HINTS[group];
 }

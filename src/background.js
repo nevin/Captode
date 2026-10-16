@@ -194,22 +194,25 @@ async function ensureOffscreen() {
 /** Seconds of countdown asked for (older popups sent true for a fixed 3 seconds). */
 const countdownSeconds = (v) => (v === true ? 3 : Math.max(0, Math.min(30, Number(v) || 0)));
 
-async function startRecording({ mode, fps, audio, countdown: wantCountdown }, tab) {
+async function startRecording({ mode, fps, audio, size = 'page', countdown: wantCountdown }, tab) {
   if (mode === 'screen') {
     // Picking a screen or window needs a visible page for the browser's picker.
     await setRec({ state: 'starting', kind: 'page', tabId: tab.id });
     const seconds = countdownSeconds(wantCountdown);
-    await openPage(`recorder/screen.html?fps=${fps}&audio=${audio ? 1 : 0}&countdown=${seconds}`, tab);
+    await openPage(`recorder/screen.html?fps=${fps}&audio=${audio ? 1 : 0}&countdown=${seconds}&size=${encodeURIComponent(size)}`, tab);
     return;
   }
 
   let crop = null;
+  let aspect = null;
   if (mode === 'area') {
     const rect = await run(tab.id, pickArea, 'Drag to select the area to record');
     if (!rect) return;
     crop = { x: rect.x / rect.vw, y: rect.y / rect.vh, w: rect.w / rect.vw, h: rect.h / rect.vh };
+    aspect = rect.vw / rect.vh;
     await run(tab.id, showOutline, rect);
   }
+  aspect ??= await run(tab.id, () => innerWidth / innerHeight).catch(() => null);
   const seconds = countdownSeconds(wantCountdown);
   if (seconds && !(await run(tab.id, countdown, seconds))) {
     await run(tab.id, hideOutline); // cancelled with Esc
@@ -219,7 +222,7 @@ async function startRecording({ mode, fps, audio, countdown: wantCountdown }, ta
   const streamId = await chrome.tabCapture.getMediaStreamId({ targetTabId: tab.id });
   await ensureOffscreen();
   const res = await chrome.runtime.sendMessage({
-    target: 'recorder', to: 'offscreen', type: 'rec-start', streamId, fps, audio, crop, title: tab.title,
+    target: 'recorder', to: 'offscreen', type: 'rec-start', streamId, fps, audio, aspect, crop, size, title: tab.title,
   });
   if (!res?.ok) {
     await run(tab.id, hideOutline).catch(() => {});

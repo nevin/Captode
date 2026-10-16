@@ -58,8 +58,9 @@ quality that fits.
 
 Record
 Record the current tab, an area of it, or your whole screen or a window, with sound if
-you like. A countdown of up to 30 seconds gives you time to get ready, and one click on the toolbar button
-stops the recording.
+you like. Only the page is kept, even when DevTools shows it at a phone's size, and you can
+record it as shown, scaled up or down, or at a standard resolution. A countdown of up to 30
+seconds gives you time to get ready, and one click on the toolbar button stops the recording.
 
 Edit recordings
 Trim the start and end on a timeline, then save the result as a video or an animated

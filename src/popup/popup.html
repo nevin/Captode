@@ -77,6 +77,24 @@
             <button data-fps="15">15</button><button data-fps="24">24</button><button data-fps="30">30</button><button data-fps="60">60 fps</button>
           </div>
         </div>
+        <div class="toggle setting"><label for="size">Video size<small id="size-hint">Just the page, as shown</small></label>
+          <select id="size" aria-describedby="size-hint">
+            <option value="page">Page size</option>
+            <optgroup label="Scale">
+              <option value="0.5x">50%</option>
+              <option value="0.75x">75%</option>
+              <option value="1.5x">150%</option>
+              <option value="2x">200%</option>
+            </optgroup>
+            <optgroup label="Resolution">
+              <option value="480p">480p</option>
+              <option value="720p">720p (HD)</option>
+              <option value="1080p">1080p (Full HD)</option>
+              <option value="1440p">1440p (2K)</option>
+              <option value="2160p">2160p (4K)</option>
+            </optgroup>
+          </select>
+        </div>
         <label class="toggle"><span>Record audio<small>Sound from the tab or screen</small></span><input type="checkbox" id="audio"></label>
         <div class="toggle setting"><span id="countdown-label">Countdown<small id="countdown-hint">Time to get ready first</small></span>
           <div class="spin">

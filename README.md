@@ -58,6 +58,11 @@ The capture opens in the editor, where you can:
 - **Visible area:** the current tab.
 - **Selected area:** drag a rectangle; only that part of the tab is recorded.
 
+Tab recordings keep only the page: if DevTools shows it at a phone's size (device mode),
+the black space around it is left out. **Video size** records the page as shown (the
+default), scaled (50%, 75%, 150% or 200%), or at a standard resolution (480p to 4K,
+measured on the shorter side so phone-shaped pages stay portrait).
+
 You can pick the frame rate (15, 24, 30 or 60 fps), include audio, and set a countdown of up
 to 30 seconds (or none) to get ready; press Esc, or Cancel for full-screen recordings, to
 call it off. Click the Captode icon (or press **Alt+Shift+R**) to stop. The recording then
