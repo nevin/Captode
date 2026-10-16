@@ -570,4 +570,52 @@ export const tests = {
     await ed.close();
     void before; void page;
   },
+
+  async 'editor: spotlight, magnifier, callout, dashed and double-headed arrows'({ editor }) {
+    const ed = await editor();
+    await ed.evaluate(() => document.querySelector('#zoom-label').click());
+    await sleep(100);
+    const w = await ed.evaluate(() => { const r = document.querySelector('#wrap').getBoundingClientRect(); return { x: r.x, y: r.y }; });
+    const at = (x, y) => [w.x + x, w.y + y];
+    const dragFrom = async (from, to) => { await ed.mouse.move(...from); await ed.mouse.down(); await ed.mouse.move(...to, { steps: 5 }); await ed.mouse.up(); };
+    // Spotlight: inside unchanged, outside darker.
+    await ed.keyboard.press('f');
+    await dragFrom(at(100, 100), at(400, 300));
+    // Magnifier somewhere else.
+    await ed.keyboard.press('z');
+    await dragFrom(at(700, 400), at(860, 560));
+    const px = await ed.evaluate(async () => {
+      const a = captodeEditor.pixels(), f = await captodeEditor.render();
+      const get = (img, x, y) => [...img.data.subarray((y * img.width + x) * 4, (y * img.width + x) * 4 + 3)];
+      const lum = (p) => p[0] + p[1] + p[2];
+      const m = captodeEditor.objects()[1];
+      const cx = Math.round((m.x1 + m.x2) / 2), cy = Math.round((m.y1 + m.y2) / 2);
+      return { inA: get(a, 250, 200), inF: get(f, 250, 200), outA: lum(get(a, 600, 150)), outF: lum(get(f, 600, 150)), lensA: get(a, cx, cy), lensF: get(f, cx, cy), outLens: lum(get(f, cx + 120, cy)) };
+    });
+    ok(px.inA.every((v, i) => Math.abs(v - px.inF[i]) <= 1), `spotlight changed its inside: ${px.inA} → ${px.inF}`);
+    ok(px.outF < px.outA * 0.7 || px.outA < 30, `outside the spotlight not dimmed: ${px.outA} → ${px.outF}`);
+    ok(px.lensA.every((v, i) => Math.abs(v - px.lensF[i]) <= 12), `magnifier centre ${px.lensF}, image ${px.lensA}`);
+    // Callout: press on the target, drag to where the bubble goes, type.
+    await ed.keyboard.press('k');
+    await dragFrom(at(500, 500), at(600, 620));
+    await sleep(150);
+    await ed.keyboard.type('Look');
+    await ed.keyboard.press('Escape');
+    const c = (await ed.evaluate(() => captodeEditor.objects())).find((o) => o.tail);
+    ok(c && c.text === 'Look' && Math.abs(c.tail.x - 500) <= 1 && Math.abs(c.x - 600) <= 1, `callout ${JSON.stringify(c)}`);
+    // Arrow: dashed, heads at both ends.
+    await ed.keyboard.press('a');
+    await ed.evaluate(() => {
+      for (const [id, v] of [['s-dash', 'dashed'], ['s-heads', '2']]) { const s = document.getElementById(id); s.value = v; s.dispatchEvent(new Event('input', { bubbles: true })); }
+    });
+    await dragFrom(at(900, 150), at(1100, 300));
+    const a = (await ed.evaluate(() => captodeEditor.objects())).at(-1);
+    ok(a.type === 'arrow' && a.dash === 'dashed' && a.heads === 2, `arrow ${JSON.stringify(a)}`);
+    // Clicking inside a spotlight reaches what's under it: here, nothing, so no selection.
+    await ed.keyboard.press('v');
+    await ed.mouse.click(...at(250, 200));
+    ok(/Annotate/.test(await ed.evaluate(() => document.querySelector('#style-title').textContent)), 'clicking inside a spotlight selected it');
+    await ed.evaluate(() => { window.onbeforeunload = null; });
+    await ed.close();
+  },
 };

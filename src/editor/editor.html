@@ -104,6 +104,14 @@
           </div>
           <label class="field"><span>Thickness <b id="s-width-v"></b></span><input type="range" id="s-width" min="1" max="40"></label>
           <label class="field"><span>Opacity <b id="s-opacity-v"></b></span><input type="range" id="s-opacity" min="10" max="100"></label>
+          <div class="grid2" id="s-line-opts">
+            <label class="field"><span>Line</span>
+              <select id="s-dash"><option value="solid">Solid</option><option value="dashed">Dashed</option><option value="dotted">Dotted</option></select>
+            </label>
+            <label class="field" id="s-heads-field"><span>Arrow heads</span>
+              <select id="s-heads"><option value="1">At the end</option><option value="2">Both ends</option></select>
+            </label>
+          </div>
         </div>
 
         <div data-group="fill">
@@ -140,6 +148,19 @@
           <label class="field"><span>Size <b id="st-size-v"></b></span><input type="range" id="st-size" min="20" max="160"></label>
           <label class="field"><span id="st-n-label">Next number</span><input type="number" id="st-n" min="0" max="999" inputmode="numeric"></label>
           <p class="muted small">Click to add a step: each one counts up from the last. Drag to move one.</p>
+        </div>
+
+        <div data-group="spotlight">
+          <label class="field"><span>Dim the rest <b id="sp-dim-v"></b></span><input type="range" id="sp-dim" min="20" max="90" step="5"></label>
+          <label class="field"><span>Rounded corners <b id="sp-radius-v"></b></span><input type="range" id="sp-radius" min="0" max="60"></label>
+          <p class="muted small">Everything outside the spotlights is dimmed. Draw several to light up more than one area.</p>
+        </div>
+
+        <div data-group="magnify">
+          <label class="field"><span>Magnification <b id="mg-zoom-v"></b></span><input type="range" id="mg-zoom" min="1.5" max="4" step="0.5"></label>
+          <div class="field"><span>Border</span>
+            <div class="row"><input type="color" id="mg-color"><div class="swatches" data-for="mg-color"></div></div>
+          </div>
         </div>
 
         <div data-group="redact">
@@ -277,7 +298,10 @@
     <div><span>Rectangle</span><span><kbd>R</kbd></span></div>
     <div><span>Ellipse</span><span><kbd>E</kbd></span></div>
     <div><span>Text</span><span><kbd>T</kbd></span></div>
+    <div><span>Callout (speech bubble)</span><span><kbd>K</kbd></span></div>
     <div><span>Step number</span><span><kbd>N</kbd></span></div>
+    <div><span>Spotlight</span><span><kbd>F</kbd></span></div>
+    <div><span>Magnifier</span><span><kbd>Z</kbd></span></div>
     <div><span>Blur or pixelate</span><span><kbd>B</kbd></span></div>
     <h3>Editing</h3>
     <div><span>Undo</span><span><kbd>⌘</kbd> <kbd>Z</kbd></span></div>

@@ -26,6 +26,9 @@ const TOOLS = [
   ['rect', 'Rectangle', 'r', svg('<rect x="3" y="5" width="18" height="14" rx="1"/>')],
   ['ellipse', 'Ellipse', 'e', svg('<ellipse cx="12" cy="12" rx="9" ry="7"/>')],
   ['text', 'Text', 't', svg('<path d="M4 7V4h16v3M9 20h6M12 4v16"/>')],
+  ['callout', 'Callout', 'k', svg('<path d="M4 4h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1h-9l-5 4v-4H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z"/>')],
+  ['spotlight', 'Spotlight', 'f', svg('<rect x="3" y="3" width="18" height="18" rx="2" stroke-dasharray="2 2.5"/><rect x="8" y="8" width="8" height="8" rx="1.5"/>')],
+  ['magnify', 'Magnifier', 'z', svg('<circle cx="11" cy="11" r="7"/><path d="m20 20-4-4M8.5 11h5M11 8.5v5"/>')],
   ['step', 'Step number', 'n', svg('<circle cx="12" cy="12" r="9"/><path d="M10.5 9.5 12.5 8v8"/>')],
   ['redact', 'Blur or pixelate', 'b', svg('<rect x="3" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="14" y="3" width="7" height="7" opacity=".4"/><rect x="3" y="14" width="7" height="7" opacity=".4"/>')],
 ];
@@ -38,23 +41,28 @@ const SWATCHES = ['#e5484d', '#f76b15', '#ffc53d', '#30a46c', '#0090ff', '#5b4bf
 const BACKDROPS = ['transparent', '#ffffff', '#ececf4', '#17171c', '#dbe4ff', '#ffe4e6', '#dcfce7', '#0f172a'];
 const GROUPS = {
   pen: ['stroke'], highlighter: ['stroke'], line: ['stroke'], arrow: ['stroke'],
-  rect: ['stroke', 'fill'], ellipse: ['stroke', 'fill'], text: ['text'], step: ['step'], redact: ['redact'], crop: ['crop'],
+  rect: ['stroke', 'fill'], ellipse: ['stroke', 'fill'], text: ['text'], callout: ['text'], step: ['step'], redact: ['redact'], crop: ['crop'],
+  spotlight: ['spotlight'], magnify: ['magnify'],
 };
 const NAMES = {
   pen: 'Pen', highlighter: 'Highlighter', line: 'Line', arrow: 'Arrow', rect: 'Rectangle',
-  ellipse: 'Ellipse', text: 'Text', step: 'Step number', redact: 'Blur / pixelate', crop: 'Crop',
+  ellipse: 'Ellipse', text: 'Text', callout: 'Callout', step: 'Step number', spotlight: 'Spotlight', magnify: 'Magnifier', redact: 'Blur / pixelate', crop: 'Crop',
 };
 
 // ---------- state ----------
 
 const defaults = {
-  stroke: { color: '#e5484d', width: 4, opacity: 100 },
+  stroke: { color: '#e5484d', width: 4, opacity: 100, dash: 'solid', heads: 1 },
   hl: { color: '#ffd60a', width: 22, opacity: 40 },
   fill: { on: false, color: '#ffd60a' },
   text: { font: 'system-ui', size: 32, bold: true, italic: false, color: '#ffffff', bg: '#17171c' },
   redact: { mode: 'pixelate', strength: 12 },
   step: { color: '#e5484d', size: null }, // size null: scaled to the image
+  callout: { font: 'system-ui', size: 24, bold: true, italic: false, color: '#ffffff', bg: '#5b4bff' },
+  spotlight: { dim: 60, radius: 12 },
+  magnify: { zoom: 2, color: '#ffffff' },
 };
+const DASHABLE = new Set(['line', 'arrow', 'rect', 'ellipse']);
 const frame = { padding: 0, bg: 'transparent', radius: 0, shadow: false }; // bg: a colour or 'transparent'
 
 let base = null;     // OffscreenCanvas with the pixels being edited
@@ -241,6 +249,58 @@ function redactLayer(o, x, y, w, h) {
   return layer;
 }
 
+/** A callout's tail: a triangle from the side of the bubble facing the tip to the tip. */
+function bubbleTail(ctx, o, L) {
+  const { x, y } = o, w = L.bw, h = L.bh, t = o.tail;
+  const cx = x + w / 2, cy = y + h / 2;
+  if (t.x >= x && t.x <= x + w && t.y >= y && t.y <= y + h) return; // tip inside the bubble
+  const half = clamp(o.size * 0.45, 6, Math.min(w, h) * 0.3);
+  const r = L.pad * 0.8;
+  let a, b;
+  if (Math.abs(t.x - cx) / w > Math.abs(t.y - cy) / h) {
+    const sx = t.x < cx ? x : x + w;
+    const my = clamp(t.y, y + r + half, y + h - r - half);
+    a = [sx, my - half]; b = [sx, my + half];
+  } else {
+    const sy = t.y < cy ? y : y + h;
+    const mx = clamp(t.x, x + r + half, x + w - r - half);
+    a = [mx - half, sy]; b = [mx + half, sy];
+  }
+  ctx.beginPath();
+  ctx.moveTo(...a);
+  ctx.lineTo(t.x, t.y);
+  ctx.lineTo(...b);
+  ctx.closePath();
+  ctx.fill();
+}
+
+// Spotlights share one dimmed layer with a clear hole for each; drawn on a reused
+// canvas the size of the one being drawn to.
+let spotLayer = null;
+function drawSpotlights(ctx, spots) {
+  const { width, height } = ctx.canvas;
+  if (!spotLayer || spotLayer.width !== width || spotLayer.height !== height) spotLayer = new OffscreenCanvas(width, height);
+  const lx = spotLayer.getContext('2d');
+  lx.setTransform(1, 0, 0, 1, 0, 0);
+  lx.globalCompositeOperation = 'source-over';
+  lx.clearRect(0, 0, width, height);
+  lx.setTransform(ctx.getTransform());
+  lx.fillStyle = `rgba(10, 10, 20, ${Math.max(...spots.map((s) => s.dim)) / 100})`;
+  lx.fillRect(0, 0, base.width, base.height);
+  lx.globalCompositeOperation = 'destination-out';
+  lx.fillStyle = '#000';
+  for (const s of spots) {
+    const r = norm(s);
+    roundRect(lx, r.x, r.y, r.w, r.h, s.radius);
+    lx.fill();
+  }
+  ctx.save();
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.globalAlpha = 1;
+  ctx.drawImage(spotLayer, 0, 0);
+  ctx.restore();
+}
+
 function drawObject(ctx, o) {
   ctx.save();
   ctx.globalAlpha = (o.opacity ?? 100) / 100;
@@ -249,6 +309,10 @@ function drawObject(ctx, o) {
   ctx.strokeStyle = o.color;
   ctx.fillStyle = o.color;
   ctx.lineWidth = o.width;
+  if (DASHABLE.has(o.type) && o.dash && o.dash !== 'solid') {
+    const w = Math.max(1, o.width);
+    ctx.setLineDash(o.dash === 'dotted' ? [0.01, w * 2.2] : [w * 3, w * 2.2]);
+  }
 
   switch (o.type) {
     case 'pen':
@@ -289,10 +353,42 @@ function drawObject(ctx, o) {
     case 'arrow': {
       const len = Math.hypot(o.x2 - o.x1, o.y2 - o.y1);
       const size = arrowHead(ctx, o.x1, o.y1, o.x2, o.y2, o.width);
-      const k = len ? Math.max(0, len - size * 0.7) / len : 0;
+      if (o.heads === 2) arrowHead(ctx, o.x2, o.y2, o.x1, o.y1, o.width);
+      // The shaft stops inside the heads, so its end doesn't poke out of their points.
+      const k1 = len ? Math.max(0, len - size * 0.7) / len : 0;
+      const k0 = o.heads === 2 && len ? Math.min(k1, (size * 0.7) / len) : 0;
       ctx.beginPath();
-      ctx.moveTo(o.x1, o.y1);
-      ctx.lineTo(o.x1 + (o.x2 - o.x1) * k, o.y1 + (o.y2 - o.y1) * k);
+      ctx.moveTo(o.x1 + (o.x2 - o.x1) * k0, o.y1 + (o.y2 - o.y1) * k0);
+      ctx.lineTo(o.x1 + (o.x2 - o.x1) * k1, o.y1 + (o.y2 - o.y1) * k1);
+      ctx.stroke();
+      break;
+    }
+    case 'magnify': {
+      const r = norm(o);
+      const rad = Math.min(r.w, r.h) / 2;
+      if (rad < 2) break;
+      const cx = r.x + r.w / 2, cy = r.y + r.h / 2, z = o.zoom || 2;
+      ctx.globalAlpha = 1;
+      ctx.save();
+      ctx.shadowColor = 'rgba(0,0,0,0.3)';
+      ctx.shadowBlur = rad * 0.25;
+      ctx.shadowOffsetY = rad * 0.06;
+      ctx.beginPath();
+      ctx.arc(cx, cy, rad, 0, Math.PI * 2);
+      ctx.fillStyle = o.color;
+      ctx.fill();
+      ctx.restore();
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(cx, cy, rad, 0, Math.PI * 2);
+      ctx.clip();
+      ctx.imageSmoothingEnabled = true;
+      ctx.drawImage(base, cx - rad / z, cy - rad / z, (rad * 2) / z, (rad * 2) / z, cx - rad, cy - rad, rad * 2, rad * 2);
+      ctx.restore();
+      ctx.beginPath();
+      ctx.arc(cx, cy, rad, 0, Math.PI * 2);
+      ctx.lineWidth = Math.max(2, rad * 0.05);
+      ctx.strokeStyle = o.color;
       ctx.stroke();
       break;
     }
@@ -303,6 +399,7 @@ function drawObject(ctx, o) {
         ctx.fillStyle = o.bg;
         roundRect(ctx, o.x, o.y, L.bw, L.bh, L.pad * 0.8);
         ctx.fill();
+        if (o.tail) bubbleTail(ctx, o, L);
       }
       ctx.font = fontOf(o);
       ctx.fillStyle = o.color;
@@ -393,7 +490,13 @@ function paintImage(ctx, vis = null) {
 function paintObjects(ctx, vis = null) {
   ctx.save();
   ctx.translate(frame.padding, frame.padding);
+  const spots = objects.filter((o) => o.type === 'spotlight');
   for (const o of objects) {
+    if (o.type === 'spotlight') {
+      // All of them at once, where the first one is in the stack.
+      if (o === spots[0]) drawSpotlights(ctx, spots);
+      continue;
+    }
     if (vis) {
       const b = bounds(o);
       const m = (o.width || 0) * 4 + 8; // arrow heads and shadows reach past the bounds
@@ -571,8 +674,10 @@ function bounds(o) {
     return { x: x0 - h, y: y0 - h, w: x1 - x0 + o.width, h: y1 - y0 + o.width };
   }
   if (o.type === 'text') {
-    const L = textLayout(o);
-    return { x: o.x, y: o.y, w: L.bw, h: L.bh };
+    const b = textBox(o);
+    if (!o.tail) return b;
+    const x0 = Math.min(b.x, o.tail.x), y0 = Math.min(b.y, o.tail.y);
+    return { x: x0, y: y0, w: Math.max(b.x + b.w, o.tail.x) - x0, h: Math.max(b.y + b.h, o.tail.y) - y0 };
   }
   if (o.type === 'step') {
     const r = o.size / 2 + stepRing(o) / 2;
@@ -585,8 +690,8 @@ function bounds(o) {
 
 // Handles for resizing: the two ends of a line or arrow; corners and edge midpoints of
 // boxes; corners only for things that keep their proportions (text, steps).
-const UNIFORM = new Set(['text', 'step']);
-const CURSORS = { nw: 'nwse-resize', se: 'nwse-resize', ne: 'nesw-resize', sw: 'nesw-resize', n: 'ns-resize', s: 'ns-resize', e: 'ew-resize', w: 'ew-resize', p1: 'move', p2: 'move' };
+const UNIFORM = new Set(['text', 'step', 'magnify']);
+const CURSORS = { nw: 'nwse-resize', se: 'nwse-resize', ne: 'nesw-resize', sw: 'nesw-resize', n: 'ns-resize', s: 'ns-resize', e: 'ew-resize', w: 'ew-resize', p1: 'move', p2: 'move', tail: 'crosshair' };
 
 /** The box a shape is resized by (without stroke width). */
 function shapeBox(o) {
@@ -595,8 +700,14 @@ function shapeBox(o) {
     for (const [x, y] of o.points) { x0 = Math.min(x0, x); y0 = Math.min(y0, y); x1 = Math.max(x1, x); y1 = Math.max(y1, y); }
     return { x: x0, y: y0, w: x1 - x0, h: y1 - y0 };
   }
-  if (o.type === 'text' || o.type === 'step') return bounds(o);
+  if (o.type === 'text') return textBox(o);
+  if (o.type === 'step') return bounds(o);
   return norm(o);
+}
+
+function textBox(o) {
+  const L = textLayout(o);
+  return { x: o.x, y: o.y, w: L.bw, h: L.bh };
 }
 
 function handles(o) {
@@ -605,7 +716,9 @@ function handles(o) {
   const xs = { w: b.x, c: b.x + b.w / 2, e: b.x + b.w }, ys = { n: b.y, c: b.y + b.h / 2, s: b.y + b.h };
   const all = [['nw', 'w', 'n'], ['ne', 'e', 'n'], ['se', 'e', 's'], ['sw', 'w', 's'], ['n', 'c', 'n'], ['e', 'e', 'c'], ['s', 'c', 's'], ['w', 'w', 'c']];
   const list = UNIFORM.has(o.type) || (o.points && (b.w < 4 || b.h < 4)) ? all.slice(0, 4) : all;
-  return list.map(([id, hx, hy]) => ({ id, x: xs[hx], y: ys[hy] }));
+  const hs = list.map(([id, hx, hy]) => ({ id, x: xs[hx], y: ys[hy] }));
+  if (o.tail) hs.push({ id: 'tail', x: o.tail.x, y: o.tail.y });
+  return hs;
 }
 
 const handleAt = (o, pt) => handles(o).find((h) => Math.hypot(h.x - pt.x, h.y - pt.y) <= 9 / zoom) || null;
@@ -665,21 +778,27 @@ function hits(o, pt) {
     return false;
   }
   const b = bounds(o);
-  return pt.x >= b.x - tol && pt.x <= b.x + b.w + tol && pt.y >= b.y - tol && pt.y <= b.y + b.h + tol;
+  const inside = pt.x >= b.x - tol && pt.x <= b.x + b.w + tol && pt.y >= b.y - tol && pt.y <= b.y + b.h + tol;
+  if (o.type === 'spotlight') {
+    // Only its edge: whatever is in the light stays clickable.
+    const edge = tol + 4 / zoom;
+    return inside && !(pt.x > b.x + edge && pt.x < b.x + b.w - edge && pt.y > b.y + edge && pt.y < b.y + b.h - edge);
+  }
+  return inside;
 }
 
 const topHit = (pt) => [...objects].reverse().find((o) => hits(o, pt)) || null;
 
 function moveObj(o, dx, dy) {
   if (o.points) o.points = o.points.map(([x, y]) => [x + dx, y + dy]);
-  else if (o.type === 'text' || o.type === 'step') { o.x += dx; o.y += dy; }
+  else if (o.type === 'text' || o.type === 'step') { o.x += dx; o.y += dy; if (o.tail) o.tail = { x: o.tail.x + dx, y: o.tail.y + dy }; }
   else { o.x1 += dx; o.y1 += dy; o.x2 += dx; o.y2 += dy; }
 }
 
 function scaleObj(o, sx, sy) {
   const s = (sx + sy) / 2;
   if (o.points) o.points = o.points.map(([x, y]) => [x * sx, y * sy]);
-  else if (o.type === 'text') { o.x *= sx; o.y *= sy; o.size = Math.max(4, Math.round(o.size * sy)); }
+  else if (o.type === 'text') { o.x *= sx; o.y *= sy; o.size = Math.max(4, Math.round(o.size * sy)); if (o.tail) o.tail = { x: o.tail.x * sx, y: o.tail.y * sy }; }
   else if (o.type === 'step') { o.x *= sx; o.y *= sy; o.size = Math.max(8, Math.round(o.size * s)); }
   else { o.x1 *= sx; o.y1 *= sy; o.x2 *= sx; o.y2 *= sy; }
   if (o.width) o.width = Math.max(1, o.width * s);
@@ -712,6 +831,9 @@ function propsFor(type) {
   if (type === 'text') return { ...defaults.text };
   if (type === 'redact') return { ...defaults.redact };
   if (type === 'step') return { color: defaults.step.color, size: defaults.step.size || autoStepSize() };
+  if (type === 'callout') return { ...defaults.callout };
+  if (type === 'spotlight') return { ...defaults.spotlight };
+  if (type === 'magnify') return { ...defaults.magnify };
   const p = { ...defaults.stroke };
   if (type === 'rect' || type === 'ellipse') p.fill = defaults.fill.on ? defaults.fill.color : null;
   return p;
@@ -846,6 +968,16 @@ fg.addEventListener('pointerdown', (e) => {
     return;
   }
 
+  if (tool === 'callout') {
+    // Press on what it points at, drag to where the bubble goes, then type.
+    const o = { type: 'text', ...propsFor('callout'), text: '', x: pt.x, y: pt.y, tail: { x: pt.x, y: pt.y } };
+    objects.push(o);
+    select([o]);
+    drag = { kind: 'callout', o, moved: false };
+    syncStyleUi();
+    return;
+  }
+
   if (tool === 'step') {
     const hit = topHit(pt);
     if (hit?.type === 'step') {
@@ -885,7 +1017,8 @@ fg.addEventListener('pointermove', (e) => {
   const pt = toImage(e);
   if (drag.kind === 'handle') {
     const o = selected;
-    if (drag.h === 'p1') { o.x1 = pt.x; o.y1 = pt.y; }
+    if (drag.h === 'tail') o.tail = { x: pt.x, y: pt.y };
+    else if (drag.h === 'p1') { o.x1 = pt.x; o.y1 = pt.y; }
     else if (drag.h === 'p2') { const q = snapEnd(o, pt, e.shiftKey); o.x2 = q.x; o.y2 = q.y; }
     else applyBox(o, drag.from, drag.box, resizedBox(drag.box, drag.h, pt, UNIFORM.has(o.type) || e.shiftKey));
   } else if (drag.kind === 'marquee') {
@@ -924,10 +1057,14 @@ fg.addEventListener('pointermove', (e) => {
         if (Math.hypot(q.x - lx, q.y - ly) > 1.5 / zoom) o.points.push([q.x, q.y]);
       }
     } else {
-      const q = snapEnd(o, pt, e.shiftKey);
+      const q = snapEnd(o, pt, e.shiftKey || o.type === 'magnify');
       o.x2 = q.x;
       o.y2 = q.y;
     }
+  } else if (drag.kind === 'callout') {
+    drag.o.x = pt.x;
+    drag.o.y = pt.y;
+    drag.moved ||= Math.hypot(pt.x - drag.o.tail.x, pt.y - drag.o.tail.y) > 8 / zoom;
   }
   requestRender();
 });
@@ -944,6 +1081,10 @@ function endDrag() {
       select([]);
     } else commit();
     syncStyleUi();
+  } else if (d.kind === 'callout') {
+    const o = d.o;
+    if (!d.moved) { o.x = o.tail.x + 28 / zoom; o.y = o.tail.y - o.size * 2.6; } // a click: bubble above and to the right
+    editText(o);
   } else if (d.kind === 'handle' || (d.kind === 'move' && d.moved)) {
     commit();
   } else if (d.kind === 'crop' || d.kind === 'crop-move') {
@@ -1025,7 +1166,7 @@ function setTool(t) {
   renderFg();
 }
 
-const TOOL_GROUPS = [['select', 'pan', 'crop'], ['pen', 'highlighter'], ['arrow', 'line', 'rect', 'ellipse'], ['text', 'step', 'redact']];
+const TOOL_GROUPS = [['select', 'pan', 'crop'], ['pen', 'highlighter'], ['arrow', 'line', 'rect', 'ellipse'], ['text', 'callout', 'step'], ['spotlight', 'magnify', 'redact']];
 $('#tools').innerHTML = TOOL_GROUPS.map((g) => g.map((id) => {
   const [, title, key, icon] = TOOLS.find((t) => t[0] === id);
   return `<button class="btn ghost icon" data-tool="${id}" data-tip="${title}  ${key.toUpperCase()}" aria-label="${title}">${icon}</button>`;
@@ -1160,7 +1301,11 @@ function syncStyleUi() {
     : n ? `Selected ${NAMES[type].toLowerCase()}` : NAMES[type];
   if (!type || type === 'crop' || type === 'mixed') return;
   const p = selection[0] || propsFor(type);
+  $('#s-line-opts').classList.toggle('hidden', !DASHABLE.has(type));
+  $('#s-heads-field').classList.toggle('hidden', type !== 'arrow');
   if (groups.includes('stroke')) {
+    $('#s-dash').value = p.dash || 'solid';
+    $('#s-heads').value = String(p.heads || 1);
     $('#s-color').value = p.color;
     $('#s-width').value = p.width;
     $('#s-opacity').value = p.opacity;
@@ -1171,7 +1316,18 @@ function syncStyleUi() {
     $('#s-fill-on').checked = !!p.fill;
     $('#s-fill').value = p.fill || defaults.fill.color;
   }
-  if (type === 'text') {
+  if (type === 'spotlight') {
+    $('#sp-dim').value = p.dim;
+    $('#sp-dim-v').textContent = p.dim + '%';
+    $('#sp-radius').value = p.radius;
+    $('#sp-radius-v').textContent = p.radius + ' px';
+  }
+  if (type === 'magnify') {
+    $('#mg-zoom').value = p.zoom;
+    $('#mg-zoom-v').textContent = p.zoom + '×';
+    $('#mg-color').value = p.color;
+  }
+  if (type === 'text' || type === 'callout') {
     if (![...$('#t-font').options].some((o) => o.value === p.font)) $('#t-font').add(new Option(p.font));
     $('#t-font').value = p.font;
     $('#t-size').value = p.size;
@@ -1199,9 +1355,13 @@ function readStyleUi(type) {
   const p = {};
   if (groups.includes('stroke')) {
     Object.assign(p, { color: $('#s-color').value, width: Number($('#s-width').value), opacity: Number($('#s-opacity').value) });
+    if (DASHABLE.has(type)) p.dash = $('#s-dash').value;
+    if (type === 'arrow') p.heads = Number($('#s-heads').value);
   }
+  if (type === 'spotlight') Object.assign(p, { dim: Number($('#sp-dim').value), radius: Number($('#sp-radius').value) });
+  if (type === 'magnify') Object.assign(p, { zoom: Number($('#mg-zoom').value), color: $('#mg-color').value });
   if (groups.includes('fill')) p.fill = $('#s-fill-on').checked ? $('#s-fill').value : null;
-  if (type === 'text') {
+  if (type === 'text' || type === 'callout') {
     Object.assign(p, {
       font: $('#t-font').value,
       size: clamp(Number($('#t-size').value) || 32, 6, 400),
@@ -1227,11 +1387,17 @@ function onStyleChange() {
     commitSoon();
   }
   if (type === 'highlighter') defaults.hl = { color: p.color, width: p.width, opacity: p.opacity };
+  else if (type === 'text' && selected?.tail) defaults.callout = p;
   else if (type === 'text') defaults.text = p;
+  else if (type === 'callout') defaults.callout = p;
+  else if (type === 'spotlight') { defaults.spotlight = p; $('#sp-dim-v').textContent = p.dim + '%'; $('#sp-radius-v').textContent = p.radius + ' px'; }
+  else if (type === 'magnify') { defaults.magnify = p; $('#mg-zoom-v').textContent = p.zoom + '×'; }
   else if (type === 'redact') defaults.redact = p;
   else if (type === 'step') { defaults.step = p; $('#st-size-v').textContent = p.size + ' px'; }
   else {
-    defaults.stroke = { color: p.color, width: p.width, opacity: p.opacity };
+    defaults.stroke = { ...defaults.stroke, color: p.color, width: p.width, opacity: p.opacity };
+    if (p.dash) defaults.stroke.dash = p.dash;
+    if (p.heads) defaults.stroke.heads = p.heads;
     if ('fill' in p) defaults.fill = { on: !!p.fill, color: p.fill || $('#s-fill').value };
   }
   $('#s-width-v').textContent = Math.round(Number($('#s-width').value)) + ' px';
