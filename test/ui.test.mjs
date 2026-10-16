@@ -691,9 +691,15 @@ export const tests = {
     const under = () => ed.evaluate(([x, y]) => { const r = document.querySelector('#wrap').getBoundingClientRect(); const z = parseFloat(document.querySelector('#zoom-label').textContent) / 100; return [(x - r.left) / z, (y - r.top) / z]; }, pt);
     const a = await under();
     const info = await ed.evaluate(([x, y]) => {
-      const stage = document.querySelector('#stage');
+      const stage = document.querySelector('#stage'), wrap = document.querySelector('#wrap');
+      const errors = [];
+      const onError = (e) => errors.push(e.message);
+      addEventListener('error', onError);
       for (let i = 0; i < 3; i++) stage.dispatchEvent(new WheelEvent('wheel', { deltaY: -50, clientX: x, clientY: y, ctrlKey: true, bubbles: true, cancelable: true }));
-      return { zoom: document.querySelector('#zoom-label').textContent, scroll: [stage.scrollLeft, stage.scrollTop], max: [stage.scrollWidth - stage.clientWidth, stage.scrollHeight - stage.clientHeight] };
+      removeEventListener('error', onError);
+      const r = wrap.getBoundingClientRect();
+      return { zoom: document.querySelector('#zoom-label').textContent, scroll: [stage.scrollLeft, stage.scrollTop], max: [stage.scrollWidth - stage.clientWidth, stage.scrollHeight - stage.clientHeight],
+        wrapStyle: [wrap.style.width, wrap.style.height], wrapRect: [Math.round(r.width), Math.round(r.height)], display: getComputedStyle(wrap).display, stageClass: stage.className, errors };
     }, pt);
     const b = await under();
     ok(Math.hypot(a[0] - b[0], a[1] - b[1]) < 3, `point under the pointer moved from ${a.map(Math.round)} to ${b.map(Math.round)} (${JSON.stringify(info)})`);
