@@ -528,6 +528,61 @@ export const tests = {
     await pop.close();
   },
 
+  async 'export presets: built in, saved, applied, and custom once changed'({ browser, url }) {
+    const lab = await open(browser, url('lab/lab.html'));
+    const id = await lab.evaluate(async () => {
+      const { putCapture } = await import('/lib/db.js');
+      await chrome.storage.local.remove(['exportPresets', 'lastExport', 'settings']);
+      const c = new OffscreenCanvas(600, 400);
+      c.getContext('2d').fillRect(0, 0, 50, 50);
+      return putCapture(await c.convertToBlob(), { title: 'Presets', mode: 'visible' });
+    });
+    await lab.close();
+    const ed = await open(browser, url(`editor/editor.html?id=${id}&reopen=1`), { width: 1280, height: 900 });
+    const ready = () => ed.waitForFunction(() => /px/.test(document.querySelector('#doc-dims').textContent) && document.querySelector('.preset-select option'), { polling: 100 });
+    await ready();
+    await ed.evaluate(() => document.querySelector('[data-pane="export"]').click());
+    const state = () => ed.evaluate(() => ({
+      preset: document.querySelector('.preset-select').value,
+      format: document.querySelector('#x-format').value,
+      limit: document.querySelector('#x-limit').value,
+      scale: document.querySelector('#x-scale').value,
+      quality: document.querySelector('#x-quality').value,
+      device: document.querySelector('#device-panel [data-k="enabled"]').checked,
+      mine: [...document.querySelectorAll('.preset-select optgroup[label="Yours"] option')].map((o) => o.textContent),
+    }));
+    await ed.select('.preset-select', 'email');
+    let st = await state();
+    ok(st.format === 'jpeg' && st.limit === '1024' && st.quality === '85' && st.preset === 'email', `email preset: ${JSON.stringify(st)}`);
+    await ed.select('.preset-select', 'mockup');
+    st = await state();
+    ok(st.format === 'png' && st.device, `mock-up preset turns the device frame on: ${JSON.stringify(st)}`);
+    // Changing something by hand makes it custom.
+    await ed.select('#x-scale', '0.5');
+    st = await state();
+    ok(st.preset === '', `after a change: ${st.preset}`);
+    // Save it as a preset of your own; it is there next time, and can be deleted.
+    await ed.select('.preset-select', '__save');
+    await ed.waitForFunction(() => document.activeElement.classList.contains('preset-name'), { polling: 100 });
+    await ed.keyboard.type('Half-size mock-up');
+    await ed.keyboard.press('Enter');
+    st = await state();
+    ok(st.mine.join() === 'Half-size mock-up' && st.preset.startsWith('u'), `saved: ${JSON.stringify(st)}`);
+    await ed.select('.preset-select', 'review');
+    ok((await state()).scale === '1' && !(await state()).device, 'design review: full size, no frame');
+    await ed.reload();
+    await ready();
+    await ed.evaluate(() => document.querySelector('[data-pane="export"]').click());
+    const mine = await ed.$eval('.preset-select optgroup[label="Yours"] option', (o) => o.value);
+    await ed.select('.preset-select', mine);
+    st = await state();
+    ok(st.scale === '0.5' && st.device && st.format === 'png', `your preset applied: ${JSON.stringify(st)}`);
+    await ed.click('.preset-delete');
+    ok(!(await state()).mine.length, 'deleted');
+    await ed.evaluate(() => chrome.storage.local.remove(['exportPresets', 'lastExport', 'device', 'deviceOpts']));
+    await ed.close();
+  },
+
   async 'countdown shows the chosen seconds and Esc cancels it'({ browser, url }) {
     const p = await open(browser, url('popup/popup.html'), { width: 800, height: 600 });
     const r = await p.evaluate(async () => {

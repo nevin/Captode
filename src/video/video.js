@@ -3,6 +3,7 @@ import { GifEncoder } from '../lib/gif.js';
 import { buildPalette } from '../lib/quantize.js';
 import { getSettings } from '../lib/settings.js';
 import { recall, remember, rememberControls } from '../lib/remember.js';
+import { mountPresets } from '../lib/presets.js';
 import { WebpAnimEncoder } from '../lib/webp.js';
 import { mountDevicePanel, deviceRenderer, frameDrawer } from '../lib/device.js';
 import { toast, enhance, fmtBytes } from '../lib/ui.js';
@@ -132,20 +133,22 @@ function showPreview(which) {
   $('#timeline').classList.toggle('hidden', which !== 'player');
 }
 
-$('#formats').addEventListener('click', (e) => {
-  const f = e.target.closest('button')?.dataset.f;
-  if (!f || busy) return;
+/** Switches format, with that format's resolution and frame rate as last used. */
+async function setFormat(f) {
   format = f;
   remember('video', { format: f });
   fillResolutions(true);
   fillFps(true);
-  // This format's resolution and frame rate, as last used.
-  recall('video').then((last) => {
-    const per = last.controls?.[f] || {};
-    for (const id of ['res', 'fps']) if ([...$('#' + id).options].some((o) => o.value === per[id])) $('#' + id).value = per[id];
-    syncUi();
-  });
   syncUi();
+  const per = (await recall('video')).controls?.[f] || {};
+  for (const id of ['res', 'fps']) if ([...$('#' + id).options].some((o) => o.value === per[id])) $('#' + id).value = per[id];
+  syncUi();
+}
+$('#formats').addEventListener('click', (e) => {
+  const f = e.target.closest('button')?.dataset.f;
+  if (!f || busy) return;
+  setFormat(f);
+  document.querySelector('.inspector').dispatchEvent(new Event('change')); // no longer a preset
 });
 document.querySelector('.inspector').addEventListener('input', (e) => {
   if (e.target.closest('#device-panel')) return; // handled by the panel's own callback
@@ -616,7 +619,38 @@ $('#dl-original').addEventListener('click', () => source && save(source, `captod
   if (!document.querySelector(`#formats [data-f="${format}"]`)) format = 'mp4';
   fillResolutions(true);
   fillFps(true);
-  rememberControls('video', ['v-quality', 'g-colors', 'g-dither', 'g-lossy', 'w-quality', 'w-lossless', 'optimize'], last.controls);
+  const CONTROLS = ['v-quality', 'g-colors', 'g-dither', 'g-lossy', 'w-quality', 'w-lossless', 'optimize'];
+  rememberControls('video', CONTROLS, last.controls);
+  mountPresets($('#presets'), {
+    kind: 'video',
+    watch: document.querySelector('.inspector'),
+    capture: () => {
+      const d = device.get();
+      return {
+        format,
+        controls: Object.fromEntries([...CONTROLS, 'res', 'fps'].map((id) => [id, $('#' + id).type === 'checkbox' ? $('#' + id).checked : $('#' + id).value])),
+        device: { enabled: d.enabled, device: d.device, size: d.size, orientation: d.orientation, fit: d.fit, frame: d.frame, statusBar: d.statusBar },
+      };
+    },
+    apply: async (p) => {
+      if (p.device) {
+        device.set(p.device);
+        if (p.device.enabled) $('#device-section').open = true;
+      }
+      await setFormat(p.format);
+      for (const [id, v] of Object.entries(p.controls || {})) {
+        const el = $('#' + id);
+        if (!el) continue;
+        if (el.type === 'checkbox') el.checked = !!v;
+        // Resolutions larger than the recording aren't offered: use the nearest below.
+        else if (id === 'res' && ![...el.options].some((o) => o.value === String(v))) el.value = [...el.options].map((o) => o.value).filter((x) => Number(x) <= Number(v)).at(-1) || '0';
+        else if (el.tagName !== 'SELECT' || [...el.options].some((o) => o.value === String(v))) el.value = v;
+        el.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+      remember('video', { controls: { [format]: { res: $('#res').value, fps: $('#fps').value } } });
+      syncUi();
+    },
+  });
   // Resolution and frame rate are per format (GIF defaults smaller and slower).
   const perFormat = last.controls?.[format] || {};
   for (const id of ['res', 'fps']) if ([...$('#' + id).options].some((o) => o.value === perFormat[id])) $('#' + id).value = perFormat[id];

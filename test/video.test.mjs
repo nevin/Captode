@@ -292,4 +292,17 @@ export const tests = {
     await page.evaluate(() => chrome.storage.local.remove('lastExport'));
     await page.close();
   },
+
+  async 'video presets set the format, resolution and frame rate'({ browser, url, clip }) {
+    const page = await open(browser, url(`video/video.html?id=${clip}`), { width: 1440, height: 900 });
+    await page.waitForFunction(() => /fps/.test(document.querySelector('#dims').textContent) && document.querySelector('.preset-select option'), { polling: 100 });
+    await page.select('.preset-select', 'chat-gif');
+    await page.waitForFunction(() => document.querySelector('#formats .on')?.dataset.f === 'gif', { polling: 100 });
+    const got = await page.evaluate(() => [document.querySelector('#res').value, document.querySelector('#fps').value, document.querySelector('#g-lossy').value].join());
+    ok(got === '480,15,20', `chat GIF: ${got}`);
+    await page.click('#formats [data-f="mp4"]');
+    ok(await page.$eval('.preset-select', (e) => e.value) === '', 'choosing a format by hand makes it custom');
+    await page.evaluate(() => chrome.storage.local.remove('lastExport'));
+    await page.close();
+  },
 };

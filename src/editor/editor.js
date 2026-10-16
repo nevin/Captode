@@ -1,4 +1,5 @@
 import { recall, remember, rememberControls } from '../lib/remember.js';
+import { mountPresets } from '../lib/presets.js';
 import { getCapture, listCaptures, deleteCapture, restoreCapture, saveEdits } from '../lib/db.js';
 import { encodeOffThread } from '../lib/encoder.js';
 import { mountDevicePanel, renderInDevice } from '../lib/device.js';
@@ -1774,6 +1775,9 @@ $('#delete').addEventListener('click', deleteSelected);
 
 // ---------- export ----------
 
+/** The export options remembered between visits and kept in presets. */
+const EXPORT_CONTROLS = ['x-quality', 'x-colors', 'x-dither', 'x-lossy', 'x-page', 'x-split', 'x-scale', 'x-limit'];
+
 const EXT = { png: 'png', png8: 'png', jpeg: 'jpg', webp: 'webp', avif: 'avif', gif: 'gif', bmp: 'bmp', pdf: 'pdf' };
 
 const FORMAT_INFO = {
@@ -2096,11 +2100,34 @@ document.addEventListener('keydown', (e) => {
     const wanted = settings.imageFormat === 'last' ? last.format || 'png' : settings.imageFormat;
     const fmt = $('#x-format').querySelector(`option[value="${wanted}"]`);
     if (fmt && !fmt.hidden) $('#x-format').value = wanted;
-    rememberControls('image', ['x-quality', 'x-colors', 'x-dither', 'x-lossy', 'x-page', 'x-split', 'x-scale', 'x-limit'], last.controls);
+    rememberControls('image', EXPORT_CONTROLS, last.controls);
     $('#x-format').addEventListener('change', () => remember('image', { format: $('#x-format').value }));
     device = await mountDevicePanel($('#device-panel'), () => refreshExport(), {
       source: () => (base ? [fullW(), fullH()] : null),
       picture: async (width) => (base ? smallPicture(width) : null),
+    });
+    mountPresets($('#presets'), {
+      kind: 'image',
+      watch: $('#pane-export'),
+      capture: () => {
+        const d = device.get();
+        return {
+          format: $('#x-format').value,
+          controls: Object.fromEntries(EXPORT_CONTROLS.map((id) => [id, $('#' + id).type === 'checkbox' ? $('#' + id).checked : $('#' + id).value])),
+          device: { enabled: d.enabled, device: d.device, size: d.size, orientation: d.orientation, fit: d.fit, frame: d.frame, statusBar: d.statusBar },
+        };
+      },
+      apply: (p) => {
+        const set = (id, v) => {
+          const el = $('#' + id);
+          if (el.type === 'checkbox') el.checked = !!v; else el.value = v;
+          el.dispatchEvent(new Event('input', { bubbles: true }));
+          el.dispatchEvent(new Event('change', { bubbles: true }));
+        };
+        if ($('#x-format').querySelector(`option[value="${p.format}"]:not([hidden])`)) set('x-format', p.format);
+        for (const [id, v] of Object.entries(p.controls || {})) if ($('#' + id)) set(id, v);
+        if (p.device) device.set(p.device);
+      },
     });
   } else {
     $('#device-panel').textContent = 'Available when running as the extension.';

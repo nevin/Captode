@@ -351,3 +351,9 @@ dialog.modal:focus-visible { outline: none; }
   :focus-visible { outline-color: Highlight; }
   .handle, .range, .playhead { forced-color-adjust: none; }
 }
+
+/* Export presets */
+.preset-field .row { display: flex; gap: 6px; }
+.preset-field select { flex: 1; min-width: 0; }
+.preset-save { display: flex; gap: 6px; margin: -4px 0 12px; }
+.preset-save input { flex: 1; min-width: 0; }

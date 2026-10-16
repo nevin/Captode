@@ -494,7 +494,18 @@ export async function mountDevicePanel(el, onChange, { source, picture } = {}) {
     const t = e.target;
     apply(k, t.type === 'checkbox' ? t.checked : t.type === 'range' ? Number(t.value) : t.value);
   });
-  return { get: () => ({ ...o }), refresh: sync };
+  /** Changes several options at once (from a preset). */
+  const set = (patch) => {
+    Object.assign(o, normalise({ ...o, ...patch }));
+    for (const input of el.querySelectorAll('[data-k]')) {
+      const k = input.dataset.k;
+      if (input.type === 'checkbox') input.checked = !!o[k];
+      else input.value = o[k];
+    }
+    picker.set(o.device);
+    apply('enabled', o.enabled);
+  };
+  return { get: () => ({ ...o }), refresh: sync, set };
 }
 
 /**
