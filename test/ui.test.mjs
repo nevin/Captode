@@ -36,7 +36,7 @@ export const tests = {
   async 'editor: draw, download label, unsaved-changes guard, shortcuts sheet'({ editor }) {
     const ed = await editor();
     ok(/Download PNG/.test(await ed.evaluate(() => document.querySelector('#download').textContent)), 'download button names the format');
-    const b = await ed.evaluate(() => { const r = document.querySelector('#fg').getBoundingClientRect(); return { x: r.x, y: r.y, w: r.width, h: r.height }; });
+    const b = await ed.evaluate(() => { const r = document.querySelector('#wrap').getBoundingClientRect(); return { x: r.x, y: r.y, w: r.width, h: r.height }; });
     await ed.keyboard.press('r');
     await ed.mouse.move(b.x + b.w * 0.3, b.y + b.h * 0.3);
     await ed.mouse.down();
@@ -237,7 +237,7 @@ export const tests = {
 
   async 'editor: step numbers count up, can be renumbered, and undo'({ editor }) {
     const ed = await editor();
-    const b = await ed.evaluate(() => { const c = document.querySelector('#fg'); const r = c.getBoundingClientRect(); return { x: r.x, y: r.y, w: r.width, h: r.height, k: c.width / r.width }; });
+    const b = await ed.evaluate(() => { const r = document.querySelector('#wrap').getBoundingClientRect(); return { x: r.x, y: r.y, w: r.width, h: r.height }; });
     const at = (fx, fy) => [b.x + b.w * fx, b.y + b.h * fy];
     const panel = () => ed.evaluate(() => ({ label: document.querySelector('#st-n-label').textContent, n: document.querySelector('#st-n').value, size: Number(document.querySelector('#st-size').value) }));
     await ed.keyboard.press('n');
@@ -246,9 +246,8 @@ export const tests = {
     let p = await panel();
     ok(p.label === 'Number' && p.n === '3', `after three clicks the selected step shows ${p.label} ${p.n}`);
     // Three circles in the chosen colour (#e5484d) are drawn.
-    const red = await ed.evaluate(() => {
-      const c = document.querySelector('#fg');
-      const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
+    const red = await ed.evaluate(async () => {
+      const d = (await captodeEditor.render()).data;
       let n = 0;
       for (let i = 0; i < d.length; i += 4) if (Math.abs(d[i] - 0xe5) < 12 && Math.abs(d[i + 1] - 0x48) < 12 && Math.abs(d[i + 2] - 0x4d) < 12 && d[i + 3] > 250) n++;
       return n;
@@ -300,7 +299,7 @@ export const tests = {
     };
     const clear = async () => { await page.bringToFront(); await page.evaluate(() => navigator.clipboard.writeText('before')); };
     const ed = await editor();
-    const size = await ed.evaluate(() => [document.querySelector('#bg').width, document.querySelector('#bg').height]);
+    const size = await ed.evaluate(() => captodeEditor.size());
     await clear();
     await ed.bringToFront();
     await ed.evaluate(() => document.querySelector('#tab-export').click());
@@ -327,8 +326,8 @@ export const tests = {
 
   async 'editor: undo all, and bring the changes back'({ editor }) {
     const ed = await editor();
-    const b = await ed.evaluate(() => { const r = document.querySelector('#fg').getBoundingClientRect(); return { x: r.x, y: r.y, w: r.width, h: r.height }; });
-    const drawn = () => ed.evaluate(() => { const c = document.querySelector('#fg'); const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data; let n = 0; for (let i = 3; i < d.length; i += 4) if (d[i]) n++; return n; });
+    const b = await ed.evaluate(() => { const r = document.querySelector('#wrap').getBoundingClientRect(); return { x: r.x, y: r.y, w: r.width, h: r.height }; });
+    const drawn = () => ed.evaluate(() => captodeEditor.objects().length);
     const disabled = (id) => ed.evaluate((id) => document.getElementById(id).disabled, id);
     ok(await disabled('undo-all'), 'Undo all is enabled before any change');
     await ed.keyboard.press('r');
@@ -387,6 +386,108 @@ export const tests = {
     await dragBy(-50, -30, 'middle');
     after = await scroll();
     ok(Math.abs(after[0] - before[0] - 50) <= 2, `middle-button drag scrolled ${before} → ${after}`);
+    await ed.close();
+  },
+
+  async 'editor: large captures draw only what is on screen, correctly'({ browser, url }) {
+    const ed = await open(browser, url('editor/editor.html'), { width: 1440, height: 900 });
+    await ed.bringToFront();
+    await ed.evaluate(async () => {
+      // 2560 × 24000: a long page on a high-resolution screen. Each 100-px band has its own colour.
+      const c = new OffscreenCanvas(2560, 24000); const x = c.getContext('2d');
+      for (let y = 0; y < 24000; y += 100) { x.fillStyle = `rgb(${(y / 100) % 256}, ${(y / 37) % 256 | 0}, 120)`; x.fillRect(0, y, 2560, 100); }
+      const dt = new DataTransfer(); dt.items.add(new File([await c.convertToBlob()], 'long.png', { type: 'image/png' }));
+      document.dispatchEvent(new ClipboardEvent('paste', { clipboardData: dt }));
+    });
+    await ed.waitForFunction(() => captodeEditor.size()?.[1] === 24000, { polling: 100, timeout: 60000 });
+    await ed.evaluate(() => document.querySelector('#zoom-label').click()); // 100%
+    await sleep(200);
+    // Scroll deep into the image and compare what's drawn with the image itself.
+    const r = await ed.evaluate(async () => {
+      const stage = document.querySelector('#stage');
+      stage.scrollTop = 20000;
+      await new Promise((res) => requestAnimationFrame(() => requestAnimationFrame(res)));
+      const bg = document.querySelector('#bg');
+      const canvasPx = [...document.querySelectorAll('#wrap canvas')].reduce((n, c) => n + c.width * c.height, 0);
+      // The pixel in the middle of the visible canvas, and where it is in the image.
+      const br = bg.getBoundingClientRect(), wr = document.querySelector('#wrap').getBoundingClientRect();
+      const cx = br.left + br.width / 2, cy = br.top + br.height / 2;
+      const drawn = [...bg.getContext('2d').getImageData(Math.round(bg.width / 2), Math.round(bg.height / 2), 1, 1).data];
+      const ix = Math.round(cx - wr.left), iy = Math.round(cy - wr.top);
+      const want = [...captodeEditor.pixels().data.subarray((iy * 2560 + ix) * 4, (iy * 2560 + ix) * 4 + 4)];
+      return { canvasPx, viewport: innerWidth * innerHeight * devicePixelRatio ** 2, drawn, want, iy };
+    });
+    ok(r.canvasPx <= r.viewport * 2.2, `canvases hold ${r.canvasPx} px for a ${r.viewport} px window`);
+    ok(r.iy > 19000 && r.drawn.every((v, i) => Math.abs(v - r.want[i]) <= 2), `at row ${r.iy}: drawn ${r.drawn}, image has ${r.want}`);
+    await ed.close();
+  },
+
+  async 'editor: blur changes only its area, and undo stays within its memory budget'({ editor }) {
+    const ed = await editor();
+    const b = await ed.evaluate(() => { const r = document.querySelector('#wrap').getBoundingClientRect(); return { x: r.x, y: r.y, w: r.width, h: r.height }; });
+    await ed.keyboard.press('b');
+    await ed.evaluate(() => { const s = document.querySelector('#r-mode'); s.value = 'blur'; s.dispatchEvent(new Event('input', { bubbles: true })); });
+    await ed.mouse.move(b.x + b.w * 0.1, b.y + b.h * 0.1);
+    await ed.mouse.down();
+    await ed.mouse.move(b.x + b.w * 0.5, b.y + b.h * 0.5, { steps: 4 });
+    await ed.mouse.up();
+    const r = await ed.evaluate(async () => {
+      const a = captodeEditor.pixels(), f = await captodeEditor.render();
+      const o = captodeEditor.objects()[0];
+      const x0 = Math.round(Math.min(o.x1, o.x2)), y0 = Math.round(Math.min(o.y1, o.y2)), x1 = Math.round(Math.max(o.x1, o.x2)), y1 = Math.round(Math.max(o.y1, o.y2));
+      let inside = 0, outside = 0;
+      for (let y = 0; y < a.height; y += 3) for (let x = 0; x < a.width; x += 3) {
+        const i = (y * a.width + x) * 4;
+        const d = Math.abs(a.data[i] - f.data[i]) + Math.abs(a.data[i + 1] - f.data[i + 1]) + Math.abs(a.data[i + 2] - f.data[i + 2]);
+        if (x >= x0 && x < x1 && y >= y0 && y < y1) inside += d > 0; else outside += d > 0;
+      }
+      return { inside, outside };
+    });
+    ok(r.inside > 100 && r.outside === 0, `blur changed ${r.inside} pixels inside and ${r.outside} outside`);
+    // Undo memory: resizing a capture keeps a copy per step; old ones go past the budget.
+    await ed.evaluate(() => document.querySelector('#tab-adjust').click());
+    for (const w of [12000, 11000, 10000, 9000, 8000]) {
+      await ed.evaluate((w) => { const i = document.querySelector('#rs-w'); i.value = w; i.dispatchEvent(new Event('input', { bubbles: true })); document.querySelector('#rs-apply').click(); }, w);
+      await ed.waitForFunction((w) => captodeEditor.size()[0] === w, { polling: 100, timeout: 30000 }, w);
+    }
+    const h = await ed.evaluate(() => captodeEditor.history());
+    ok(h.steps < 7 && h.index === h.steps - 1, `history kept ${h.steps} steps of big images`);
+    await ed.keyboard.down('Control'); await ed.keyboard.press('z'); await ed.keyboard.up('Control');
+    await ed.keyboard.down('Meta'); await ed.keyboard.press('z'); await ed.keyboard.up('Meta');
+    ok([9000, 10000].includes((await ed.evaluate(() => captodeEditor.size()))[0]), 'undo after trimming did not go back a step');
+    await ed.evaluate(() => { window.onbeforeunload = null; });
+    await ed.close();
+  },
+
+  async 'editor: resize handles for shapes, text and steps'({ editor }) {
+    const ed = await editor();
+    await ed.evaluate(() => document.querySelector('#zoom-label').click()); // 100%: image px = CSS px
+    await sleep(100);
+    const wrap = () => ed.evaluate(() => { const r = document.querySelector('#wrap').getBoundingClientRect(); return { x: r.x, y: r.y }; });
+    let w = await wrap();
+    const at = (x, y) => [w.x + x, w.y + y];
+    const dragFrom = async (from, to) => { await ed.mouse.move(...from); await ed.mouse.down(); await ed.mouse.move(...to, { steps: 4 }); await ed.mouse.up(); };
+    // Rectangle: drag its bottom-right corner, then its left edge.
+    await ed.keyboard.press('r');
+    await dragFrom(at(100, 100), at(300, 200));
+    await ed.keyboard.press('v');
+    await dragFrom(at(300, 200), at(400, 260));
+    let o = (await ed.evaluate(() => captodeEditor.objects()))[0];
+    ok(Math.abs(o.x2 - 400) <= 1 && Math.abs(o.y2 - 260) <= 1 && Math.abs(o.x1 - 100) <= 1, `corner drag gave ${JSON.stringify(o)}`);
+    await dragFrom(at(100, 180), at(150, 120));
+    o = (await ed.evaluate(() => captodeEditor.objects()))[0];
+    ok(Math.abs(Math.min(o.x1, o.x2) - 150) <= 1 && Math.abs(o.y1 - 100) <= 1 && Math.abs(o.y2 - 260) <= 1, `edge drag gave ${JSON.stringify(o)}`);
+    // Step: its corner scales it, keeping it round.
+    await ed.keyboard.press('n');
+    await ed.mouse.click(...at(600, 400));
+    const step = (await ed.evaluate(() => captodeEditor.objects())).at(-1);
+    await ed.keyboard.press('v');
+    await ed.mouse.click(...at(600, 400));
+    const half = step.size / 2 + Math.max(1.5, step.size * 0.06) / 2;
+    await dragFrom(at(600 + half, 400 + half), at(600 + half * 2, 400 + half * 2));
+    const bigger = (await ed.evaluate(() => captodeEditor.objects())).at(-1);
+    ok(bigger.size > step.size * 1.4, `step size ${step.size} → ${bigger.size}`);
+    await ed.evaluate(() => { window.onbeforeunload = null; });
     await ed.close();
   },
 };

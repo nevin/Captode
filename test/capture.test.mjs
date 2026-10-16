@@ -33,7 +33,7 @@ export async function setup({ browser, url, site }) {
       const error = await ctl.evaluate(async () => (await chrome.storage.session.get('lastError')).lastError);
       throw new Error(`editor did not show the capture: ${JSON.stringify(state)}, lastError ${error}`);
     }
-    const size = await ed.evaluate(() => [document.querySelector('#bg').width, document.querySelector('#bg').height]);
+    const size = await ed.evaluate(() => captodeEditor.size());
     const error = await ctl.evaluate(async () => (await chrome.storage.session.get('lastError')).lastError);
     ok(!error, `capture reported an error: ${error}`);
     return { ed, size };
@@ -110,8 +110,8 @@ export const tests = {
       const ed = await waitForTab(browser, (u) => u.includes('editor.html?id='));
       await ed.waitForFunction(() => /px/.test(document.querySelector('#doc-dims').textContent), { timeout: 30000, polling: 100 });
       const r = await ed.evaluate(async (b64) => {
-        const bg = document.querySelector('#bg');
-        const ours = bg.getContext('2d', { willReadFrequently: true }).getImageData(0, 0, bg.width, bg.height).data;
+        const bg = captodeEditor.pixels();
+        const ours = bg.data;
         const img = await createImageBitmap(await (await fetch('data:image/png;base64,' + b64)).blob());
         const c = new OffscreenCanvas(img.width, img.height).getContext('2d', { willReadFrequently: true });
         c.drawImage(img, 0, 0);
@@ -184,7 +184,7 @@ export const tests = {
       await page.mouse.up();
       const ed2 = await waitForTab(browser, (u) => u.includes('editor.html?id='));
       await ed2.waitForFunction(() => /px/.test(document.querySelector('#doc-dims').textContent), { timeout: 30000, polling: 100 });
-      const area = await ed2.evaluate(() => [document.querySelector('#bg').width, document.querySelector('#bg').height]);
+      const area = await ed2.evaluate(() => captodeEditor.size());
       near(area[0], 300 * scale, 1, `${scale * 100}%: area width`);
       near(area[1], 200 * scale, 1, `${scale * 100}%: area height`);
       notes.push(`${scale * 100}% ${r.ours.join('×')}`);

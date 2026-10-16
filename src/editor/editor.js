@@ -100,12 +100,29 @@ function snapshot() {
   return { base, objects: structuredClone(objs), frame: { ...frame } };
 }
 
+// Undo keeps a reference to the image in each step, so crops and resizes each hold a
+// full copy. Old steps go once those copies pass this budget (or 100 steps).
+const HISTORY_BYTES = 768 * 2 ** 20;
+const HISTORY_STEPS = 100;
+
+function trimHistory() {
+  while (history.length > 2) {
+    const images = new Set(history.map((s) => s.base));
+    if (original) images.add(original.base); // kept for Undo all anyway
+    let bytes = 0;
+    for (const im of images) bytes += im.width * im.height * 4;
+    if (bytes <= HISTORY_BYTES && history.length <= HISTORY_STEPS) return;
+    history.shift();
+    hIndex--;
+  }
+}
+
 function commit() {
   if (hIndex >= 0) dirty = true;
   history.splice(hIndex + 1);
   history.push(snapshot());
-  if (history.length > 80) history.shift();
   hIndex = history.length - 1;
+  trimHistory();
   updateButtons();
   refreshExport();
 }
@@ -136,7 +153,7 @@ function undoAll() {
   updateButtons();
   toast('All changes undone', { action: { label: 'Undo', run: undo }, ms: 6000 });
 }
-const atOriginal = () => hIndex <= 0 || !!history[hIndex]?.reverted;
+const atOriginal = () => history[hIndex] === original || !!history[hIndex]?.reverted;
 function redo() { if (hIndex < history.length - 1) restore(history[++hIndex]); }
 
 function updateButtons() {
@@ -188,6 +205,31 @@ function luminance(hex) {
   const v = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255)
     .map((c) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4));
   return 0.2126 * v[0] + 0.7152 * v[1] + 0.0722 * v[2];
+}
+
+// Blurred or pixelated areas, worked out once and reused until they move or change:
+// recomputing them on every frame made dragging stutter on large captures.
+const redactCache = new WeakMap();
+
+function redactLayer(o, x, y, w, h) {
+  const key = `${x},${y},${w},${h},${o.mode},${o.strength}`;
+  const hit = redactCache.get(o);
+  if (hit && hit.key === key && hit.base === base) return hit.layer;
+  const layer = canvas(w, h);
+  const lx = layer.getContext('2d');
+  if (o.mode === 'blur') {
+    lx.filter = `blur(${o.strength}px)`;
+    const m = o.strength * 2;
+    lx.drawImage(base, x - m, y - m, w + m * 2, h + m * 2, -m, -m, w + m * 2, h + m * 2);
+  } else {
+    const b = o.strength;
+    const tiny = canvas(Math.ceil(w / b), Math.ceil(h / b));
+    tiny.getContext('2d').drawImage(base, x, y, w, h, 0, 0, tiny.width, tiny.height);
+    lx.imageSmoothingEnabled = false;
+    lx.drawImage(tiny, 0, 0, tiny.width, tiny.height, 0, 0, w, h);
+  }
+  redactCache.set(o, { key, base, layer });
+  return layer;
 }
 
 function drawObject(ctx, o) {
@@ -292,19 +334,9 @@ function drawObject(ctx, o) {
       if (o.mode === 'solid') {
         ctx.fillStyle = '#111';
         ctx.fillRect(x, y, w, h);
-      } else if (o.mode === 'blur') {
-        ctx.beginPath();
-        ctx.rect(x, y, w, h);
-        ctx.clip();
-        ctx.filter = `blur(${o.strength}px)`;
-        const m = o.strength * 2;
-        ctx.drawImage(base, x - m, y - m, w + m * 2, h + m * 2, x - m, y - m, w + m * 2, h + m * 2);
       } else {
-        const b = o.strength;
-        const tiny = canvas(Math.ceil(w / b), Math.ceil(h / b));
-        tiny.getContext('2d').drawImage(base, x, y, w, h, 0, 0, tiny.width, tiny.height);
-        ctx.imageSmoothingEnabled = false;
-        ctx.drawImage(tiny, 0, 0, tiny.width, tiny.height, x, y, w, h);
+        ctx.imageSmoothingEnabled = o.mode === 'blur';
+        ctx.drawImage(redactLayer(o, x, y, w, h), x, y);
       }
       break;
     }
@@ -312,7 +344,7 @@ function drawObject(ctx, o) {
   ctx.restore();
 }
 
-function paintImage(ctx) {
+function paintImage(ctx, vis = null) {
   const p = frame.padding;
   const W = fullW(), H = fullH();
   const r = frame.radius;
@@ -335,23 +367,97 @@ function paintImage(ctx) {
   }
   ctx.save();
   if (r > 0) { roundRect(ctx, p, p, base.width, base.height, r); ctx.clip(); }
-  ctx.drawImage(base, p, p);
+  if (vis) {
+    // Only the part of the image in view: a long capture can be tens of thousands of
+    // pixels tall.
+    const sx = clamp(Math.floor(vis.x - p), 0, base.width), sy = clamp(Math.floor(vis.y - p), 0, base.height);
+    const sw = clamp(Math.ceil(vis.x + vis.w - p), 0, base.width) - sx;
+    const sh = clamp(Math.ceil(vis.y + vis.h - p), 0, base.height) - sy;
+    if (sw > 0 && sh > 0) ctx.drawImage(base, sx, sy, sw, sh, sx + p, sy + p, sw, sh);
+  } else {
+    ctx.drawImage(base, p, p);
+  }
   ctx.restore();
 }
 
-function paintObjects(ctx) {
+/** Draws the annotations; with `vis` (in image-with-padding coordinates), only those in view. */
+function paintObjects(ctx, vis = null) {
   ctx.save();
   ctx.translate(frame.padding, frame.padding);
-  for (const o of objects) drawObject(ctx, o);
+  for (const o of objects) {
+    if (vis) {
+      const b = bounds(o);
+      const m = (o.width || 0) * 4 + 8; // arrow heads and shadows reach past the bounds
+      const vx = vis.x - frame.padding, vy = vis.y - frame.padding;
+      if (b.x - m > vx + vis.w || b.x + b.w + m < vx || b.y - m > vy + vis.h || b.y + b.h + m < vy) continue;
+    }
+    drawObject(ctx, o);
+  }
   ctx.restore();
 }
 
-function renderBg() { paintImage(bctx); }
+// ---------- the view ----------
+// The editor draws only what is on screen: two canvases the size of the visible part
+// of the image sit inside #wrap, which has the full zoomed size so the stage scrolls
+// as if the whole image were there.
+
+let view = { x: 0, y: 0, w: 0, h: 0, dpr: 1 }; // the visible part of #wrap, in CSS px
+let rafId = 0;
+let bgDirty = false;
+
+function updateView() {
+  const W = fullW() * zoom, H = fullH() * zoom;
+  const sr = stage.getBoundingClientRect(), wr = wrap.getBoundingClientRect();
+  const x0 = Math.floor(clamp(sr.left - wr.left, 0, W)), y0 = Math.floor(clamp(sr.top - wr.top, 0, H));
+  const x1 = Math.ceil(clamp(sr.right - wr.left, 0, W)), y1 = Math.ceil(clamp(sr.bottom - wr.top, 0, H));
+  const dpr = devicePixelRatio || 1;
+  view = { x: x0, y: y0, w: Math.max(0, x1 - x0), h: Math.max(0, y1 - y0), dpr };
+  const cw = Math.max(1, Math.round(view.w * dpr)), ch = Math.max(1, Math.round(view.h * dpr));
+  for (const c of [bg, fg]) {
+    if (c.width !== cw || c.height !== ch) { c.width = cw; c.height = ch; }
+    c.style.left = view.x + 'px';
+    c.style.top = view.y + 'px';
+    c.style.width = view.w + 'px';
+    c.style.height = view.h + 'px';
+  }
+}
+
+/** The visible area, in image-with-padding coordinates. */
+const visible = () => ({ x: view.x / zoom, y: view.y / zoom, w: view.w / zoom, h: view.h / zoom });
+
+/** Sets ctx up to draw in image-with-padding coordinates at the current zoom and scroll. */
+function viewTransform(ctx) {
+  const k = zoom * view.dpr;
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+  ctx.setTransform(k, 0, 0, k, -view.x * view.dpr, -view.y * view.dpr);
+  ctx.imageSmoothingEnabled = zoom < 2; // show pixels crisply when zoomed in
+}
+
+function renderBg() {
+  if (!base) return;
+  viewTransform(bctx);
+  paintImage(bctx, visible());
+}
+
+/** Redraws on the next frame: many pointer events can arrive per frame. */
+function requestRender(withImage = false) {
+  bgDirty ||= withImage;
+  if (rafId) return;
+  rafId = requestAnimationFrame(() => {
+    rafId = 0;
+    if (!base) return;
+    updateView();
+    if (bgDirty) renderBg();
+    bgDirty = false;
+    renderFg();
+  });
+}
 
 function renderFg() {
   if (!base) return;
-  fctx.clearRect(0, 0, fg.width, fg.height);
-  paintObjects(fctx);
+  viewTransform(fctx);
+  paintObjects(fctx, visible());
   fctx.save();
   fctx.translate(frame.padding, frame.padding);
   const px = 1 / zoom;
@@ -363,12 +469,13 @@ function renderFg() {
     fctx.strokeStyle = '#5b4bff';
     fctx.strokeRect(b.x - 4 * px, b.y - 4 * px, b.w + 8 * px, b.h + 8 * px);
     fctx.setLineDash([]);
-    for (const [hx, hy] of handles(selected)) {
+    for (const h of handles(selected)) {
       fctx.beginPath();
-      fctx.arc(hx, hy, 6 * px, 0, Math.PI * 2);
+      if (h.id === 'p1' || h.id === 'p2') fctx.arc(h.x, h.y, 6 * px, 0, Math.PI * 2);
+      else fctx.rect(h.x - 5 * px, h.y - 5 * px, 10 * px, 10 * px);
       fctx.fillStyle = '#fff';
       fctx.fill();
-      fctx.lineWidth = 2 * px;
+      fctx.lineWidth = 1.5 * px;
       fctx.stroke();
     }
   }
@@ -399,26 +506,24 @@ function renderFg() {
 
 function layout() {
   if (!base) return;
-  const W = fullW(), H = fullH();
-  for (const c of [bg, fg]) { c.width = W; c.height = H; }
   applyZoom();
-  renderBg();
-  renderFg();
   $('#rs-w').value = base.width;
   $('#rs-h').value = base.height;
   $('#doc-dims').textContent = `${base.width} × ${base.height} px`;
 }
 
 function applyZoom() {
-  const W = fullW(), H = fullH();
-  for (const c of [bg, fg]) {
-    c.style.width = W * zoom + 'px';
-    c.style.height = H * zoom + 'px';
-  }
+  if (!base) return;
+  wrap.style.width = fullW() * zoom + 'px';
+  wrap.style.height = fullH() * zoom + 'px';
   $('#zoom-label').textContent = Math.round(zoom * 100) + '%';
   if (editing) placeTextEditor();
+  updateView();
+  renderBg();
   renderFg();
 }
+stage.addEventListener('scroll', () => requestRender(true), { passive: true });
+new ResizeObserver(() => requestRender(true)).observe(stage);
 
 function setZoom(z) {
   zoom = clamp(z, 0.05, 8);
@@ -459,9 +564,65 @@ function bounds(o) {
   return { x: r.x - h, y: r.y - h, w: r.w + h * 2, h: r.h + h * 2 };
 }
 
+// Handles for resizing: the two ends of a line or arrow; corners and edge midpoints of
+// boxes; corners only for things that keep their proportions (text, steps).
+const UNIFORM = new Set(['text', 'step']);
+const CURSORS = { nw: 'nwse-resize', se: 'nwse-resize', ne: 'nesw-resize', sw: 'nesw-resize', n: 'ns-resize', s: 'ns-resize', e: 'ew-resize', w: 'ew-resize', p1: 'move', p2: 'move' };
+
+/** The box a shape is resized by (without stroke width). */
+function shapeBox(o) {
+  if (o.points) {
+    let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+    for (const [x, y] of o.points) { x0 = Math.min(x0, x); y0 = Math.min(y0, y); x1 = Math.max(x1, x); y1 = Math.max(y1, y); }
+    return { x: x0, y: y0, w: x1 - x0, h: y1 - y0 };
+  }
+  if (o.type === 'text' || o.type === 'step') return bounds(o);
+  return norm(o);
+}
+
 function handles(o) {
-  if (o.type === 'pen' || o.type === 'highlighter' || o.type === 'text' || o.type === 'step') return [];
-  return [[o.x1, o.y1], [o.x2, o.y2]];
+  if (o.type === 'line' || o.type === 'arrow') return [{ id: 'p1', x: o.x1, y: o.y1 }, { id: 'p2', x: o.x2, y: o.y2 }];
+  const b = shapeBox(o);
+  const xs = { w: b.x, c: b.x + b.w / 2, e: b.x + b.w }, ys = { n: b.y, c: b.y + b.h / 2, s: b.y + b.h };
+  const all = [['nw', 'w', 'n'], ['ne', 'e', 'n'], ['se', 'e', 's'], ['sw', 'w', 's'], ['n', 'c', 'n'], ['e', 'e', 'c'], ['s', 'c', 's'], ['w', 'w', 'c']];
+  const list = UNIFORM.has(o.type) || (o.points && (b.w < 4 || b.h < 4)) ? all.slice(0, 4) : all;
+  return list.map(([id, hx, hy]) => ({ id, x: xs[hx], y: ys[hy] }));
+}
+
+const handleAt = (o, pt) => handles(o).find((h) => Math.hypot(h.x - pt.x, h.y - pt.y) <= 9 / zoom) || null;
+
+/** The box after dragging handle `id` of box `b` to `pt`. */
+function resizedBox(b, id, pt, keepRatio) {
+  let x0 = b.x, y0 = b.y, x1 = b.x + b.w, y1 = b.y + b.h;
+  if (id.includes('w')) x0 = pt.x;
+  if (id.includes('e')) x1 = pt.x;
+  if (id.includes('n')) y0 = pt.y;
+  if (id.includes('s')) y1 = pt.y;
+  if (keepRatio && id.length === 2 && b.w > 0 && b.h > 0) {
+    // Scale about the opposite corner by whichever direction moved further.
+    const s = Math.max(Math.abs(x1 - x0) / b.w, Math.abs(y1 - y0) / b.h, 0.05);
+    const ax = id.includes('w') ? b.x + b.w : b.x, ay = id.includes('n') ? b.y + b.h : b.y;
+    const w = b.w * s, h = b.h * s;
+    x0 = id.includes('w') ? ax - w : ax; x1 = x0 + w;
+    y0 = id.includes('n') ? ay - h : ay; y1 = y0 + h;
+  }
+  return { x: Math.min(x0, x1), y: Math.min(y0, y1), w: Math.abs(x1 - x0), h: Math.abs(y1 - y0) };
+}
+
+/** Fits `o` to box `nb`, starting from `from` (the shape when the drag began) with box `ob`. */
+function applyBox(o, from, ob, nb) {
+  const sx = ob.w ? nb.w / ob.w : 1, sy = ob.h ? nb.h / ob.h : 1;
+  if (o.points) {
+    o.points = from.points.map(([x, y]) => [nb.x + (x - ob.x) * sx, nb.y + (y - ob.y) * sy]);
+  } else if (o.type === 'text') {
+    o.size = clamp(Math.round(from.size * sy), 6, 400);
+    o.x = nb.x; o.y = nb.y;
+  } else if (o.type === 'step') {
+    o.size = clamp(Math.round(from.size * sx), 12, 400);
+    o.x = nb.x + nb.w / 2; o.y = nb.y + nb.h / 2;
+  } else {
+    Object.assign(o, { x1: nb.x, y1: nb.y, x2: nb.x + nb.w, y2: nb.y + nb.h });
+  }
 }
 
 function segDist(px, py, x1, y1, x2, y2) {
@@ -506,7 +667,7 @@ function scaleObj(o, sx, sy) {
 }
 
 function toImage(e) {
-  const r = fg.getBoundingClientRect();
+  const r = wrap.getBoundingClientRect();
   return {
     x: (e.clientX - r.left) / zoom - frame.padding,
     y: (e.clientY - r.top) / zoom - frame.padding,
@@ -618,8 +779,12 @@ fg.addEventListener('pointerdown', (e) => {
 
   if (tool === 'select') {
     if (selected) {
-      const h = handles(selected).findIndex(([hx, hy]) => Math.hypot(hx - pt.x, hy - pt.y) <= 8 / zoom);
-      if (h >= 0) { drag = { kind: 'handle', h }; return; }
+      const h = handleAt(selected, pt);
+      if (h) {
+        const { _editing, ...from } = selected;
+        drag = { kind: 'handle', h: h.id, from: structuredClone(from), box: shapeBox(selected) };
+        return;
+      }
     }
     selected = topHit(pt);
     if (selected) showPane('annotate');
@@ -677,12 +842,23 @@ fg.addEventListener('pointerdown', (e) => {
 });
 
 fg.addEventListener('pointermove', (e) => {
-  if (!drag) return;
+  if (!drag) {
+    // Hovering: resize cursors over handles, a move cursor over the selection.
+    let cursor = '';
+    if (tool === 'select' && selected && base && !spacePan) {
+      const p = toImage(e);
+      const h = handleAt(selected, p);
+      cursor = h ? CURSORS[h.id] : hits(selected, p) ? 'move' : '';
+    }
+    if (fg.style.cursor !== cursor) fg.style.cursor = cursor;
+    return;
+  }
   const pt = toImage(e);
   if (drag.kind === 'handle') {
     const o = selected;
-    if (drag.h === 0) { o.x1 = pt.x; o.y1 = pt.y; }
-    else { const q = snapEnd(o, pt, e.shiftKey); o.x2 = q.x; o.y2 = q.y; }
+    if (drag.h === 'p1') { o.x1 = pt.x; o.y1 = pt.y; }
+    else if (drag.h === 'p2') { const q = snapEnd(o, pt, e.shiftKey); o.x2 = q.x; o.y2 = q.y; }
+    else applyBox(o, drag.from, drag.box, resizedBox(drag.box, drag.h, pt, UNIFORM.has(o.type) || e.shiftKey));
   } else if (drag.kind === 'move') {
     moveObj(selected, pt.x - drag.last.x, pt.y - drag.last.y);
     drag.last = pt;
@@ -706,15 +882,19 @@ fg.addEventListener('pointermove', (e) => {
   } else if (drag.kind === 'draw') {
     const o = drag.o;
     if (o.points) {
-      const [lx, ly] = o.points[o.points.length - 1];
-      if (Math.hypot(pt.x - lx, pt.y - ly) > 1.5 / zoom) o.points.push([pt.x, pt.y]);
+      // Every position the pointer passed through, not just one per event, for smooth lines.
+      for (const ce of e.getCoalescedEvents?.() || [e]) {
+        const q = toImage(ce);
+        const [lx, ly] = o.points[o.points.length - 1];
+        if (Math.hypot(q.x - lx, q.y - ly) > 1.5 / zoom) o.points.push([q.x, q.y]);
+      }
     } else {
       const q = snapEnd(o, pt, e.shiftKey);
       o.x2 = q.x;
       o.y2 = q.y;
     }
   }
-  renderFg();
+  requestRender();
 });
 
 function endDrag() {
@@ -1435,3 +1615,13 @@ document.addEventListener('keydown', (e) => {
     showEmpty();
   }
 })();
+
+// Read-only access for the automated tests: the on-screen canvases only hold the
+// visible part of the image.
+globalThis.captodeEditor = {
+  size: () => (base ? [base.width, base.height] : null),
+  pixels: () => base.getContext('2d').getImageData(0, 0, base.width, base.height),
+  objects: () => objects.map(({ _editing, ...o }) => structuredClone(o)),
+  history: () => ({ steps: history.length, index: hIndex }),
+  render: async () => { const c = await finalCanvas({ scaled: false }); return c.getContext('2d').getImageData(0, 0, c.width, c.height); },
+};

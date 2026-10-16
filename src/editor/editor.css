@@ -26,9 +26,10 @@ body { display: flex; flex-direction: column; overflow: hidden; }
 .zoombar [data-tip]:hover::after { top: auto; bottom: calc(100% + 8px); }
 .zoombar #zoom-label { min-width: 58px; font-variant-numeric: tabular-nums; }
 
-.wrap { position: relative; margin: 76px auto 60px; width: max-content; box-shadow: var(--shadow-lg); }
-.wrap canvas { display: block; }
-.wrap #fg { position: absolute; inset: 0; touch-action: none; }
+.wrap { position: relative; margin: 76px auto 60px; box-shadow: var(--shadow-lg); }
+/* Sized and placed by the script to cover just the visible part of the image. */
+.wrap canvas { position: absolute; left: 0; top: 0; display: block; }
+.wrap #fg { touch-action: none; }
 .wrap.checker { background: repeating-conic-gradient(#d9d9df 0 25%, #fff 0 50%) 0 0 / 16px 16px; }
 .stage[data-tool="select"] #fg { cursor: default; }
 .stage[data-tool="text"] #fg { cursor: text; }

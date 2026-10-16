@@ -93,7 +93,7 @@ await light(ed);
 await ed.bringToFront();
 await ed.waitForFunction(() => /px/.test(document.querySelector('#doc-dims').textContent));
 await sleep(300);
-const box = await ed.evaluate(() => { const r = document.querySelector('#fg').getBoundingClientRect(); return { x: r.x, y: r.y, w: r.width, h: r.height }; });
+const box = await ed.evaluate(() => { const r = document.querySelector('#wrap').getBoundingClientRect(); return { x: r.x, y: r.y, w: r.width, h: r.height }; });
 const at = (fx, fy) => [box.x + box.w * fx, box.y + box.h * fy];
 const drag = async (tool, from, to) => {
   await ed.keyboard.press(tool);
