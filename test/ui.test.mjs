@@ -539,47 +539,107 @@ export const tests = {
     });
     await lab.close();
     const ed = await open(browser, url(`editor/editor.html?id=${id}&reopen=1`), { width: 1280, height: 900 });
-    const ready = () => ed.waitForFunction(() => /px/.test(document.querySelector('#doc-dims').textContent) && document.querySelector('.preset-select option'), { polling: 100 });
-    await ready();
-    await ed.evaluate(() => document.querySelector('[data-pane="export"]').click());
-    const state = () => ed.evaluate(() => ({
-      preset: document.querySelector('.preset-select').value,
-      format: document.querySelector('#x-format').value,
-      limit: document.querySelector('#x-limit').value,
-      scale: document.querySelector('#x-scale').value,
-      quality: document.querySelector('#x-quality').value,
-      device: document.querySelector('#device-panel [data-k="enabled"]').checked,
-      mine: [...document.querySelectorAll('.preset-select optgroup[label="Yours"] option')].map((o) => o.textContent),
-    }));
-    await ed.select('.preset-select', 'email');
-    let st = await state();
-    ok(st.format === 'jpeg' && st.limit === '1024' && st.quality === '85' && st.preset === 'email', `email preset: ${JSON.stringify(st)}`);
-    await ed.select('.preset-select', 'mockup');
-    st = await state();
-    ok(st.format === 'png' && st.device, `mock-up preset turns the device frame on: ${JSON.stringify(st)}`);
-    // Changing something by hand makes it custom.
-    await ed.select('#x-scale', '0.5');
-    st = await state();
-    ok(st.preset === '', `after a change: ${st.preset}`);
-    // Save it as a preset of your own; it is there next time, and can be deleted.
-    await ed.select('.preset-select', '__save');
-    await ed.waitForFunction(() => document.activeElement.classList.contains('preset-name'), { polling: 100 });
-    await ed.keyboard.type('Half-size mock-up');
-    await ed.keyboard.press('Enter');
-    st = await state();
-    ok(st.mine.join() === 'Half-size mock-up' && st.preset.startsWith('u'), `saved: ${JSON.stringify(st)}`);
-    await ed.select('.preset-select', 'review');
-    ok((await state()).scale === '1' && !(await state()).device, 'design review: full size, no frame');
-    await ed.reload();
-    await ready();
-    await ed.evaluate(() => document.querySelector('[data-pane="export"]').click());
-    const mine = await ed.$eval('.preset-select optgroup[label="Yours"] option', (o) => o.value);
-    await ed.select('.preset-select', mine);
-    st = await state();
-    ok(st.scale === '0.5' && st.device && st.format === 'png', `your preset applied: ${JSON.stringify(st)}`);
-    await ed.click('.preset-delete');
-    ok(!(await state()).mine.length, 'deleted');
-    await ed.evaluate(() => chrome.storage.local.remove(['exportPresets', 'lastExport', 'device', 'deviceOpts']));
+    try {
+      const ready = () => ed.waitForFunction(() => /px/.test(document.querySelector('#doc-dims').textContent) && document.querySelector('.preset-select option'), { polling: 100 });
+      await ready();
+      await ed.evaluate(() => document.querySelector('[data-pane="export"]').click());
+      const state = () => ed.evaluate(() => ({
+        preset: document.querySelector('.preset-select').value,
+        format: document.querySelector('#x-format').value,
+        limit: document.querySelector('#x-limit').value,
+        scale: document.querySelector('#x-scale').value,
+        quality: document.querySelector('#x-quality').value,
+        device: document.querySelector('#device-panel [data-k="enabled"]').checked,
+        mine: [...document.querySelectorAll('.preset-select optgroup[label="Yours"] option')].map((o) => o.textContent),
+      }));
+      await ed.select('.preset-select', 'email');
+      let st = await state();
+      ok(st.format === 'jpeg' && st.limit === '1024' && st.quality === '85' && st.preset === 'email', `email preset: ${JSON.stringify(st)}`);
+      await ed.select('.preset-select', 'mockup');
+      st = await state();
+      ok(st.format === 'png' && st.device, `mock-up preset turns the device frame on: ${JSON.stringify(st)}`);
+      // Changing something by hand makes it custom.
+      await ed.select('#x-scale', '0.5');
+      st = await state();
+      ok(st.preset === '', `after a change: ${st.preset}`);
+      // Save it as a preset of your own; it is there next time, and can be deleted.
+      await ed.select('.preset-select', '__save');
+      await ed.waitForFunction(() => document.activeElement.classList.contains('preset-name'), { polling: 100 });
+      await ed.keyboard.type('Half-size mock-up');
+      await ed.keyboard.press('Enter');
+      await ed.waitForFunction(() => document.querySelector('.preset-select optgroup[label="Yours"]'), { polling: 100 });
+      st = await state();
+      ok(st.mine.join() === 'Half-size mock-up' && st.preset.startsWith('u'), `saved: ${JSON.stringify(st)}`);
+      await ed.select('.preset-select', 'review');
+      ok((await state()).scale === '1' && !(await state()).device, 'design review: full size, no frame');
+      await ed.reload();
+      await ready();
+      await ed.evaluate(() => document.querySelector('[data-pane="export"]').click());
+      const mine = await ed.$eval('.preset-select optgroup[label="Yours"] option', (o) => o.value);
+      await ed.select('.preset-select', mine);
+      st = await state();
+      ok(st.scale === '0.5' && st.device && st.format === 'png', `your preset applied: ${JSON.stringify(st)}`);
+      await ed.click('.preset-delete');
+      ok(!(await state()).mine.length, 'deleted');
+    } finally {
+      // Presets turn the device frame on: never leave it on for later tests.
+      await ed.evaluate(() => chrome.storage.local.remove(['exportPresets', 'lastExport', 'device', 'deviceOpts'])).catch(() => {});
+      await ed.close();
+    }
+  },
+
+  async 'review: measure in CSS pixels with edge snapping, colour contrast, and a grid that is not exported'({ browser, url }) {
+    const lab = await open(browser, url('lab/lab.html'));
+    // A 2× capture: a 360 × 200 px box (180 × 100 CSS px) at (100, 100), dark text colour on white.
+    const id = await lab.evaluate(async () => {
+      const { putCapture } = await import('/lib/db.js');
+      const c = new OffscreenCanvas(800, 500);
+      const g = c.getContext('2d');
+      g.fillStyle = '#ffffff'; g.fillRect(0, 0, 800, 500);
+      g.fillStyle = '#5b4bff'; g.fillRect(100, 100, 360, 200);
+      g.fillStyle = '#767676'; g.fillRect(100, 360, 200, 40);
+      return putCapture(await c.convertToBlob(), { title: 'Review', mode: 'visible', dpr: 2 });
+    });
+    await lab.close();
+    const ed = await open(browser, url(`editor/editor.html?id=${id}&reopen=1`), { width: 1400, height: 900 });
+    await ed.waitForFunction(() => /px/.test(document.querySelector('#doc-dims').textContent), { polling: 100 });
+    const at = async (x, y) => {
+      const r = await ed.evaluate(() => { const b = document.querySelector('#wrap').getBoundingClientRect(); return { x: b.left, y: b.top, z: captodeEditor.zoom() }; });
+      return [r.x + x * r.z, r.y + y * r.z];
+    };
+    // Measure: start a little outside the box's left edge, end a little inside its right edge.
+    await ed.keyboard.press('u');
+    ok(await ed.evaluate(() => document.body.dataset.pane) === 'review', 'the Measure tool opens the Review tab');
+    await ed.mouse.move(...(await at(97, 200)));
+    await ed.mouse.down();
+    await ed.mouse.move(...(await at(457, 203)), { steps: 6 });
+    await ed.mouse.up();
+    let r = await ed.evaluate(() => captodeEditor.review());
+    ok(r.measures.length === 1 && r.measures[0].x1 === 100 && r.measures[0].x2 === 460, `snapped to the edges: ${JSON.stringify(r.measures)}`);
+    ok(r.text.startsWith('180 px') && r.measures[0].y2 === r.measures[0].y1, `in CSS pixels, straightened: ${r.text}`);
+    // With Alt, no snapping.
+    await ed.keyboard.down('Alt');
+    await ed.mouse.move(...(await at(97, 250)));
+    await ed.mouse.down();
+    await ed.mouse.move(...(await at(457, 250)), { steps: 6 });
+    await ed.mouse.up();
+    await ed.keyboard.up('Alt');
+    r = await ed.evaluate(() => captodeEditor.review());
+    ok(r.measures[1].x1 === 97 && r.measures[1].x2 === 457, `Alt: ${JSON.stringify(r.measures[1])}`);
+    // Colours: grey #767676 on white is 4.54:1, which passes AA for normal text.
+    await ed.keyboard.press('i');
+    await ed.mouse.click(...(await at(150, 380)));
+    await ed.mouse.click(...(await at(600, 450)));
+    r = await ed.evaluate(() => captodeEditor.review());
+    ok(r.colours.join() === '#767676,#ffffff', `picked ${r.colours}`);
+    ok(/4\.54 : 1/.test(r.contrast) && /Normal text: AA pass · AAA fail/.test(r.contrast), r.contrast);
+    // The grid shows on screen only: the export is unchanged, measurements too.
+    await ed.keyboard.press('g');
+    ok(await ed.$eval('#g-on', (e) => e.checked), 'G turns the grid on');
+    const exported = await ed.evaluate(async () => { const d = await captodeEditor.render(); const i = (16 * d.width + 16) * 4; return [d.data[i], d.data[i + 1], d.data[i + 2], d.width]; });
+    ok(exported.join() === '255,255,255,800', `the export has no grid or measurements: ${exported}`);
+    await ed.click('#m-clear');
+    ok(!(await ed.evaluate(() => captodeEditor.review())).measures.length, 'Clear all');
     await ed.close();
   },
 

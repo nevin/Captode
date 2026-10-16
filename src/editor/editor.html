@@ -81,6 +81,7 @@
     <nav class="tabs" role="tablist" aria-label="Inspector">
       <button role="tab" id="tab-annotate" aria-controls="pane-annotate" data-pane="annotate" class="on">Annotate</button>
       <button role="tab" id="tab-adjust" aria-controls="pane-adjust" data-pane="adjust">Adjust</button>
+      <button role="tab" id="tab-review" aria-controls="pane-review" data-pane="review">Review</button>
       <button role="tab" id="tab-export" aria-controls="pane-export" data-pane="export">Export</button>
     </nav>
 
@@ -239,6 +240,44 @@
       </section>
     </div>
 
+    <!-- Review: measuring, colours and spacing, for checking a design. Nothing here is exported. -->
+    <div class="pane hidden" role="tabpanel" id="pane-review" aria-labelledby="tab-review" data-pane="review">
+      <section class="section">
+        <h3 class="section-title">Measure</h3>
+        <p class="muted small">Drag across the image with the Measure tool (U). Lines straighten and their ends snap to edges; hold Alt for neither.</p>
+        <div class="readout" id="m-readout" aria-live="polite">No measurements yet</div>
+        <div class="grid2">
+          <label class="field"><span>Pixel ratio</span>
+            <select id="m-ratio"><option value="auto">Automatic</option><option value="1">1×</option><option value="2">2×</option><option value="3">3×</option></select>
+          </label>
+          <div class="field"><span>&nbsp;</span><button class="btn" id="m-clear" disabled>Clear all</button></div>
+        </div>
+        <p class="muted small" id="m-ratio-note"></p>
+      </section>
+
+      <section class="section">
+        <h3 class="section-title">Colours and contrast</h3>
+        <p class="muted small">Click the image with the Colour picker (I). Choose which colour to set next.</p>
+        <div class="pick-pair" role="radiogroup" aria-label="Colour to set next">
+          <button class="pick-slot on" data-slot="0" role="radio" aria-checked="true"><span class="pick-swatch"></span><span><b>Text</b><small class="pick-hex">Not picked</small></span></button>
+          <button class="pick-slot" data-slot="1" role="radio" aria-checked="false"><span class="pick-swatch"></span><span><b>Background</b><small class="pick-hex">Not picked</small></span></button>
+        </div>
+        <div class="readout contrast" id="c-readout" aria-live="polite">Pick two colours to check their contrast</div>
+        <div class="row gap">
+          <button class="btn" id="c-copy" disabled>Copy colours</button>
+          <button class="btn ghost" id="c-swap" disabled>Swap</button>
+        </div>
+      </section>
+
+      <section class="section">
+        <h3 class="section-title">Spacing grid</h3>
+        <label class="toggle"><span>Show a grid<small>Over the image only; not exported</small></span><input type="checkbox" id="g-on"></label>
+        <label class="field"><span>Every</span>
+          <select id="g-step"><option value="4">4 px</option><option value="8" selected>8 px</option><option value="16">16 px</option><option value="24">24 px</option></select>
+        </label>
+      </section>
+    </div>
+
     <!-- Export -->
     <div class="pane hidden" role="tabpanel" id="pane-export" aria-labelledby="tab-export" data-pane="export">
       <section class="section">
@@ -323,6 +362,9 @@
     <div><span>Step number</span><span><kbd>N</kbd></span></div>
     <div><span>Spotlight</span><span><kbd>F</kbd></span></div>
     <div><span>Magnifier</span><span><kbd>Z</kbd></span></div>
+    <div><span>Measure</span><span><kbd>U</kbd></span></div>
+    <div><span>Colour picker</span><span><kbd>I</kbd></span></div>
+    <div><span>Spacing grid on or off</span><span><kbd>G</kbd></span></div>
     <div><span>Blur or pixelate</span><span><kbd>B</kbd></span></div>
     <h3>Editing</h3>
     <div><span>Undo</span><span><kbd>⌘</kbd> <kbd>Z</kbd></span></div>

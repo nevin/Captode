@@ -55,11 +55,15 @@ async function captureImage(mode, tab) {
   if (mode === 'visible') {
     const bmp = await captureVisible(tab.windowId);
     blob = await toPng(bmp, 0, 0, bmp.width, bmp.height);
+    // Image pixels per CSS pixel, for measuring in the editor.
+    const vw = await run(tab.id, () => innerWidth).catch(() => 0);
+    if (vw) meta.dpr = bmp.width / vw;
   } else if (mode === 'area') {
     const rect = await run(tab.id, pickArea, 'Drag to select the area to capture');
     if (!rect) return;
     const bmp = await captureVisible(tab.windowId);
     const s = bmp.width / rect.vw;
+    meta.dpr = s;
     blob = await toPng(bmp, rect.x * s, rect.y * s, rect.w * s, rect.h * s);
   } else {
     blob = await captureFullPage(tab, meta);
@@ -115,6 +119,7 @@ async function captureFullPage(tab, meta) {
       return captureVisible(tab.windowId);
     })();
     const scale = first.width / info.vw;
+    meta.dpr = scale; // image pixels per CSS pixel, for measuring
 
     // Stay inside the browser's canvas limits; very long pages are cut off.
     const maxH = Math.floor(Math.min(32000, 250e6 / (info.width * scale)) / scale);

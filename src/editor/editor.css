@@ -149,3 +149,18 @@ body { display: flex; flex-direction: column; overflow: hidden; }
 .arrange .row > .btn { flex: none; }
 .align-row { flex-wrap: wrap; gap: 4px; }
 .align-row .btn.icon { width: 30px; height: 30px; }
+
+/* Review */
+.readout { margin: 8px 0 10px; padding: 9px 11px; border-radius: 8px; background: var(--panel-2); font-size: 13px; line-height: 1.5; font-variant-numeric: tabular-nums; }
+.readout b { font-weight: 600; }
+.readout .pass { color: #30a46c; font-weight: 600; }
+.readout .fail { color: #e5484d; font-weight: 600; }
+.pick-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 8px; }
+.pick-slot { display: flex; align-items: center; gap: 8px; padding: 7px 8px; border: 1px solid var(--line); border-radius: 8px; background: transparent; text-align: left; cursor: pointer; min-width: 0; }
+.pick-slot > span:last-child { display: grid; min-width: 0; }
+.pick-slot small { color: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pick-slot.on { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
+.pick-swatch { flex: none; width: 26px; height: 26px; border-radius: 6px; border: 1px solid var(--line-strong);
+  background: repeating-conic-gradient(#ccc 0 25%, #fff 0 50%) 50% / 10px 10px; }
+.row.gap { display: flex; gap: 6px; }
+.stage[data-tool="measure"] canvas, .stage[data-tool="pick"] canvas { cursor: crosshair; }
