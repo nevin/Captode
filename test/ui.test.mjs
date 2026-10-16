@@ -758,6 +758,7 @@ export const tests = {
       // Keep the download in the page, to look inside it.
       await ed.evaluate(() => { HTMLAnchorElement.prototype.click = function () { window.__download = { name: this.download, href: this.href }; }; });
       await ed.evaluate(() => document.querySelector('[data-pane="export"]').click());
+      await ed.evaluate(() => document.querySelector('#multi-open').scrollIntoView({ block: 'center' }));
       await ed.click('#multi-open');
       await ed.waitForFunction(() => document.querySelector('#multi').open && document.querySelectorAll('#multi-list input').length > 40, { polling: 100 });
       await ed.evaluate(() => {
@@ -792,6 +793,58 @@ export const tests = {
       ok(saved.join() === 'none,iphone-17-pro,ipad-pro-11', `remembered ${saved}`);
     } finally {
       await ed.evaluate(() => chrome.storage.local.remove(['multiDevices'])).catch(() => {});
+      await ed.close();
+    }
+  },
+
+  async 'share for review: a single page with the image, step notes and where it came from'({ browser, url }) {
+    const lab = await open(browser, url('lab/lab.html'));
+    const id = await lab.evaluate(async () => {
+      const { putCapture } = await import('/lib/db.js');
+      const c = new OffscreenCanvas(800, 500);
+      c.getContext('2d').fillRect(0, 0, 10, 10);
+      return putCapture(await c.convertToBlob(), { title: 'Checkout page', url: 'https://example.com/checkout', mode: 'visible', dpr: 2 });
+    });
+    await lab.close();
+    const ed = await open(browser, url(`editor/editor.html?id=${id}&reopen=1`), { width: 1400, height: 900 });
+    try {
+      await ed.waitForFunction(() => /px/.test(document.querySelector('#doc-dims').textContent), { polling: 100 });
+      const at = async (x, y) => {
+        const r = await ed.evaluate(() => { const b = document.querySelector('#wrap').getBoundingClientRect(); return { x: b.left, y: b.top, z: captodeEditor.zoom() }; });
+        return [r.x + x * r.z, r.y + y * r.z];
+      };
+      await ed.keyboard.press('n');
+      await ed.mouse.click(...(await at(200, 100)));
+      await ed.mouse.click(...(await at(600, 400)));
+      await ed.keyboard.press('Escape');
+      await ed.evaluate(() => { HTMLAnchorElement.prototype.click = function () { window.__download = { name: this.download, href: this.href }; }; });
+      await ed.evaluate(() => document.querySelector('[data-pane="export"]').click());
+      await ed.evaluate(() => document.querySelector('#share-open').scrollIntoView({ block: 'center' }));
+      await ed.click('#share-open');
+      await ed.waitForFunction(() => document.querySelector('#share').open && document.querySelectorAll('#sh-steps textarea').length === 2, { polling: 100 });
+      ok(await ed.$eval('#sh-title', (e) => e.value) === 'Checkout page', 'the title starts as the capture\'s');
+      await ed.type('#sh-summary', 'Spacing above the button is off.');
+      await ed.type('#sh-steps [data-i="0"]', 'Header <b>too</b> tall');
+      await ed.type('#sh-steps [data-i="1"]', 'Button should be 48 px');
+      await ed.click('#sh-go');
+      await ed.waitForFunction(() => window.__download, { polling: 100, timeout: 30000 });
+      const page = await ed.evaluate(async () => ({ name: window.__download.name, html: await (await fetch(window.__download.href)).text() }));
+      ok(page.name === 'Checkout page-review.html', `file name ${page.name}`);
+      ok(page.html.includes('Spacing above the button is off.') && page.html.includes('Button should be 48 px'), 'the summary and notes are in the page');
+      ok(page.html.includes('Header &lt;b&gt;too&lt;/b&gt; tall') && !page.html.includes('<b>too</b>'), 'notes are escaped');
+      ok(page.html.includes('https://example.com/checkout') && page.html.includes('2× pixel ratio'), 'where it came from');
+      ok(/src="data:image\/png;base64,/.test(page.html) && (page.html.match(/class="marker"/g) || []).length === 2, 'the image and two step markers are inside');
+      ok(!/<(script|link)[^>]+src=|<link[^>]+href=/.test(page.html.replace(/<script>[\s\S]*?<\/script>/g, '')), 'nothing is loaded from elsewhere');
+      // The notes are kept on the steps.
+      const notes = await ed.evaluate(() => captodeEditor.objects().filter((o) => o.type === 'step').map((o) => o.note));
+      ok(notes.join('|') === 'Header <b>too</b> tall|Button should be 48 px', `kept: ${notes}`);
+      // And the page works: clicking a step lights up its marker.
+      const view = await browser.newPage();
+      await view.setContent(page.html);
+      await view.click('#step-1');
+      ok(await view.$eval('.marker[data-i="1"]', (m) => m.classList.contains('on')), 'clicking a note highlights its marker');
+      await view.close();
+    } finally {
       await ed.close();
     }
   },

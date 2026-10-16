@@ -5,6 +5,7 @@ import { encodeOffThread } from '../lib/encoder.js';
 import { mountDevicePanel, renderInDevice, DEVICES, matchDevice } from '../lib/device.js';
 import { GROUPS as DEVICE_GROUPS } from '../lib/devices.js';
 import { zip } from '../lib/zip.js';
+import { buildReviewPage } from './review-page.js';
 import { getSettings, backgroundColour } from '../lib/settings.js';
 import { toast, enhance, tablist, openDialog, fmtBytes, ago } from '../lib/ui.js';
 
@@ -2213,6 +2214,74 @@ async function exportMulti() {
 $('#multi-open').addEventListener('click', openMulti);
 $('#multi-go').addEventListener('click', exportMulti);
 
+// ---------- share for review ----------
+
+const stepsInOrder = () => objects.filter((o) => o.type === 'step').sort((a, b) => a.n - b.n);
+
+function openShare() {
+  if (!base) return;
+  if (editing) ta.blur();
+  $('#sh-title').value = $('#sh-title').value || meta.title || 'Screenshot';
+  const steps = stepsInOrder();
+  $('#sh-none').classList.toggle('hidden', !!steps.length);
+  $('#sh-steps').innerHTML = steps.map((o, i) =>
+    `<label><span class="n" style="background:${o.color}">${o.n}</span><textarea data-i="${i}" rows="1" aria-label="Note for step ${o.n}" placeholder="What is step ${o.n} about?"></textarea></label>`).join('');
+  // Notes are kept on the steps, so they come back with the capture.
+  steps.forEach((o, i) => { $('#sh-steps').querySelector(`[data-i="${i}"]`).value = o.note || ''; });
+  openDialog($('#share'));
+  $('#sh-title').focus();
+}
+
+const blobToDataUrl = (blob) => new Promise((resolve, reject) => {
+  const r = new FileReader();
+  r.onload = () => resolve(r.result);
+  r.onerror = () => reject(r.error);
+  r.readAsDataURL(blob);
+});
+
+async function exportShare(e) {
+  e.preventDefault();
+  const steps = stepsInOrder();
+  steps.forEach((o, i) => { o.note = $('#sh-steps').querySelector(`[data-i="${i}"]`).value.trim(); });
+  commit(); // the notes are part of the edits
+  $('#sh-go').disabled = true;
+  try {
+    // The annotated image without a device frame, as PNG: the page is for looking closely.
+    const c = await finalCanvas({ scaled: false, deviceOpts: { enabled: false } });
+    const { blob } = await encodeOffThread(c, 'png', {}, 'export', 0);
+    const W = fullW(), H = fullH();
+    const title = $('#sh-title').value.trim() || 'Screenshot';
+    const html = buildReviewPage({
+      title,
+      summary: $('#sh-summary').value.trim(),
+      image: await blobToDataUrl(blob),
+      width: c.width,
+      height: c.height,
+      steps: steps.map((o) => ({ n: o.n, x: (o.x + frame.padding) / W, y: (o.y + frame.padding) / H, color: o.color, note: o.note })),
+      labels: objects.filter((o) => o.type === 'text' && o.text.trim()).map((o) => o.text.trim()),
+      facts: [
+        ['Page', meta.url || ''],
+        ['Captured', new Date(meta.created || Date.now()).toLocaleString()],
+        ['Size', `${base.width} × ${base.height} px${meta.dpr ? ` (${Math.round(meta.dpr * 100) / 100}× pixel ratio)` : ''}`],
+        ['Browser', navigator.userAgentData?.brands?.filter((b) => !/not.a.brand/i.test(b.brand)).map((b) => `${b.brand} ${b.version}`).join(', ') || ''],
+      ],
+    });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([html], { type: 'text/html' }));
+    a.download = `${title.replace(/[\\/:*?"<>|]+/g, '-').slice(0, 80)}-review.html`;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 30000);
+    $('#share').close();
+    toast(`Saved ${a.download}`, { kind: 'success' });
+  } catch (err) {
+    toast('Could not make the review page: ' + err.message, { kind: 'error', ms: 5000 });
+  } finally {
+    $('#sh-go').disabled = false;
+  }
+}
+$('#share-open').addEventListener('click', openShare);
+$('#share-form').addEventListener('submit', exportShare);
+
 function fileName() {
   const n = ($('#x-name').value || 'captode').trim().replace(/[\\/:*?"<>|]+/g, '-');
   return `${n}.${EXT[$('#x-format').value]}`;
@@ -2440,7 +2509,7 @@ document.addEventListener('keydown', (e) => {
   const id = new URLSearchParams(location.search).get('id');
   const rec = id && globalThis.chrome?.runtime ? await getCapture(id) : null;
   if (rec) {
-    await loadBlob(rec.blob, rec.meta);
+    await loadBlob(rec.blob, { ...rec.meta, created: rec.created });
     captureId = id;
     if (rec.edits) await restoreEdits(rec.edits);
     if (rec.meta?.truncated) toast('This page is very long, so only its top part was captured.', { ms: 6000 });

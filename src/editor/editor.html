@@ -337,6 +337,14 @@
         </button>
       </section>
 
+      <section class="section">
+        <h3 class="section-title">Share for review</h3>
+        <p class="muted small">A single web page with the image, a note for each step, and where it came from. Attach it to a ticket or send it in chat: it opens in any browser.</p>
+        <button class="btn block" id="share-open">
+          <svg class="i" viewBox="0 0 24 24"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7M12 3v12M7 8l5-5 5 5"/></svg>Share for review…
+        </button>
+      </section>
+
       <div class="export-bar">
         <div class="estimate" id="x-estimate">—</div>
         <p class="fitted hidden" id="x-fitted"></p>
@@ -363,6 +371,19 @@
       <button class="btn primary" id="multi-go">Download zip</button>
     </div>
   </div>
+</dialog>
+<dialog class="modal share" id="share" aria-labelledby="share-title">
+  <form class="modal-body" id="share-form" method="dialog">
+    <h2 id="share-title">Share for review</h2>
+    <label class="field"><span>Title</span><input type="text" id="sh-title" maxlength="120" required></label>
+    <label class="field"><span>Summary <small class="muted">optional</small></span><textarea id="sh-summary" rows="3" placeholder="What should reviewers look at?"></textarea></label>
+    <div id="sh-steps"></div>
+    <p class="muted small" id="sh-none">Add numbered steps (N) to the image to write a note for each.</p>
+    <div class="row actions">
+      <button type="button" class="btn" data-close>Cancel</button>
+      <button type="submit" class="btn primary" id="sh-go">Download review page</button>
+    </div>
+  </form>
 </dialog>
 <dialog class="modal" id="shortcuts" aria-labelledby="shortcuts-title">
   <div class="modal-head">
