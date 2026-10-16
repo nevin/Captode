@@ -337,4 +337,32 @@ export const tests = {
     ok(r.size[0] === r.size[2] && r.size[1] === r.size[3], `same size: ${r.size}`);
     ok(r.duration > 7 && r.sound > 7, `plays for its full length, with sound: ${r.duration} s, sound ${r.sound} s`);
   },
+
+  async 'review a frame: measure with edge snapping and check colours on a paused frame'({ video }) {
+    await video.evaluate(() => { document.querySelector('#review-section').open = true; document.querySelector('#review-section').scrollIntoView(); });
+    await video.click('#rv-tools [data-rt="measure"]');
+    ok(await video.evaluate(() => document.querySelector('#player').paused && !document.querySelector('#rv-overlay').classList.contains('hidden')), 'the video pauses and the layer shows');
+    // The clip's time blocks are 90 px wide, at x = 40 + 100n, from y = 400 to 600.
+    const at = (x, y) => video.evaluate((x, y) => {
+      const r = document.querySelector('#rv-overlay').getBoundingClientRect();
+      const v = document.querySelector('#player');
+      return [r.left + (x / v.videoWidth) * r.width, r.top + (y / v.videoHeight) * r.height];
+    }, x, y);
+    await video.mouse.move(...(await at(36, 500)));
+    await video.mouse.down();
+    await video.mouse.move(...(await at(134, 502)), { steps: 5 });
+    await video.mouse.up();
+    const text = await video.$eval('#rv-m', (e) => e.textContent);
+    ok(text === '90 px', `a block measures ${text}`);
+    // Colours: the background and a block.
+    await video.click('#rv-tools [data-rt="pick"]');
+    await video.mouse.click(...(await at(20, 300)));
+    await video.mouse.click(...(await at(85, 450)));
+    const contrast = await video.$eval('#rv-c', (e) => e.textContent);
+    ok(/Contrast \d+\.\d\d : 1/.test(contrast), `contrast: ${contrast}`);
+    // Playing again hides the layer.
+    await video.evaluate(() => document.querySelector('#player').play());
+    await video.waitForFunction(() => document.querySelector('#rv-overlay').classList.contains('hidden'), { polling: 100 });
+    await video.evaluate(() => document.querySelector('#player').pause());
+  },
 };

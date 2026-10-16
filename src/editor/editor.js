@@ -6,6 +6,7 @@ import { mountDevicePanel, renderInDevice, DEVICES, matchDevice } from '../lib/d
 import { GROUPS as DEVICE_GROUPS } from '../lib/devices.js';
 import { zip } from '../lib/zip.js';
 import { buildReviewPage } from './review-page.js';
+import { luminance, contrast, contrastHtml, hexOf, measureText as measureWords, edgeNear as edgeIn, measureFrom, drawMeasures } from '../lib/review.js';
 import { getSettings, backgroundColour } from '../lib/settings.js';
 import { toast, enhance, tablist, openDialog, fmtBytes, ago } from '../lib/ui.js';
 
@@ -269,13 +270,6 @@ function arrowHead(ctx, x1, y1, x2, y2, width) {
 }
 
 const stepRing = (o) => Math.max(1.5, o.size * 0.06);
-
-/** Relative luminance of a #rrggbb colour, 0 (black) to 1 (white). */
-function luminance(hex) {
-  const v = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255)
-    .map((c) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4));
-  return 0.2126 * v[0] + 0.7152 * v[1] + 0.0722 * v[2];
-}
 
 // Blurred or pixelated areas, worked out once and reused until they move or change:
 // recomputing them on every frame made dragging stutter on large captures.
@@ -1167,21 +1161,9 @@ fg.addEventListener('pointermove', (e) => {
   }
   const pt = toImage(e);
   if (drag.kind === 'measure') {
-    const m = drag.m, a = drag.start;
-    const end = { x: Math.round(pt.x), y: Math.round(pt.y) };
-    const across = Math.abs(end.x - a.x) >= Math.abs(end.y - a.y);
-    // Shift, or nearly straight (within about 4°): straight across or straight down.
-    const dx = Math.abs(end.x - a.x), dy = Math.abs(end.y - a.y);
-    if (e.shiftKey || (!e.altKey && Math.min(dx, dy) <= Math.max(dx, dy) * 0.07)) { if (across) end.y = a.y; else end.x = a.x; }
-    // Each end snaps to the nearest edge in the image along the measuring direction
-    // (Alt: no snapping), so an element's size comes out exact.
-    const start = { ...a };
-    if (!e.altKey) {
-      const axis = across ? 'x' : 'y';
-      start[axis] = edgeNear(a.x, a.y, axis);
-      end[axis] = edgeNear(end.x, end.y, axis);
-    }
-    Object.assign(m, { x1: start.x, y1: start.y, x2: end.x, y2: end.y });
+    // Straightened when nearly straight, ends snapped to edges (Alt: neither).
+    const m = drag.m;
+    Object.assign(m, measureFrom(drag.start, pt, { shift: e.shiftKey, free: e.altKey, snapAt: edgeNear }));
     renderFg();
     showMeasure(m);
     return;
@@ -1492,13 +1474,7 @@ const review = { measures: [], colours: [null, null], slot: 0 };
 
 /** Image pixels per CSS pixel: from the capture, or as chosen. */
 const pxRatio = () => ($('#m-ratio').value === 'auto' ? meta.dpr || 1 : Number($('#m-ratio').value));
-const css = (v) => { const n = v / pxRatio(); return Math.abs(n - Math.round(n)) < 0.05 ? String(Math.round(n)) : n.toFixed(1); };
-
-function measureText(m) {
-  const dx = Math.abs(m.x2 - m.x1), dy = Math.abs(m.y2 - m.y1);
-  if (dx < 0.5 || dy < 0.5) return `${css(Math.max(dx, dy))} px`;
-  return `${css(dx)} × ${css(dy)} px · ${css(Math.hypot(dx, dy))} px long`;
-}
+const measureText = (m) => measureWords(m, pxRatio());
 
 function showMeasure(m) {
   $('#m-readout').innerHTML = m ? `<b>${measureText(m)}</b>` : 'No measurements yet';
@@ -1530,58 +1506,12 @@ function drawReview(ctx, px) {
     ctx.restore();
   }
   const list = drag?.kind === 'measure' ? [...review.measures, drag.m] : review.measures;
-  for (const m of list) {
-    const len = Math.hypot(m.x2 - m.x1, m.y2 - m.y1);
-    if (len < 0.5) continue;
-    ctx.save();
-    ctx.strokeStyle = '#ff3d9a';
-    ctx.fillStyle = '#ff3d9a';
-    ctx.lineWidth = 1.5 * px;
-    ctx.beginPath();
-    ctx.moveTo(m.x1, m.y1);
-    ctx.lineTo(m.x2, m.y2);
-    // Ticks across each end.
-    const nx = -(m.y2 - m.y1) / len * 6 * px, ny = (m.x2 - m.x1) / len * 6 * px;
-    for (const [x, y] of [[m.x1, m.y1], [m.x2, m.y2]]) { ctx.moveTo(x - nx, y - ny); ctx.lineTo(x + nx, y + ny); }
-    ctx.stroke();
-    const label = measureText(m).replace(' long', '');
-    ctx.font = `600 ${12 * px}px system-ui, sans-serif`;
-    const w = ctx.measureText(label).width + 10 * px, h = 18 * px;
-    const lx = (m.x1 + m.x2) / 2 - w / 2, ly = (m.y1 + m.y2) / 2 - h - 6 * px;
-    ctx.beginPath();
-    ctx.roundRect(lx, ly, w, h, 4 * px);
-    ctx.fill();
-    ctx.fillStyle = '#fff';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(label, lx + 5 * px, ly + h / 2);
-    ctx.restore();
-  }
+  drawMeasures(ctx, list, px, (m) => measureText(m).replace(' long', ''));
 }
 
-/**
- * The edge nearest (x, y) along `axis`: where the colour changes most within a few
- * screen pixels, or the point itself where nothing changes clearly.
- */
-function edgeNear(x, y, axis) {
-  const r = Math.max(2, Math.round(8 / zoom));
-  const lo = Math.max(0, (axis === 'x' ? x : y) - r);
-  const hi = Math.min(axis === 'x' ? base.width : base.height, (axis === 'x' ? x : y) + r);
-  if (hi - lo < 2 || x < 0 || y < 0 || x > base.width || y > base.height) return axis === 'x' ? x : y;
-  const ctx = base.getContext('2d');
-  const row = axis === 'x'
-    ? ctx.getImageData(lo, Math.min(base.height - 1, Math.max(0, y)), hi - lo, 1).data
-    : ctx.getImageData(Math.min(base.width - 1, Math.max(0, x)), lo, 1, hi - lo).data;
-  let best = 0, at = axis === 'x' ? x : y;
-  for (let i = 1; i < hi - lo; i++) {
-    const d = Math.abs(row[i * 4] - row[i * 4 - 4]) + Math.abs(row[i * 4 + 1] - row[i * 4 - 3]) + Math.abs(row[i * 4 + 2] - row[i * 4 - 2]);
-    // The boundary between the two pixels; nearer ones win a tie.
-    const pos = lo + i;
-    if (d > best || (d === best && d && Math.abs(pos - (axis === 'x' ? x : y)) < Math.abs(at - (axis === 'x' ? x : y)))) { best = d; at = pos; }
-  }
-  return best >= 30 ? at : axis === 'x' ? x : y;
-}
+/** The edge nearest (x, y) along `axis` in the image, within a few screen pixels. */
+const edgeNear = (x, y, axis) => edgeIn((x0, y0, w, h) => base.getContext('2d').getImageData(x0, y0, w, h).data, base.width, base.height, x, y, axis, Math.max(2, Math.round(8 / zoom)));
 
-const hexOf = (d) => '#' + [d[0], d[1], d[2]].map((v) => v.toString(16).padStart(2, '0')).join('');
 
 function pickColour(pt) {
   const x = Math.floor(pt.x), y = Math.floor(pt.y);
@@ -1606,18 +1536,9 @@ function showColours() {
   $('#c-copy').disabled = !(a || b);
   $('#c-swap').disabled = !(a && b);
   if (!a || !b) { $('#c-readout').textContent = 'Pick two colours to check their contrast'; return; }
-  const ratio = contrast(a, b);
-  const mark = (ok, label) => `<span class="${ok ? 'pass' : 'fail'}">${label} ${ok ? 'pass' : 'fail'}</span>`;
-  $('#c-readout').innerHTML = `Contrast <b>${ratio.toFixed(2)} : 1</b><br>` +
-    `Normal text: ${mark(ratio >= 4.5, 'AA')} · ${mark(ratio >= 7, 'AAA')}<br>` +
-    `Large text and UI: ${mark(ratio >= 3, 'AA')} · ${mark(ratio >= 4.5, 'AAA')}`;
+  $('#c-readout').innerHTML = contrastHtml(a, b);
 }
 
-/** WCAG 2 contrast ratio of two colours. */
-function contrast(a, b) {
-  const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x);
-  return (hi + 0.05) / (lo + 0.05);
-}
 
 for (const btn of document.querySelectorAll('.pick-slot')) {
   btn.addEventListener('click', () => { review.slot = Number(btn.dataset.slot); showColours(); setTool('pick'); });

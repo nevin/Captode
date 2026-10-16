@@ -210,14 +210,19 @@ async function startRecording({ mode, fps, audio, size = 'page', countdown: want
 
   let crop = null;
   let aspect = null;
+  let pageWidth = null; // CSS pixels, so the video page can measure in them
   if (mode === 'area') {
     const rect = await run(tab.id, pickArea, 'Drag to select the area to record');
     if (!rect) return;
     crop = { x: rect.x / rect.vw, y: rect.y / rect.vh, w: rect.w / rect.vw, h: rect.h / rect.vh };
     aspect = rect.vw / rect.vh;
+    pageWidth = rect.vw;
     await run(tab.id, showOutline, rect);
   }
-  aspect ??= await run(tab.id, () => innerWidth / innerHeight).catch(() => null);
+  if (!aspect) {
+    const view = await run(tab.id, () => [innerWidth, innerHeight]).catch(() => null);
+    if (view) { aspect = view[0] / view[1]; pageWidth = view[0]; }
+  }
   const seconds = countdownSeconds(wantCountdown);
   if (seconds && !(await run(tab.id, countdown, seconds))) {
     await run(tab.id, hideOutline); // cancelled with Esc
@@ -227,7 +232,7 @@ async function startRecording({ mode, fps, audio, size = 'page', countdown: want
   const streamId = await chrome.tabCapture.getMediaStreamId({ targetTabId: tab.id });
   await ensureOffscreen();
   const res = await chrome.runtime.sendMessage({
-    target: 'recorder', to: 'offscreen', type: 'rec-start', streamId, fps, audio, aspect, crop, size, title: tab.title,
+    target: 'recorder', to: 'offscreen', type: 'rec-start', streamId, fps, audio, aspect, crop, size, pageWidth, title: tab.title,
   });
   if (!res?.ok) {
     await run(tab.id, hideOutline).catch(() => {});

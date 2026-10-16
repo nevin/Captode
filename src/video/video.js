@@ -9,6 +9,7 @@ import { mountDevicePanel, deviceRenderer, frameDrawer } from '../lib/device.js'
 import { toast, enhance, fmtBytes } from '../lib/ui.js';
 import { demuxWebm, muxWebm } from '../lib/webm.js';
 import { sourceColourSpace, outputColour } from '../lib/video-colour.js';
+import { contrastHtml, hexOf, measureText, edgeNear, measureFrom, drawMeasures } from '../lib/review.js';
 
 const $ = (s) => document.querySelector(s);
 const player = $('#player');
@@ -607,6 +608,127 @@ $('#dl-original').addEventListener('click', async () => {
   if (source) save(await taggedOriginal(), `captode-recording-${Date.now()}.webm`);
 });
 
+// ---------- review a frame ----------
+
+// Measuring and colour picking on the paused frame, drawn on a layer over the player.
+const rv = { tool: 'off', frame: null, measures: [], drag: null, colours: [null, null], slot: 0 };
+const rvRatio = () => ($('#rv-ratio').value === 'auto' ? meta.dpr || 1 : Number($('#rv-ratio').value));
+
+/** The frame showing, at the video's own size, to read pixels from. */
+function grabFrame() {
+  const c = new OffscreenCanvas(player.videoWidth, player.videoHeight);
+  c.getContext('2d', { willReadFrequently: true }).drawImage(player, 0, 0);
+  rv.frame = c;
+}
+
+/** Lays the measuring layer exactly over the picture in the player. */
+function placeOverlay() {
+  const o = $('#rv-overlay');
+  const pr = player.getBoundingClientRect(), box = player.parentElement.getBoundingClientRect();
+  // The picture inside the player box (object-fit: contain).
+  const s = Math.min(pr.width / player.videoWidth, pr.height / player.videoHeight);
+  const w = player.videoWidth * s, h = player.videoHeight * s;
+  Object.assign(o.style, { left: `${pr.left - box.left + (pr.width - w) / 2}px`, top: `${pr.top - box.top + (pr.height - h) / 2}px`, width: `${w}px`, height: `${h}px` });
+  o.width = Math.round(w * devicePixelRatio);
+  o.height = Math.round(h * devicePixelRatio);
+  drawOverlay();
+}
+
+function drawOverlay() {
+  const o = $('#rv-overlay');
+  if (o.classList.contains('hidden')) return;
+  const ctx = o.getContext('2d');
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.clearRect(0, 0, o.width, o.height);
+  const k = o.width / player.videoWidth; // canvas pixels per video pixel
+  ctx.setTransform(k, 0, 0, k, 0, 0);
+  const list = rv.drag ? [...rv.measures, rv.drag.m] : rv.measures;
+  drawMeasures(ctx, list, devicePixelRatio / k, (m) => measureText(m, rvRatio()).replace(' long', ''));
+}
+
+function setReviewTool(t) {
+  rv.tool = t;
+  for (const b of document.querySelectorAll('#rv-tools button')) {
+    b.classList.toggle('on', b.dataset.rt === t);
+    b.setAttribute('aria-checked', String(b.dataset.rt === t));
+  }
+  const on = t !== 'off' && player.videoWidth > 0;
+  $('#rv-overlay').classList.toggle('hidden', !on);
+  if (!on) return;
+  if (!player.paused) player.pause();
+  grabFrame();
+  placeOverlay();
+}
+
+const toVideo = (e) => {
+  const r = $('#rv-overlay').getBoundingClientRect();
+  return { x: ((e.clientX - r.left) / r.width) * player.videoWidth, y: ((e.clientY - r.top) / r.height) * player.videoHeight };
+};
+const frameEdge = (x, y, axis) => edgeNear((x0, y0, w, h) => rv.frame.getContext('2d').getImageData(x0, y0, w, h).data,
+  rv.frame.width, rv.frame.height, x, y, axis, Math.max(2, Math.round((8 * player.videoWidth) / $('#rv-overlay').getBoundingClientRect().width)));
+
+function showReview() {
+  const last = rv.measures.at(-1);
+  $('#rv-m').innerHTML = last ? `<b>${measureText(last, rvRatio())}</b>` : 'No measurements yet';
+  $('#rv-clear').disabled = !rv.measures.length;
+  for (const b of document.querySelectorAll('#review-section .pick-slot')) {
+    const i = Number(b.dataset.slot), c = rv.colours[i];
+    b.classList.toggle('on', i === rv.slot);
+    b.setAttribute('aria-checked', String(i === rv.slot));
+    b.querySelector('.pick-swatch').style.background = c || '';
+    b.querySelector('.pick-hex').textContent = c ? c.toUpperCase() : 'Not picked';
+  }
+  const [a, b] = rv.colours;
+  if (a && b) $('#rv-c').innerHTML = contrastHtml(a, b);
+  else $('#rv-c').textContent = 'Pick two colours to check their contrast';
+  const auto = meta.dpr ? `${Math.round(meta.dpr * 100) / 100}×` : '1×';
+  $('#rv-ratio').options[0].textContent = `Automatic (${auto})`;
+}
+
+$('#rv-tools').addEventListener('click', (e) => {
+  const t = e.target.closest('[data-rt]')?.dataset.rt;
+  if (t) setReviewTool(t);
+});
+$('#rv-overlay').addEventListener('pointerdown', (e) => {
+  if (!rv.frame) return;
+  const p = toVideo(e);
+  if (rv.tool === 'pick') {
+    const x = Math.floor(p.x), y = Math.floor(p.y);
+    rv.colours[rv.slot] = hexOf(rv.frame.getContext('2d').getImageData(x, y, 1, 1).data);
+    if (!rv.colours[1 - rv.slot]) rv.slot = 1 - rv.slot;
+    showReview();
+    return;
+  }
+  $('#rv-overlay').setPointerCapture(e.pointerId);
+  const start = { x: Math.round(p.x), y: Math.round(p.y) };
+  rv.drag = { start, m: { x1: start.x, y1: start.y, x2: start.x, y2: start.y } };
+});
+$('#rv-overlay').addEventListener('pointermove', (e) => {
+  if (!rv.drag) return;
+  Object.assign(rv.drag.m, measureFrom(rv.drag.start, toVideo(e), { shift: e.shiftKey, free: e.altKey, snapAt: frameEdge }));
+  drawOverlay();
+  $('#rv-m').innerHTML = `<b>${measureText(rv.drag.m, rvRatio())}</b>`;
+});
+const endMeasure = () => {
+  if (!rv.drag) return;
+  const { m } = rv.drag;
+  rv.drag = null;
+  if (Math.hypot(m.x2 - m.x1, m.y2 - m.y1) >= 2) rv.measures = [...rv.measures, m].slice(-30);
+  drawOverlay();
+  showReview();
+};
+$('#rv-overlay').addEventListener('pointerup', endMeasure);
+$('#rv-overlay').addEventListener('pointercancel', endMeasure);
+for (const b of document.querySelectorAll('#review-section .pick-slot')) {
+  b.addEventListener('click', () => { rv.slot = Number(b.dataset.slot); setReviewTool('pick'); showReview(); });
+}
+$('#rv-clear').addEventListener('click', () => { rv.measures = []; drawOverlay(); showReview(); });
+$('#rv-ratio').addEventListener('input', () => { drawOverlay(); showReview(); });
+// Playing hides the layer; a new frame (after seeking) is measured afresh.
+player.addEventListener('play', () => { if (rv.tool !== 'off') setReviewTool('off'); });
+player.addEventListener('seeked', () => { if (rv.tool !== 'off') { grabFrame(); rv.measures = []; drawOverlay(); showReview(); } });
+addEventListener('resize', () => { if (rv.tool !== 'off') placeOverlay(); });
+
 // ---------- start ----------
 
 (async () => {
@@ -621,6 +743,7 @@ $('#dl-original').addEventListener('click', async () => {
   }
   source = rec.blob;
   meta = rec.meta || {};
+  showReview();
   srcUrl = URL.createObjectURL(source);
   player.src = srcUrl;
   duration = await loadDuration(player);

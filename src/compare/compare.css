@@ -44,4 +44,3 @@ body { display: flex; flex-direction: column; overflow: hidden; }
 .mode-opt { margin-top: 12px; }
 #modes { margin-bottom: 4px; }
 #modes button { flex: 1; padding: 0 2px; font-size: 12px; white-space: nowrap; }
-.readout { margin: 4px 0 6px; padding: 9px 11px; border-radius: 8px; background: var(--panel-2); font-size: 13px; line-height: 1.5; font-variant-numeric: tabular-nums; }

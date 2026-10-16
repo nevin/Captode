@@ -83,3 +83,7 @@ body { display: flex; flex-direction: column; overflow: hidden; }
 .timeline [data-tip]:not(.handle)::after { top: auto; bottom: calc(100% + 8px); }
 
 .hint { margin: -8px 0 14px; }
+
+/* Review a frame */
+#rv-overlay { position: absolute; z-index: 2; max-width: none; max-height: none; border-radius: 0; box-shadow: none; background: none; cursor: crosshair; touch-action: none; }
+#rv-tools button { flex: 1; font-size: 12px; }

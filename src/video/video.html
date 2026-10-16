@@ -28,6 +28,7 @@
       <img id="out-img" class="hidden" alt="Exported animation">
       <video id="out-video" class="hidden" controls playsinline></video>
       <div class="preview-label hidden" id="preview-label"></div>
+      <canvas id="rv-overlay" class="hidden" aria-label="Measuring layer over the paused frame"></canvas>
     </div>
     <div class="timeline" id="timeline">
       <button class="btn icon" id="play" data-tip="Play or pause  Space">
@@ -120,6 +121,29 @@
     <details class="section" id="device-section">
       <summary class="section-title">Device frame</summary>
       <div id="device-panel"></div>
+    </details>
+
+    <!-- Review: measuring and colours on a paused frame. Nothing here is exported. -->
+    <details class="section" id="review-section">
+      <summary class="section-title">Review a frame</summary>
+      <p class="muted small">Measure or pick colours on the frame showing. The video pauses; nothing here is exported.</p>
+      <div class="seg" id="rv-tools" role="radiogroup" aria-label="Review tool">
+        <button data-rt="off" class="on" role="radio" aria-checked="true">Off</button>
+        <button data-rt="measure" role="radio" aria-checked="false">Measure</button>
+        <button data-rt="pick" role="radio" aria-checked="false" aria-label="Colour picker">Colours</button>
+      </div>
+      <div class="readout" id="rv-m" aria-live="polite">No measurements yet</div>
+      <div class="grid2">
+        <label class="field"><span>Pixel ratio</span>
+          <select id="rv-ratio"><option value="auto">Automatic</option><option value="1">1×</option><option value="2">2×</option><option value="3">3×</option></select>
+        </label>
+        <div class="field"><span>&nbsp;</span><button class="btn" id="rv-clear" disabled>Clear all</button></div>
+      </div>
+      <div class="pick-pair" role="radiogroup" aria-label="Colour to set next">
+        <button class="pick-slot on" data-slot="0" role="radio" aria-checked="true"><span class="pick-swatch"></span><span><b>Text</b><small class="pick-hex">Not picked</small></span></button>
+        <button class="pick-slot" data-slot="1" role="radio" aria-checked="false"><span class="pick-swatch"></span><span><b>Background</b><small class="pick-hex">Not picked</small></span></button>
+      </div>
+      <div class="readout" id="rv-c" aria-live="polite">Pick two colours to check their contrast</div>
     </details>
 
     <div class="export-bar">

@@ -7,9 +7,11 @@ let session = null;
 let ticker = 0;
 let audioContext = null;
 let title = '';
+let cssWidth = 0; // the recorded part of the page, in CSS pixels
 
-async function start({ streamId, fps, audio, aspect, crop, size, title: tabTitle }) {
+async function start({ streamId, fps, audio, aspect, crop, size, pageWidth, title: tabTitle }) {
   title = tabTitle || '';
+  cssWidth = pageWidth ? pageWidth * (crop ? crop.w : 1) : 0;
   const media = { chromeMediaSource: 'tab', chromeMediaSourceId: streamId };
   const stream = await navigator.mediaDevices.getUserMedia({
     video: { mandatory: { ...media, maxWidth: 3840, maxHeight: 2160, maxFrameRate: fps } },
@@ -36,7 +38,9 @@ async function stop() {
   const { blob, meta } = await current.stop();
   audioContext?.close();
   audioContext = null;
-  const id = await putCapture(blob, { ...meta, title });
+  // Video pixels per CSS pixel of the page, for measuring on the video page.
+  const dpr = cssWidth && current.width ? current.width / cssWidth : undefined;
+  const id = await putCapture(blob, { ...meta, title, dpr });
   chrome.runtime.sendMessage({ type: 'rec-done', id, kind: 'offscreen' });
 }
 
