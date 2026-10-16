@@ -149,6 +149,16 @@
           <label class="field"><span>Strength</span><input type="range" id="r-strength" min="4" max="40"></label>
         </div>
 
+        <div id="arrange" class="arrange hidden">
+          <span class="label">Arrange</span>
+          <div class="row">
+            <button class="btn icon" id="a-front" data-tip="Bring to front  ⌘]"><svg class="i" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2" fill="currentColor" fill-opacity=".25"/><path d="M4 16V5a1 1 0 0 1 1-1h11"/></svg></button>
+            <button class="btn icon" id="a-back" data-tip="Send to back  ⌘["><svg class="i" viewBox="0 0 24 24"><rect x="4" y="4" width="12" height="12" rx="2"/><path d="M20 8v11a1 1 0 0 1-1 1H8"/></svg></button>
+            <button class="btn icon" id="a-dup" data-tip="Duplicate  ⌘D"><svg class="i" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M4 16V5a1 1 0 0 1 1-1h11M14 11v6M11 14h6"/></svg></button>
+            <button class="btn icon" id="a-del" data-tip="Delete  ⌫"><svg class="i" viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg></button>
+          </div>
+        </div>
+
         <div data-group="crop">
           <div class="field"><span>Aspect ratio</span>
             <select id="c-ratio">
@@ -274,6 +284,11 @@
     <div><span>Redo</span><span><kbd>⇧</kbd> <kbd>⌘</kbd> <kbd>Z</kbd></span></div>
     <div><span>Undo all changes</span><span>Toolbar button</span></div>
     <div><span>Delete selection</span><span><kbd>⌫</kbd></span></div>
+    <div><span>Select several</span><span><kbd>⇧</kbd> + click, or drag a box</span></div>
+    <div><span>Select all</span><span><kbd>⌘</kbd> <kbd>A</kbd></span></div>
+    <div><span>Duplicate</span><span><kbd>⌘</kbd> <kbd>D</kbd></span></div>
+    <div><span>Copy / paste annotations</span><span><kbd>⌘</kbd> <kbd>C</kbd> / <kbd>⌘</kbd> <kbd>V</kbd></span></div>
+    <div><span>Bring to front / send to back</span><span><kbd>⌘</kbd> <kbd>]</kbd> / <kbd>⌘</kbd> <kbd>[</kbd></span></div>
     <div><span>Deselect</span><span><kbd>Esc</kbd></span></div>
     <div><span>Nudge (10 px with ⇧)</span><span><kbd>←</kbd><kbd>↑</kbd><kbd>→</kbd><kbd>↓</kbd></span></div>
     <div><span>Straight line or square</span><span><kbd>⇧</kbd> + drag</span></div>

@@ -1,5 +1,6 @@
 // Shared set-up for Captode's browser tests: a copy of the extension that may
 // capture the local test site, a small web server for that site, and Chrome.
+import { spawn } from 'node:child_process';
 import puppeteer from 'puppeteer';
 import { createServer } from 'node:http';
 import { cpSync, mkdtempSync, readFileSync, writeFileSync, rmSync, existsSync } from 'node:fs';
@@ -41,7 +42,17 @@ function testCopy() {
  * Starts Chrome with the extension. Uses CHROME_PATH if set, else the browser
  * Puppeteer downloaded. Returns `{ browser, id, url(path), close() }`.
  */
+// On a Mac whose display has gone to sleep, Chrome stops producing frames and screen
+// captures never finish. Keep the display awake (and wake it) while tests run.
+let awake = false;
+function keepDisplayAwake() {
+  if (awake || process.platform !== 'darwin') return;
+  awake = true;
+  try { spawn('caffeinate', ['-d', '-i', '-u', '-w', String(process.pid)], { stdio: 'ignore' }).unref(); } catch {}
+}
+
 export async function launch({ scheme = 'light', args = [] } = {}) {
+  keepDisplayAwake();
   const ext = testCopy();
   const profile = mkdtempSync(join(tmpdir(), 'captode-profile-'));
   const browser = await puppeteer.launch({

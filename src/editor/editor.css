@@ -142,3 +142,8 @@ body { display: flex; flex-direction: column; overflow: hidden; }
 
 .fitted { margin: -4px 0 0; font-size: 12px; color: var(--muted); }
 .fitted.warn { color: var(--warn); }
+
+/* Arrange: shown whenever something is selected */
+.arrange { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); display: grid; gap: 8px; }
+.arrange .row { justify-content: flex-start; }
+.arrange .row > .btn { flex: none; }

@@ -59,7 +59,8 @@ const frame = { padding: 0, bg: 'transparent', radius: 0, shadow: false }; // bg
 
 let base = null;     // OffscreenCanvas with the pixels being edited
 let objects = [];    // annotations, in image coordinates
-let selected = null;
+let selection = []; // selected annotations
+let selected = null; // the selected annotation when exactly one is: it gets handles and the style panel
 let tool = 'select';
 let zoom = 1;
 let crop = null;
@@ -80,6 +81,8 @@ let hIndex = -1;
 
 const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
 const canvas = (w, h) => new OffscreenCanvas(Math.max(1, Math.round(w)), Math.max(1, Math.round(h)));
+const rectOf = (a, b) => ({ x: Math.min(a.x, b.x), y: Math.min(a.y, b.y), w: Math.abs(b.x - a.x), h: Math.abs(b.y - a.y) });
+const overlaps = (a, b) => a.x <= b.x + b.w && b.x <= a.x + a.w && a.y <= b.y + b.h && b.y <= a.y + a.h;
 const norm = (o) => ({
   x: Math.min(o.x1, o.x2), y: Math.min(o.y1, o.y2),
   w: Math.abs(o.x2 - o.x1), h: Math.abs(o.y2 - o.y1),
@@ -87,6 +90,12 @@ const norm = (o) => ({
 const fullW = () => base.width + frame.padding * 2;
 const fullH = () => base.height + frame.padding * 2;
 
+
+function select(list) {
+  selection = list.filter(Boolean);
+  selected = selection.length === 1 ? selection[0] : null;
+}
+const isSelected = (o) => selection.includes(o);
 
 function debounce(fn, ms) {
   let t = 0;
@@ -132,7 +141,7 @@ function restore(s) {
   base = s.base;
   objects = structuredClone(s.objects);
   Object.assign(frame, s.frame);
-  selected = null;
+  select([]);
   crop = null;
   syncFrameUi();
   layout();
@@ -159,7 +168,7 @@ function redo() { if (hIndex < history.length - 1) restore(history[++hIndex]); }
 function updateButtons() {
   $('#undo').disabled = hIndex <= 0;
   $('#redo').disabled = hIndex >= history.length - 1;
-  $('#delete').disabled = !selected;
+  $('#delete').disabled = !selection.length;
   $('#undo-all').disabled = !original || atOriginal();
 }
 
@@ -462,13 +471,23 @@ function renderFg() {
   fctx.translate(frame.padding, frame.padding);
   const px = 1 / zoom;
 
-  if (selected && !selected._editing) {
-    const b = bounds(selected);
+  fctx.strokeStyle = '#5b4bff';
+  for (const o of selection) {
+    if (o._editing) continue;
+    const b = bounds(o);
     fctx.setLineDash([5 * px, 4 * px]);
     fctx.lineWidth = px;
-    fctx.strokeStyle = '#5b4bff';
     fctx.strokeRect(b.x - 4 * px, b.y - 4 * px, b.w + 8 * px, b.h + 8 * px);
     fctx.setLineDash([]);
+  }
+  if (drag?.kind === 'marquee') {
+    const m = rectOf(drag.start, drag.end);
+    fctx.fillStyle = 'rgba(91,75,255,0.08)';
+    fctx.fillRect(m.x, m.y, m.w, m.h);
+    fctx.lineWidth = px;
+    fctx.strokeRect(m.x, m.y, m.w, m.h);
+  }
+  if (selected && !selected._editing) {
     for (const h of handles(selected)) {
       fctx.beginPath();
       if (h.id === 'p1' || h.id === 'p2') fctx.arc(h.x, h.y, 6 * px, 0, Math.PI * 2);
@@ -754,7 +773,7 @@ function finishText() {
   ta.classList.add('hidden');
   if (!o.text) {
     objects = objects.filter((x) => x !== o);
-    if (selected === o) selected = null;
+    select(selection.filter((x) => x !== o));
   }
   renderFg();
   commit();
@@ -786,10 +805,20 @@ fg.addEventListener('pointerdown', (e) => {
         return;
       }
     }
-    selected = topHit(pt);
-    if (selected) showPane('annotate');
+    const hit = topHit(pt);
+    if (e.shiftKey) {
+      // Shift-click adds to or removes from the selection; Shift-drag adds a box's worth.
+      if (hit) select(isSelected(hit) ? selection.filter((x) => x !== hit) : [...selection, hit]);
+      else drag = { kind: 'marquee', start: pt, end: pt, add: [...selection] };
+    } else if (hit) {
+      if (!isSelected(hit)) select([hit]);
+      drag = { kind: 'move', last: pt, moved: false };
+    } else {
+      select([]);
+      drag = { kind: 'marquee', start: pt, end: pt, add: [] };
+    }
+    if (selection.length) showPane('annotate');
     syncStyleUi();
-    if (selected) drag = { kind: 'move', last: pt, moved: false };
     renderFg();
     return;
   }
@@ -807,9 +836,9 @@ fg.addEventListener('pointerdown', (e) => {
   if (tool === 'text') {
     const hit = topHit(pt);
     if (hit && hit.type === 'text') {
-      selected = hit;
+      select([hit]);
     } else {
-      selected = { type: 'text', ...propsFor('text'), text: '', x: pt.x, y: pt.y - defaults.text.size * 0.6 };
+      select([{ type: 'text', ...propsFor('text'), text: '', x: pt.x, y: pt.y - defaults.text.size * 0.6 }]);
       objects.push(selected);
     }
     syncStyleUi();
@@ -820,10 +849,10 @@ fg.addEventListener('pointerdown', (e) => {
   if (tool === 'step') {
     const hit = topHit(pt);
     if (hit?.type === 'step') {
-      selected = hit;
+      select([hit]);
       drag = { kind: 'move', last: pt, moved: false };
     } else {
-      selected = { type: 'step', ...propsFor('step'), n: nextStep(), x: pt.x, y: pt.y };
+      select([{ type: 'step', ...propsFor('step'), n: nextStep(), x: pt.x, y: pt.y }]);
       objects.push(selected);
       lastStep = selected;
       stepStart = null;
@@ -836,7 +865,7 @@ fg.addEventListener('pointerdown', (e) => {
 
   const o = newShape(tool, pt);
   objects.push(o);
-  selected = o;
+  select([o]);
   drag = { kind: 'draw', o };
   renderFg();
 });
@@ -859,8 +888,14 @@ fg.addEventListener('pointermove', (e) => {
     if (drag.h === 'p1') { o.x1 = pt.x; o.y1 = pt.y; }
     else if (drag.h === 'p2') { const q = snapEnd(o, pt, e.shiftKey); o.x2 = q.x; o.y2 = q.y; }
     else applyBox(o, drag.from, drag.box, resizedBox(drag.box, drag.h, pt, UNIFORM.has(o.type) || e.shiftKey));
+  } else if (drag.kind === 'marquee') {
+    drag.end = pt;
+    const m = rectOf(drag.start, pt);
+    const inBox = m.w > 2 || m.h > 2 ? objects.filter((o) => overlaps(bounds(o), m)) : [];
+    select([...new Set([...drag.add, ...inBox])]);
+    syncStyleUi();
   } else if (drag.kind === 'move') {
-    moveObj(selected, pt.x - drag.last.x, pt.y - drag.last.y);
+    for (const o of selection) moveObj(o, pt.x - drag.last.x, pt.y - drag.last.y);
     drag.last = pt;
     drag.moved = true;
   } else if (drag.kind === 'crop') {
@@ -906,7 +941,7 @@ function endDrag() {
     const tiny = !o.points && Math.hypot(o.x2 - o.x1, o.y2 - o.y1) < 3;
     if (tiny) {
       objects = objects.filter((x) => x !== o);
-      selected = null;
+      select([]);
     } else commit();
     syncStyleUi();
   } else if (d.kind === 'handle' || (d.kind === 'move' && d.moved)) {
@@ -922,7 +957,7 @@ fg.addEventListener('pointercancel', endDrag);
 
 fg.addEventListener('dblclick', (e) => {
   const hit = topHit(toImage(e));
-  if (hit?.type === 'text') { selected = hit; syncStyleUi(); editText(hit); }
+  if (hit?.type === 'text') { select([hit]); syncStyleUi(); editText(hit); }
 });
 
 // ---------- panning ----------
@@ -981,7 +1016,7 @@ function setTool(t) {
   if (editing) ta.blur();
   tool = t;
   if (t !== 'crop') crop = null;
-  if (t !== 'select' && selected && GROUPS[t] && selected.type !== t) selected = null;
+  if (t !== 'select' && selection.length && GROUPS[t] && selection.some((o) => o.type !== t)) select([]);
   stage.dataset.tool = t;
   if (t !== 'select') showPane('annotate');
   for (const b of document.querySelectorAll('#tools .btn')) b.classList.toggle('active', b.dataset.tool === t);
@@ -1001,10 +1036,58 @@ $('#tools').addEventListener('click', (e) => {
 });
 
 function deleteSelected() {
-  if (!selected) return;
-  objects = objects.filter((o) => o !== selected);
-  selected = null;
+  if (!selection.length) return;
+  objects = objects.filter((o) => !isSelected(o));
+  select([]);
   syncStyleUi();
+  renderFg();
+  commit();
+}
+
+const cloneObj = ({ _editing, ...o }) => structuredClone(o);
+
+/** Adds copies of `list`, offset so they don't hide the originals, and selects them. */
+function addCopies(list, offset) {
+  const copies = list.map(cloneObj);
+  for (const o of copies) moveObj(o, offset, offset);
+  objects.push(...copies);
+  select(copies);
+  syncStyleUi();
+  renderFg();
+  commit();
+}
+const duplicateSelected = () => selection.length && addCopies(objects.filter(isSelected), 16 / Math.max(zoom, 0.25));
+
+// Copied annotations go on the system clipboard as text, so they paste into this or
+// another editor tab, and an image copied since then isn't mistaken for them.
+const CLIP_TAG = 'captode-annotations';
+let pasteCount = 0;
+async function copySelected() {
+  const items = objects.filter(isSelected).map(cloneObj);
+  if (!items.length) return;
+  try {
+    await navigator.clipboard.writeText(JSON.stringify({ [CLIP_TAG]: 1, items }));
+    pasteCount = 0;
+    toast(`Copied ${items.length === 1 ? 'the annotation' : `${items.length} annotations`}`, { kind: 'success', ms: 1600 });
+  } catch (e) {
+    toast('Could not copy: ' + e.message, { kind: 'error' });
+  }
+}
+function pasteAnnotations(text) {
+  try {
+    const data = JSON.parse(text);
+    if (!data?.[CLIP_TAG] || !Array.isArray(data.items)) return false;
+    pasteCount++;
+    addCopies(data.items, (16 * pasteCount) / Math.max(zoom, 0.25));
+    return true;
+  } catch { return false; }
+}
+
+/** Moves the selection to the front (top of the stack) or the back. */
+function arrange(toFront) {
+  if (!selection.length) return;
+  const picked = objects.filter(isSelected), rest = objects.filter((o) => !isSelected(o));
+  objects = toFront ? [...rest, ...picked] : [...picked, ...rest];
   renderFg();
   commit();
 }
@@ -1018,14 +1101,18 @@ document.addEventListener('keydown', (e) => {
   if (mod && e.shiftKey && e.key.toLowerCase() === 'c') { e.preventDefault(); copyImage(); return; }
   if (typing) return;
   if (e.key === ' ') { e.preventDefault(); if (!e.repeat && base) setSpacePan(true); return; }
-  if ((e.key === 'Delete' || e.key === 'Backspace') && selected) { e.preventDefault(); deleteSelected(); return; }
-  if (e.key === 'Escape') { selected = null; crop = null; updateCropUi(); syncStyleUi(); renderFg(); return; }
+  if (mod && e.key.toLowerCase() === 'a' && base) { e.preventDefault(); setTool('select'); select([...objects]); syncStyleUi(); renderFg(); return; }
+  if (mod && e.key.toLowerCase() === 'd') { e.preventDefault(); duplicateSelected(); return; }
+  if (mod && !e.shiftKey && e.key.toLowerCase() === 'c' && selection.length) { e.preventDefault(); copySelected(); return; }
+  if (mod && (e.key === ']' || e.key === '[')) { e.preventDefault(); arrange(e.key === ']'); return; }
+  if ((e.key === 'Delete' || e.key === 'Backspace') && selection.length) { e.preventDefault(); deleteSelected(); return; }
+  if (e.key === 'Escape') { select([]); crop = null; updateCropUi(); syncStyleUi(); renderFg(); return; }
   if (e.key === 'Enter' && tool === 'crop' && crop) { applyCrop(); return; }
-  if (selected && e.key.startsWith('Arrow')) {
+  if (selection.length && e.key.startsWith('Arrow')) {
     e.preventDefault();
     const s = e.shiftKey ? 10 : 1;
     const d = { ArrowLeft: [-s, 0], ArrowRight: [s, 0], ArrowUp: [0, -s], ArrowDown: [0, s] }[e.key];
-    moveObj(selected, ...d);
+    for (const o of selection) moveObj(o, ...d);
     renderFg();
     commitSoon();
     return;
@@ -1054,8 +1141,9 @@ for (const box of document.querySelectorAll('.swatches')) {
 }
 $('#t-font').innerHTML = FONTS.map((f) => `<option style="font-family:${JSON.stringify(f).replaceAll('"', "'")}">${f}</option>`).join('');
 
+/** The kind of annotation the style panel is for: the selection's, if all one kind, or the tool's. */
 function currentType() {
-  if (selected) return selected.type;
+  if (selection.length) return selection.every((o) => o.type === selection[0].type) ? selection[0].type : 'mixed';
   return GROUPS[tool] ? tool : null;
 }
 
@@ -1064,9 +1152,14 @@ function syncStyleUi() {
   const groups = GROUPS[type] || [];
   for (const g of document.querySelectorAll('[data-group]')) g.classList.toggle('hidden', !groups.includes(g.dataset.group));
   $('#style-hint').classList.toggle('hidden', !!type);
-  $('#style-title').textContent = type ? (selected ? `Selected ${NAMES[type].toLowerCase()}` : NAMES[type]) : 'Annotate';
-  if (!type || type === 'crop') return;
-  const p = selected || propsFor(type);
+  $('#arrange').classList.toggle('hidden', !selection.length);
+  const n = selection.length;
+  $('#style-title').textContent = !type ? 'Annotate'
+    : type === 'mixed' ? `${n} items selected`
+    : n > 1 ? `${n} × ${NAMES[type].toLowerCase()}`
+    : n ? `Selected ${NAMES[type].toLowerCase()}` : NAMES[type];
+  if (!type || type === 'crop' || type === 'mixed') return;
+  const p = selection[0] || propsFor(type);
   if (groups.includes('stroke')) {
     $('#s-color').value = p.color;
     $('#s-width').value = p.width;
@@ -1125,10 +1218,10 @@ function readStyleUi(type) {
 
 function onStyleChange() {
   const type = currentType();
-  if (!type || type === 'crop') return;
+  if (!type || type === 'crop' || type === 'mixed') return;
   const p = readStyleUi(type);
-  if (selected) {
-    Object.assign(selected, p);
+  if (selection.length) {
+    for (const o of selection) Object.assign(o, p);
     if (editing) placeTextEditor();
     renderFg();
     commitSoon();
@@ -1290,6 +1383,10 @@ $('#zoom-in').addEventListener('click', () => setZoom(zoom * 1.25));
 $('#zoom-out').addEventListener('click', () => setZoom(zoom / 1.25));
 $('#zoom-label').addEventListener('click', () => (zoom === 1 ? fitZoom() : setZoom(1)));
 $('#undo-all').addEventListener('click', undoAll);
+$('#a-front').addEventListener('click', () => arrange(true));
+$('#a-back').addEventListener('click', () => arrange(false));
+$('#a-dup').addEventListener('click', duplicateSelected);
+$('#a-del').addEventListener('click', deleteSelected);
 $('#undo').addEventListener('click', undo);
 $('#redo').addEventListener('click', redo);
 $('#delete').addEventListener('click', deleteSelected);
@@ -1493,7 +1590,7 @@ async function loadBlob(blob, info = {}) {
   c.getContext('2d').drawImage(bmp, 0, 0);
   base = c;
   objects = [];
-  selected = null;
+  select([]);
   crop = null;
   meta = info;
   history.length = 0;
@@ -1560,7 +1657,9 @@ $('#open2').addEventListener('change', (e) => openFile(e.target.files[0]));
 document.addEventListener('paste', (e) => {
   if (/^(INPUT|TEXTAREA)$/.test(e.target.tagName)) return;
   const item = [...e.clipboardData.items].find((i) => i.type.startsWith('image/'));
-  if (item) openFile(item.getAsFile());
+  if (item) { openFile(item.getAsFile()); return; }
+  const text = e.clipboardData.getData('text/plain');
+  if (base && text && pasteAnnotations(text)) e.preventDefault();
 });
 stage.addEventListener('dragover', (e) => e.preventDefault());
 stage.addEventListener('drop', (e) => {

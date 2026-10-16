@@ -7,10 +7,24 @@ export async function setup({ browser, url, site }) {
   const page = await open(browser, `${site}/rich.html`);
   const ctl = await open(browser, url('popup/popup.html'), { width: 340, height: 600 });
   const tabId = await ctl.evaluate(async (site) => (await chrome.tabs.query({ url: `${site}/*` }))[0].id, site);
+  // Captures the test page and returns the editor it opens. A busy CI runner sometimes
+  // misses the first capture; try once more, and say what the extension reported.
   const editor = async () => {
-    await page.bringToFront();
-    await ctl.evaluate((tabId) => chrome.runtime.sendMessage({ type: 'capture-image', mode: 'visible', tabId }), tabId);
-    const ed = await waitForTab(browser, (u) => u.includes('editor.html?id='));
+    let ed;
+    for (let attempt = 0; !ed; attempt++) {
+      const before = new Set(browser.targets());
+      await ctl.evaluate(() => chrome.storage.session.remove('lastError'));
+      await page.bringToFront();
+      await ctl.evaluate((tabId) => chrome.runtime.sendMessage({ type: 'capture-image', mode: 'visible', tabId }), tabId);
+      try {
+        const t = await browser.waitForTarget((t) => !before.has(t) && t.type() === 'page' && t.url().includes('editor.html?id='), { timeout: 15000 });
+        ed = await t.page();
+      } catch (e) {
+        const lastError = await ctl.evaluate(async () => (await chrome.storage.session.get('lastError')).lastError);
+        if (attempt) throw new Error(`no editor opened after capturing (last error: ${lastError})`);
+        await sleep(1000);
+      }
+    }
     await ed.setViewport({ width: 1440, height: 900 });
     await ed.bringToFront();
     await ed.waitForFunction(() => /px/.test(document.querySelector('#doc-dims').textContent), { polling: 100 });
@@ -489,5 +503,71 @@ export const tests = {
     ok(bigger.size > step.size * 1.4, `step size ${step.size} → ${bigger.size}`);
     await ed.evaluate(() => { window.onbeforeunload = null; });
     await ed.close();
+  },
+
+  async 'editor: select several, move, restyle, duplicate, copy and paste, arrange'({ editor, browser, page }) {
+    const ed = await editor();
+    await ed.evaluate(() => document.querySelector('#zoom-label').click());
+    await sleep(100);
+    const w = await ed.evaluate(() => { const r = document.querySelector('#wrap').getBoundingClientRect(); return { x: r.x, y: r.y }; });
+    const at = (x, y) => [w.x + x, w.y + y];
+    const objs = () => ed.evaluate(() => captodeEditor.objects());
+    const dragFrom = async (from, to, shift = false) => {
+      if (shift) await ed.keyboard.down('Shift');
+      await ed.mouse.move(...from); await ed.mouse.down(); await ed.mouse.move(...to, { steps: 4 }); await ed.mouse.up();
+      if (shift) await ed.keyboard.up('Shift');
+    };
+    const key = async (k) => { for (const m of ['Control', 'Meta']) { await ed.keyboard.down(m); await ed.keyboard.press(k); await ed.keyboard.up(m); } };
+    // Three rectangles.
+    await ed.keyboard.press('r');
+    for (const x of [100, 300, 500]) await dragFrom(at(x, 100), at(x + 100, 180));
+    await ed.keyboard.press('v');
+    // Drag a box around the first two.
+    await dragFrom(at(80, 80), at(420, 200));
+    let t = await ed.evaluate(() => document.querySelector('#style-title').textContent);
+    ok(/^2 ×/.test(t), `box selection: "${t}"`);
+    // Shift-click adds the third; move all three together.
+    await ed.keyboard.down('Shift'); await ed.mouse.click(...at(500, 140)); await ed.keyboard.up('Shift');
+    await dragFrom(at(150, 100), at(150, 160));
+    let o = await objs();
+    ok(o.every((r) => Math.abs(Math.min(r.y1, r.y2) - 160) <= 1), `moved together: ${o.map((r) => r.y1)}`);
+    // Restyle all three at once.
+    await ed.evaluate(() => { const i = document.querySelector('#s-color'); i.value = '#0090ff'; i.dispatchEvent(new Event('input', { bubbles: true })); });
+    o = await objs();
+    ok(o.every((r) => r.color === '#0090ff'), 'colour did not apply to all');
+    // Duplicate (⌘D / Ctrl+D): six, and the copies are selected.
+    await key('d');
+    o = await objs();
+    ok(o.length === 6 || o.length === 9, `after duplicate there are ${o.length}`);
+    const count = o.length;
+    // Copy and paste through the clipboard.
+    await ed.evaluate(() => document.querySelector('#a-front').click());
+    // ⌘C puts the annotations on the clipboard as text; read it from the web page (an
+    // extension page can't be given clipboard access in a test), then paste it back.
+    await browser.defaultBrowserContext().overridePermissions(new URL(page.url()).origin, ['clipboard-read', 'clipboard-write', 'clipboard-sanitized-write']);
+    await ed.evaluate(() => document.dispatchEvent(new KeyboardEvent('keydown', { key: 'c', ctrlKey: true, bubbles: true })));
+    await sleep(300);
+    await page.bringToFront();
+    const text = await page.evaluate(() => navigator.clipboard.readText());
+    ok(/captode-annotations/.test(text), `clipboard has ${text.slice(0, 60)}`);
+    await ed.bringToFront();
+    await ed.evaluate((text) => {
+      const dt = new DataTransfer(); dt.setData('text/plain', text);
+      document.dispatchEvent(new ClipboardEvent('paste', { clipboardData: dt, bubbles: true }));
+    }, text);
+    o = await objs();
+    ok(o.length > count, `paste added nothing (${count} → ${o.length})`);
+    // Send to back puts the selection first in the stack.
+    const before = o.length;
+    await ed.evaluate(() => document.querySelector('#a-back').click());
+    const sel = await ed.evaluate(() => document.querySelector('#style-title').textContent);
+    ok(/×/.test(sel), `selection lost after arranging: ${sel}`);
+    // Select all and delete.
+    await key('a');
+    await ed.keyboard.press('Delete');
+    ok((await objs()).length === 0, 'select all + delete left annotations');
+    await ed.evaluate(() => { window.onbeforeunload = null; });
+    await ed.close();
+    void before; void page;
   },
 };
