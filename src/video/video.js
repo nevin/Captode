@@ -2,6 +2,7 @@ import { getCapture } from '../lib/db.js';
 import { GifEncoder } from '../lib/gif.js';
 import { buildPalette } from '../lib/quantize.js';
 import { getSettings } from '../lib/settings.js';
+import { recall, remember, rememberControls } from '../lib/remember.js';
 import { WebpAnimEncoder } from '../lib/webp.js';
 import { mountDevicePanel, deviceRenderer, frameDrawer } from '../lib/device.js';
 import { toast, enhance, fmtBytes } from '../lib/ui.js';
@@ -135,8 +136,15 @@ $('#formats').addEventListener('click', (e) => {
   const f = e.target.closest('button')?.dataset.f;
   if (!f || busy) return;
   format = f;
+  remember('video', { format: f });
   fillResolutions(true);
   fillFps(true);
+  // This format's resolution and frame rate, as last used.
+  recall('video').then((last) => {
+    const per = last.controls?.[f] || {};
+    for (const id of ['res', 'fps']) if ([...$('#' + id).options].some((o) => o.value === per[id])) $('#' + id).value = per[id];
+    syncUi();
+  });
   syncUi();
 });
 document.querySelector('.inspector').addEventListener('input', (e) => {
@@ -601,9 +609,18 @@ $('#dl-original').addEventListener('click', () => source && save(source, `captod
       return c;
     },
   });
-  format = (await getSettings()).videoFormat || 'mp4';
+  // The default format from Settings, or the one used last; and the options used last.
+  const last = await recall('video');
+  const wanted = (await getSettings()).videoFormat;
+  format = (wanted === 'last' ? last.format : wanted) || 'mp4';
+  if (!document.querySelector(`#formats [data-f="${format}"]`)) format = 'mp4';
   fillResolutions(true);
   fillFps(true);
+  rememberControls('video', ['v-quality', 'g-colors', 'g-dither', 'g-lossy', 'w-quality', 'w-lossless', 'optimize'], last.controls);
+  // Resolution and frame rate are per format (GIF defaults smaller and slower).
+  const perFormat = last.controls?.[format] || {};
+  for (const id of ['res', 'fps']) if ([...$('#' + id).options].some((o) => o.value === perFormat[id])) $('#' + id).value = perFormat[id];
+  for (const id of ['res', 'fps']) $('#' + id).addEventListener('change', () => remember('video', { controls: { [format]: { res: $('#res').value, fps: $('#fps').value } } }));
   syncUi();
   enhance();
   buildFilmstrip();

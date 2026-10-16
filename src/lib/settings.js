@@ -4,8 +4,8 @@ export const DEFAULT_SETTINGS = {
   theme: 'system',           // 'system' | 'light' | 'dark'
   background: 'transparent', // background behind device frames and padding: 'transparent' | 'white' | 'custom'
   backgroundColor: '#ffffff',
-  imageFormat: 'png',
-  videoFormat: 'mp4',
+  imageFormat: 'last',       // 'last' (the editor remembers it) or a format
+  videoFormat: 'last',
   autoCopy: false,           // copy new screenshots to the clipboard when the editor opens them
 };
 

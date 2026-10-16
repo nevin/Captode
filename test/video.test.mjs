@@ -275,4 +275,21 @@ export const tests = {
     await page.close();
     return notes.join(', ');
   },
+
+  async 'the video page remembers the format, resolution and frame rate'({ browser, url, clip }) {
+    const page = await open(browser, url(`video/video.html?id=${clip}`), { width: 1440, height: 900 });
+    const ready = () => page.waitForFunction(() => /fps/.test(document.querySelector('#dims').textContent) && document.querySelector('#formats .on'), { polling: 100 });
+    await ready();
+    await page.click('#formats [data-f="gif"]');
+    const res = await page.$eval('#res', (e) => [...e.options].map((o) => o.value).find((v) => v !== '0' && v !== e.value));
+    await page.select('#res', res);
+    await page.select('#fps', '10');
+    await page.waitForFunction(async (res) => (await chrome.storage.local.get('lastExport')).lastExport?.video?.controls?.gif?.res === res, { polling: 100 }, res);
+    await page.reload();
+    await ready();
+    const got = await page.evaluate(() => [document.querySelector('#formats .on').dataset.f, document.querySelector('#res').value, document.querySelector('#fps').value].join());
+    ok(got === `gif,${res},10`, `remembered ${got}, expected gif,${res},10`);
+    await page.evaluate(() => chrome.storage.local.remove('lastExport'));
+    await page.close();
+  },
 };

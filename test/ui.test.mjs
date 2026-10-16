@@ -467,6 +467,39 @@ export const tests = {
     await st.close();
   },
 
+  async 'export choices are remembered for next time'({ browser, url }) {
+    const lab = await open(browser, url('lab/lab.html'));
+    const id = await lab.evaluate(async () => {
+      const { putCapture } = await import('/lib/db.js');
+      await chrome.storage.local.remove(['lastExport', 'settings']);
+      const c = new OffscreenCanvas(300, 200);
+      c.getContext('2d').fillRect(0, 0, 50, 50);
+      return putCapture(await c.convertToBlob(), { title: 'Remember', mode: 'visible' });
+    });
+    await lab.close();
+    const ed = await open(browser, url(`editor/editor.html?id=${id}&reopen=1`), { width: 1280, height: 900 });
+    const ready = () => ed.waitForFunction(() => /px/.test(document.querySelector('#doc-dims').textContent), { polling: 100 });
+    await ready();
+    ok(await ed.$eval('#x-format', (e) => e.value) === 'png', 'PNG to begin with');
+    await ed.evaluate(() => document.querySelector('[data-pane="export"]').click());
+    await ed.click('#formats [data-f="jpeg"]');
+    await ed.select('#x-scale', '0.5');
+    await ed.evaluate(() => { const q = document.querySelector('#x-quality'); q.value = '60'; q.dispatchEvent(new Event('input', { bubbles: true })); q.dispatchEvent(new Event('change', { bubbles: true })); });
+    await ed.waitForFunction(async () => (await chrome.storage.local.get('lastExport')).lastExport?.image?.controls?.['x-quality'] === '60', { polling: 100 });
+    await ed.reload();
+    await ready();
+    const got = await ed.evaluate(() => ['#x-format', '#x-scale', '#x-quality'].map((s) => document.querySelector(s).value).join());
+    ok(got === 'jpeg,0.5,60', `remembered: ${got}`);
+    ok(/Download JPEG/.test(await ed.$eval('#download', (e) => e.textContent)), 'the download button says JPEG');
+    // A format chosen in Settings wins over the last one used.
+    await ed.evaluate(() => chrome.storage.local.set({ settings: { imageFormat: 'webp' } }));
+    await ed.reload();
+    await ready();
+    ok(await ed.$eval('#x-format', (e) => e.value) === 'webp', 'the Settings default applies');
+    await ed.evaluate(() => chrome.storage.local.remove(['lastExport', 'settings']));
+    await ed.close();
+  },
+
   async 'countdown shows the chosen seconds and Esc cancels it'({ browser, url }) {
     const p = await open(browser, url('popup/popup.html'), { width: 800, height: 600 });
     const r = await p.evaluate(async () => {

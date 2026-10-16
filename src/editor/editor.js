@@ -1,3 +1,4 @@
+import { recall, remember, rememberControls } from '../lib/remember.js';
 import { getCapture, listCaptures, deleteCapture, restoreCapture, saveEdits } from '../lib/db.js';
 import { encodeOffThread } from '../lib/encoder.js';
 import { mountDevicePanel, renderInDevice } from '../lib/device.js';
@@ -2090,8 +2091,13 @@ document.addEventListener('keydown', (e) => {
     if (editorDefaults) Object.assign(defaults, editorDefaults);
     settings = await getSettings();
     frame.bg = backgroundColour(settings) || 'transparent';
-    const fmt = $('#x-format').querySelector(`option[value="${settings.imageFormat}"]`);
-    if (fmt && !fmt.hidden) $('#x-format').value = settings.imageFormat;
+    // The default format from Settings, or the one used last; and the options used last.
+    const last = await recall('image');
+    const wanted = settings.imageFormat === 'last' ? last.format || 'png' : settings.imageFormat;
+    const fmt = $('#x-format').querySelector(`option[value="${wanted}"]`);
+    if (fmt && !fmt.hidden) $('#x-format').value = wanted;
+    rememberControls('image', ['x-quality', 'x-colors', 'x-dither', 'x-lossy', 'x-page', 'x-split', 'x-scale', 'x-limit'], last.controls);
+    $('#x-format').addEventListener('change', () => remember('image', { format: $('#x-format').value }));
     device = await mountDevicePanel($('#device-panel'), () => refreshExport(), {
       source: () => (base ? [fullW(), fullH()] : null),
       picture: async (width) => (base ? smallPicture(width) : null),
