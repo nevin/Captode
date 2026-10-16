@@ -1279,8 +1279,12 @@ stage.addEventListener('wheel', (e) => {
   e.preventDefault();
   // Trackpad pinches arrive as small steps, mouse wheels as large ones.
   const f = Math.exp(-clamp(e.deltaY, -50, 50) * 0.01);
-  zoomAt(zoom * f, e.clientX, e.clientY);
+  // A pinch can arrive without a position; then use where the pointer last was.
+  const [x, y] = e.clientX || e.clientY ? [e.clientX, e.clientY] : lastPointer || stageCentre();
+  zoomAt(zoom * f, x, y);
 }, { passive: false });
+let lastPointer = null;
+stage.addEventListener('pointermove', (e) => { lastPointer = [e.clientX, e.clientY]; }, { passive: true });
 
 /** Zooms keeping the point under (cx, cy) on screen still. */
 function zoomAt(z, cx, cy) {

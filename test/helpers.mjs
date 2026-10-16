@@ -61,7 +61,11 @@ export async function launch({ scheme = 'light', args = [] } = {}) {
     pipe: true,
     enableExtensions: true,
     userDataDir: profile,
-    args: ['--window-size=1280,900', '--use-fake-ui-for-media-stream', '--autoplay-policy=no-user-gesture-required', '--no-sandbox', ...args],
+    // CI runners often have no visible desktop, so Chrome thinks its window is hidden and
+    // throttles timers and painting; tests need it to behave as if it were on screen.
+    args: ['--window-size=1280,900', '--use-fake-ui-for-media-stream', '--autoplay-policy=no-user-gesture-required', '--no-sandbox',
+      '--disable-background-timer-throttling', '--disable-backgrounding-occluded-windows', '--disable-renderer-backgrounding',
+      '--disable-features=CalculateNativeWinOcclusion', ...args],
     defaultViewport: null,
   });
   const id = await browser.installExtension(ext);
