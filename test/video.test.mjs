@@ -191,4 +191,87 @@ export const tests = {
     await toggle();
     return `GIF ${gif.ms} ms ${Math.round(gif.size / 1024)} KB (lossy 40: ${Math.round(lossy.size / 1024)} KB), WebP ${webp.ms} ms ${Math.round(webp.size / 1024)} KB`;
   },
+
+  async 'exports keep the colours of the recording, and say which colours they are'({ browser, url }) {
+    // A recording of colour patches (brand colours, primaries, greys), as Chrome
+    // records a tab: VP9 with the BT.601 matrix.
+    const COLOURS = ['#6c56ff', '#e5484d', '#ffb224', '#30a46c', '#ff0000', '#00ff00', '#0000ff', '#00b8d9',
+      '#1e1e1e', '#808080', '#f5f5f5', '#c9a227', '#0f62fe', '#ff6b9a', '#4a3aa8', '#e8f5e9'];
+    const lab = await open(browser, url('lab/lab.html'));
+    await lab.bringToFront();
+    const id = await lab.evaluate(async (COLOURS) => {
+      const { record } = await import('/lib/recorder.js');
+      const { putCapture } = await import('/lib/db.js');
+      const c = document.createElement('canvas'); c.width = 1280; c.height = 720; document.body.append(c);
+      const g = c.getContext('2d');
+      let t = 0;
+      const draw = () => {
+        COLOURS.forEach((col, i) => { g.fillStyle = col; g.fillRect((i % 4) * 320, Math.floor(i / 4) * 180, 320, 180); });
+        g.fillStyle = '#000'; g.fillRect(10 + (t++ % 50), 5, 4, 4);
+      };
+      draw();
+      const timer = setInterval(draw, 33);
+      const s = await record(c.captureStream(30), { fps: 30 });
+      await new Promise((r) => setTimeout(r, 2000));
+      const { blob, meta } = await s.stop();
+      clearInterval(timer);
+      return putCapture(blob, meta);
+    }, COLOURS);
+    await lab.close();
+    const page = await open(browser, url(`video/video.html?id=${id}`), { width: 1440, height: 900 });
+    await page.bringToFront();
+    await page.waitForFunction(() => /fps/.test(document.querySelector('#dims').textContent), { polling: 100 });
+    // The worst difference from the true colours, over all patches, in a frame 1 s in.
+    const measure = (src) => page.evaluate(async (src, COLOURS) => {
+      const blob = await (await fetch(src)).blob();
+      let d, w;
+      if (blob.type.startsWith('video')) {
+        const v = document.createElement('video'); v.muted = true; v.src = URL.createObjectURL(blob);
+        await new Promise((r) => { v.onloadeddata = r; });
+        v.currentTime = 1; await new Promise((r) => { v.onseeked = r; });
+        w = v.videoWidth;
+        const k = new OffscreenCanvas(w, v.videoHeight).getContext('2d', { willReadFrequently: true });
+        k.drawImage(v, 0, 0); d = k.getImageData(0, 0, w, v.videoHeight).data;
+      } else {
+        const bmp = await createImageBitmap(blob);
+        w = bmp.width;
+        const k = new OffscreenCanvas(w, bmp.height).getContext('2d', { willReadFrequently: true });
+        k.drawImage(bmp, 0, 0); d = k.getImageData(0, 0, w, bmp.height).data;
+      }
+      const s = w / 1280;
+      let worst = 0, where = '';
+      COLOURS.forEach((col, i) => {
+        const x = Math.round(((i % 4) * 320 + 160) * s), y = Math.round((Math.floor(i / 4) * 180 + 90) * s);
+        const k = (y * w + x) * 4;
+        const e = Math.max(...[1, 3, 5].map((j, c) => Math.abs(parseInt(col.slice(j, j + 2), 16) - d[k + c])));
+        if (e > worst) { worst = e; where = `${col} came out rgb(${d[k]}, ${d[k + 1]}, ${d[k + 2]})`; }
+      });
+      const bytes = new Uint8Array(await blob.arrayBuffer());
+      const find = (seq) => bytes.findIndex((_, i) => seq.every((b, j) => bytes[i + j] === b));
+      const at = find([0x63, 0x6f, 0x6c, 0x72]); // 'colr'
+      const webmColour = find([0x55, 0xb0]) >= 0;
+      return { worst, where, colr: at >= 0 ? [...bytes.slice(at + 4, at + 15)] : null, webmColour };
+    }, src, COLOURS);
+    const notes = [];
+    for (const f of ['mp4', 'webm', 'gif', 'webp']) {
+      await page.click(`#formats [data-f="${f}"]`);
+      await sleep(100);
+      await page.click('#convert');
+      await page.waitForFunction(() => !document.querySelector('#result').classList.contains('hidden') || /failed/i.test(document.querySelector('#status').textContent), { timeout: 180000, polling: 100 });
+      const out = await page.evaluate(() => (document.querySelector('#out-video:not(.hidden)') || document.querySelector('#out-img:not(.hidden)'))?.src);
+      ok(out, `${f} export failed`);
+      const r = await measure(out);
+      // Compression costs a few levels; the wrong colour matrix cost up to 40.
+      ok(r.worst <= 8, `${f}: ${r.where}`);
+      if (f === 'mp4') {
+        // nclx: sRGB primaries (1) and transfer (13), BT.709 matrix (1), limited range.
+        ok(r.colr && String.fromCharCode(...r.colr.slice(0, 4)) === 'nclx' && r.colr.slice(4, 11).join() === '0,1,0,13,0,1,0', `MP4 colour tag ${r.colr}`);
+      }
+      if (f === 'webm') ok(r.webmColour, 'WebM has no Colour element');
+      notes.push(`${f} ±${r.worst}`);
+      await page.click('#redo-export').catch(() => {});
+    }
+    await page.close();
+    return notes.join(', ');
+  },
 };

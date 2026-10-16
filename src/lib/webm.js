@@ -7,7 +7,8 @@ const ID = {
   EBML: 0x1a45dfa3, Segment: 0x18538067, Info: 0x1549a966, TimecodeScale: 0x2ad7b1, Duration: 0x4489,
   Tracks: 0x1654ae6b, TrackEntry: 0xae, TrackNumber: 0xd7, TrackType: 0x83, CodecID: 0x86, CodecPrivate: 0x63a2,
   CodecDelay: 0x56aa, SeekPreRoll: 0x56bb,
-  Video: 0xe0, PixelWidth: 0xb0, PixelHeight: 0xba, Audio: 0xe1, SamplingFrequency: 0xb5, Channels: 0x9f,
+  Video: 0xe0, PixelWidth: 0xb0, PixelHeight: 0xba,
+  Colour: 0x55b0, MatrixCoefficients: 0x55b1, Range: 0x55b9, TransferCharacteristics: 0x55ba, Primaries: 0x55bb, Audio: 0xe1, SamplingFrequency: 0xb5, Channels: 0x9f,
   Cluster: 0x1f43b675, Timecode: 0xe7, SimpleBlock: 0xa3, BlockGroup: 0xa0, Block: 0xa1, ReferenceBlock: 0xfb,
   SeekHead: 0x114d9b74, Seek: 0x4dbb, SeekID: 0x53ab, SeekPosition: 0x53ac, Cues: 0x1c53bb6b, CuePoint: 0xbb,
   CueTime: 0xb3, CueTrackPositions: 0xb7, CueTrack: 0xf7, CueClusterPosition: 0xf1, TrackUID: 0x73c5,
@@ -200,7 +201,7 @@ function el(id, body, { float = false, sizeWidth = 0, uintWidth = 0 } = {}) {
 
 /**
  * Builds a WebM file from encoded chunks.
- * `video`: `{ codecId, width, height, frames }`; `audio` (optional):
+ * `video`: `{ codecId, width, height, frames, colour? }` (colour as for MP4); `audio` (optional):
  * `{ codecId, sampleRate, channels, description, frames }`. Frames are
  * `{ timestamp (µs), key, data }` in decode order.
  */
@@ -209,7 +210,11 @@ export function muxWebm({ video, audio = null }) {
   const tracks = [
     el(ID.TrackEntry, [
       el(ID.TrackNumber, 1), el(ID.TrackUID, 1), el(ID.TrackType, 1), el(ID.CodecID, video.codecId),
-      el(ID.Video, [el(ID.PixelWidth, video.width), el(ID.PixelHeight, video.height)]),
+      el(ID.Video, [el(ID.PixelWidth, video.width), el(ID.PixelHeight, video.height),
+        ...(video.colour ? [el(ID.Colour, [
+          el(ID.MatrixCoefficients, video.colour.matrix), el(ID.Range, video.colour.fullRange ? 2 : 1),
+          el(ID.TransferCharacteristics, video.colour.transfer), el(ID.Primaries, video.colour.primaries),
+        ])] : [])]),
     ]),
   ];
   if (audio) {

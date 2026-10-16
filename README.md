@@ -145,6 +145,10 @@ Everything runs in the browser; nothing is uploaded.
 - Encoding runs in background workers, so the editor and video page stay responsive. GIF
   exports spread colour mapping and compression across several CPU cores.
 
+Colours stay true for design and UX reviews: video exports keep the recording's exact
+colours and are tagged as sRGB, so QuickTime, browsers and chat apps show them the same
+way, and image exports (PNG, JPEG, PDF) are tagged as sRGB too.
+
 ## Supported platforms
 
 Captode runs on **Windows, macOS, Linux and ChromeOS**, in Chrome 116 or later and other

@@ -3,6 +3,7 @@ import { buildPalette, mapPixels, exactColors } from './quantize.js';
 import { GifEncoder } from './gif.js';
 import { deflate, encodeIndexed, encodePng, filterRows } from './png.js';
 import { oxipng, mozjpeg } from './wasm.js';
+import { SRGB_ICC, tagPng, tagJpeg } from './srgb.js';
 
 const enc = new TextEncoder();
 
@@ -120,10 +121,14 @@ function buildPdf(pages) {
       `/Resources << /XObject << /Im0 ${n + 2} 0 R >> >> /Contents ${n + 1} 0 R >>`);
     obj(n + 1, `<< /Length ${content.length} >>\nstream\n${content}\nendstream`);
     const im = p.img;
-    obj(n + 2, `<< /Type /XObject /Subtype /Image /Width ${p.iw} /Height ${p.ih} /ColorSpace ${im.colorSpace} ` +
+    // Colours are sRGB (the profile is the last object).
+    const colorSpace = im.colorSpace.replace('/DeviceRGB', `[/ICCBased ${3 + pages.length * 3} 0 R]`);
+    obj(n + 2, `<< /Type /XObject /Subtype /Image /Width ${p.iw} /Height ${p.ih} /ColorSpace ${colorSpace} ` +
       `/BitsPerComponent 8 /Filter ${im.filter}${im.parms ? ` /DecodeParms ${im.parms}` : ''} /Length ${im.data.length} >>\nstream\n`, im.data, '\nendstream');
   });
-  const count = 3 + pages.length * 3;
+  const icc = 3 + pages.length * 3;
+  obj(icc, `<< /N 3 /Alternate /DeviceRGB /Length ${SRGB_ICC.length} >>\nstream\n`, SRGB_ICC, '\nendstream');
+  const count = icc + 1;
   const xref = pos;
   let table = `xref\n0 ${count}\n0000000000 65535 f \n`;
   for (let i = 1; i < count; i++) table += `${String(offsets[i]).padStart(10, '0')} 00000 n \n`;
@@ -139,11 +144,13 @@ export function toBmp(src) {
   const { width: w, height: h } = c;
   const px = c.getContext('2d').getImageData(0, 0, w, h).data;
   const row = (w * 3 + 3) & ~3;
-  const buf = new ArrayBuffer(54 + row * h);
+  // The basic header: BMP colours are sRGB unless a later header says otherwise.
+  const HEAD = 54;
+  const buf = new ArrayBuffer(HEAD + row * h);
   const v = new DataView(buf);
   v.setUint16(0, 0x4d42, true);
   v.setUint32(2, buf.byteLength, true);
-  v.setUint32(10, 54, true);
+  v.setUint32(10, HEAD, true);
   v.setUint32(14, 40, true);
   v.setInt32(18, w, true);
   v.setInt32(22, h, true);
@@ -154,7 +161,7 @@ export function toBmp(src) {
   v.setInt32(42, 2835, true);
   const out = new Uint8Array(buf);
   for (let y = 0; y < h; y++) {
-    let o = 54 + (h - 1 - y) * row;
+    let o = HEAD + (h - 1 - y) * row;
     for (let x = 0; x < w; x++) {
       const i = (y * w + x) * 4;
       out[o++] = px[i + 2];
@@ -181,10 +188,11 @@ export async function toPng(src) {
   return squeeze(own.size <= browser.size ? own : browser);
 }
 
-/** Recompresses a PNG blob with oxipng, keeping whichever is smaller. */
+/** Recompresses a PNG blob with oxipng, keeping whichever is smaller, marked as sRGB. */
 async function squeeze(png) {
   const better = await oxipng(await png.arrayBuffer());
-  return better && better.length < png.size ? new Blob([better], { type: 'image/png' }) : png;
+  const bytes = better && better.length < png.size ? better : new Uint8Array(await png.arrayBuffer());
+  return new Blob([tagPng(bytes)], { type: 'image/png' });
 }
 
 function psnr(a, b) {
@@ -312,7 +320,7 @@ export async function encodeImage(src, format, { quality = 0.85, colors = 256, d
   switch (format) {
     case 'png': return toPng(src);
     case 'png8': return toPng8(src, { colors, dither });
-    case 'jpeg': return new Blob([await jpegBytes(src, quality, { calibrate })], { type: 'image/jpeg' });
+    case 'jpeg': return new Blob([tagJpeg(await jpegBytes(src, quality, { calibrate }))], { type: 'image/jpeg' });
     case 'webp': return src.convertToBlob({ type: 'image/webp', quality });
     case 'avif': return src.convertToBlob({ type: 'image/avif', quality });
     case 'gif': return toGif(src, { colors, dither, lossy });

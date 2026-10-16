@@ -252,6 +252,28 @@ export const tests = {
     await pop.close();
   },
 
+  async 'image exports say their colours are sRGB'({ browser, url }) {
+    const lab = await open(browser, url('lab/lab.html'));
+    const r = await lab.evaluate(async () => {
+      const { encodeImage } = await import('/lib/formats.js');
+      const c = new OffscreenCanvas(64, 48);
+      const g = c.getContext('2d');
+      for (let x = 0; x < 64; x++) { g.fillStyle = `rgb(${x * 4}, 86, 255)`; g.fillRect(x, 0, 1, 48); }
+      const out = {};
+      for (const f of ['png', 'png8', 'jpeg', 'pdf']) {
+        const b = new Uint8Array(await (await encodeImage(c, f, { quality: 0.85 })).arrayBuffer());
+        const text = new TextDecoder('latin1').decode(b);
+        out[f] = { srgb: text.includes('sRGB'), icc: text.includes('ICC_PROFILE'), iccBased: /\/ICCBased \d+ 0 R/.test(text), decodes: await createImageBitmap(new Blob([b])).then(() => true, () => f === 'pdf') };
+      }
+      return out;
+    });
+    await lab.close();
+    ok(r.png.srgb && r.png.decodes, `PNG: ${JSON.stringify(r.png)}`);
+    ok(r.png8.srgb && r.png8.decodes, `PNG-8: ${JSON.stringify(r.png8)}`);
+    ok(r.jpeg.icc && r.jpeg.decodes, `JPEG: ${JSON.stringify(r.jpeg)}`);
+    ok(r.pdf.iccBased, `PDF: ${JSON.stringify(r.pdf)}`);
+  },
+
   async 'countdown shows the chosen seconds and Esc cancels it'({ browser, url }) {
     const p = await open(browser, url('popup/popup.html'), { width: 800, height: 600 });
     const r = await p.evaluate(async () => {

@@ -13,6 +13,7 @@ import { WebpAnimEncoder } from '../lib/webp.js';
 import { buildPalette } from '../lib/quantize.js';
 import { WorkerPool } from '../lib/pool.js';
 import { deviceRenderer, frameDrawer } from '../lib/device.js';
+import { sourceColourSpace, outputColour } from '../lib/video-colour.js';
 
 /** An error after which the page should fall back to its slower, simpler path. */
 class Unsupported extends Error {}
@@ -111,6 +112,9 @@ async function videoDecoderConfig(v) {
   if (!v || !v.codec) throw new Unsupported('This recording uses a video format Captode cannot decode here.');
   const config = { codec: v.codec, codedWidth: v.width, codedHeight: v.height };
   if (v.codecId === 'V_MPEG4/ISO/AVC' && v.description) config.description = v.description;
+  // Without this, WebCodecs decodes Chrome's recordings with the wrong colours.
+  const colorSpace = sourceColourSpace(v);
+  if (colorSpace) config.colorSpace = colorSpace;
   if (!(await VideoDecoder.isConfigSupported(config)).supported) throw new Unsupported(`Cannot decode ${v.codecId}`);
   return config;
 }
@@ -304,10 +308,12 @@ async function run(job) {
     const audio = job.video.audio ? await exportAudio(src, job.format, start, end) : null;
     const chunks = [];
     let description = null;
+    let encodedColour = null;
     let failure = null;
     const encoder = new VideoEncoder({
       output: (chunk, md) => {
         if (md?.decoderConfig?.description) description = new Uint8Array(md.decoderConfig.description);
+        if (md?.decoderConfig?.colorSpace) encodedColour = md.decoderConfig.colorSpace;
         const data = new Uint8Array(chunk.byteLength);
         chunk.copyTo(data);
         chunks.push({ timestamp: chunk.timestamp, duration: chunk.duration ?? frameUs, key: chunk.type === 'key', data });
@@ -334,11 +340,13 @@ async function run(job) {
     encoder.close();
     if (failure) throw failure;
 
+    // Tagged, so every player shows the colours as they were on screen.
+    const colour = outputColour(encodedColour);
     if (job.format === 'mp4') {
       if (!description) throw new Unsupported('The H.264 encoder gave no configuration.');
-      return muxMp4({ video: { width: W, height: H, avcC: description, frames: chunks }, audio });
+      return muxMp4({ video: { width: W, height: H, avcC: description, frames: chunks, colour }, audio });
     }
-    return muxWebm({ video: { codecId: config.codec.startsWith('vp8') ? 'V_VP8' : 'V_VP9', width: W, height: H, frames: chunks }, audio });
+    return muxWebm({ video: { codecId: config.codec.startsWith('vp8') ? 'V_VP8' : 'V_VP9', width: W, height: H, frames: chunks, colour }, audio });
   }
 
   // GIF and WebP

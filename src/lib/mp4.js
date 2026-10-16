@@ -69,13 +69,17 @@ function sampleTables(samples, timescale, chunkOffset, sampleEntry, isVideo) {
   return { stbl: box('stbl', ...parts), duration: total };
 }
 
-function avc1Entry(width, height, avcC) {
+/** The colour tag (`{ primaries, transfer, matrix, fullRange }` as H.273 numbers). */
+const colr = (c) => box('colr', str('nclx'), u16(c.primaries), u16(c.transfer), u16(c.matrix), u8(c.fullRange ? 0x80 : 0));
+
+function avc1Entry(width, height, avcC, colour) {
   return box('avc1',
     zeros(6), u16(1), // reserved, data reference index
     zeros(16), u16(width), u16(height),
     u32(0x00480000), u32(0x00480000), u32(0), u16(1), // 72 dpi, one frame per sample
     zeros(32), u16(0x0018), u16(0xffff),
-    box('avcC', avcC));
+    box('avcC', avcC),
+    ...(colour ? [colr(colour)] : []));
 }
 
 /** An MPEG-4 descriptor: tag, length (four-byte form), body. */
@@ -142,7 +146,7 @@ function trak(id, kind, { width = 0, height = 0, timescale, stbl, mediaDuration,
 
 /**
  * Builds an MP4 from encoded chunks.
- * `video`: `{ width, height, avcC, frames }` (avcC is the encoder's decoder
+ * `video`: `{ width, height, avcC, frames, colour? }` (avcC is the encoder's decoder
  * description); `audio` (optional): AAC `{ sampleRate, channels, asc, bitrate, frames }`
  * or Opus `{ codec: 'opus', channels, opusHead, frames }`.
  */
@@ -155,7 +159,7 @@ export function muxMp4({ video, audio = null }) {
   // The moov box's size doesn't depend on the chunk offsets' values, so build it
   // once to measure, then again with the real offsets.
   const build = (vOffset, aOffset) => {
-    const v = sampleTables(video.frames, VTS, vOffset, avc1Entry(video.width, video.height, video.avcC), true);
+    const v = sampleTables(video.frames, VTS, vOffset, avc1Entry(video.width, video.height, video.avcC, video.colour), true);
     const entry = audio?.codec === 'opus'
       ? opusEntry(audio.channels, audio.opusHead)
       : audio && mp4aEntry(audio.sampleRate, audio.channels, audio.asc, audio.bitrate);

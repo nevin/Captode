@@ -47,7 +47,9 @@ or install the zip from `npm run package`.
    and press Cancel during the countdown: nothing is recorded. Then try again and press Cancel in the picker: Captode should say nothing
    was shared (on macOS, with a pointer to the Screen Recording permission).
 7. In the recording, trim with the timeline, then export **MP4**, **GIF**, **WebP** and
-   **WebM**. Open each downloaded file in the system's own player or viewer.
+   **WebM**. Open each downloaded file in the system's own player or viewer. Record
+   test/site/colours.html (served by the tests' site, or opened as a file): colours in
+   the exports, in QuickTime too, should match the page, with no lighter or washed-out look.
 8. Turn on the **device frame** and export a screenshot and a GIF.
 9. In Settings turn on **Copy screenshots to the clipboard**, take a screenshot, and paste
    it into another app (a chat or document). In the editor, add numbered steps and use
