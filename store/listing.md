@@ -73,9 +73,8 @@ Trim the start and end on a timeline, then save the result as a video or an anim
 GIF. Exports take seconds rather than the length of the recording.
 
 Device frames
-Present any screenshot or recording inside a real phone or tablet, portrait or landscape:
-iPhones, iPads, Pixel and Galaxy phones, foldables and tablets, with their real screen sizes
-and proportions. Your capture keeps its exact pixels.
+Present any screenshot or recording inside real phone and tablet models, portrait or
+landscape, at their true screen sizes and proportions. Your capture keeps its exact pixels.
 
 For everyone
 Captode follows your light or dark theme, works with touchscreens, keyboards, screen
@@ -118,7 +117,7 @@ Regenerate them after any interface or logo change: `npm run icons`, then `npm r
 
 ```
 Captode takes screenshots and screen recordings of the user's current tab or screen, and
-lets the user annotate, trim and export them as image, PDF or video files.
+lets the user annotate, review, compare, trim and export them as image, PDF or video files.
 ```
 
 **Permission justifications**
