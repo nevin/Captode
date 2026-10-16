@@ -58,6 +58,21 @@ or install the zip from `npm run package`.
    **Copy** in the Export panel; paste again.
 10. Switch the theme in Settings and check the popup and editor follow it; set it to
    System and change the operating system's dark mode.
+11. **Review tab:** measure a button with U (the size is in CSS pixels and snaps to its
+   edges), pick its text and background colours with I and read the contrast, press G for
+   the grid. Export: none of it is in the file.
+12. **Compare:** from the editor, compare a screenshot with an earlier one, then open a
+   design PNG as B. Try the slider (drag, and arrow keys), side by side, overlay, and the
+   difference; download the difference image.
+13. **Share for review:** add numbered steps, write a note for each, download the page and
+   open it in another browser. Clicking a note highlights its step.
+14. **Several devices:** tick three devices and download the zip; open it in the system's
+   own archive tool.
+15. **Keyboard only:** with a screen reader on (VoiceOver: ⌘F5; NVDA on Windows), draw a
+   shape, Tab to the Annotations list, choose items with the arrow keys, move one with Alt
+   and the arrows, and delete it. Each step is announced.
+16. Remove a capture from Recent captures, delete an annotation and reset Settings: each
+   toast offers Undo, which brings it back.
 
 ### Windows
 

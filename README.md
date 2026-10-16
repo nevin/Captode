@@ -48,9 +48,33 @@ The capture opens in the editor, where you can:
   file, and the live estimate shows the size before you download. You can also copy the image
   to the clipboard, from the top bar or the Export panel, or have every new screenshot copied
   automatically (Settings → Copy screenshots to the clipboard). See [How compression works](#how-compression-works).
+- **Quick styles:** Bug, Review, Note, Approved, Neutral and Brand set the colours of every
+  tool at once, and of whatever is selected.
+- **Presets** for common uses (chat, issue trackers, email, design review, phone mock-ups,
+  websites), or save your own. Your last format and options are remembered.
+- **Several devices at once:** one zip with an image for each device you tick.
+- **Share for review:** a single web page with the annotated image, a note for each numbered
+  step and where the capture came from, to attach to a ticket or send in chat. It opens in any
+  browser, needs no account, and nothing is uploaded.
 - **Keyboard shortcuts** for every tool. Press **?** in the editor to see them all.
+- **Keyboard and screen readers:** every annotation is listed in words in the Annotate tab,
+  where it can be chosen, moved, edited or removed from the keyboard, and changes are announced.
+- **Undo** for removing a capture, deleting annotations and resetting settings.
 - **Recent captures:** open the editor from the popup to get back any capture from the last
   24 hours, even after closing its tab.
+
+### Review tools
+
+For checking a build against its design, in the editor's **Review** tab (nothing here is exported):
+
+- **Measure (U):** drag across the image. Sizes are in CSS pixels, using the capture's pixel
+  ratio. Lines straighten and their ends snap to edges, so an element's size comes out exact.
+- **Colour picker (I):** pick a text and a background colour to see their hex codes and WCAG
+  contrast ratio, with AA and AAA results for normal and large text.
+- **Spacing grid (G):** every 4, 8, 16 or 24 CSS pixels.
+- **Compare:** two captures, or a capture and a design file, with a slider, side by side, as an
+  overlay, or as a difference that highlights the changed pixels and says how many changed.
+  Images of different widths (a 1× design and a 2× screenshot) are lined up automatically.
 
 ### Recordings
 
@@ -110,7 +134,8 @@ Open **Settings** from the gear in the popup (or right-click the icon → Option
 - **Export background:** Transparent, White or a custom colour, used behind device frames
   and around padded screenshots. JPEG, BMP, PDF, MP4 and WebM can't be transparent, so
   they get white when Transparent is chosen.
-- **Default formats** for screenshots and recordings, and whether device frames are on.
+- **Default formats** for screenshots and recordings (or the last one used), and whether
+  device frames are on.
 
 Settings also has links to help, problem reports and the privacy policy, and a button that
 resets everything to the defaults.
@@ -197,7 +222,8 @@ src/
   content/page.js        functions injected into the page (area picker, scrolling, countdown)
   popup/                 the toolbar popup
   settings/              the Settings page
-  editor/                image editor
+  editor/                image editor; review-page.js builds the Share for review page
+  compare/               compare two images
   video/                 recording preview and export
   recorder/offscreen.*   records the tab (offscreen document)
   recorder/screen.*      records the whole screen or a window
@@ -205,6 +231,13 @@ src/
     db.js                hands captures between pages through IndexedDB
     recorder.js          MediaRecorder wrapper, with cropping for selected-area recordings
     device.js            phone and tablet frames
+    devices.js           the device catalogue: real resolutions, densities and sizes
+    device-picker.js     the searchable device menu
+    presets.js           export presets
+    remember.js          remembers export choices
+    srgb.js              marks exported images as sRGB
+    video-colour.js      colour spaces for recordings and their exports
+    zip.js               ZIP writer for several-device exports
     settings.js          user settings shared by every page
     theme.js             applies the Light, Dark or System theme
     gif.js               animated GIF encoder: frame diffing, lossy LZW

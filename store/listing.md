@@ -3,13 +3,13 @@
 Everything to fill in the Chrome Web Store Developer Dashboard, field by field, plus the
 assets to upload. (Microsoft Edge Add-ons asks for the same things; notes at the end.)
 
-Build the package with `npm run package` and upload `dist/captode-1.1.0.zip`.
+Build the package with `npm run package` and upload `dist/captode-1.2.0.zip`.
 
 ---
 
 ## Package (uploaded zip)
 
-- Manifest V3, version 1.1.0, minimum Chrome 116.
+- Manifest V3, version 1.2.0, minimum Chrome 116.
 - Permissions: `activeTab`, `scripting`, `tabCapture`, `offscreen`, `storage`,
   `unlimitedStorage`. **No host permissions** and no content scripts: Captode only touches
   a page after the user invokes it, which avoids the extra review that broad host access
@@ -61,6 +61,12 @@ Record the current tab, an area of it, or your whole screen or a window, with so
 you like. Only the page is kept, even when DevTools shows it at a phone's size, and you can
 record it as shown, scaled up or down, or at a standard resolution. A countdown of up to 30
 seconds gives you time to get ready, and one click on the toolbar button stops the recording.
+
+Review designs
+Check a build against its design: measure spacing in CSS pixels, check colour contrast against
+accessibility guidelines, lay a spacing grid over the page, or compare two images with a slider
+or a highlight of what changed. Share a capture for review as a single web page with a note for
+each numbered step.
 
 Edit recordings
 Trim the start and end on a timeline, then save the result as a video or an animated
@@ -189,7 +195,7 @@ extensions); the popup says so on those pages.
 - [x] Tests pass on Windows, macOS and Linux (`npm test`, GitHub Actions)
 - [ ] Go through the manual checklist in `docs/TESTING.md` (recording can't be automated)
 - [ ] Developer account: one-time registration fee paid, contact email verified
-- [ ] Upload `dist/captode-1.1.0.zip` and fill in the fields above
+- [ ] Upload `dist/captode-1.2.0.zip` and fill in the fields above
 
 ---
 

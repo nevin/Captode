@@ -14,7 +14,11 @@ them. It does not collect, transmit, sell or share any personal or sensitive dat
   and so you can reopen a recent capture where you left off. They are deleted automatically after 24 hours, and you can remove any of them
   sooner from the editor's Recent captures list.
 - **Your settings** (theme, export background, default formats, device-frame and
-  recording options) are kept in the browser's extension storage on your device.
+  recording options, export presets and recently used devices) are kept in the browser's
+  extension storage on your device.
+- **Review pages** made with Share for review, and zips of several devices, are files you
+  download: Captode doesn't upload or host them. A review page contains the image and the
+  notes you wrote, and the address of the page you captured.
 - **Compression** (including the oxipng and MozJPEG encoders bundled with the extension)
   runs locally. No code is downloaded at run time.
 
