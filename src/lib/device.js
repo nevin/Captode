@@ -4,7 +4,8 @@
 // exact pixels: nothing is resampled, only cropped or framed. The frame is drawn from
 // shapes, so it is sharp at any size.
 import { getSettings } from './settings.js';
-import { DEVICES, GROUPS, LEGACY, DEFAULT_DEVICE, matchDevice } from './devices.js';
+import { DEVICES, LEGACY, DEFAULT_DEVICE, matchDevice } from './devices.js';
+import { createDevicePicker } from './device-picker.js';
 
 export { DEVICES, matchDevice };
 
@@ -387,14 +388,6 @@ export function describe(opts, srcW, srcH) {
 const options = (list, value) => list.map(([k, v]) => `<option value="${k}"${k === value ? ' selected' : ''}>${v}</option>`).join('');
 const sel = (name, list, value) => `<select data-k="${name}">${options(list, value)}</select>`;
 
-function deviceMenu(value) {
-  const groups = GROUPS.map(([label, test]) => {
-    const list = Object.values(DEVICES).filter(test).map((d) => [d.id, d.name]);
-    return `<optgroup label="${label}">${options(list, value)}</optgroup>`;
-  });
-  return `<select data-k="device"><option value="auto"${value === 'auto' ? ' selected' : ''}>Best match for the capture</option>${groups.join('')}</select>`;
-}
-
 const THUMB = { w: 236, h: 200 }; // the preview's largest size, in CSS pixels
 
 /**
@@ -417,7 +410,7 @@ export async function mountDevicePanel(el, onChange, { source, picture } = {}) {
   el.innerHTML = `
     <label class="toggle"><span>Show in a device frame<small>A real phone or tablet around the capture</small></span><input type="checkbox" data-k="enabled"${o.enabled ? ' checked' : ''}></label>
     <div class="dev-opts">
-      <label class="field"><span>Device</span>${deviceMenu(o.device)}</label>
+      <div class="field"><span class="dev-pick-label">Device</span><div class="dev-pick-slot"></div></div>
       <canvas class="dev-thumb hidden" role="img" aria-label="Preview of the capture in the device"></canvas>
       <p class="dev-info" aria-live="polite"></p>
       <div class="grid2">
@@ -463,8 +456,20 @@ export async function mountDevicePanel(el, onChange, { source, picture } = {}) {
     }, 120);
   };
 
+  const picker = createDevicePicker({
+    value: o.device,
+    onPick: (v) => apply('device', v),
+    autoLabel: () => { const [w, h] = source?.() || []; return w && h ? DEVICES[matchDevice(w, h).id].name : ''; },
+  });
+  // Read as "Device, iPhone 17 Pro".
+  el.querySelector('.dev-pick-label').id = 'dev-pick-label';
+  const btn = picker.el.querySelector('.dev-pick-btn');
+  btn.setAttribute('aria-labelledby', `dev-pick-label ${btn.querySelector('.dev-pick-name').id}`);
+  el.querySelector('.dev-pick-slot').replaceWith(picker.el);
+
   const sync = () => {
     drawThumb();
+    picker.refresh();
     el.querySelector('.dev-opts').classList.toggle('hidden', !o.enabled);
     el.querySelector('[data-k="bg1"]').classList.toggle('hidden', o.bg !== 'custom');
     el.querySelector('.status-style').classList.toggle('hidden', o.statusBar === 'none');
@@ -476,15 +481,18 @@ export async function mountDevicePanel(el, onChange, { source, picture } = {}) {
     e.preventDefault();
     chrome.runtime.openOptionsPage();
   });
-  el.addEventListener('input', (e) => {
-    const k = e.target.dataset.k;
-    if (!k) return;
-    const t = e.target;
-    o[k] = t.type === 'checkbox' ? t.checked : t.type === 'range' ? Number(t.value) : t.value;
+  const apply = (k, v) => {
+    o[k] = v;
     sync();
     const { enabled, bg: _bg, bg1: _bg1, ...rest } = o;
     chrome.storage.local.set({ deviceOpts: rest, device: enabled });
     onChange({ ...o });
+  };
+  el.addEventListener('input', (e) => {
+    const k = e.target.dataset.k;
+    if (!k) return;
+    const t = e.target;
+    apply(k, t.type === 'checkbox' ? t.checked : t.type === 'range' ? Number(t.value) : t.value);
   });
   return { get: () => ({ ...o }), refresh: sync };
 }

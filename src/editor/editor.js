@@ -2006,6 +2006,7 @@ async function loadBlob(blob, info = {}) {
   original = history[0];
   loadedBase = base;
   updateButtons();
+  device?.refresh(); // the best match depends on the image
 }
 
 function showEmpty() {

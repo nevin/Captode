@@ -361,6 +361,56 @@ export const tests = {
     return `${Object.keys(r.out).length} layouts exact; ${JSON.stringify(r.counts)}`;
   },
 
+  async 'device picker: search, filters, keyboard and recent devices'({ browser, url }) {
+    const lab = await open(browser, url('lab/lab.html'));
+    const id = await lab.evaluate(async () => {
+      const { putCapture } = await import('/lib/db.js');
+      await chrome.storage.local.set({ device: true, deviceRecent: [] });
+      const c = new OffscreenCanvas(1206, 2622);
+      c.getContext('2d').fillRect(0, 0, 10, 10);
+      return putCapture(await c.convertToBlob(), { title: 'Phone', mode: 'visible' });
+    });
+    await lab.close();
+    const ed = await open(browser, url(`editor/editor.html?id=${id}`), { width: 1440, height: 1000 });
+    await ed.waitForFunction(() => /px/.test(document.querySelector('#doc-dims').textContent), { polling: 100 });
+    await ed.evaluate(() => document.querySelector('[data-pane="export"]').click());
+    await ed.waitForFunction(() => /:/.test(document.querySelector('.dev-pick-name')?.textContent), { polling: 100 });
+    const state = () => ed.evaluate(() => ({
+      name: document.querySelector('.dev-pick-name').textContent,
+      open: document.querySelector('.dev-pick-btn').getAttribute('aria-expanded'),
+      options: [...document.querySelectorAll('.dev-list [role="option"]')].map((li) => li.firstChild.textContent),
+      groups: [...document.querySelectorAll('.dev-group')].map((g) => g.textContent),
+      active: document.querySelector('.dev-search').getAttribute('aria-activedescendant'),
+      focus: document.activeElement.className,
+    }));
+    ok((await state()).name === 'Best match: iPhone 17 Pro', `button: ${(await state()).name}`);
+    await ed.click('.dev-pick-btn');
+    let st = await state();
+    ok(st.open === 'true' && st.focus === 'dev-search' && st.options.length > 40, `opened: ${JSON.stringify({ ...st, options: st.options.length })}`);
+    // The iPad filter, then a search within everything.
+    await ed.click('[data-filter="ipad"]');
+    st = await state();
+    ok(st.options.length === 6 && st.options.every((o) => /iPad/.test(o)), `iPad filter: ${st.options}`);
+    await ed.click('[data-filter="all"]');
+    await ed.focus('.dev-search');
+    await ed.keyboard.type('galaxy fold');
+    st = await state();
+    ok(st.options.join() === 'Galaxy Z Fold6 (folded),Galaxy Z Fold6 (open)', `search: ${st.options}`);
+    await ed.keyboard.press('ArrowDown');
+    await ed.keyboard.press('Enter');
+    st = await state();
+    ok(st.name === 'Galaxy Z Fold6 (open)' && st.open === 'false' && st.focus === 'dev-pick-btn', `chosen: ${JSON.stringify(st)}`);
+    ok(/Galaxy Z Fold6 \(open\): 1856 × 2160/.test(await ed.$eval('.dev-info', (e) => e.textContent)), 'the description follows the choice');
+    // Recently used devices come first next time; Escape closes.
+    await ed.click('.dev-pick-btn');
+    st = await state();
+    ok(st.groups[0] === 'Recent' && st.options[1] === 'Galaxy Z Fold6 (open)', `recent: ${st.groups} ${st.options.slice(0, 3)}`);
+    await ed.keyboard.press('Escape');
+    ok((await state()).open === 'false', 'Escape closes the list');
+    await ed.evaluate(() => chrome.storage.local.set({ device: false, deviceRecent: [], deviceOpts: {} }));
+    await ed.close();
+  },
+
   async 'countdown shows the chosen seconds and Esc cancels it'({ browser, url }) {
     const p = await open(browser, url('popup/popup.html'), { width: 800, height: 600 });
     const r = await p.evaluate(async () => {
