@@ -1,0 +1,47 @@
+html, body { height: 100%; }
+body { display: flex; flex-direction: column; overflow: hidden; }
+.layout { flex: 1; display: flex; min-height: 0; }
+.stage {
+  flex: 1; position: relative; min-width: 0; overflow: auto; padding: 24px;
+  background-color: var(--stage);
+  background-image: radial-gradient(circle, var(--stage-dot) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+.inspector { width: 320px; flex: none; overflow-y: auto; background: var(--panel); border-left: 1px solid var(--line); }
+.empty-card { max-width: 420px; margin: 12vh auto 0; text-align: center; padding: 32px 28px; border-radius: 16px; background: var(--panel); border: 1px solid var(--line); box-shadow: var(--shadow); }
+.empty-card h2 { margin: 0 0 6px; font-size: 18px; }
+.empty-card p { margin: 0; }
+
+.view { position: relative; margin: 0 auto; box-shadow: var(--shadow-lg); border-radius: 6px; overflow: hidden; outline: none; }
+.view:focus-visible { box-shadow: 0 0 0 3px var(--accent); }
+.view canvas { display: block; width: 100%; height: 100%; }
+.view .pane-a, .view .pane-b { position: absolute; inset: 0; }
+.view .tag { position: absolute; top: 8px; padding: 2px 8px; border-radius: 6px; background: rgba(0,0,0,.65); color: #fff; font-size: 12px; font-weight: 600; pointer-events: none; }
+.view .pane-a .tag { left: 8px; }
+.view .pane-b .tag { right: 8px; }
+#can-d { position: absolute; inset: 0; }
+
+/* Slider: B shows to the right of the divider. */
+.view[data-mode="slider"] .pane-b { clip-path: inset(0 0 0 var(--split, 50%)); }
+.divider { position: absolute; top: 0; bottom: 0; left: var(--split, 50%); width: 0; display: none; cursor: ew-resize; outline: none; }
+.view[data-mode="slider"] .divider { display: block; }
+.divider::before { content: ''; position: absolute; top: 0; bottom: 0; left: -1px; width: 2px; background: #fff; box-shadow: 0 0 0 1px rgba(0,0,0,.25); }
+.divider .grip { position: absolute; top: 50%; left: -16px; width: 32px; height: 32px; margin-top: -16px; border-radius: 50%;
+  background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,.35); }
+.divider .grip::before { content: '‹ ›'; position: absolute; inset: 0; display: grid; place-items: center; color: #333; font-weight: 700; font-size: 14px; letter-spacing: 1px; }
+.divider:focus-visible .grip { box-shadow: 0 0 0 3px var(--accent); }
+
+/* Side by side: two columns, each image whole. */
+.view[data-mode="side"] { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; overflow: visible; box-shadow: none; }
+.view[data-mode="side"] .pane-a, .view[data-mode="side"] .pane-b { position: relative; inset: auto; box-shadow: var(--shadow-lg); border-radius: 6px; overflow: hidden; }
+
+.view[data-mode="overlay"] .pane-b { opacity: var(--opacity, .5); }
+.view[data-mode="diff"] .pane-a, .view[data-mode="diff"] .pane-b { visibility: hidden; }
+
+.pick { display: flex; align-items: end; gap: 6px; }
+.pick .field { flex: 1; min-width: 0; }
+.pick > .btn { margin-bottom: 14px; }
+.mode-opt { margin-top: 12px; }
+#modes { margin-bottom: 4px; }
+#modes button { flex: 1; padding: 0 2px; font-size: 12px; white-space: nowrap; }
+.readout { margin: 4px 0 6px; padding: 9px 11px; border-radius: 8px; background: var(--panel-2); font-size: 13px; line-height: 1.5; font-variant-numeric: tabular-nums; }

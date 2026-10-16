@@ -1949,6 +1949,11 @@ $('#zoom-in').addEventListener('click', () => zoomAt(zoom * 1.25, ...stageCentre
 $('#zoom-out').addEventListener('click', () => zoomAt(zoom / 1.25, ...stageCentre()));
 $('#zoom-label').addEventListener('click', () => (zoom === 1 ? fitZoom() : setZoom(1)));
 $('#undo-all').addEventListener('click', undoAll);
+$('#compare').addEventListener('click', async () => {
+  // Saved edits (a crop, say) are what gets compared.
+  if (captureId) await persist();
+  chrome.tabs.create({ url: chrome.runtime.getURL(`compare/compare.html${captureId ? `?a=${captureId}` : ''}`) });
+});
 $('#a-front').addEventListener('click', () => arrange(true));
 for (const b of document.querySelectorAll('[data-align]')) b.addEventListener('click', () => align(b.dataset.align));
 $('#a-back').addEventListener('click', () => arrange(false));

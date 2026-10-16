@@ -643,6 +643,49 @@ export const tests = {
     await ed.close();
   },
 
+  async 'compare: slider, side by side, overlay, and a difference that finds the change'({ browser, url }) {
+    const lab = await open(browser, url('lab/lab.html'));
+    // A at 2×, B the same design at 1× with one button moved: matching widths lines them up.
+    const [a, b] = await lab.evaluate(async () => {
+      const { putCapture } = await import('/lib/db.js');
+      const page = async (s, buttonX) => {
+        const c = new OffscreenCanvas(400 * s, 300 * s);
+        const g = c.getContext('2d');
+        g.scale(s, s);
+        g.fillStyle = '#ffffff'; g.fillRect(0, 0, 400, 300);
+        g.fillStyle = '#5b4bff'; g.fillRect(0, 0, 400, 40);
+        g.fillStyle = '#30a46c'; g.fillRect(buttonX, 200, 100, 40);
+        return c.convertToBlob();
+      };
+      return [await putCapture(await page(2, 40), { title: 'Build' }), await putCapture(await page(1, 60), { title: 'Design' })];
+    });
+    await lab.close();
+    const cmp = await open(browser, url(`compare/compare.html?a=${a}&b=${b}`), { width: 1400, height: 900 });
+    await cmp.waitForFunction(() => !document.querySelector('#view').classList.contains('hidden'), { polling: 100 });
+    ok((await cmp.evaluate(() => captodeCompare.size())).join() === '800,600', 'A sets the size');
+    ok(/×2\.00/.test(await cmp.$eval('#match-note', (e) => e.textContent)), 'B is scaled to A');
+    // Slider: the divider moves with the keyboard.
+    await cmp.focus('#divider');
+    await cmp.keyboard.press('Home');
+    ok(await cmp.$eval('#divider', (e) => e.getAttribute('aria-valuenow')) === '0', 'Home moves the divider to the left');
+    // Side by side and overlay.
+    await cmp.click('#modes [data-mode="side"]');
+    ok(await cmp.$eval('#view', (e) => e.dataset.mode) === 'side', 'side by side');
+    await cmp.click('#modes [data-mode="overlay"]');
+    ok(!(await cmp.$eval('[data-for="overlay"]', (e) => e.classList.contains('hidden'))), 'overlay shows its opacity');
+    // Difference: the moved button is found: 20 CSS px = 40 px across, two 40 px-wide strips.
+    await cmp.click('#modes [data-mode="diff"]');
+    await cmp.waitForFunction(() => captodeCompare.stats(), { polling: 100 });
+    const st = await cmp.evaluate(() => captodeCompare.stats());
+    ok(st.box && st.box.x === 80 && st.box.y === 400 && st.box.w === 240 && st.box.h === 80, `changes at ${JSON.stringify(st.box)}`);
+    ok(Math.abs(st.changed - 2 * 40 * 80) < 400, `${st.changed} pixels changed, expected about ${2 * 40 * 80}`);
+    // Lining B up by hand removes the difference: move it 40 px left.
+    await cmp.evaluate(() => { const i = document.querySelector('#dx'); i.value = '-40'; i.dispatchEvent(new Event('input')); });
+    await cmp.waitForFunction(() => captodeCompare.stats()?.box?.y === 0 || /differ/.test(document.querySelector('#stats').textContent), { polling: 100 });
+    ok(/% of pixels differ|No differences/.test(await cmp.$eval('#stats', (e) => e.textContent)), 'the readout updates');
+    await cmp.close();
+  },
+
   async 'countdown shows the chosen seconds and Esc cancels it'({ browser, url }) {
     const p = await open(browser, url('popup/popup.html'), { width: 800, height: 600 });
     const r = await p.evaluate(async () => {
