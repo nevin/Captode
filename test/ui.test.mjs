@@ -654,4 +654,86 @@ export const tests = {
     ok((await ed.evaluate(() => captodeEditor.objects().length)) === 0, 'reopening after Undo all brought edits back');
     await ed.close();
   },
+
+  async 'editor: rotate and flip with annotations, and zoom at the pointer'({ editor }) {
+    const ed = await editor();
+    await ed.evaluate(() => document.querySelector('#zoom-label').click());
+    await sleep(100);
+    const w = await ed.evaluate(() => { const r = document.querySelector('#wrap').getBoundingClientRect(); return { x: r.x, y: r.y }; });
+    await ed.keyboard.press('r');
+    await ed.mouse.move(w.x + 100, w.y + 120); await ed.mouse.down(); await ed.mouse.move(w.x + 300, w.y + 200, { steps: 3 }); await ed.mouse.up();
+    const state = () => ed.evaluate(() => {
+      const p = captodeEditor.pixels(); let h = 0;
+      for (let i = 0; i < p.data.length; i += 997) h = (h * 31 + p.data[i]) >>> 0;
+      return { size: captodeEditor.size(), o: captodeEditor.objects()[0], hash: h };
+    });
+    const start = await state();
+    const click = (id) => ed.evaluate((id) => document.getElementById(id).click(), id);
+    await click('rot-cw');
+    const turned = await state();
+    ok(turned.size[0] === start.size[1] && turned.size[1] === start.size[0], `rotated size ${turned.size}`);
+    // The rectangle's top-left (100, 120) is now at (H - 120, 100).
+    const H = start.size[1];
+    ok(Math.abs(Math.max(turned.o.x1, turned.o.x2) - (H - 120)) <= 1 && Math.abs(Math.min(turned.o.y1, turned.o.y2) - 100) <= 1, `rotated rectangle ${JSON.stringify(turned.o)}`);
+    await click('rot-ccw');
+    const back = await state();
+    ok(back.hash === start.hash && back.size.join() === start.size.join(), 'rotating right then left changed the image');
+    ok(Math.abs(back.o.x1 - start.o.x1) < 0.01 && Math.abs(back.o.y2 - start.o.y2) < 0.01, 'rotating right then left moved the rectangle');
+    await click('flip-h'); await click('flip-h'); await click('flip-v'); await click('flip-v');
+    ok((await state()).hash === start.hash, 'flipping twice changed the image');
+    // Zoom at the pointer: the image point under it stays put.
+    const pt = [w.x + 400, w.y + 300];
+    const under = () => ed.evaluate(([x, y]) => { const r = document.querySelector('#wrap').getBoundingClientRect(); const z = parseFloat(document.querySelector('#zoom-label').textContent) / 100; return [(x - r.left) / z, (y - r.top) / z]; }, pt);
+    const a = await under();
+    await ed.mouse.move(...pt);
+    await ed.keyboard.down('Control');
+    for (let i = 0; i < 3; i++) await ed.mouse.wheel({ deltaY: -50 });
+    await ed.keyboard.up('Control');
+    await sleep(100);
+    const b = await under();
+    ok(Math.hypot(a[0] - b[0], a[1] - b[1]) < 3, `point under the pointer moved from ${a.map(Math.round)} to ${b.map(Math.round)}`);
+    await ed.evaluate(() => { window.onbeforeunload = null; });
+    await ed.close();
+  },
+
+  async 'editor: snapping with guides, align and distribute'({ editor }) {
+    const ed = await editor();
+    await ed.evaluate(() => document.querySelector('#zoom-label').click());
+    await sleep(100);
+    const w = await ed.evaluate(() => { const r = document.querySelector('#wrap').getBoundingClientRect(); return { x: r.x, y: r.y }; });
+    const at = (x, y) => [w.x + x, w.y + y];
+    const dragFrom = async (from, to, mod) => {
+      if (mod) await ed.keyboard.down(mod);
+      await ed.mouse.move(...from); await ed.mouse.down(); await ed.mouse.move(...to, { steps: 6 }); await ed.mouse.up();
+      if (mod) await ed.keyboard.up(mod);
+    };
+    const objs = () => ed.evaluate(() => captodeEditor.objects());
+    const left = (o) => Math.min(o.x1, o.x2) - o.width / 2;
+    await ed.keyboard.press('r');
+    await dragFrom(at(100, 100), at(200, 160));
+    await dragFrom(at(330, 300), at(430, 360));
+    await ed.keyboard.press('v');
+    // Drag the second so its left edge is 4 px right of the first's: it snaps into line.
+    await dragFrom(at(380, 330), at(380 - 226, 360)); // from the middle (the top edge has a handle)
+    let o = await objs();
+    ok(Math.abs(left(o[1]) - left(o[0])) < 0.01, `snapped: left edges ${left(o[0])} and ${left(o[1])}`);
+    // With Alt held it lands where it was dropped.
+    await dragFrom(at(160, 330), at(164, 360), 'Alt');
+    o = await objs();
+    ok(Math.abs(left(o[1]) - left(o[0]) - 4) < 1, `Alt: left edges ${left(o[0])} and ${left(o[1])}`);
+    // A third, then select all and align tops, then space evenly across.
+    await ed.keyboard.press('r');
+    await dragFrom(at(700, 500), at(760, 540));
+    for (const m of ['Control', 'Meta']) { await ed.keyboard.down(m); await ed.keyboard.press('a'); await ed.keyboard.up(m); }
+    await ed.evaluate(() => document.querySelector('[data-align="top"]').click());
+    o = await objs();
+    const tops = o.map((r) => Math.min(r.y1, r.y2));
+    ok(Math.max(...tops) - Math.min(...tops) < 0.01, `tops after aligning: ${tops}`);
+    await ed.evaluate(() => document.querySelector('[data-align="dist-h"]').click());
+    o = (await objs()).map((r) => ({ l: Math.min(r.x1, r.x2) - r.width / 2, r: Math.max(r.x1, r.x2) + r.width / 2 })).sort((a, b) => a.l - b.l);
+    const gaps = [o[1].l - o[0].r, o[2].l - o[1].r];
+    ok(Math.abs(gaps[0] - gaps[1]) < 0.5, `gaps after spacing: ${gaps}`);
+    await ed.evaluate(() => { window.onbeforeunload = null; });
+    await ed.close();
+  },
 };

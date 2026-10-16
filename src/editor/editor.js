@@ -629,6 +629,19 @@ function renderFg() {
     fctx.strokeRect(b.x - 4 * px, b.y - 4 * px, b.w + 8 * px, b.h + 8 * px);
     fctx.setLineDash([]);
   }
+  if (guides.length) {
+    fctx.save();
+    fctx.strokeStyle = '#ff3d9a';
+    fctx.lineWidth = px;
+    for (const g of guides) {
+      fctx.beginPath();
+      if ('x' in g) { fctx.moveTo(g.x, -frame.padding); fctx.lineTo(g.x, base.height + frame.padding); }
+      else { fctx.moveTo(-frame.padding, g.y); fctx.lineTo(base.width + frame.padding, g.y); }
+      fctx.stroke();
+    }
+    fctx.restore();
+    fctx.strokeStyle = '#5b4bff';
+  }
   if (drag?.kind === 'marquee') {
     const m = rectOf(drag.start, drag.end);
     fctx.fillStyle = 'rgba(91,75,255,0.08)';
@@ -765,6 +778,76 @@ function handles(o) {
   const hs = list.map(([id, hx, hy]) => ({ id, x: xs[hx], y: ys[hy] }));
   if (o.tail) hs.push({ id: 'tail', x: o.tail.x, y: o.tail.y });
   return hs;
+}
+
+// ---------- snapping and alignment ----------
+// Moving or resizing snaps edges and centres to the image's and to other annotations'
+// (hold Alt to place freely), with guide lines showing what lined up.
+
+let guides = []; // { x } or { y }, in image coordinates, while dragging
+
+/** Lines things can snap to: the image's edges and centre, and other annotations'. */
+function snapTargets(exclude) {
+  const xs = [0, base.width / 2, base.width], ys = [0, base.height / 2, base.height];
+  for (const o of objects) {
+    if (exclude.includes(o) || o.type === 'spotlight') continue;
+    const b = bounds(o);
+    xs.push(b.x, b.x + b.w / 2, b.x + b.w);
+    ys.push(b.y, b.y + b.h / 2, b.y + b.h);
+  }
+  return { xs, ys };
+}
+
+/** The smallest shift (within a few screen pixels) that lines one of `xs`/`ys` up with a target. */
+function snap(xs, ys, targets) {
+  const within = 6 / zoom;
+  const best = (vals, tgts) => {
+    let d = Infinity, at = null;
+    for (const v of vals) for (const t of tgts) if (Math.abs(t - v) < Math.abs(d)) { d = t - v; at = t; }
+    return Math.abs(d) <= within ? { d, at } : { d: 0, at: null };
+  };
+  const bx = best(xs, targets.xs), by = best(ys, targets.ys);
+  if (bx.at !== null) guides.push({ x: bx.at });
+  if (by.at !== null) guides.push({ y: by.at });
+  return { dx: bx.d, dy: by.d };
+}
+
+function startMove(pt, moved) {
+  const boxes = selection.map(bounds);
+  const x0 = Math.min(...boxes.map((b) => b.x)), y0 = Math.min(...boxes.map((b) => b.y));
+  const box = { x: x0, y: y0, w: Math.max(...boxes.map((b) => b.x + b.w)) - x0, h: Math.max(...boxes.map((b) => b.y + b.h)) - y0 };
+  return { kind: 'move', origin: pt, moved, from: selection.map(cloneObj), box, targets: snapTargets(selection) };
+}
+
+/** Lines the selection up: with one item, against the image; with more, against each other. */
+function align(how) {
+  if (!selection.length) return;
+  const boxes = selection.map(bounds);
+  const U = selection.length === 1 ? { x: 0, y: 0, w: base.width, h: base.height } : (() => {
+    const x0 = Math.min(...boxes.map((b) => b.x)), y0 = Math.min(...boxes.map((b) => b.y));
+    return { x: x0, y: y0, w: Math.max(...boxes.map((b) => b.x + b.w)) - x0, h: Math.max(...boxes.map((b) => b.y + b.h)) - y0 };
+  })();
+  if (how === 'dist-h' || how === 'dist-v') {
+    if (selection.length < 3) return;
+    const h = how === 'dist-h';
+    const order = selection.map((o, i) => ({ o, b: boxes[i] })).sort((a, b) => (h ? a.b.x - b.b.x : a.b.y - b.b.y));
+    const total = order.reduce((n, { b }) => n + (h ? b.w : b.h), 0);
+    const gap = ((h ? U.w : U.h) - total) / (order.length - 1);
+    let at = h ? U.x : U.y;
+    for (const { o, b } of order) {
+      moveObj(o, h ? at - b.x : 0, h ? 0 : at - b.y);
+      at += (h ? b.w : b.h) + gap;
+    }
+  } else {
+    selection.forEach((o, i) => {
+      const b = boxes[i];
+      const dx = { left: U.x - b.x, centre: U.x + U.w / 2 - (b.x + b.w / 2), right: U.x + U.w - (b.x + b.w) }[how] ?? 0;
+      const dy = { top: U.y - b.y, middle: U.y + U.h / 2 - (b.y + b.h / 2), bottom: U.y + U.h - (b.y + b.h) }[how] ?? 0;
+      moveObj(o, dx, dy);
+    });
+  }
+  renderFg();
+  commit();
 }
 
 const handleAt = (o, pt) => handles(o).find((h) => Math.hypot(h.x - pt.x, h.y - pt.y) <= 9 / zoom) || null;
@@ -980,7 +1063,7 @@ fg.addEventListener('pointerdown', (e) => {
       else drag = { kind: 'marquee', start: pt, end: pt, add: [...selection] };
     } else if (hit) {
       if (!isSelected(hit)) select([hit]);
-      drag = { kind: 'move', last: pt, moved: false };
+      drag = startMove(pt, false);
     } else {
       select([]);
       drag = { kind: 'marquee', start: pt, end: pt, add: [] };
@@ -1028,13 +1111,13 @@ fg.addEventListener('pointerdown', (e) => {
     const hit = topHit(pt);
     if (hit?.type === 'step') {
       select([hit]);
-      drag = { kind: 'move', last: pt, moved: false };
+      drag = startMove(pt, false);
     } else {
       select([{ type: 'step', ...propsFor('step'), n: nextStep(), x: pt.x, y: pt.y }]);
       objects.push(selected);
       lastStep = selected;
       stepStart = null;
-      drag = { kind: 'move', last: pt, moved: true }; // drag to place it exactly
+      drag = startMove(pt, true); // drag to place it exactly
     }
     syncStyleUi();
     renderFg();
@@ -1066,7 +1149,16 @@ fg.addEventListener('pointermove', (e) => {
     if (drag.h === 'tail') o.tail = { x: pt.x, y: pt.y };
     else if (drag.h === 'p1') { o.x1 = pt.x; o.y1 = pt.y; }
     else if (drag.h === 'p2') { const q = snapEnd(o, pt, e.shiftKey); o.x2 = q.x; o.y2 = q.y; }
-    else applyBox(o, drag.from, drag.box, resizedBox(drag.box, drag.h, pt, UNIFORM.has(o.type) || e.shiftKey));
+    else {
+      guides = [];
+      const q = { ...pt };
+      if (!e.altKey) {
+        const t = snapTargets([o]);
+        const s = snap(/[we]/.test(drag.h) ? [pt.x] : [], /[ns]/.test(drag.h) ? [pt.y] : [], t);
+        q.x += s.dx; q.y += s.dy;
+      }
+      applyBox(o, drag.from, drag.box, resizedBox(drag.box, drag.h, q, UNIFORM.has(o.type) || e.shiftKey));
+    }
   } else if (drag.kind === 'marquee') {
     drag.end = pt;
     const m = rectOf(drag.start, pt);
@@ -1074,9 +1166,16 @@ fg.addEventListener('pointermove', (e) => {
     select([...new Set([...drag.add, ...inBox])]);
     syncStyleUi();
   } else if (drag.kind === 'move') {
-    for (const o of selection) moveObj(o, pt.x - drag.last.x, pt.y - drag.last.y);
-    drag.last = pt;
-    drag.moved = true;
+    // From where the drag began, so snapping doesn't accumulate.
+    let dx = pt.x - drag.origin.x, dy = pt.y - drag.origin.y;
+    guides = [];
+    if (!e.altKey) {
+      const b = drag.box;
+      const s = snap([b.x + dx, b.x + b.w / 2 + dx, b.x + b.w + dx], [b.y + dy, b.y + b.h / 2 + dy, b.y + b.h + dy], drag.targets);
+      dx += s.dx; dy += s.dy;
+    }
+    drag.from.forEach((f, i) => { Object.assign(selection[i], structuredClone(f)); moveObj(selection[i], dx, dy); });
+    drag.moved ||= Math.hypot(dx, dy) > 0;
   } else if (drag.kind === 'crop') {
     const s = drag.start;
     let w = pt.x - s.x;
@@ -1119,6 +1218,7 @@ function endDrag() {
   if (!drag) return;
   const d = drag;
   drag = null;
+  guides = [];
   if (d.kind === 'draw') {
     const o = d.o;
     const tiny = !o.points && Math.hypot(o.x2 - o.x1, o.y2 - o.y1) < 3;
@@ -1177,8 +1277,23 @@ addEventListener('blur', () => setSpacePan(false));
 stage.addEventListener('wheel', (e) => {
   if (!e.ctrlKey && !e.metaKey) return;
   e.preventDefault();
-  setZoom(zoom * (e.deltaY < 0 ? 1.1 : 1 / 1.1));
+  // Trackpad pinches arrive as small steps, mouse wheels as large ones.
+  const f = Math.exp(-clamp(e.deltaY, -50, 50) * 0.01);
+  zoomAt(zoom * f, e.clientX, e.clientY);
 }, { passive: false });
+
+/** Zooms keeping the point under (cx, cy) on screen still. */
+function zoomAt(z, cx, cy) {
+  if (!base) return;
+  const before = wrap.getBoundingClientRect();
+  const ix = (cx - before.left) / zoom, iy = (cy - before.top) / zoom;
+  setZoom(z);
+  const after = wrap.getBoundingClientRect();
+  stage.scrollLeft += after.left + ix * zoom - cx;
+  stage.scrollTop += after.top + iy * zoom - cy;
+  requestRender(true);
+}
+const stageCentre = () => { const r = stage.getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; };
 
 // ---------- inspector tabs ----------
 
@@ -1307,8 +1422,8 @@ document.addEventListener('keydown', (e) => {
   if (mod) return;
   const t = TOOLS.find(([, , key]) => key === e.key.toLowerCase());
   if (t) setTool(t[0]);
-  if (e.key === '+' || e.key === '=') setZoom(zoom * 1.25);
-  if (e.key === '-') setZoom(zoom / 1.25);
+  if (e.key === '+' || e.key === '=') zoomAt(zoom * 1.25, ...stageCentre());
+  if (e.key === '-') zoomAt(zoom / 1.25, ...stageCentre());
   if (e.key === '0') fitZoom();
 });
 
@@ -1340,6 +1455,8 @@ function syncStyleUi() {
   for (const g of document.querySelectorAll('[data-group]')) g.classList.toggle('hidden', !groups.includes(g.dataset.group));
   $('#style-hint').classList.toggle('hidden', !!type);
   $('#arrange').classList.toggle('hidden', !selection.length);
+  for (const b of document.querySelectorAll('[data-align^="dist"]')) b.disabled = selection.length < 3;
+  $('#align-label').textContent = selection.length > 1 ? 'Align' : 'Align to the image';
   const n = selection.length;
   $('#style-title').textContent = !type ? 'Annotate'
     : type === 'mixed' ? `${n} items selected`
@@ -1558,6 +1675,50 @@ $('#rs-apply').addEventListener('click', async () => {
   toast(`Resized to ${w} × ${h}`, { kind: 'success' });
 });
 
+/**
+ * Rotates the image a quarter turn (dir 1: clockwise, -1: anticlockwise) or flips it
+ * ('h' or 'v'), taking the annotations with it. Text stays upright, centred where it was.
+ */
+function transformImage(kind) {
+  if (!base) return;
+  const W = base.width, H = base.height;
+  const map = {
+    cw: ([x, y]) => [H - y, x],
+    ccw: ([x, y]) => [y, W - x],
+    h: ([x, y]) => [W - x, y],
+    v: ([x, y]) => [x, H - y],
+  }[kind];
+  const turn = kind === 'cw' || kind === 'ccw';
+  const c = canvas(turn ? H : W, turn ? W : H);
+  const cx = c.getContext('2d');
+  if (kind === 'cw') { cx.translate(H, 0); cx.rotate(Math.PI / 2); }
+  else if (kind === 'ccw') { cx.translate(0, W); cx.rotate(-Math.PI / 2); }
+  else if (kind === 'h') { cx.translate(W, 0); cx.scale(-1, 1); }
+  else { cx.translate(0, H); cx.scale(1, -1); }
+  cx.drawImage(base, 0, 0);
+  for (const o of objects) {
+    if (o.points) o.points = o.points.map(map);
+    else if (o.type === 'text' || o.type === 'step') {
+      const b = o.type === 'text' ? textBox(o) : { x: o.x, y: o.y, w: 0, h: 0 };
+      const [nx, ny] = map([b.x + b.w / 2, b.y + b.h / 2]);
+      o.x = nx - b.w / 2; o.y = ny - b.h / 2;
+      if (o.tail) { const [tx, ty] = map([o.tail.x, o.tail.y]); o.tail = { x: tx, y: ty }; }
+    } else {
+      [o.x1, o.y1] = map([o.x1, o.y1]);
+      [o.x2, o.y2] = map([o.x2, o.y2]);
+    }
+  }
+  base = c;
+  crop = null;
+  layout();
+  fitZoom();
+  commit();
+}
+$('#rot-ccw').addEventListener('click', () => transformImage('ccw'));
+$('#rot-cw').addEventListener('click', () => transformImage('cw'));
+$('#flip-h').addEventListener('click', () => transformImage('h'));
+$('#flip-v').addEventListener('click', () => transformImage('v'));
+
 function setBackdrop(bg) {
   frame.bg = bg;
   syncFrameUi();
@@ -1591,11 +1752,12 @@ for (const id of ['f-pad', 'f-bg', 'f-radius', 'f-shadow']) {
 
 // ---------- zoom & toolbar ----------
 
-$('#zoom-in').addEventListener('click', () => setZoom(zoom * 1.25));
-$('#zoom-out').addEventListener('click', () => setZoom(zoom / 1.25));
+$('#zoom-in').addEventListener('click', () => zoomAt(zoom * 1.25, ...stageCentre()));
+$('#zoom-out').addEventListener('click', () => zoomAt(zoom / 1.25, ...stageCentre()));
 $('#zoom-label').addEventListener('click', () => (zoom === 1 ? fitZoom() : setZoom(1)));
 $('#undo-all').addEventListener('click', undoAll);
 $('#a-front').addEventListener('click', () => arrange(true));
+for (const b of document.querySelectorAll('[data-align]')) b.addEventListener('click', () => align(b.dataset.align));
 $('#a-back').addEventListener('click', () => arrange(false));
 $('#a-dup').addEventListener('click', duplicateSelected);
 $('#a-del').addEventListener('click', deleteSelected);

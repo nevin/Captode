@@ -15,18 +15,29 @@ export to the format you need. Captode runs entirely in your browser. Nothing is
 
 The capture opens in the editor, where you can:
 
-- **Crop**, freely or to 1:1, 16:9, 4:3, 9:16 or 3:4.
+- **Crop**, freely or to 1:1, 16:9, 4:3, 9:16 or 3:4. **Rotate** a quarter turn either way
+  and **flip**, with your annotations following.
 - **Draw** with a pen or highlighter.
-- **Add shapes:** lines, arrows, rectangles and ellipses, with stroke colour, fill, thickness and opacity.
+- **Add shapes:** lines, arrows, rectangles and ellipses, with stroke colour, fill, thickness,
+  opacity, and solid, dashed or dotted lines; arrows can have heads at both ends.
+- **Callouts:** speech bubbles whose tail points at what you're talking about.
+- **Spotlight** an area by dimming everything else, or **magnify** a detail with a lens.
 - **Add text:** choose the font (including fonts installed on your computer), size (A− / A+),
   bold, italic, text colour and background colour.
 - **Number the steps:** each click adds a numbered marker (1, 2, 3…) in the colour and
   size you choose; start from any number, or renumber one.
 - **Blur, pixelate or black out** sensitive details.
-- Select, move, restyle and delete anything you added. Undo and redo, or **Undo all** to go
-  back to the original (itself undoable).
+- Select, move, resize (handles on every annotation), restyle and delete anything you
+  added. **Select several** with Shift-click or by dragging a box, then move, restyle,
+  duplicate, copy and paste (between editor tabs too), bring to front or send to back,
+  **align** and **space evenly**. Moving and resizing **snap** to edges and centres, with
+  guides (hold Alt to place freely). Undo and redo, or **Undo all** to go back to the
+  original (itself undoable).
+- **Your edits are kept** with the capture, so reopening it from Recent captures picks up
+  where you left off.
+- **Large captures stay fast:** the editor draws only what's on screen.
 - **Pan** around a zoomed-in or long capture with the hand tool, by holding Space, or with
-  the middle mouse button.
+  the middle mouse button; ⌘/Ctrl + scroll zooms towards the pointer.
 - **Resize** to exact pixel sizes, with or without keeping the proportions.
 - **Frame** the shot with padding, a backdrop colour, rounded corners and a shadow.
 - **Set a size limit** (100 KB to 25 MB) and Captode finds the best quality that fits,

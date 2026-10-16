@@ -147,3 +147,5 @@ body { display: flex; flex-direction: column; overflow: hidden; }
 .arrange { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); display: grid; gap: 8px; }
 .arrange .row { justify-content: flex-start; }
 .arrange .row > .btn { flex: none; }
+.align-row { flex-wrap: wrap; gap: 4px; }
+.align-row .btn.icon { width: 30px; height: 30px; }

@@ -45,8 +45,10 @@ out with a mouse, finger or pen. Long pages are stitched cleanly, with sticky he
 shown once.
 
 Mark up
-Add arrows, shapes, text, highlights and numbered steps, and blur or black out anything
-private before you share. Crop, resize, or add padding, a background and a shadow. Every tool has a
+Add arrows, shapes, text, callouts, highlights and numbered steps, spotlight or magnify
+what matters, and blur or black out anything private before you share. Select several
+things to align, arrange or copy them, and pick up where you left off: your edits are
+kept with each capture. Crop, resize, or add padding, a background and a shadow. Every tool has a
 keyboard shortcut, and changes can be undone.
 
 Save

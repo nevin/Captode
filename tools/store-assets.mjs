@@ -107,24 +107,22 @@ const setColour = (sel, c) => ed.evaluate((sel, c) => { const i = document.query
 await ed.keyboard.press('h');
 await setColour('#s-color', '#ffc53d');
 await drag('h', [0.025, 0.205], [0.425, 0.205]);       // highlight the headline
-await ed.keyboard.press('r');
-await setColour('#s-color', '#ffffff');
-await drag('r', [0.016, 0.315], [0.222, 0.405]);       // box round the buttons
-await ed.keyboard.press('a');
-await setColour('#s-color', '#ffffff');
-await drag('a', [0.445, 0.36], [0.24, 0.36]);          // arrow to them
 await drag('b', [0.672, 0.625], [0.915, 0.705]);       // blur the names
-await ed.keyboard.press('t');
-await ed.mouse.click(...at(0.455, 0.335));
-await sleep(150);
+await ed.keyboard.press('n');                          // numbered steps
+for (const p of [[0.028, 0.322], [0.121, 0.322], [0.668, 0.755]]) { await ed.mouse.click(...at(...p)); await sleep(60); }
+await ed.keyboard.press('Escape');
+await ed.keyboard.press('k');                          // a callout pointing at the demo button
+await setColour('#t-bg', '#17171c');
+await drag('k', [0.205, 0.37], [0.3, 0.36]);
+await sleep(200);
 await ed.keyboard.type('Try the new demo!');
-await ed.mouse.click(...at(0.5, 0.95));               // finish the text
+await ed.keyboard.press('Escape');
 await ed.keyboard.press('v');
 await ed.keyboard.press('Escape');
 await ed.keyboard.press('Escape');
 await sleep(300);
 await compose('2-annotate.jpg', 'Mark it up in seconds',
-  'Arrows, shapes, text, highlighter, and blur for anything private',
+  'Callouts, numbered steps, arrows and highlights, and blur for anything private',
   `<img class="full" src="${await png(ed, { x: 0, y: 0, ...UI })}">`);
 
 // ---------- 3. Export with a device frame ----------
