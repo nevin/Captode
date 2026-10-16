@@ -590,7 +590,17 @@ $('#dl-original').addEventListener('click', () => source && save(source, `captod
   $('#info').textContent = `${player.videoWidth} × ${player.videoHeight} · ${fmtTime(duration)} · ${fmtBytes(source.size)}`;
   if (meta.title) { $('#doc-name').textContent = meta.title; document.title = `${meta.title} — Captode`; }
   if ((await chrome.storage.local.get('device')).device) $('#device-section').open = true;
-  device = await mountDevicePanel($('#device-panel'), () => { fillResolutions(); syncUi(); }, { source: () => (player.videoWidth ? [player.videoWidth, player.videoHeight] : null) });
+  device = await mountDevicePanel($('#device-panel'), () => { fillResolutions(); syncUi(); }, {
+    source: () => (player.videoWidth ? [player.videoWidth, player.videoHeight] : null),
+    // The frame showing in the player.
+    picture: async (width) => {
+      if (!player.videoWidth) return null;
+      const s = Math.min(1, width / player.videoWidth);
+      const c = new OffscreenCanvas(Math.round(player.videoWidth * s), Math.round(player.videoHeight * s));
+      c.getContext('2d').drawImage(player, 0, 0, c.width, c.height);
+      return c;
+    },
+  });
   format = (await getSettings()).videoFormat || 'mp4';
   fillResolutions(true);
   fillFps(true);

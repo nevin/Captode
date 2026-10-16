@@ -395,11 +395,14 @@ function deviceMenu(value) {
   return `<select data-k="device"><option value="auto"${value === 'auto' ? ' selected' : ''}>Best match for the capture</option>${groups.join('')}</select>`;
 }
 
+const THUMB = { w: 236, h: 200 }; // the preview's largest size, in CSS pixels
+
 /**
  * Builds the device-mode controls inside `el`. Calls `onChange(opts)` on every
- * change. `source()` gives the capture's [width, height], for the description.
+ * change. `source()` gives the capture's [width, height], for the description;
+ * `picture(width)` gives the capture as a canvas about that wide, for the preview.
  */
-export async function mountDevicePanel(el, onChange, { source } = {}) {
+export async function mountDevicePanel(el, onChange, { source, picture } = {}) {
   const stored = await chrome.storage.local.get({ deviceOpts: {}, device: false });
   const settings = await getSettings();
   // The background always starts from Settings; the frame itself is remembered.
@@ -415,6 +418,7 @@ export async function mountDevicePanel(el, onChange, { source } = {}) {
     <label class="toggle"><span>Show in a device frame<small>A real phone or tablet around the capture</small></span><input type="checkbox" data-k="enabled"${o.enabled ? ' checked' : ''}></label>
     <div class="dev-opts">
       <label class="field"><span>Device</span>${deviceMenu(o.device)}</label>
+      <canvas class="dev-thumb hidden" role="img" aria-label="Preview of the capture in the device"></canvas>
       <p class="dev-info" aria-live="polite"></p>
       <div class="grid2">
         <label class="field"><span>Orientation</span>${sel('orientation', [['auto', 'Automatic'], ['portrait', 'Portrait'], ['landscape', 'Landscape']], o.orientation)}</label>
@@ -434,7 +438,33 @@ export async function mountDevicePanel(el, onChange, { source } = {}) {
       </div>
     </div>`;
 
+  // The preview: the capture, scaled down, in the device. Drawn after changes settle.
+  let thumbTimer = 0;
+  let thumbRun = 0;
+  const drawThumb = () => {
+    clearTimeout(thumbTimer);
+    thumbTimer = setTimeout(async () => {
+      const run = ++thumbRun;
+      const thumb = el.querySelector('.dev-thumb');
+      const pic = o.enabled && picture ? await picture(480) : null;
+      if (run !== thumbRun) return;
+      thumb.classList.toggle('hidden', !pic);
+      if (!pic) return;
+      const framed = renderInDevice({ ...o, padding: 0, bg: 'none' }, pic);
+      const dpr = globalThis.devicePixelRatio || 1;
+      const s = Math.min(THUMB.w / framed.width, THUMB.h / framed.height);
+      thumb.style.width = `${Math.round(framed.width * s)}px`;
+      thumb.style.height = `${Math.round(framed.height * s)}px`;
+      thumb.width = Math.round(framed.width * s * dpr);
+      thumb.height = Math.round(framed.height * s * dpr);
+      const ctx = thumb.getContext('2d');
+      ctx.imageSmoothingQuality = 'high';
+      ctx.drawImage(framed, 0, 0, thumb.width, thumb.height);
+    }, 120);
+  };
+
   const sync = () => {
+    drawThumb();
     el.querySelector('.dev-opts').classList.toggle('hidden', !o.enabled);
     el.querySelector('[data-k="bg1"]').classList.toggle('hidden', o.bg !== 'custom');
     el.querySelector('.status-style').classList.toggle('hidden', o.statusBar === 'none');

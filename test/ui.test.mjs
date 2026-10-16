@@ -75,6 +75,8 @@ export const tests = {
     ok(await ed.evaluate(() => document.querySelector('#tab-export').getAttribute('aria-selected') === 'true'), 'tab not selected');
     await ed.click('#device-panel input[data-k="enabled"]');
     await ed.waitForFunction(() => !document.querySelector('#export-preview').classList.contains('hidden') && document.querySelector('#device-preview').width > 300, { timeout: 20000, polling: 100 });
+    // A small preview of the device sits in the panel.
+    await ed.waitForFunction(() => { const t = document.querySelector('.dev-thumb'); return !t.classList.contains('hidden') && t.width > 50; }, { timeout: 20000, polling: 100 });
     await ed.click('#device-panel input[data-k="enabled"]');
     await ed.evaluate(() => { const s = document.querySelector('#x-format'); s.value = 'jpeg'; s.dispatchEvent(new Event('input', { bubbles: true })); });
     await ed.evaluate(() => { const s = document.querySelector('#x-limit'); s.value = '100'; s.dispatchEvent(new Event('input', { bubbles: true })); });

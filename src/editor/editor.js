@@ -1810,6 +1810,17 @@ function syncExportUi() {
   for (const id of ['download', 'download2']) $('#' + id).lastChild.textContent = label;
 }
 
+/** The image with its annotations, about `width` pixels wide (for previews). */
+function smallPicture(width) {
+  const s = Math.min(1, width / fullW());
+  const c = canvas(fullW() * s, fullH() * s);
+  const ctx = c.getContext('2d');
+  ctx.scale(c.width / fullW(), c.height / fullH());
+  paintImage(ctx);
+  paintObjects(ctx);
+  return c;
+}
+
 async function finalCanvas({ scaled = true } = {}) {
   let c = canvas(fullW(), fullH());
   const ctx = c.getContext('2d');
@@ -2077,7 +2088,10 @@ document.addEventListener('keydown', (e) => {
     frame.bg = backgroundColour(settings) || 'transparent';
     const fmt = $('#x-format').querySelector(`option[value="${settings.imageFormat}"]`);
     if (fmt && !fmt.hidden) $('#x-format').value = settings.imageFormat;
-    device = await mountDevicePanel($('#device-panel'), () => refreshExport(), { source: () => (base ? [fullW(), fullH()] : null) });
+    device = await mountDevicePanel($('#device-panel'), () => refreshExport(), {
+      source: () => (base ? [fullW(), fullH()] : null),
+      picture: async (width) => (base ? smallPicture(width) : null),
+    });
   } else {
     $('#device-panel').textContent = 'Available when running as the extension.';
   }
