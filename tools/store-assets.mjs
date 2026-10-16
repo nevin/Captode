@@ -125,20 +125,55 @@ await compose('2-annotate.jpg', 'Mark it up in seconds',
   'Callouts, numbered steps, arrows and highlights, and blur for anything private',
   `<img class="full" src="${await png(ed, { x: 0, y: 0, ...UI })}">`);
 
-// ---------- 3. Export with a device frame ----------
+// ---------- 3. Review: measure in CSS pixels and check contrast ----------
+
+await ed.click('#undo-all'); // a clean capture to measure
+await ed.evaluate(() => document.querySelector('.toast')?.classList.add('hidden'));
+await sleep(300);
+const rectOf = (sel) => web.evaluate((sel) => {
+  const r = document.querySelector(sel).getBoundingClientRect();
+  return { x: r.x / innerWidth, y: r.y / innerHeight, w: r.width / innerWidth, h: r.height / innerHeight };
+}, sel);
+const button = await rectOf('.hero .btn.s');
+const signUp = await rectOf('header .btn');
+await ed.click('#tab-review');
+const mid = button.y + button.h / 2;
+await drag('u', [button.x - 0.006, mid], [button.x + button.w + 0.006, mid]);            // its width
+await drag('u', [signUp.x + 0.006, signUp.y - 0.01], [signUp.x + 0.006, signUp.y + signUp.h + 0.01]); // a button's height
+await ed.keyboard.press('i');
+await ed.mouse.click(...at(button.x + 0.004, button.y + button.h * 0.2));               // the button
+await ed.mouse.click(...at(button.x + button.w + 0.06, mid));                           // the background
+await ed.select('#g-step', '16');
+await ed.keyboard.press('g');
+await sleep(300);
+await compose('3-review.jpg', 'Check the build against the design',
+  'Measure in CSS pixels, check colour contrast against WCAG, and lay a spacing grid over the page',
+  `<img class="full" src="${await png(ed, { x: 0, y: 0, ...UI })}">`);
+await ed.keyboard.press('g');
+await ed.click('#m-clear');
+await ed.keyboard.press('v');
+
+// ---------- 4. Export with a real device ----------
 
 await ed.click('#tab-export');
 await ed.evaluate(() => { const s = document.querySelector('#x-limit'); s.value = '1024'; s.dispatchEvent(new Event('input', { bubbles: true })); });
+await ed.evaluate(() => document.querySelector('#device-panel input[data-k="enabled"]').scrollIntoView({ block: 'center' }));
 await ed.click('#device-panel input[data-k="enabled"]');
+// A desktop page suits a tablet in landscape.
+await ed.click('.dev-pick-btn');
+await ed.keyboard.type('ipad pro 13');
+await ed.keyboard.press('ArrowDown');
+await ed.keyboard.press('Enter');
 await ed.waitForFunction(() => !document.querySelector('#export-preview').classList.contains('hidden') && document.querySelector('#device-preview').width > 300, { timeout: 20000 });
 await sleep(800);
 await ed.waitForFunction(() => /KB|MB/.test(document.querySelector('#x-estimate').textContent), { timeout: 30000 });
-await compose('3-export.jpg', 'Export it your way',
-  'Set a file size limit, or show it in a phone or tablet frame',
+await compose('4-devices.jpg', 'Show it on a real device',
+  '63 phones and tablets at their true sizes, portrait or landscape. Your pixels stay exact.',
   `<img class="full" src="${await png(ed, { x: 0, y: 0, ...UI })}">`);
+await ed.evaluate(() => document.querySelector('#device-panel input[data-k="enabled"]').scrollIntoView({ block: 'center' }));
 await ed.click('#device-panel input[data-k="enabled"]'); // leave the setting off again
 
-// ---------- 4. Recording and video export ----------
+// ---------- 5. Recording and video export ----------
 
 const lab = await open(browser, url('lab/lab.html'));
 await lab.bringToFront();
@@ -182,18 +217,49 @@ await vp.evaluate(() => {
 await vp.click('#convert');
 await vp.waitForFunction(() => !document.querySelector('#result').classList.contains('hidden'), { timeout: 120000 });
 await sleep(500);
-await compose('4-record.jpg', 'Record, trim and share',
+await compose('5-record.jpg', 'Record, trim and share',
   'Record a tab, a selected area or your whole screen, then trim and export it in seconds',
   `<img class="full" src="${await png(vp, { x: 0, y: 0, ...UI })}">`);
 
-// ---------- 5. Settings, dark ----------
+// ---------- 6. Compare: before and after a change ----------
+
+const captureNow = async () => {
+  const seen = new Set(browser.targets().map((t) => t.url()));
+  await web.bringToFront();
+  await pop.evaluate((id) => chrome.runtime.sendMessage({ type: 'capture-image', mode: 'visible', tabId: id }), tabId);
+  const tab = await waitForTab(browser, (u) => u.includes('editor.html?id=') && !seen.has(u));
+  const id = new URL(tab.url()).searchParams.get('id');
+  await tab.close();
+  return id;
+};
+const before = await captureNow();
+// A change to check: the buttons get bigger and the heading moves.
+await web.evaluate(() => {
+  for (const b of document.querySelectorAll('.hero .btn.s')) b.style.padding = '14px 26px';
+  document.querySelector('.hero h1').style.marginTop = '28px';
+});
+await sleep(200);
+const after = await captureNow();
+await web.evaluate(() => location.reload());
+const cmp = await open(browser, url(`compare/compare.html?a=${before}&b=${after}`), UI);
+await light(cmp);
+await cmp.bringToFront();
+await cmp.waitForFunction(() => !document.querySelector('#view').classList.contains('hidden'));
+await cmp.click('#modes [data-mode="diff"]');
+await cmp.waitForFunction(() => /%/.test(document.querySelector('#stats').textContent));
+await sleep(300);
+await compose('6-compare.jpg', 'See exactly what changed',
+  'Compare two captures, or a capture and a design, with a slider or a highlight of every changed pixel',
+  `<img class="full" src="${await png(cmp, { x: 0, y: 0, ...UI })}">`);
+
+// ---------- 7. Settings, dark ----------
 
 const st = await open(browser, url('settings/settings.html'), UI);
 await st.emulateMediaFeatures([{ name: 'prefers-color-scheme', value: 'dark' }]);
 await st.evaluate(() => document.scrollingElement.scrollTo(0, 1e6)); // show About and the privacy note
 await sleep(300);
 const scrolled = await st.evaluate(() => window.scrollY);
-await compose('5-private.jpg', 'Private by design',
+await compose('7-private.jpg', 'Private by design',
   'Everything stays on your device: no account, no uploads, no tracking. Light and dark themes.',
   `<img class="full" src="${await png(st, { x: 0, y: scrolled, ...UI })}">`);
 

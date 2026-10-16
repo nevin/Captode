@@ -101,7 +101,7 @@ Captode is open source: https://github.com/nevin/Captode
 | Field | File | Size |
 | --- | --- | --- |
 | Store icon | `store/icon-128.png` | 128 × 128 (96 × 96 artwork, 16 px transparent padding) |
-| Screenshots (upload in this order) | `store/screenshots/1-capture.jpg` … `5-private.jpg` | 1280 × 800, JPEG |
+| Screenshots (the store takes 5; upload in this order) | `1-capture`, `2-annotate`, `3-review`, `4-devices`, `5-record` (`.jpg`, in `store/screenshots/`). `6-compare` and `7-private` are spares to swap in. | 1280 × 800, JPEG |
 | Small promo tile | `store/promo-small.jpg` | 440 × 280 |
 | Marquee promo tile | `store/promo-marquee.jpg` | 1400 × 560 |
 
