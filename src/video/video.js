@@ -70,6 +70,7 @@ function plan() {
 }
 
 function fillResolutions(reset = false) {
+  device?.refresh();
   const d = device?.get();
   const w = player.videoWidth, h = player.videoHeight;
   const r = d?.enabled ? deviceRenderer(d, w, h) : { width: w, height: h };
@@ -589,7 +590,7 @@ $('#dl-original').addEventListener('click', () => source && save(source, `captod
   $('#info').textContent = `${player.videoWidth} × ${player.videoHeight} · ${fmtTime(duration)} · ${fmtBytes(source.size)}`;
   if (meta.title) { $('#doc-name').textContent = meta.title; document.title = `${meta.title} — Captode`; }
   if ((await chrome.storage.local.get('device')).device) $('#device-section').open = true;
-  device = await mountDevicePanel($('#device-panel'), () => { fillResolutions(); syncUi(); });
+  device = await mountDevicePanel($('#device-panel'), () => { fillResolutions(); syncUi(); }, { source: () => (player.videoWidth ? [player.videoWidth, player.videoHeight] : null) });
   format = (await getSettings()).videoFormat || 'mp4';
   fillResolutions(true);
   fillFps(true);

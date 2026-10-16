@@ -85,14 +85,22 @@ opens in the video page, where you can:
 ### Device mode
 
 Turn on **Device mode** in the popup, the editor or the video page to export a screenshot or
-video inside a phone or tablet frame. You can choose:
+video inside a real phone or tablet: 44 devices, including iPhone 13 mini to iPhone 17 Pro Max,
+iPhone SE, iPad mini to iPad Pro 13″, Pixel 7 to Pixel 10 Pro XL, Galaxy S24 to S25 Ultra,
+Galaxy Z Flip and Fold, and Pixel and Galaxy tablets.
 
-- the device and its colour
-- portrait or landscape
+Each device uses its published screen resolution, pixel density and body size, so its
+proportions and bezels are real. The frame is sized around the capture, so the capture keeps
+its exact pixels: a screenshot taken on a device, or in DevTools' device mode, fills its screen
+pixel for pixel. You can choose:
+
+- the device, or **Best match for the capture**, which picks the device whose screen the
+  capture fits (the panel says which, and whether the pixels are kept exactly)
+- portrait or landscape (the hardware turns; the status bar and home indicator stay upright)
+- the size: the capture's own pixels (exact), or the device's screen resolution
 - how the capture fits the screen
-- a transparent, white or custom-colour background (the default is set in Settings)
-- padding
-- a status bar
+- the finish, padding, and a transparent, white or custom-colour background (the default is set in Settings)
+- a status bar above or over the page, or none
 
 ### Settings
 

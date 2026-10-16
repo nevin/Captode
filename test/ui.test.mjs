@@ -274,6 +274,91 @@ export const tests = {
     ok(r.pdf.iccBased, `PDF: ${JSON.stringify(r.pdf)}`);
   },
 
+  async 'device frames: real devices, both orientations, and exact capture pixels'({ browser, url }) {
+    const lab = await open(browser, url('lab/lab.html'));
+    const r = await lab.evaluate(async () => {
+      const { deviceRenderer, DEVICES, matchDevice, normalise, describe } = await import('/lib/device.js');
+      const problems = [];
+      // The catalogue: real resolutions, consistent sizes, believable bezels.
+      const names = new Set();
+      for (const d of Object.values(DEVICES)) {
+        if (names.has(d.name)) problems.push(`two devices called ${d.name}`);
+        names.add(d.name);
+        if (Math.abs(d.px[1] / d.dpr - d.viewport[1]) > 1.5) problems.push(`${d.name}: viewport height doesn't match its pixels`);
+        const limit = d.type === 'tablet' ? 70 : d.home === 'button' ? 120 : 30;
+        if (d.bezel.x < 2 || d.bezel.y < 2 || d.bezel.x > limit || d.bezel.y > limit) problems.push(`${d.name}: bezel ${d.bezel.x.toFixed(1)} × ${d.bezel.y.toFixed(1)} pt`);
+      }
+      const kinds = Object.values(DEVICES);
+      const count = (f) => kinds.filter(f).length;
+      // A capture with every pixel different, so any resampling shows.
+      const capture = (w, h) => {
+        const c = new OffscreenCanvas(w, h);
+        const ctx = c.getContext('2d', { willReadFrequently: true });
+        const img = ctx.createImageData(w, h);
+        for (let i = 0; i < img.data.length; i += 4) { const p = i / 4; img.data[i] = p % 251; img.data[i + 1] = (p >> 3) % 241; img.data[i + 2] = (p * 7) % 239; img.data[i + 3] = 255; }
+        ctx.putImageData(img, 0, 0);
+        return c;
+      };
+      // The capture's pixels, found in the output: a 40 × 40 patch from its middle.
+      const kept = (out, src, r) => {
+        const s = src.getContext('2d').getImageData(Math.floor(src.width / 2), Math.floor(src.height / 2), 40, 40).data;
+        const ctx = out.getContext('2d', { willReadFrequently: true });
+        // Where the capture's middle landed: search near the screen's middle.
+        const x0 = Math.floor(out.width / 2) - 80, y0 = Math.floor(out.height / 2) - 80, R = 200;
+        const area = ctx.getImageData(x0, y0, R, R).data;
+        const at = (x, y, i) => area[((y * R) + x) * 4 + i];
+        for (let dy = 0; dy <= 160; dy++) for (let dx = 0; dx <= 160; dx++) {
+          let same = true;
+          for (let y = 0; y < 40 && same; y++) for (let x = 0; x < 40 && same; x++) {
+            for (let i = 0; i < 3; i++) if (at(dx + x, dy + y, i) !== s[(y * 40 + x) * 4 + i]) { same = false; break; }
+          }
+          if (same) return true;
+        }
+        return false;
+      };
+      const out = {};
+      for (const [id, orientation] of [['iphone-17-pro', 'portrait'], ['iphone-17-pro', 'landscape'], ['pixel-9', 'portrait'], ['galaxy-s25-ultra', 'landscape'], ['ipad-pro-11', 'landscape'], ['iphone-se', 'portrait']]) {
+        const d = DEVICES[id];
+        const [w, h] = orientation === 'portrait' ? d.px : [d.px[1], d.px[0]];
+        const src = capture(w, h);
+        const r = deviceRenderer({ device: id, orientation, padding: 0 }, w, h);
+        const c = new OffscreenCanvas(r.width, r.height);
+        r.render(c.getContext('2d'), src);
+        out[`${id} ${orientation}`] = { exact: r.info.exact, screen: r.info.screen.join('×'), want: `${w}×${h}`, kept: kept(c, src), wide: r.width > r.height };
+      }
+      // A desktop capture: the device's real shape around the capture's own pixels.
+      const desk = capture(1280, 800);
+      const rd = deviceRenderer({ device: 'iphone-17-pro', orientation: 'portrait' }, 1280, 800);
+      // The device's own screen resolution instead.
+      const rs = deviceRenderer({ device: 'iphone-17-pro', orientation: 'portrait', size: 'device', statusBar: 'none' }, 1280, 800);
+      return {
+        problems, out,
+        counts: { ios: count((d) => d.os === 'ios'), ipad: count((d) => d.os === 'ipados'), android: count((d) => d.os === 'android' && d.type === 'phone'), androidTablets: count((d) => d.os === 'android' && d.type === 'tablet') },
+        match: [matchDevice(1206, 2622), matchDevice(2424, 1080), matchDevice(1179, 9000)],
+        legacy: [normalise({ device: 'phone', statusBar: true }), normalise({ device: 'gone' })].map((o) => `${o.device} ${o.statusBar}`),
+        desk: { exact: rd.info.exact, screen: rd.info.screen },
+        deviceSize: { exact: rs.info.exact, screen: rs.info.screen, scale: rs.info.scale },
+        describe: describe({ device: 'auto' }, 1206, 2622),
+      };
+    });
+    await lab.close();
+    ok(!r.problems.length, r.problems.join('; '));
+    ok(r.counts.ios >= 10 && r.counts.ipad >= 5 && r.counts.android >= 10 && r.counts.androidTablets >= 3, `devices: ${JSON.stringify(r.counts)}`);
+    for (const [k, v] of Object.entries(r.out)) {
+      ok(v.exact && v.screen === v.want, `${k}: screen ${v.screen}, expected the device's ${v.want}`);
+      ok(v.kept, `${k}: the capture's pixels were changed`);
+      ok(v.wide === k.endsWith('landscape'), `${k}: wrong orientation`);
+    }
+    ok(r.match[0].id === 'iphone-17-pro' && r.match[0].exact && !r.match[0].landscape, `1206 × 2622 matched ${JSON.stringify(r.match[0])}`);
+    ok(r.match[1].landscape && r.match[1].exact && /pixel/.test(r.match[1].id), `2424 × 1080 matched ${JSON.stringify(r.match[1])}`);
+    ok(!r.match[2].exact && r.match[2].id === 'iphone-16', `a full page 1179 px wide matched ${JSON.stringify(r.match[2])}`);
+    ok(r.legacy[0] === 'iphone-17-pro auto' && r.legacy[1] === 'auto auto', `older settings: ${r.legacy}`);
+    ok(r.desk.exact && r.desk.screen[0] === 1280, `a desktop capture keeps its pixels: ${JSON.stringify(r.desk)}`);
+    ok(r.deviceSize.screen.join() === '1206,2622' && !r.deviceSize.exact, `device resolution: ${JSON.stringify(r.deviceSize)}`);
+    ok(/iPhone 17 Pro: 1206 × 2622 px.*matches this capture exactly.*kept exactly/.test(r.describe), r.describe);
+    return `${Object.keys(r.out).length} layouts exact; ${JSON.stringify(r.counts)}`;
+  },
+
   async 'countdown shows the chosen seconds and Esc cancels it'({ browser, url }) {
     const p = await open(browser, url('popup/popup.html'), { width: 800, height: 600 });
     const r = await p.evaluate(async () => {

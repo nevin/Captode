@@ -1888,6 +1888,7 @@ async function updateDevicePreview() {
   const show = Boolean(d?.enabled && base && document.body.dataset.pane === 'export');
   stage.classList.toggle('previewing', show);
   $('#export-preview').classList.toggle('hidden', !show);
+  device?.refresh();
   if (!show) return;
   const c = await finalCanvas({ scaled: false });
   if (run !== previewRun) return;
@@ -2076,7 +2077,7 @@ document.addEventListener('keydown', (e) => {
     frame.bg = backgroundColour(settings) || 'transparent';
     const fmt = $('#x-format').querySelector(`option[value="${settings.imageFormat}"]`);
     if (fmt && !fmt.hidden) $('#x-format').value = settings.imageFormat;
-    device = await mountDevicePanel($('#device-panel'), () => refreshExport());
+    device = await mountDevicePanel($('#device-panel'), () => refreshExport(), { source: () => (base ? [fullW(), fullH()] : null) });
   } else {
     $('#device-panel').textContent = 'Available when running as the extension.';
   }

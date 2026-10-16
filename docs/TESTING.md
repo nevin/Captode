@@ -50,7 +50,9 @@ or install the zip from `npm run package`.
    **WebM**. Open each downloaded file in the system's own player or viewer. Record
    test/site/colours.html (served by the tests' site, or opened as a file): colours in
    the exports, in QuickTime too, should match the page, with no lighter or washed-out look.
-8. Turn on the **device frame** and export a screenshot and a GIF.
+8. Turn on the **device frame** and export a screenshot and a GIF. Take a screenshot in
+   DevTools' device mode as an iPhone or Pixel: **Best match** names that device and says
+   the pixels are kept exactly. Switch to Landscape and to another device, a tablet included.
 9. In Settings turn on **Copy screenshots to the clipboard**, take a screenshot, and paste
    it into another app (a chat or document). In the editor, add numbered steps and use
    **Copy** in the Export panel; paste again.

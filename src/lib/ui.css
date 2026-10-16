@@ -151,6 +151,8 @@ input[type="checkbox"]:disabled { opacity: .4; cursor: default; }
 .row > * { flex: 1; min-width: 0; }
 .row > .btn, .row > input[type="color"], .row > input[type="checkbox"], .row > .flex0 { flex: none; }
 .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0 10px; }
+.dev-info { margin: -4px 0 10px; font-size: 12px; line-height: 1.45; color: var(--muted); }
+.dev-info:empty { display: none; }
 .toggle {
   display: flex; align-items: center; justify-content: space-between; gap: 12px;
   padding: 7px 0; margin-bottom: 4px; cursor: pointer;
