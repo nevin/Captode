@@ -51,6 +51,8 @@ function keepDisplayAwake() {
   try { spawn('caffeinate', ['-d', '-i', '-u', '-w', String(process.pid)], { stdio: 'ignore' }).unref(); } catch {}
 }
 
+const defaultFeatures = puppeteer.defaultArgs({ headless: true }).find((a) => a.startsWith('--disable-features='));
+
 export async function launch({ scheme = 'light', args = [] } = {}) {
   keepDisplayAwake();
   const ext = testCopy();
@@ -61,11 +63,14 @@ export async function launch({ scheme = 'light', args = [] } = {}) {
     pipe: true,
     enableExtensions: true,
     userDataDir: profile,
-    // CI runners often have no visible desktop, so Chrome thinks its window is hidden and
-    // throttles timers and painting; tests need it to behave as if it were on screen.
+    // Puppeteer already stops Chrome throttling background pages. Windows runners have no
+    // visible desktop, so also skip Windows' occlusion check, added to Puppeteer's own list
+    // of disabled features (a second --disable-features flag would replace that list).
+    ignoreDefaultArgs: [defaultFeatures],
     args: ['--window-size=1280,900', '--use-fake-ui-for-media-stream', '--autoplay-policy=no-user-gesture-required', '--no-sandbox',
-      '--disable-background-timer-throttling', '--disable-backgrounding-occluded-windows', '--disable-renderer-backgrounding',
-      '--disable-features=CalculateNativeWinOcclusion', ...args],
+      `${defaultFeatures},CalculateNativeWinOcclusion`, ...args,
+      // Extra Chrome options for reproducing a runner's setup, e.g. --force-prefers-reduced-motion.
+      ...(process.env.CHROME_ARGS || '').split(' ').filter(Boolean)],
     defaultViewport: null,
   });
   const id = await browser.installExtension(ext);

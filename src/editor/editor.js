@@ -1930,7 +1930,11 @@ async function copyImage({ auto = false } = {}) {
   if (!base) return false;
   try {
     const c = await finalCanvas();
-    await navigator.clipboard.write([new ClipboardItem({ 'image/png': c.convertToBlob({ type: 'image/png' }) })]);
+    // The clipboard can stall (another app holding it, say): don't leave the user waiting.
+    await Promise.race([
+      navigator.clipboard.write([new ClipboardItem({ 'image/png': c.convertToBlob({ type: 'image/png' }) })]),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('the clipboard did not respond. Try again.')), 8000)),
+    ]);
     dirty = false;
     toast(auto ? 'Screenshot copied to the clipboard' : 'Copied to the clipboard', { kind: 'success' });
     return true;

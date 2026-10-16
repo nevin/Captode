@@ -64,8 +64,8 @@ export const tests = {
     ok(await ed.evaluate(() => document.querySelector('#shortcuts').open), 'shortcuts sheet did not open');
     await ed.keyboard.press('Escape');
     await ed.click('#copy');
-    await sleep(300);
-    ok(!(await guarded()), 'copying should count as saving');
+    for (let t = 0; t < 30 && (await guarded()); t++) await sleep(100); // copying takes a moment
+    ok(!(await guarded()), 'copying should count as saving: ' + await ed.evaluate(() => document.querySelector('.toast')?.textContent));
     await ed.close();
   },
 
@@ -633,7 +633,9 @@ export const tests = {
     await ed.keyboard.press('c');
     await ed.mouse.move(...at(50, 50)); await ed.mouse.down(); await ed.mouse.move(...at(900, 600), { steps: 3 }); await ed.mouse.up();
     await ed.keyboard.press('Enter');
-    await sleep(1200); // saved shortly after the last change
+    // Saved shortly after the last change (slower on a busy machine): wait until it is.
+    const stored = () => ed.evaluate(async () => { const { getCapture } = await import('/lib/db.js'); return (await getCapture(new URLSearchParams(location.search).get('id')))?.edits?.objects?.length ?? 0; });
+    for (let t = 0; t < 100 && (await stored()) < 2; t++) await sleep(100);
     const before = await ed.evaluate(() => ({ size: captodeEditor.size(), n: captodeEditor.objects().length }));
     ed.on('dialog', (d) => d.accept()); // "leave without downloading?"
     await ed.reload({ waitUntil: 'load' });
@@ -647,7 +649,7 @@ export const tests = {
     const orig = await ed.evaluate(() => ({ size: captodeEditor.size(), n: captodeEditor.objects().length }));
     ok(orig.n === 0 && orig.size[0] > before.size[0], `Undo all gave ${JSON.stringify(orig)}`);
     // …and that is saved too.
-    await sleep(1200);
+    for (let t = 0; t < 100 && (await stored()) > 0; t++) await sleep(100);
     await ed.reload({ waitUntil: 'load' });
     await ed.waitForFunction(() => window.captodeEditor?.size(), { polling: 100, timeout: 20000 });
     await sleep(500);
