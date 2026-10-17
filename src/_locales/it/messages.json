@@ -1837,5 +1837,8 @@
   },
   "export_will_be": {
     "message": "Il file sarà di $1"
+  },
+  "editor_first_hint": {
+    "message": "Scegli uno strumento in alto, oppure premi <kbd>T</kbd> per il testo, <kbd>A</kbd> per una freccia, <kbd>B</kbd> per sfocare."
   }
 }

@@ -1837,5 +1837,8 @@
   },
   "export_will_be": {
     "message": "파일 크기: $1"
+  },
+  "editor_first_hint": {
+    "message": "위에서 도구를 고르거나 <kbd>T</kbd>(텍스트), <kbd>A</kbd>(화살표), <kbd>B</kbd>(흐리게)를 누르세요."
   }
 }

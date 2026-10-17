@@ -1837,5 +1837,8 @@
   },
   "export_will_be": {
     "message": "O arquivo terá $1"
+  },
+  "editor_first_hint": {
+    "message": "Escolha uma ferramenta acima ou pressione <kbd>T</kbd> para texto, <kbd>A</kbd> para uma seta ou <kbd>B</kbd> para desfocar."
   }
 }

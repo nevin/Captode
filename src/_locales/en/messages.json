@@ -1839,5 +1839,8 @@
   },
   "export_will_be": {
     "message": "The file will be $1"
+  },
+  "editor_first_hint": {
+    "message": "Pick a tool above, or press <kbd>T</kbd> for text, <kbd>A</kbd> for an arrow, <kbd>B</kbd> to blur."
   }
 }

@@ -1837,5 +1837,8 @@
   },
   "export_will_be": {
     "message": "ファイルのサイズ: $1"
+  },
+  "editor_first_hint": {
+    "message": "上のツールを選ぶか、<kbd>T</kbd> でテキスト、<kbd>A</kbd> で矢印、<kbd>B</kbd> でぼかしを使えます。"
   }
 }

@@ -1837,5 +1837,8 @@
   },
   "export_will_be": {
     "message": "Die Datei wird $1 groß"
+  },
+  "editor_first_hint": {
+    "message": "Wählen Sie oben ein Werkzeug oder drücken Sie <kbd>T</kbd> für Text, <kbd>A</kbd> für einen Pfeil, <kbd>B</kbd> zum Verpixeln."
   }
 }

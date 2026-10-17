@@ -73,6 +73,11 @@
       <canvas id="device-preview"></canvas>
     </div>
 
+    <div class="canvas-hint hidden" id="canvas-hint" role="note">
+      <span data-i18n-html="editor_first_hint">Pick a tool above, or press <kbd>T</kbd> for text, <kbd>A</kbd> for an arrow, <kbd>B</kbd> to blur.</span>
+      <button class="btn ghost icon" id="canvas-hint-close" data-tip="Dismiss" data-i18n-tip="popup_dismiss" aria-label="Dismiss" data-i18n-aria-label="popup_dismiss"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+    </div>
+
     <div class="zoombar">
       <button class="btn ghost icon" id="zoom-out" data-tip="Zoom out  −" data-i18n-tip="editor_zoom_out"><svg class="i" viewBox="0 0 24 24"><path d="M5 12h14"/></svg></button>
       <button class="btn ghost" id="zoom-label" data-tip="Fit or actual size  0" data-i18n-tip="editor_fit_or_actual_size_0">100%</button>

@@ -1837,5 +1837,8 @@
   },
   "export_will_be": {
     "message": "El archivo medirá $1"
+  },
+  "editor_first_hint": {
+    "message": "Elige una herramienta arriba o pulsa <kbd>T</kbd> para texto, <kbd>A</kbd> para una flecha o <kbd>B</kbd> para difuminar."
   }
 }

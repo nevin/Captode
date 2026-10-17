@@ -339,6 +339,53 @@ export const tests = {
     await ed.close();
   },
 
+  async 'editor: a first hint until something is added, and the last tab and tool come back'({ browser, url }) {
+    const lab = await open(browser, url('lab/lab.html'));
+    const shot = () => lab.evaluate(async () => {
+      const { putCapture } = await import('/lib/db.js');
+      const c = new OffscreenCanvas(800, 500);
+      c.getContext('2d').fillRect(0, 0, 10, 10);
+      return putCapture(await c.convertToBlob(), { title: 'Hint', mode: 'visible' });
+    });
+    await lab.evaluate(() => chrome.storage.local.remove(['editorHintDone', 'editorLast']));
+    const openEditor = async () => {
+      const ed = await open(browser, url(`editor/editor.html?id=${await shot()}&reopen=1`), { width: 1400, height: 900 });
+      await ed.waitForFunction(() => /px/.test(document.querySelector('#doc-dims').textContent), { polling: 100 });
+      await sleep(200);
+      return ed;
+    };
+    const state = (ed) => ed.evaluate(() => ({
+      hint: !document.querySelector('#canvas-hint').classList.contains('hidden'),
+      tool: document.querySelector('#tools .active')?.dataset.tool,
+      pane: document.querySelector('.tabs button.on')?.dataset.pane,
+    }));
+    let ed = await openEditor();
+    let r = await state(ed);
+    ok(r.hint && r.tool === 'select' && r.pane === 'annotate', `first time: ${JSON.stringify(r)}`);
+    // Drawing something hides the hint for good.
+    const b = await ed.evaluate(() => { const w = document.querySelector('#wrap').getBoundingClientRect(); return [w.x, w.y]; });
+    await ed.keyboard.press('a');
+    await ed.mouse.move(b[0] + 50, b[1] + 50);
+    await ed.mouse.down();
+    await ed.mouse.move(b[0] + 200, b[1] + 150, { steps: 4 });
+    await ed.mouse.up();
+    ok(!(await state(ed)).hint, 'the hint goes once something is added');
+    await ed.evaluate(() => document.querySelector('[data-pane="adjust"]').click());
+    await ed.close();
+    ed = await openEditor();
+    r = await state(ed);
+    ok(!r.hint && r.tool === 'arrow' && r.pane === 'adjust', `the next image: ${JSON.stringify(r)}`);
+    // Crop is for the moment: the next image starts with Select.
+    await ed.keyboard.press('c');
+    await ed.close();
+    ed = await openEditor();
+    r = await state(ed);
+    ok(r.tool === 'select', `after crop: ${JSON.stringify(r)}`);
+    await ed.evaluate(() => chrome.storage.local.remove('editorLast'));
+    await ed.close();
+    await lab.close();
+  },
+
   async 'image exports say their colours are sRGB'({ browser, url }) {
     const lab = await open(browser, url('lab/lab.html'));
     const r = await lab.evaluate(async () => {
@@ -665,6 +712,7 @@ export const tests = {
       st = await state();
       ok(st.scale === '0.5' && st.device && st.format === 'png', `your preset applied: ${JSON.stringify(st)}`);
       await ed.click('.preset-delete');
+      await ed.waitForFunction(() => !document.querySelector('.preset-select optgroup[label="Yours"]'), { polling: 50, timeout: 5000 }).catch(() => {});
       ok(!(await state()).mine.length, 'deleted');
     } finally {
       // Presets turn the device frame on: never leave it on for later tests.

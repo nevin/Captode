@@ -1837,5 +1837,8 @@
   },
   "export_will_be": {
     "message": "文件尺寸：$1"
+  },
+  "editor_first_hint": {
+    "message": "在上方选择工具，或按 <kbd>T</kbd> 添加文字、<kbd>A</kbd> 添加箭头、<kbd>B</kbd> 进行模糊。"
   }
 }

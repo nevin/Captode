@@ -148,6 +148,7 @@ function trimHistory() {
 
 function commit() {
   if (hIndex >= 0) dirty = true;
+  if (objects.length) hideFirstHint(true);
   history.splice(hIndex + 1);
   history.push(snapshot());
   hIndex = history.length - 1;
@@ -1347,8 +1348,31 @@ function showPane(name) {
 }
 document.querySelector('.tabs').addEventListener('click', (e) => {
   const b = e.target.closest('button[data-pane]');
-  if (b) showPane(b.dataset.pane);
+  if (b) { showPane(b.dataset.pane); rememberWork({ pane: b.dataset.pane }); }
 });
+
+// The tab and tool used last come back with the next image. Crop and the hand are
+// for one moment, so the next image starts with Select instead.
+const FORGET_TOOLS = new Set(['crop', 'pan']);
+let lastWork = null; // { pane, tool }, once read at the start
+function rememberWork(change) {
+  if (!lastWork || !globalThis.chrome?.storage) return;
+  Object.assign(lastWork, change);
+  chrome.storage.local.set({ editorLast: lastWork });
+}
+
+// A first hint, until something has been added to an image.
+let firstHint = false;
+function showFirstHint() {
+  if (!firstHint || objects.length) return;
+  $('#canvas-hint').classList.remove('hidden');
+}
+function hideFirstHint(done) {
+  if ($('#canvas-hint').classList.contains('hidden')) return;
+  $('#canvas-hint').classList.add('hidden');
+  if (done) { firstHint = false; chrome.storage?.local.set({ editorHintDone: true }); }
+}
+$('#canvas-hint-close').addEventListener('click', () => hideFirstHint(true));
 
 // ---------- tools ----------
 
@@ -1361,6 +1385,7 @@ function setTool(t) {
   if (REVIEW_TOOLS.has(t)) showPane('review');
   else if (t !== 'select') showPane('annotate');
   for (const b of document.querySelectorAll('#tools .btn')) b.classList.toggle('active', b.dataset.tool === t);
+  rememberWork({ tool: FORGET_TOOLS.has(t) ? 'select' : t });
   syncStyleUi();
   updateCropUi();
   renderFg();
@@ -2296,6 +2321,7 @@ async function loadBlob(blob, info = {}) {
   syncRatioNote();
   updateButtons();
   device?.refresh(); // the best match depends on the image
+  showFirstHint();
 }
 
 function showEmpty() {
@@ -2434,6 +2460,16 @@ document.addEventListener('keydown', (e) => {
     }
   } else {
     showEmpty();
+  }
+  if (globalThis.chrome?.storage) {
+    const { editorLast = {}, editorHintDone } = await chrome.storage.local.get(['editorLast', 'editorHintDone']);
+    if (rec) {
+      if (TOOLS.some((x) => x[0] === editorLast.tool) && !FORGET_TOOLS.has(editorLast.tool)) setTool(editorLast.tool);
+      if (document.querySelector(`.tabs [data-pane="${editorLast.pane}"]`)) showPane(editorLast.pane);
+    }
+    lastWork = { pane: 'annotate', tool: 'select', ...editorLast };
+    firstHint = !editorHintDone;
+    if (rec) showFirstHint();
   }
 })();
 

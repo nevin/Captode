@@ -207,3 +207,12 @@ body { display: flex; flex-direction: column; overflow: hidden; }
 .layers li.active { background: var(--hover); }
 .layers li[aria-selected="true"] { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
 .layers:focus-visible li.active { box-shadow: inset 0 0 0 1.5px var(--accent); }
+
+/* Shown on a first image until something is added. */
+.canvas-hint {
+  position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%); z-index: 5; max-width: calc(100% - 240px);
+  display: flex; align-items: center; gap: 6px; padding: 6px 6px 6px 14px; border-radius: 10px;
+  background: var(--panel); border: 1px solid var(--line); box-shadow: var(--shadow); color: var(--muted); font-size: 13px;
+}
+.canvas-hint kbd { margin: 0 1px; }
+.canvas-hint .btn { width: 28px; height: 28px; flex: none; }

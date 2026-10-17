@@ -1837,5 +1837,8 @@
   },
   "export_will_be": {
     "message": "Le fichier fera $1"
+  },
+  "editor_first_hint": {
+    "message": "Choisissez un outil ci-dessus, ou appuyez sur <kbd>T</kbd> pour du texte, <kbd>A</kbd> pour une flèche, <kbd>B</kbd> pour flouter."
   }
 }
