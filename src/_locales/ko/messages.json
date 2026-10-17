@@ -1732,5 +1732,38 @@
   },
   "look_brand": {
     "message": "브랜드"
+  },
+  "popup_record_screen_instead": {
+    "message": "화면 녹화하기"
+  },
+  "popup_options": {
+    "message": "옵션"
+  },
+  "popup_see_all": {
+    "message": "모두 보기"
+  },
+  "popup_countdown_short": {
+    "message": "$1초 카운트다운"
+  },
+  "popup_no_countdown": {
+    "message": "카운트다운 없음"
+  },
+  "popup_with_audio": {
+    "message": "오디오"
+  },
+  "popup_no_audio": {
+    "message": "오디오 없음"
+  },
+  "popup_last_used": {
+    "message": "최근"
+  },
+  "popup_enter_repeats": {
+    "message": "Enter 키로 다시 실행"
+  },
+  "badge_video": {
+    "message": "동영상"
+  },
+  "badge_edited": {
+    "message": "편집됨"
   }
 }

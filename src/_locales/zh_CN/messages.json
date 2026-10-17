@@ -1732,5 +1732,38 @@
   },
   "look_brand": {
     "message": "品牌"
+  },
+  "popup_record_screen_instead": {
+    "message": "改为录制屏幕"
+  },
+  "popup_options": {
+    "message": "选项"
+  },
+  "popup_see_all": {
+    "message": "查看全部"
+  },
+  "popup_countdown_short": {
+    "message": "倒计时 $1 秒"
+  },
+  "popup_no_countdown": {
+    "message": "无倒计时"
+  },
+  "popup_with_audio": {
+    "message": "含音频"
+  },
+  "popup_no_audio": {
+    "message": "无音频"
+  },
+  "popup_last_used": {
+    "message": "上次"
+  },
+  "popup_enter_repeats": {
+    "message": "按 Enter 键再来一次"
+  },
+  "badge_video": {
+    "message": "视频"
+  },
+  "badge_edited": {
+    "message": "已编辑"
   }
 }

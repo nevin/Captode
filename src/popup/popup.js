@@ -1,6 +1,7 @@
 import { enhance, tablist, showShortcut } from '../lib/ui.js';
 import { outputSize } from '../lib/recorder.js';
 import { t, localize } from '../lib/i18n.js';
+import { listCaptures } from '../lib/db.js';
 
 localize();
 
@@ -10,7 +11,7 @@ let kind = 'image';
 let tabPixels = null; // this tab's page area in pixels, once known
 let fps = '30';
 
-const settings = await chrome.storage.local.get({ kind: 'image', fps: '30', audio: false, countdown: true, countdownSeconds: null, device: false, videoSize: 'page' });
+const settings = await chrome.storage.local.get({ kind: 'image', fps: '30', audio: false, countdown: true, countdownSeconds: null, device: false, videoSize: 'page', lastMode: {}, recOptsOpen: false });
 fps = String(settings.fps);
 $('#audio').checked = settings.audio;
 // Seconds of countdown before a recording starts (0 = none): a second at a time up
@@ -38,6 +39,9 @@ const SIZE_HINTS = {
 setSize(settings.videoSize);
 setKind(settings.kind);
 setFps(fps);
+$('#rec-opts').open = settings.recOptsOpen;
+$('#rec-opts').addEventListener('toggle', () => chrome.storage.local.set({ recOptsOpen: $('#rec-opts').open }));
+markLastUsed();
 
 const { lastError } = await chrome.storage.session.get('lastError');
 if (lastError) {
@@ -61,7 +65,15 @@ const blocked = !activeTab?.url || PROTECTED.test(activeTab.url);
 if (blocked) {
   $('#blocked').classList.remove('hidden');
   for (const b of document.querySelectorAll('.mode:not([data-mode="screen"])')) b.disabled = true;
+  markLastUsed();
 }
+$('#record-instead').addEventListener('click', () => {
+  setKind('video');
+  chrome.storage.local.set({ kind: 'video' });
+  $('#modes-video [data-mode="screen"]').focus();
+});
+showRecent();
+
 enhance();
 showShortcut(document.querySelector('.shortcut-keys'));
 showSizes();
@@ -88,10 +100,12 @@ function setKind(k) {
   selectTab($(`.kind [data-kind="${k}"]`));
   for (const id of ['modes-image', 'hint-image']) $('#' + id).classList.toggle('hidden', k !== 'image');
   for (const id of ['modes-video', 'hint-video']) $('#' + id).classList.toggle('hidden', k !== 'video');
+  $('#record-instead').classList.toggle('hidden', k === 'video');
 }
 
 function setFps(v) {
   fps = v;
+  queueMicrotask(summarise);
   for (const b of document.querySelectorAll('#fps button')) {
     b.classList.toggle('on', b.dataset.fps === v);
     b.setAttribute('role', 'radio');
@@ -123,8 +137,9 @@ $('#countdown').addEventListener('keydown', (e) => {
 });
 $('#size').addEventListener('change', (e) => { setSize(e.target.value); chrome.storage.local.set({ videoSize: e.target.value }); });
 for (const id of ['audio', 'device']) {
-  $('#' + id).addEventListener('change', (e) => chrome.storage.local.set({ [id]: e.target.checked }));
+  $('#' + id).addEventListener('change', (e) => { chrome.storage.local.set({ [id]: e.target.checked }); summarise(); });
 }
+$('#recent-all').addEventListener('click', () => $('#open-editor').click());
 $('#open-settings').addEventListener('click', () => { chrome.runtime.openOptionsPage(); window.close(); });
 $('#open-editor').addEventListener('click', async () => {
   await chrome.tabs.create({ url: chrome.runtime.getURL('editor/editor.html') });
@@ -135,7 +150,9 @@ $('#open-editor').addEventListener('click', async () => {
 document.addEventListener('keydown', (e) => {
   if (e.metaKey || e.ctrlKey || e.altKey || /^(INPUT|SELECT)$/.test(e.target.tagName)) return;
   const n = Number(e.key);
-  if (n >= 1 && n <= 3) {
+  if (e.key === 'Enter' && (e.target === document.body || e.target === document.documentElement)) {
+    document.querySelector(`#modes-${kind} .mode:not(:disabled) .last`)?.closest('.mode').click();
+  } else if (n >= 1 && n <= 3) {
     document.querySelectorAll(`#modes-${kind} .mode`)[n - 1]?.click();
   } else if (e.key === 'Tab') {
     document.body.classList.add('kbd-nav');
@@ -145,6 +162,7 @@ document.addEventListener('keydown', (e) => {
 for (const b of document.querySelectorAll('.mode')) {
   b.addEventListener('click', async () => {
     if (b.disabled) return;
+    await chrome.storage.local.set({ lastMode: { ...settings.lastMode, [kind]: b.dataset.mode } });
     const tab = activeTab;
     const msg = kind === 'image'
       ? { type: 'capture-image', mode: b.dataset.mode, tabId: tab.id }
@@ -167,6 +185,7 @@ function setCountdown(n, save = true) {
   $('#countdown-more').disabled = countdown === MAX_COUNTDOWN;
   $('#countdown-hint').textContent = countdown ? t('popup_time_to_get_ready_first') : t('popup_countdown_off_hint');
   if (save) chrome.storage.local.set({ countdownSeconds: countdown });
+  summarise();
 }
 
 function setSize(v) {
@@ -181,4 +200,50 @@ function setSize(v) {
   } else {
     $('#size-hint').textContent = SIZE_HINTS[group];
   }
+  summarise();
+}
+
+/** The recording options in one line, shown while they're folded away. */
+function summarise() {
+  const out = $('#opts-summary');
+  if (!out || !$('#size').selectedOptions[0]) return;
+  out.textContent = [
+    `${fps} fps`,
+    $('#size').selectedOptions[0].textContent,
+    countdown ? t('popup_countdown_short', countdown) : t('popup_no_countdown'),
+    ...($('#audio').checked ? [t('popup_with_audio')] : []),
+  ].join(' · ');
+}
+
+/** Marks the mode used last for each kind; Enter repeats it. */
+function markLastUsed() {
+  for (const el of document.querySelectorAll('.mode .last')) el.remove();
+  for (const [k, mode] of Object.entries(settings.lastMode)) {
+    const b = document.querySelector(`#modes-${k === 'video' ? 'video' : 'image'} .mode[data-mode="${mode}"]`);
+    if (!b || b.disabled) continue;
+    b.querySelector('.num').insertAdjacentHTML('beforebegin', `<span class="last" title="${t('popup_enter_repeats')}">${t('popup_last_used')}</span>`);
+  }
+}
+
+/** The last three captures, a click from reopening. */
+async function showRecent() {
+  const items = await listCaptures(3).catch(() => []);
+  if (!items.length) return;
+  const row = $('#recent-list');
+  for (const it of items) {
+    const a = document.createElement('a');
+    const video = it.kind === 'video';
+    a.href = chrome.runtime.getURL(video ? `video/video.html?id=${it.id}` : `editor/editor.html?id=${it.id}&reopen=1`);
+    const title = it.meta.title || (video ? t('video_recording') : t('popup_screenshot'));
+    a.title = title;
+    a.setAttribute('aria-label', title);
+    const thumb = document.createElement(video ? 'video' : 'img');
+    thumb.src = URL.createObjectURL(it.blob) + (video ? '#t=0.1' : '');
+    if (video) { thumb.muted = true; thumb.preload = 'metadata'; } else { thumb.decoding = 'async'; thumb.alt = ''; }
+    a.append(thumb);
+    if (video) a.insertAdjacentHTML('beforeend', `<span class="badge">${t('badge_video')}</span>`);
+    a.addEventListener('click', async (e) => { e.preventDefault(); await chrome.tabs.create({ url: a.href }); window.close(); });
+    row.append(a);
+  }
+  $('#recent').classList.remove('hidden');
 }

@@ -1734,5 +1734,38 @@
   },
   "look_brand": {
     "message": "Brand"
+  },
+  "popup_record_screen_instead": {
+    "message": "Record your screen instead"
+  },
+  "popup_options": {
+    "message": "Options"
+  },
+  "popup_see_all": {
+    "message": "See all"
+  },
+  "popup_countdown_short": {
+    "message": "$1 s countdown"
+  },
+  "popup_no_countdown": {
+    "message": "No countdown"
+  },
+  "popup_with_audio": {
+    "message": "Audio"
+  },
+  "popup_no_audio": {
+    "message": "No audio"
+  },
+  "popup_last_used": {
+    "message": "Last used"
+  },
+  "popup_enter_repeats": {
+    "message": "Press Enter to do this again"
+  },
+  "badge_video": {
+    "message": "Video"
+  },
+  "badge_edited": {
+    "message": "Edited"
   }
 }

@@ -41,7 +41,8 @@
   </div>
   <div id="blocked" class="banner warn hidden">
     <svg class="i" viewBox="0 0 24 24"><path d="M12 3 2 20h20L12 3z"/><path d="M12 10v4M12 17v.01"/></svg>
-    <div><b data-i18n="popup_this_page_can_t_be">This page can't be captured</b><span data-i18n="popup_chrome_protects_its_own_pages">Chrome protects its own pages and the Web Store. Open a website to capture it, or record your whole screen.</span></div>
+    <div><b data-i18n="popup_this_page_can_t_be">This page can't be captured</b><span data-i18n="popup_chrome_protects_its_own_pages">Chrome protects its own pages and the Web Store. Open a website to capture it, or record your whole screen.</span>
+      <button class="btn small" id="record-instead" data-i18n="popup_record_screen_instead">Record your screen instead</button></div>
   </div>
 
   <main>
@@ -76,7 +77,8 @@
         <span class="txt"><b data-i18n="popup_selected_area">Selected area</b><small data-i18n="popup_record_only_part_of_this">Record only part of this tab</small></span><kbd class="num">3</kbd>
       </button>
 
-      <div class="opts">
+      <details class="opts" id="rec-opts">
+        <summary><span data-i18n="popup_options">Options</span><small id="opts-summary"></small></summary>
         <div class="field"><span id="fps-label" data-i18n="popup_frame_rate">Frame rate</span>
           <div class="seg" id="fps" role="radiogroup" aria-label="Frame rate" data-i18n-aria-label="popup_frame_rate">
             <button data-fps="15">15</button><button data-fps="24">24</button><button data-fps="30">30</button><button data-fps="60">60 fps</button>
@@ -108,9 +110,14 @@
             <button type="button" id="countdown-more" aria-label="Longer countdown" tabindex="-1" data-i18n-aria-label="popup_longer_countdown">+</button>
           </div>
         </div>
-      </div>
+      </details>
       <p class="stop-hint" data-i18n="popup_stop_click_the_captode_icon">Stop: click the Captode icon or press <span class="shortcut-keys"></span></p>
     </div>
+
+    <section class="recent hidden" id="recent" aria-labelledby="recent-title">
+      <h3><span id="recent-title" data-i18n="editor_recent_captures">Recent captures</span><button class="link" id="recent-all" data-i18n="popup_see_all">See all</button></h3>
+      <div class="recent-row" id="recent-list"></div>
+    </section>
   </main>
 
   <footer>

@@ -1732,5 +1732,38 @@
   },
   "look_brand": {
     "message": "Marca"
+  },
+  "popup_record_screen_instead": {
+    "message": "Gravar a tela"
+  },
+  "popup_options": {
+    "message": "Opções"
+  },
+  "popup_see_all": {
+    "message": "Ver tudo"
+  },
+  "popup_countdown_short": {
+    "message": "Contagem de $1 s"
+  },
+  "popup_no_countdown": {
+    "message": "Sem contagem"
+  },
+  "popup_with_audio": {
+    "message": "Áudio"
+  },
+  "popup_no_audio": {
+    "message": "Sem áudio"
+  },
+  "popup_last_used": {
+    "message": "Último"
+  },
+  "popup_enter_repeats": {
+    "message": "Pressione Enter para repetir"
+  },
+  "badge_video": {
+    "message": "Vídeo"
+  },
+  "badge_edited": {
+    "message": "Editada"
   }
 }

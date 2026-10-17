@@ -151,7 +151,7 @@ export const tests = {
 
   async 'recording countdown can be set from off to 30 seconds'({ browser, url }) {
     const pop = await open(browser, url('popup/popup.html'), { width: 340, height: 600 });
-    await pop.evaluate(() => chrome.storage.local.remove(['countdown', 'countdownSeconds']).then(() => chrome.storage.local.set({ kind: 'video' })));
+    await pop.evaluate(() => chrome.storage.local.remove(['countdown', 'countdownSeconds']).then(() => chrome.storage.local.set({ kind: 'video', recOptsOpen: true })));
     await pop.reload();
     await pop.waitForSelector('#modes-video:not(.hidden)');
     const state = () => pop.evaluate(async () => ({
@@ -251,6 +251,69 @@ export const tests = {
     const st = await pop.evaluate(async () => ({ stored: (await chrome.storage.local.get('videoSize')).videoSize, hint: document.querySelector('#size-hint').textContent, n: document.querySelectorAll('#size option').length }));
     ok(st.stored === '720p' && /shorter side/i.test(st.hint) && st.n === 10, JSON.stringify(st));
     await pop.evaluate(() => chrome.storage.local.remove('videoSize'));
+    await pop.close();
+  },
+
+  async 'popup: options fold into one line, recent captures, and Enter repeats the last mode'({ browser, url, page }) {
+    const lab = await open(browser, url('lab/lab.html'));
+    await lab.evaluate(async () => {
+      const { putCapture } = await import('/lib/db.js');
+      for (let i = 0; i < 4; i++) {
+        const c = new OffscreenCanvas(160, 100);
+        c.getContext('2d').fillRect(0, 0, 40 + i * 20, 40);
+        await putCapture(await c.convertToBlob(), { title: `Shot ${i}`, mode: 'visible' });
+      }
+      await chrome.storage.local.set({ kind: 'video', fps: '30', countdownSeconds: 3, audio: false, lastMode: { image: 'visible', video: 'area' }, recOptsOpen: false });
+    });
+    await lab.close();
+    const pop = await browser.newPage();
+    await pop.evaluateOnNewDocument((pageUrl) => {
+      const query = chrome.tabs.query.bind(chrome.tabs);
+      chrome.tabs.query = (q) => (q?.active ? query({ url: pageUrl }) : query(q));
+      window.__sent = [];
+      chrome.runtime.sendMessage = async (m) => { window.__sent.push(m); };
+      window.close = () => {};
+    }, page.url());
+    await pop.setViewport({ width: 340, height: 600 });
+    await pop.goto(url('popup/popup.html'));
+    await prepare(pop);
+    await pop.waitForFunction(() => !document.querySelector('#recent').classList.contains('hidden'), { polling: 100 });
+    let r = await pop.evaluate(() => ({
+      height: document.body.scrollHeight,
+      open: document.querySelector('#rec-opts').open,
+      summary: document.querySelector('#opts-summary').textContent,
+      summaryFits: document.querySelector('#rec-opts').getBoundingClientRect().right <= innerWidth,
+      recent: document.querySelectorAll('#recent-list a').length,
+      last: [...document.querySelectorAll('.mode .last')].map((e) => `${e.closest('.modes').id}:${e.closest('.mode').dataset.mode}`),
+    }));
+    ok(r.height <= 600, `the Record view fits in Chrome's 600 px popup: ${r.height}`);
+    ok(!r.open && r.summary === '30 fps · Page size · 3 s countdown' && r.summaryFits, JSON.stringify(r));
+    ok(r.recent === 3, `three recent captures: ${r.recent}`);
+    ok(r.last.join() === 'modes-image:visible,modes-video:area', `last used: ${r.last}`);
+    // Changing an option updates the line; opening the options is remembered.
+    await pop.evaluate(() => { document.querySelector('#audio').click(); document.querySelector('#rec-opts > summary').click(); });
+    await sleep(100);
+    r = await pop.evaluate(async () => ({ summary: document.querySelector('#opts-summary').textContent, saved: (await chrome.storage.local.get('recOptsOpen')).recOptsOpen }));
+    ok(r.summary.endsWith('· Audio') && r.saved === true, JSON.stringify(r));
+    await pop.evaluate(() => { document.querySelector('#audio').click(); document.querySelector('#rec-opts > summary').click(); document.activeElement.blur(); });
+    // Enter repeats the last mode of the kind showing.
+    await pop.keyboard.press('Enter');
+    await pop.waitForFunction(() => window.__sent.length, { polling: 50 });
+    const sent = await pop.evaluate(() => window.__sent[0]);
+    ok(sent.type === 'record-start' && sent.mode === 'area', JSON.stringify(sent));
+    await pop.evaluate(() => chrome.storage.local.set({ kind: 'image' }));
+    await pop.close();
+  },
+
+  async 'popup on a protected page offers screen recording in one click'({ browser, url }) {
+    const pop = await open(browser, url('popup/popup.html'), { width: 340, height: 600 });
+    await pop.evaluate(() => chrome.storage.local.set({ kind: 'image' }));
+    await pop.reload();
+    await pop.waitForSelector('#record-instead:not(.hidden)');
+    await pop.click('#record-instead');
+    const r = await pop.evaluate(() => ({ video: !document.querySelector('#modes-video').classList.contains('hidden'), focus: document.activeElement.dataset.mode, button: document.querySelector('#record-instead').classList.contains('hidden') }));
+    ok(r.video && r.focus === 'screen' && r.button, JSON.stringify(r));
+    await pop.evaluate(() => chrome.storage.local.set({ kind: 'image' }));
     await pop.close();
   },
 

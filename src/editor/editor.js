@@ -2280,8 +2280,8 @@ async function renderRecent() {
     a.innerHTML = `<span class="thumb"></span><span class="meta"><b></b><small></small></span>
       <button class="btn ghost icon remove" data-tip="${t('remove')}" aria-label="${t('remove_named', title.replace(/"/g, ''))}"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>`;
     a.querySelector('.thumb').append(thumb);
-    if (it.kind === 'video') a.querySelector('.thumb').insertAdjacentHTML('beforeend', '<span class="badge">Video</span>');
-    else if (it.edited) a.querySelector('.thumb').insertAdjacentHTML('beforeend', '<span class="badge">Edited</span>');
+    if (it.kind === 'video') a.querySelector('.thumb').insertAdjacentHTML('beforeend', `<span class="badge">${t('badge_video')}</span>`);
+    else if (it.edited) a.querySelector('.thumb').insertAdjacentHTML('beforeend', `<span class="badge">${t('badge_edited')}</span>`);
     a.querySelector('b').textContent = title;
     a.querySelector('small').textContent = `${ago(it.created)} · ${fmtBytes(it.size)}`;
     a.querySelector('.remove').addEventListener('click', async (e) => {

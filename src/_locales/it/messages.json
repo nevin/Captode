@@ -1732,5 +1732,38 @@
   },
   "look_brand": {
     "message": "Brand"
+  },
+  "popup_record_screen_instead": {
+    "message": "Registra lo schermo"
+  },
+  "popup_options": {
+    "message": "Opzioni"
+  },
+  "popup_see_all": {
+    "message": "Vedi tutte"
+  },
+  "popup_countdown_short": {
+    "message": "Conto alla rovescia $1 s"
+  },
+  "popup_no_countdown": {
+    "message": "Senza conto alla rovescia"
+  },
+  "popup_with_audio": {
+    "message": "Audio"
+  },
+  "popup_no_audio": {
+    "message": "Senza audio"
+  },
+  "popup_last_used": {
+    "message": "Ultimo"
+  },
+  "popup_enter_repeats": {
+    "message": "Premi Invio per ripetere"
+  },
+  "badge_video": {
+    "message": "Video"
+  },
+  "badge_edited": {
+    "message": "Modificata"
   }
 }

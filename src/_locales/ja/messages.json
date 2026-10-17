@@ -1732,5 +1732,38 @@
   },
   "look_brand": {
     "message": "ブランド"
+  },
+  "popup_record_screen_instead": {
+    "message": "画面を録画する"
+  },
+  "popup_options": {
+    "message": "オプション"
+  },
+  "popup_see_all": {
+    "message": "すべて表示"
+  },
+  "popup_countdown_short": {
+    "message": "$1 秒カウントダウン"
+  },
+  "popup_no_countdown": {
+    "message": "カウントダウンなし"
+  },
+  "popup_with_audio": {
+    "message": "音声あり"
+  },
+  "popup_no_audio": {
+    "message": "音声なし"
+  },
+  "popup_last_used": {
+    "message": "前回"
+  },
+  "popup_enter_repeats": {
+    "message": "Enter キーでもう一度"
+  },
+  "badge_video": {
+    "message": "動画"
+  },
+  "badge_edited": {
+    "message": "編集済み"
   }
 }
