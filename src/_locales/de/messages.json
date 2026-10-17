@@ -1765,5 +1765,77 @@
   },
   "badge_edited": {
     "message": "Bearbeitet"
+  },
+  "group_move_crop": {
+    "message": "Bewegen und zuschneiden"
+  },
+  "group_draw": {
+    "message": "Zeichnen"
+  },
+  "group_shapes": {
+    "message": "Formen"
+  },
+  "group_text_steps": {
+    "message": "Text und Schritte"
+  },
+  "group_focus_privacy": {
+    "message": "Fokus und Datenschutz"
+  },
+  "group_review": {
+    "message": "Prüfen"
+  },
+  "tool_about_select": {
+    "message": "Klicken zum Auswählen, ziehen zum Verschieben. Umschalt erweitert die Auswahl."
+  },
+  "tool_about_pan": {
+    "message": "Ziehen, um im Bild zu navigieren."
+  },
+  "tool_about_crop": {
+    "message": "Ziehen, um einen Bildausschnitt zu behalten."
+  },
+  "tool_about_pen": {
+    "message": "Freihand zeichnen."
+  },
+  "tool_about_highlighter": {
+    "message": "Text wie mit einem Textmarker markieren."
+  },
+  "tool_about_arrow": {
+    "message": "Auf etwas zeigen."
+  },
+  "tool_about_line": {
+    "message": "Eine gerade Linie. Umschalt hält sie waagerecht."
+  },
+  "tool_about_rect": {
+    "message": "Ein Rahmen um etwas. Umschalt zeichnet ein Quadrat."
+  },
+  "tool_about_ellipse": {
+    "message": "Ein Oval um etwas. Umschalt zeichnet einen Kreis."
+  },
+  "tool_about_text": {
+    "message": "Klicken, um eine Beschriftung hinzuzufügen."
+  },
+  "tool_about_callout": {
+    "message": "Eine Sprechblase mit einer Notiz."
+  },
+  "tool_about_step": {
+    "message": "Nummerierte Marker für Schritte, fortlaufend."
+  },
+  "tool_about_spotlight": {
+    "message": "Alles außer einem Bereich abdunkeln."
+  },
+  "tool_about_magnify": {
+    "message": "Einen Bereich vergrößert zeigen."
+  },
+  "tool_about_redact": {
+    "message": "Private Angaben verbergen."
+  },
+  "tool_about_measure": {
+    "message": "Abstände in CSS-Pixeln messen."
+  },
+  "tool_about_pick": {
+    "message": "Farben aufnehmen und ihren Kontrast prüfen."
+  },
+  "export_will_be": {
+    "message": "Die Datei wird $1 groß"
   }
 }

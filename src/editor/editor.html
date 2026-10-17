@@ -352,16 +352,11 @@
       </section>
 
       <div class="export-bar">
-        <div class="estimate" id="x-estimate">—</div>
         <p class="fitted hidden" id="x-fitted"></p>
-        <div class="export-actions">
-          <button class="btn block" id="copy2" title="Copy the image to the clipboard, as PNG (⌘⇧C)" data-i18n-title="editor_copy_the_image_to_the_2" data-i18n="editor_copy">
-            <svg class="i" viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg>Copy
-          </button>
-          <button class="btn primary block" id="download2" data-i18n="editor_download">
-            <svg class="i" viewBox="0 0 24 24"><path d="M12 4v12M7 11l5 5 5-5M4 20h16"/></svg>Download
-          </button>
-        </div>
+        <p class="x-dims" id="x-dims"></p>
+        <button class="btn primary block download-big" id="download2">
+          <svg class="i" viewBox="0 0 24 24"><path d="M12 4v12M7 11l5 5 5-5M4 20h16"/></svg><span class="dl-label" data-i18n="editor_download">Download</span><span class="estimate" id="x-estimate" aria-live="polite">—</span>
+        </button>
       </div>
     </div>
   </aside>

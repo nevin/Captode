@@ -1765,5 +1765,77 @@
   },
   "badge_edited": {
     "message": "Editada"
+  },
+  "group_move_crop": {
+    "message": "Mover y recortar"
+  },
+  "group_draw": {
+    "message": "Dibujar"
+  },
+  "group_shapes": {
+    "message": "Formas"
+  },
+  "group_text_steps": {
+    "message": "Texto y pasos"
+  },
+  "group_focus_privacy": {
+    "message": "Enfoque y privacidad"
+  },
+  "group_review": {
+    "message": "Revisar"
+  },
+  "tool_about_select": {
+    "message": "Haz clic para seleccionar y arrastra para mover. Mayús añade a la selección."
+  },
+  "tool_about_pan": {
+    "message": "Arrastra para desplazarte por la imagen."
+  },
+  "tool_about_crop": {
+    "message": "Arrastra para quedarte con una parte de la imagen."
+  },
+  "tool_about_pen": {
+    "message": "Dibuja a mano alzada."
+  },
+  "tool_about_highlighter": {
+    "message": "Marca texto como con un rotulador."
+  },
+  "tool_about_arrow": {
+    "message": "Señala algo."
+  },
+  "tool_about_line": {
+    "message": "Una línea recta. Mayús la mantiene horizontal."
+  },
+  "tool_about_rect": {
+    "message": "Un recuadro alrededor de algo. Mayús dibuja un cuadrado."
+  },
+  "tool_about_ellipse": {
+    "message": "Un óvalo alrededor de algo. Mayús dibuja un círculo."
+  },
+  "tool_about_text": {
+    "message": "Haz clic para añadir una etiqueta."
+  },
+  "tool_about_callout": {
+    "message": "Un bocadillo con una nota."
+  },
+  "tool_about_step": {
+    "message": "Marcadores numerados para pasos, en orden."
+  },
+  "tool_about_spotlight": {
+    "message": "Oscurece todo menos una zona."
+  },
+  "tool_about_magnify": {
+    "message": "Muestra una zona más grande."
+  },
+  "tool_about_redact": {
+    "message": "Oculta datos privados."
+  },
+  "tool_about_measure": {
+    "message": "Mide distancias en píxeles CSS."
+  },
+  "tool_about_pick": {
+    "message": "Elige colores y comprueba su contraste."
+  },
+  "export_will_be": {
+    "message": "El archivo medirá $1"
   }
 }

@@ -1765,5 +1765,77 @@
   },
   "badge_edited": {
     "message": "編集済み"
+  },
+  "group_move_crop": {
+    "message": "移動と切り抜き"
+  },
+  "group_draw": {
+    "message": "描画"
+  },
+  "group_shapes": {
+    "message": "図形"
+  },
+  "group_text_steps": {
+    "message": "テキストと手順"
+  },
+  "group_focus_privacy": {
+    "message": "強調とプライバシー"
+  },
+  "group_review": {
+    "message": "確認"
+  },
+  "tool_about_select": {
+    "message": "クリックで選択、ドラッグで移動。Shift で選択に追加。"
+  },
+  "tool_about_pan": {
+    "message": "ドラッグして画像内を移動します。"
+  },
+  "tool_about_crop": {
+    "message": "ドラッグして残す範囲を選びます。"
+  },
+  "tool_about_pen": {
+    "message": "自由に描きます。"
+  },
+  "tool_about_highlighter": {
+    "message": "蛍光ペンのように文字に印を付けます。"
+  },
+  "tool_about_arrow": {
+    "message": "何かを指し示します。"
+  },
+  "tool_about_line": {
+    "message": "直線。Shift で水平・垂直に。"
+  },
+  "tool_about_rect": {
+    "message": "何かを四角で囲みます。Shift で正方形。"
+  },
+  "tool_about_ellipse": {
+    "message": "何かを楕円で囲みます。Shift で正円。"
+  },
+  "tool_about_text": {
+    "message": "クリックしてラベルを追加します。"
+  },
+  "tool_about_callout": {
+    "message": "メモ付きの吹き出し。"
+  },
+  "tool_about_step": {
+    "message": "手順を示す連番のマーカー。"
+  },
+  "tool_about_spotlight": {
+    "message": "一部分以外を暗くします。"
+  },
+  "tool_about_magnify": {
+    "message": "一部分を拡大して表示します。"
+  },
+  "tool_about_redact": {
+    "message": "個人情報を隠します。"
+  },
+  "tool_about_measure": {
+    "message": "CSS ピクセルで距離を測ります。"
+  },
+  "tool_about_pick": {
+    "message": "色を取得してコントラストを確認します。"
+  },
+  "export_will_be": {
+    "message": "ファイルのサイズ: $1"
   }
 }

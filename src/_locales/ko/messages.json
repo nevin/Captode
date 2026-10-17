@@ -1765,5 +1765,77 @@
   },
   "badge_edited": {
     "message": "편집됨"
+  },
+  "group_move_crop": {
+    "message": "이동 및 자르기"
+  },
+  "group_draw": {
+    "message": "그리기"
+  },
+  "group_shapes": {
+    "message": "도형"
+  },
+  "group_text_steps": {
+    "message": "텍스트 및 단계"
+  },
+  "group_focus_privacy": {
+    "message": "강조 및 개인정보"
+  },
+  "group_review": {
+    "message": "검토"
+  },
+  "tool_about_select": {
+    "message": "클릭하여 선택하고 드래그하여 이동합니다. Shift로 선택에 추가합니다."
+  },
+  "tool_about_pan": {
+    "message": "드래그하여 이미지를 둘러봅니다."
+  },
+  "tool_about_crop": {
+    "message": "드래그하여 남길 부분을 고릅니다."
+  },
+  "tool_about_pen": {
+    "message": "자유롭게 그립니다."
+  },
+  "tool_about_highlighter": {
+    "message": "형광펜처럼 텍스트를 표시합니다."
+  },
+  "tool_about_arrow": {
+    "message": "무언가를 가리킵니다."
+  },
+  "tool_about_line": {
+    "message": "직선입니다. Shift로 수평을 유지합니다."
+  },
+  "tool_about_rect": {
+    "message": "무언가를 상자로 둘러쌉니다. Shift로 정사각형을 그립니다."
+  },
+  "tool_about_ellipse": {
+    "message": "무언가를 타원으로 둘러쌉니다. Shift로 원을 그립니다."
+  },
+  "tool_about_text": {
+    "message": "클릭하여 레이블을 추가합니다."
+  },
+  "tool_about_callout": {
+    "message": "메모가 있는 말풍선입니다."
+  },
+  "tool_about_step": {
+    "message": "단계를 나타내는 번호 표시입니다."
+  },
+  "tool_about_spotlight": {
+    "message": "한 영역을 제외하고 모두 어둡게 합니다."
+  },
+  "tool_about_magnify": {
+    "message": "한 영역을 크게 보여 줍니다."
+  },
+  "tool_about_redact": {
+    "message": "개인 정보를 가립니다."
+  },
+  "tool_about_measure": {
+    "message": "CSS 픽셀로 거리를 잽니다."
+  },
+  "tool_about_pick": {
+    "message": "색을 골라 대비를 확인합니다."
+  },
+  "export_will_be": {
+    "message": "파일 크기: $1"
   }
 }

@@ -1765,5 +1765,77 @@
   },
   "badge_edited": {
     "message": "Modifiée"
+  },
+  "group_move_crop": {
+    "message": "Déplacer et rogner"
+  },
+  "group_draw": {
+    "message": "Dessiner"
+  },
+  "group_shapes": {
+    "message": "Formes"
+  },
+  "group_text_steps": {
+    "message": "Texte et étapes"
+  },
+  "group_focus_privacy": {
+    "message": "Mise en avant et confidentialité"
+  },
+  "group_review": {
+    "message": "Vérifier"
+  },
+  "tool_about_select": {
+    "message": "Cliquez pour sélectionner, faites glisser pour déplacer. Maj ajoute à la sélection."
+  },
+  "tool_about_pan": {
+    "message": "Faites glisser pour parcourir l'image."
+  },
+  "tool_about_crop": {
+    "message": "Faites glisser pour garder une partie de l'image."
+  },
+  "tool_about_pen": {
+    "message": "Dessinez à main levée."
+  },
+  "tool_about_highlighter": {
+    "message": "Surlignez du texte comme au surligneur."
+  },
+  "tool_about_arrow": {
+    "message": "Pointez quelque chose."
+  },
+  "tool_about_line": {
+    "message": "Une ligne droite. Maj la garde horizontale."
+  },
+  "tool_about_rect": {
+    "message": "Un cadre autour d'un élément. Maj dessine un carré."
+  },
+  "tool_about_ellipse": {
+    "message": "Un ovale autour d'un élément. Maj dessine un cercle."
+  },
+  "tool_about_text": {
+    "message": "Cliquez pour ajouter un libellé."
+  },
+  "tool_about_callout": {
+    "message": "Une bulle avec une note."
+  },
+  "tool_about_step": {
+    "message": "Repères numérotés pour les étapes, dans l'ordre."
+  },
+  "tool_about_spotlight": {
+    "message": "Assombrit tout sauf une zone."
+  },
+  "tool_about_magnify": {
+    "message": "Affiche une zone en plus grand."
+  },
+  "tool_about_redact": {
+    "message": "Masquez les informations privées."
+  },
+  "tool_about_measure": {
+    "message": "Mesurez des distances en pixels CSS."
+  },
+  "tool_about_pick": {
+    "message": "Choisissez des couleurs et vérifiez leur contraste."
+  },
+  "export_will_be": {
+    "message": "Le fichier fera $1"
   }
 }

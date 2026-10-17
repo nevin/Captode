@@ -1765,5 +1765,77 @@
   },
   "badge_edited": {
     "message": "Editada"
+  },
+  "group_move_crop": {
+    "message": "Mover e cortar"
+  },
+  "group_draw": {
+    "message": "Desenhar"
+  },
+  "group_shapes": {
+    "message": "Formas"
+  },
+  "group_text_steps": {
+    "message": "Texto e etapas"
+  },
+  "group_focus_privacy": {
+    "message": "Foco e privacidade"
+  },
+  "group_review": {
+    "message": "Revisar"
+  },
+  "tool_about_select": {
+    "message": "Clique para selecionar e arraste para mover. Shift adiciona à seleção."
+  },
+  "tool_about_pan": {
+    "message": "Arraste para percorrer a imagem."
+  },
+  "tool_about_crop": {
+    "message": "Arraste para manter parte da imagem."
+  },
+  "tool_about_pen": {
+    "message": "Desenhe à mão livre."
+  },
+  "tool_about_highlighter": {
+    "message": "Destaque texto como um marca-texto."
+  },
+  "tool_about_arrow": {
+    "message": "Aponte para algo."
+  },
+  "tool_about_line": {
+    "message": "Uma linha reta. Shift a mantém nivelada."
+  },
+  "tool_about_rect": {
+    "message": "Uma caixa em volta de algo. Shift desenha um quadrado."
+  },
+  "tool_about_ellipse": {
+    "message": "Um oval em volta de algo. Shift desenha um círculo."
+  },
+  "tool_about_text": {
+    "message": "Clique para adicionar um rótulo."
+  },
+  "tool_about_callout": {
+    "message": "Um balão com uma nota."
+  },
+  "tool_about_step": {
+    "message": "Marcadores numerados para etapas, em sequência."
+  },
+  "tool_about_spotlight": {
+    "message": "Escurece tudo exceto uma área."
+  },
+  "tool_about_magnify": {
+    "message": "Mostra uma área ampliada."
+  },
+  "tool_about_redact": {
+    "message": "Oculte dados privados."
+  },
+  "tool_about_measure": {
+    "message": "Meça distâncias em pixels CSS."
+  },
+  "tool_about_pick": {
+    "message": "Escolha cores e verifique o contraste."
+  },
+  "export_will_be": {
+    "message": "O arquivo terá $1"
   }
 }

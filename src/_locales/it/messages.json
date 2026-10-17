@@ -1765,5 +1765,77 @@
   },
   "badge_edited": {
     "message": "Modificata"
+  },
+  "group_move_crop": {
+    "message": "Sposta e ritaglia"
+  },
+  "group_draw": {
+    "message": "Disegna"
+  },
+  "group_shapes": {
+    "message": "Forme"
+  },
+  "group_text_steps": {
+    "message": "Testo e passaggi"
+  },
+  "group_focus_privacy": {
+    "message": "Messa a fuoco e privacy"
+  },
+  "group_review": {
+    "message": "Verifica"
+  },
+  "tool_about_select": {
+    "message": "Fai clic per selezionare, trascina per spostare. Maiusc aggiunge alla selezione."
+  },
+  "tool_about_pan": {
+    "message": "Trascina per spostarti nell'immagine."
+  },
+  "tool_about_crop": {
+    "message": "Trascina per tenere una parte dell'immagine."
+  },
+  "tool_about_pen": {
+    "message": "Disegna a mano libera."
+  },
+  "tool_about_highlighter": {
+    "message": "Evidenzia il testo come con un evidenziatore."
+  },
+  "tool_about_arrow": {
+    "message": "Indica qualcosa."
+  },
+  "tool_about_line": {
+    "message": "Una linea retta. Maiusc la tiene in piano."
+  },
+  "tool_about_rect": {
+    "message": "Un riquadro intorno a qualcosa. Maiusc disegna un quadrato."
+  },
+  "tool_about_ellipse": {
+    "message": "Un ovale intorno a qualcosa. Maiusc disegna un cerchio."
+  },
+  "tool_about_text": {
+    "message": "Fai clic per aggiungere un'etichetta."
+  },
+  "tool_about_callout": {
+    "message": "Un fumetto con una nota."
+  },
+  "tool_about_step": {
+    "message": "Indicatori numerati per i passaggi, in sequenza."
+  },
+  "tool_about_spotlight": {
+    "message": "Scurisce tutto tranne un'area."
+  },
+  "tool_about_magnify": {
+    "message": "Mostra un'area ingrandita."
+  },
+  "tool_about_redact": {
+    "message": "Nascondi i dati privati."
+  },
+  "tool_about_measure": {
+    "message": "Misura le distanze in pixel CSS."
+  },
+  "tool_about_pick": {
+    "message": "Scegli i colori e verificane il contrasto."
+  },
+  "export_will_be": {
+    "message": "Il file sarà di $1"
   }
 }

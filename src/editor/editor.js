@@ -1366,16 +1366,58 @@ function setTool(t) {
   renderFg();
 }
 
-const TOOL_GROUPS = [['select', 'pan', 'crop'], ['pen', 'highlighter'], ['arrow', 'line', 'rect', 'ellipse'], ['text', 'callout', 'step'], ['spotlight', 'magnify', 'redact'], ['measure', 'pick']];
+const TOOL_GROUPS = [
+  ['group_move_crop', ['select', 'pan', 'crop']],
+  ['group_draw', ['pen', 'highlighter']],
+  ['group_shapes', ['arrow', 'line', 'rect', 'ellipse']],
+  ['group_text_steps', ['text', 'callout', 'step']],
+  ['group_focus_privacy', ['spotlight', 'magnify', 'redact']],
+  ['group_review', ['measure', 'pick']],
+];
 const REVIEW_TOOLS = new Set(['measure', 'pick']);
-$('#tools').innerHTML = TOOL_GROUPS.map((g) => g.map((id) => {
-  const [, title, key, icon] = TOOLS.find((t) => t[0] === id);
-  return `<button class="btn ghost icon" data-tool="${id}" data-tip="${title}  ${key.toUpperCase()}" aria-label="${title}">${icon}</button>`;
-}).join('')).join('<span class="tool-sep"></span>');
+$('#tools').innerHTML = TOOL_GROUPS.map(([group, ids]) => `<span class="tool-group" role="group" aria-label="${t(group)}">${ids.map((id) => {
+  const [, title, key, icon] = TOOLS.find((x) => x[0] === id);
+  return `<button class="btn ghost icon" data-tool="${id}" data-key="${key.toUpperCase()}" data-tool-group="${group}" aria-label="${title}" aria-keyshortcuts="${key}">${icon}</button>`;
+}).join('')}</span>`).join('<span class="tool-sep"></span>');
 $('#tools').addEventListener('click', (e) => {
   const b = e.target.closest('[data-tool]');
   if (b) setTool(b.dataset.tool);
 });
+
+// A larger tooltip for tools: the group, the name, the key and what it does. Once one
+// shows, moving along the toolbar switches it at once, so the tools can be scanned.
+const toolTip = Object.assign(document.createElement('div'), { id: 'tool-tip', role: 'tooltip', className: 'tool-tip' });
+document.body.append(toolTip);
+let tipTimer = 0, tipShown = false;
+function showToolTip(b) {
+  const [, title] = TOOLS.find((x) => x[0] === b.dataset.tool);
+  toolTip.innerHTML = '<small></small><b></b><kbd></kbd><span></span>';
+  toolTip.children[0].textContent = t(b.dataset.toolGroup);
+  toolTip.children[1].textContent = title;
+  toolTip.children[2].textContent = b.dataset.key;
+  toolTip.children[3].textContent = t(`tool_about_${b.dataset.tool}`);
+  toolTip.classList.add('on');
+  const r = b.getBoundingClientRect(), w = toolTip.offsetWidth;
+  toolTip.style.left = `${Math.max(8, Math.min(innerWidth - w - 8, r.left + r.width / 2 - w / 2))}px`;
+  toolTip.style.top = `${r.bottom + 8}px`;
+  b.setAttribute('aria-describedby', 'tool-tip');
+  tipShown = true;
+}
+function hideToolTip() {
+  clearTimeout(tipTimer);
+  toolTip.classList.remove('on');
+  document.querySelector('[aria-describedby="tool-tip"]')?.removeAttribute('aria-describedby');
+}
+$('#tools').addEventListener('pointerover', (e) => {
+  const b = e.target.closest('[data-tool]');
+  if (!b) return;
+  clearTimeout(tipTimer);
+  if (tipShown) showToolTip(b); else tipTimer = setTimeout(() => showToolTip(b), 400);
+});
+$('#tools').addEventListener('pointerleave', () => { hideToolTip(); tipTimer = setTimeout(() => { tipShown = false; }, 300); });
+$('#tools').addEventListener('focusin', (e) => { const b = e.target.closest('[data-tool]'); if (b?.matches(':focus-visible')) showToolTip(b); });
+$('#tools').addEventListener('focusout', () => { hideToolTip(); tipShown = false; });
+$('#tools').addEventListener('pointerdown', () => { hideToolTip(); });
 
 function deleteSelected() {
   if (!selection.length) return;
@@ -2022,10 +2064,11 @@ function syncExportUi() {
   document.querySelector('[data-x="colors"]').classList.toggle('hidden', !['png8', 'gif'].includes(f));
   document.querySelector('[data-x="pdf"]').classList.toggle('hidden', f !== 'pdf');
   document.querySelector('[data-x="lossy"]').classList.toggle('hidden', f !== 'gif');
-  $('#x-lossy-v').textContent = Number($('#x-lossy').value) ? $('#x-lossy').value : 'Off';
+  $('#x-lossy-v').textContent = Number($('#x-lossy').value) ? $('#x-lossy').value : t('video_off');
   $('#x-quality-v').textContent = $('#x-quality').value + '%';
   const label = t('download_format', FORMAT_INFO[f][0]);
-  for (const id of ['download', 'download2']) $('#' + id).lastChild.textContent = label;
+  $('#download').lastChild.textContent = label;
+  $('#download2 .dl-label').textContent = label;
 }
 
 /** The image with its annotations, about `width` pixels wide (for previews). */
@@ -2091,12 +2134,13 @@ let estimateRun = 0;
 const refreshExport = debounce(async () => {
   if (!base) return;
   const run = ++estimateRun;
-  $('#x-estimate').innerHTML = `<span>${t('estimate_working')}</span>`;
+  $('#x-estimate').innerHTML = `<span class="working" title="${t('estimate_working')}">…</span>`;
   try {
     const c = await finalCanvas();
     const r = await encode(c, 'estimate');
     if (run !== estimateRun) return;
-    $('#x-estimate').innerHTML = `<span>${r.width} × ${r.height} px</span><b>${fmtBytes(r.blob.size)}</b>`;
+    $('#x-estimate').textContent = fmtBytes(r.blob.size);
+    $('#x-dims').textContent = t('export_will_be', `${r.width} × ${r.height} px`);
     $('#x-fitted').textContent = fittedNote(r.fitted);
     $('#x-fitted').classList.toggle('hidden', !r.fitted);
     $('#x-fitted').classList.toggle('warn', !!r.fitted?.tooBig);
@@ -2214,7 +2258,6 @@ async function autoCopy() {
   for (const ev of events) addEventListener(ev, once, true);
 }
 $('#copy').addEventListener('click', () => copyImage());
-$('#copy2').addEventListener('click', () => copyImage());
 for (const id of ['x-format', 'x-scale', 'x-limit', 'x-quality', 'x-colors', 'x-dither', 'x-lossy', 'x-page', 'x-split']) {
   $('#' + id).addEventListener('input', () => { syncExportUi(); refreshExport(); });
 }

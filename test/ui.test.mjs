@@ -81,7 +81,7 @@ export const tests = {
     await ed.evaluate(() => { const s = document.querySelector('#x-format'); s.value = 'jpeg'; s.dispatchEvent(new Event('input', { bubbles: true })); });
     await ed.evaluate(() => { const s = document.querySelector('#x-limit'); s.value = '100'; s.dispatchEvent(new Event('input', { bubbles: true })); });
     await sleep(600);
-    await ed.waitForFunction(() => !/Working/.test(document.querySelector('#x-estimate').textContent), { timeout: 30000, polling: 100 });
+    await ed.waitForFunction(() => /KB|MB|bytes|B$/.test(document.querySelector('#x-estimate').textContent), { timeout: 30000, polling: 100 });
     const est = await ed.evaluate(() => [document.querySelector('#x-estimate').textContent, document.querySelector('#x-fitted').textContent]);
     const kb = Number(est[0].match(/([\d.]+) KB/)?.[1]);
     ok(kb && kb <= 100, `estimate ${est[0]}`);
@@ -315,6 +315,28 @@ export const tests = {
     ok(r.video && r.focus === 'screen' && r.button, JSON.stringify(r));
     await pop.evaluate(() => chrome.storage.local.set({ kind: 'image' }));
     await pop.close();
+  },
+
+  async 'editor: tools explain themselves, and Download shows the file size'({ editor }) {
+    const ed = await editor();
+    const centre = (tool) => ed.evaluate((x) => { const r = document.querySelector(`[data-tool="${x}"]`).getBoundingClientRect(); return [r.x + r.width / 2, r.y + r.height / 2]; }, tool);
+    const tip = () => ed.evaluate(() => { const e = document.querySelector('#tool-tip'); return e.classList.contains('on') ? [...e.children].map((c) => c.textContent) : null; });
+    await ed.mouse.move(...(await centre('arrow')));
+    await ed.waitForFunction(() => document.querySelector('#tool-tip').classList.contains('on'), { polling: 50, timeout: 3000 });
+    ok((await tip()).join('|') === 'Shapes|Arrow|A|Point at something.', `arrow: ${await tip()}`);
+    // Once one shows, the next appears at once.
+    await ed.mouse.move(...(await centre('redact')));
+    await sleep(60);
+    ok((await tip())?.[1] === 'Blur or pixelate', `redact: ${await tip()}`);
+    await ed.mouse.move(5, 500);
+    await sleep(60);
+    ok(!(await tip()), 'hidden when the pointer leaves');
+    // One Download button, with the format and the file's size and dimensions.
+    await ed.evaluate(() => document.querySelector('[data-pane="export"]').click());
+    await ed.waitForFunction(() => /B$/.test(document.querySelector('#x-estimate').textContent), { polling: 100, timeout: 30000 });
+    const r = await ed.evaluate(() => ({ label: document.querySelector('#download2').textContent.trim(), dims: document.querySelector('#x-dims').textContent, copies: document.querySelectorAll('.export-bar button').length }));
+    ok(/^Download PNG\s*[\d.]+ (B|KB|MB)$/.test(r.label) && /^The file will be \d+ × \d+ px$/.test(r.dims) && r.copies === 1, JSON.stringify(r));
+    await ed.close();
   },
 
   async 'image exports say their colours are sRGB'({ browser, url }) {
@@ -1120,7 +1142,7 @@ export const tests = {
     await clear();
     await ed.bringToFront();
     await ed.evaluate(() => document.querySelector('#tab-export').click());
-    await ed.evaluate(() => document.querySelector('#copy2').click());
+    await ed.evaluate(() => document.querySelector('#copy').click());
     await sleep(500);
     let got = await clip();
     ok(got && got[0] === size[0] && got[1] === size[1], `Export panel copy put ${got} on the clipboard, expected ${size}`);

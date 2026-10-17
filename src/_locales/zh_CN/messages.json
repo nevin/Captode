@@ -1765,5 +1765,77 @@
   },
   "badge_edited": {
     "message": "已编辑"
+  },
+  "group_move_crop": {
+    "message": "移动和裁剪"
+  },
+  "group_draw": {
+    "message": "绘制"
+  },
+  "group_shapes": {
+    "message": "形状"
+  },
+  "group_text_steps": {
+    "message": "文字和步骤"
+  },
+  "group_focus_privacy": {
+    "message": "聚焦与隐私"
+  },
+  "group_review": {
+    "message": "检查"
+  },
+  "tool_about_select": {
+    "message": "单击选择，拖动移动。按住 Shift 可加选。"
+  },
+  "tool_about_pan": {
+    "message": "拖动以浏览图像。"
+  },
+  "tool_about_crop": {
+    "message": "拖动以保留图像的一部分。"
+  },
+  "tool_about_pen": {
+    "message": "自由绘制。"
+  },
+  "tool_about_highlighter": {
+    "message": "像荧光笔一样标记文字。"
+  },
+  "tool_about_arrow": {
+    "message": "指向某处。"
+  },
+  "tool_about_line": {
+    "message": "直线。按住 Shift 保持水平。"
+  },
+  "tool_about_rect": {
+    "message": "用方框圈出某处。按住 Shift 画正方形。"
+  },
+  "tool_about_ellipse": {
+    "message": "用椭圆圈出某处。按住 Shift 画正圆。"
+  },
+  "tool_about_text": {
+    "message": "单击添加标签。"
+  },
+  "tool_about_callout": {
+    "message": "带备注的对话气泡。"
+  },
+  "tool_about_step": {
+    "message": "按顺序编号的步骤标记。"
+  },
+  "tool_about_spotlight": {
+    "message": "除一个区域外全部变暗。"
+  },
+  "tool_about_magnify": {
+    "message": "放大显示某个区域。"
+  },
+  "tool_about_redact": {
+    "message": "隐藏隐私信息。"
+  },
+  "tool_about_measure": {
+    "message": "以 CSS 像素测量距离。"
+  },
+  "tool_about_pick": {
+    "message": "拾取颜色并检查对比度。"
+  },
+  "export_will_be": {
+    "message": "文件尺寸：$1"
   }
 }

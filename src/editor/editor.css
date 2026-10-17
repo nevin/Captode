@@ -19,6 +19,19 @@ body { display: flex; flex-direction: column; overflow: hidden; }
 .tools .btn:hover, .toolbar > .btn:hover { color: var(--text); }
 .tools .btn.active { background: var(--accent); color: #fff; }
 .tools .tool-sep { width: 1px; background: var(--line); margin: 6px 3px; }
+.tools .tool-group { display: flex; gap: 2px; }
+.tool-tip {
+  position: fixed; z-index: 50; display: grid; grid-template-columns: 1fr auto; gap: 1px 10px; align-items: center;
+  max-width: 240px; padding: 8px 10px; border-radius: 8px; background: #17171c; color: #fff; font-size: 12px; line-height: 1.35;
+  box-shadow: 0 6px 20px rgba(0,0,0,.25); pointer-events: none; opacity: 0; visibility: hidden; transition: opacity .1s;
+}
+.tool-tip.on { opacity: 1; visibility: visible; }
+.tool-tip small { grid-column: 1 / -1; color: #a0a0ad; font-size: 11px; text-transform: uppercase; letter-spacing: .04em; }
+.tool-tip b { font-weight: 600; font-size: 13px; }
+.tool-tip kbd { color: #fff; background: rgba(255,255,255,.12); border-color: rgba(255,255,255,.2); }
+.tool-tip span { grid-column: 1 / -1; color: #d4d4dc; }
+:root[data-theme="dark"] .tool-tip { background: #3a3a46; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .tool-tip { background: #3a3a46; } }
 .zoombar {
   position: absolute; right: 14px; bottom: 14px; z-index: 5; display: flex; align-items: center; gap: 2px; padding: 4px;
   background: var(--panel); border: 1px solid var(--line); border-radius: 10px; box-shadow: var(--shadow);
@@ -88,8 +101,15 @@ body { display: flex; flex-direction: column; overflow: hidden; }
   position: sticky; bottom: 0; margin-top: auto; display: grid; gap: 10px; padding: 14px 16px 16px;
   background: var(--panel); border-top: 1px solid var(--line);
 }
-.export-actions { display: grid; grid-template-columns: auto 1fr; gap: 8px; }
-.export-actions #copy2 { padding: 0 16px; }
+.download-big { height: 44px; justify-content: flex-start; gap: 8px; padding: 0 14px; }
+.download-big .dl-label { flex: none; }
+/* The size of the file Download gives, on the button itself. */
+.download-big .estimate {
+  flex: 1; justify-content: flex-end; padding: 0; background: none; color: inherit; opacity: .8;
+  font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.x-dims { margin: 0; color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+.x-dims:empty { display: none; }
 .export-preview {
   position: absolute; inset: 0; z-index: 6; display: flex; flex-direction: column; gap: 14px; padding: 18px 24px 24px;
   background-color: var(--stage);

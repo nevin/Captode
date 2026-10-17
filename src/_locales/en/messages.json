@@ -1767,5 +1767,77 @@
   },
   "badge_edited": {
     "message": "Edited"
+  },
+  "group_move_crop": {
+    "message": "Move and crop"
+  },
+  "group_draw": {
+    "message": "Draw"
+  },
+  "group_shapes": {
+    "message": "Shapes"
+  },
+  "group_text_steps": {
+    "message": "Text and steps"
+  },
+  "group_focus_privacy": {
+    "message": "Focus and privacy"
+  },
+  "group_review": {
+    "message": "Review"
+  },
+  "tool_about_select": {
+    "message": "Click to select, drag to move. Shift adds to the selection."
+  },
+  "tool_about_pan": {
+    "message": "Drag to move around the image."
+  },
+  "tool_about_crop": {
+    "message": "Drag to keep part of the image."
+  },
+  "tool_about_pen": {
+    "message": "Draw freely."
+  },
+  "tool_about_highlighter": {
+    "message": "Mark text, like a highlighter pen."
+  },
+  "tool_about_arrow": {
+    "message": "Point at something."
+  },
+  "tool_about_line": {
+    "message": "A straight line. Shift keeps it level."
+  },
+  "tool_about_rect": {
+    "message": "A box around something. Shift draws a square."
+  },
+  "tool_about_ellipse": {
+    "message": "An oval around something. Shift draws a circle."
+  },
+  "tool_about_text": {
+    "message": "Click to add a label."
+  },
+  "tool_about_callout": {
+    "message": "A speech bubble with a note."
+  },
+  "tool_about_step": {
+    "message": "Numbered markers for steps, counting up."
+  },
+  "tool_about_spotlight": {
+    "message": "Dim everything except one area."
+  },
+  "tool_about_magnify": {
+    "message": "Show an area larger."
+  },
+  "tool_about_redact": {
+    "message": "Hide private details."
+  },
+  "tool_about_measure": {
+    "message": "Measure distances in CSS pixels."
+  },
+  "tool_about_pick": {
+    "message": "Pick colours and check their contrast."
+  },
+  "export_will_be": {
+    "message": "The file will be $1"
   }
 }

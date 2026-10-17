@@ -81,7 +81,7 @@ export const tests = {
         s.dispatchEvent(new Event('input', { bubbles: true }));
       }, f);
       await sleep(600);
-      await ed.waitForFunction(() => !/Working/.test(document.querySelector('#x-estimate').textContent), { timeout: 30000, polling: 100 });
+      await ed.waitForFunction(() => /KB|MB|bytes|B$/.test(document.querySelector('#x-estimate').textContent), { timeout: 30000, polling: 100 });
       const est = await ed.evaluate(() => document.querySelector('#x-estimate').textContent);
       ok(/\d+(\.\d+)? (B|KB|MB)/.test(est), `${f}: no size estimate (${est})`);
       sizes.push(`${f} ${est.replace(/.*px/, '')}`);
