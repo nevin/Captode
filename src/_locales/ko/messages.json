@@ -29,12 +29,6 @@
   "popup_dismiss": {
     "message": "닫기"
   },
-  "popup_new_in_captode_1_2": {
-    "message": "Captode 1.2의 새로운 기능"
-  },
-  "popup_a_review_tab_to_measure": {
-    "message": "측정, 대비 확인, 격자 표시를 위한 검토 탭, 비교, 검토용으로 공유, 내보내기 사전 설정, 그리고 실제 기기 63종."
-  },
   "popup_this_page_can_t_be": {
     "message": "이 페이지는 캡처할 수 없습니다"
   },
@@ -1879,5 +1873,20 @@
   },
   "pick_element_hint": {
     "message": "페이지의 일부를 클릭 · ↑ 바깥 영역 선택 · Esc로 취소"
+  },
+  "popup_show_inputs": {
+    "message": "클릭과 키 표시"
+  },
+  "popup_show_inputs_hint": {
+    "message": "탭 녹화에서만, 입력한 내용은 표시 안 함"
+  },
+  "popup_with_inputs": {
+    "message": "클릭"
+  },
+  "popup_new_in_captode_1_3": {
+    "message": "Captode 1.3의 새 기능"
+  },
+  "popup_whats_new_1_3": {
+    "message": "요소 하나만 캡처, 메뉴와 도구 설명을 위한 지연, 웹 앱 전체 페이지, 녹화 중 클릭 표시."
   }
 }

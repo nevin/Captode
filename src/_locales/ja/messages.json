@@ -29,12 +29,6 @@
   "popup_dismiss": {
     "message": "閉じる"
   },
-  "popup_new_in_captode_1_2": {
-    "message": "Captode 1.2 の新機能"
-  },
-  "popup_a_review_tab_to_measure": {
-    "message": "測定・コントラスト確認・グリッド表示ができる「レビュー」タブ、比較、レビュー用に共有、書き出しプリセット、そして 63 種類の実機。"
-  },
   "popup_this_page_can_t_be": {
     "message": "このページはキャプチャできません"
   },
@@ -1879,5 +1873,20 @@
   },
   "pick_element_hint": {
     "message": "ページの一部をクリック · ↑ で外側の範囲 · Esc でキャンセル"
+  },
+  "popup_show_inputs": {
+    "message": "クリックとキーを表示"
+  },
+  "popup_show_inputs_hint": {
+    "message": "タブの録画のみ。入力した文字は表示しません"
+  },
+  "popup_with_inputs": {
+    "message": "クリック"
+  },
+  "popup_new_in_captode_1_3": {
+    "message": "Captode 1.3 の新機能"
+  },
+  "popup_whats_new_1_3": {
+    "message": "要素だけのスクリーンショット、メニューやツールチップ用の遅延、Web アプリのページ全体、録画でのクリック表示。"
   }
 }

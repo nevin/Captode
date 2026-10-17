@@ -31,12 +31,6 @@
   "popup_dismiss": {
     "message": "Dismiss"
   },
-  "popup_new_in_captode_1_2": {
-    "message": "New in Captode 1.2"
-  },
-  "popup_a_review_tab_to_measure": {
-    "message": "A Review tab to measure, check contrast and show a grid; Compare; Share for review; export presets; and 63 real devices."
-  },
   "popup_this_page_can_t_be": {
     "message": "This page can't be captured"
   },
@@ -1881,5 +1875,20 @@
   },
   "pick_element_hint": {
     "message": "Click a part of the page · ↑ takes the larger area around it · Esc to cancel"
+  },
+  "popup_show_inputs": {
+    "message": "Show clicks and keys"
+  },
+  "popup_show_inputs_hint": {
+    "message": "In tab recordings; never what you type"
+  },
+  "popup_with_inputs": {
+    "message": "Clicks"
+  },
+  "popup_new_in_captode_1_3": {
+    "message": "New in Captode 1.3"
+  },
+  "popup_whats_new_1_3": {
+    "message": "Screenshots of one element, a delay to catch menus and tooltips, full pages of web apps, and clicks shown in recordings."
   }
 }

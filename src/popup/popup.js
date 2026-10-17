@@ -12,9 +12,10 @@ let tabPixels = null; // this tab's page area in pixels, once known
 let fps = '30';
 let delay = 0; // seconds before a screenshot
 
-const settings = await chrome.storage.local.get({ kind: 'image', fps: '30', audio: false, countdown: true, countdownSeconds: null, device: false, videoSize: 'page', lastMode: {}, recOptsOpen: false, delay: 0 });
+const settings = await chrome.storage.local.get({ kind: 'image', fps: '30', audio: false, countdown: true, countdownSeconds: null, device: false, videoSize: 'page', lastMode: {}, recOptsOpen: false, delay: 0, inputs: false });
 fps = String(settings.fps);
 $('#audio').checked = settings.audio;
+$('#inputs').checked = settings.inputs;
 // Seconds of countdown before a recording starts (0 = none): a second at a time up
 // to 10, then 5 at a time up to 30. Earlier versions only stored whether the
 // 3-second countdown was on.
@@ -149,7 +150,7 @@ $('#countdown').addEventListener('keydown', (e) => {
   setCountdown(next);
 });
 $('#size').addEventListener('change', (e) => { setSize(e.target.value); chrome.storage.local.set({ videoSize: e.target.value }); });
-for (const id of ['audio', 'device']) {
+for (const id of ['audio', 'device', 'inputs']) {
   $('#' + id).addEventListener('change', (e) => { chrome.storage.local.set({ [id]: e.target.checked }); summarise(); });
 }
 $('#recent-all').addEventListener('click', () => $('#open-editor').click());
@@ -181,7 +182,7 @@ for (const b of document.querySelectorAll('.mode')) {
       ? { type: 'capture-image', mode: b.dataset.mode, tabId: tab.id, delay }
       : {
           type: 'record-start', mode: b.dataset.mode, tabId: tab.id,
-          fps: Number(fps), audio: $('#audio').checked, countdown, size: $('#size').value,
+          fps: Number(fps), audio: $('#audio').checked, countdown, size: $('#size').value, inputs: $('#inputs').checked,
         };
     await chrome.runtime.sendMessage(msg);
     window.close();
@@ -225,6 +226,7 @@ function summarise() {
     $('#size').selectedOptions[0].textContent,
     countdown ? t('popup_countdown_short', countdown) : t('popup_no_countdown'),
     ...($('#audio').checked ? [t('popup_with_audio')] : []),
+    ...($('#inputs').checked ? [t('popup_with_inputs')] : []),
   ].join(' · ');
 }
 

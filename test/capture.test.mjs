@@ -261,6 +261,58 @@ export const tests = {
     return notes.join('; ');
   },
 
+  async 'recordings can show clicks and shortcuts, but never typing or passwords'({ page, ctl, tabId }) {
+    // Tab capture can't run in the test browser (see record.test.mjs), so the layer
+    // is put on the page the way a recording does, and checked there.
+    const inject = (on) => ctl.evaluate(async (tabId, on) => {
+      const { showInputs } = await import('/content/page.js');
+      await chrome.scripting.executeScript({ target: { tabId }, func: showInputs, args: [on] });
+    }, tabId, on);
+    await page.bringToFront();
+    await page.evaluate(() => {
+      const f = document.createElement('div');
+      f.id = 'fields';
+      f.style.cssText = 'position:fixed;left:20px;top:20px;z-index:5;background:#fff;padding:8px';
+      f.innerHTML = '<input id="name"> <input id="pw" type="password">';
+      document.body.append(f);
+    });
+    await inject(true);
+    const shown = () => page.evaluate(() => {
+      const root = document.querySelector('#__captode_inputs')?.shadowRoot;
+      const keys = root?.querySelector('.keys');
+      return { layer: !!root, ripples: root?.querySelectorAll('.ripple').length || 0, keys: keys && !keys.classList.contains('out') ? keys.textContent : null };
+    });
+    const mac = await page.evaluate(() => /Mac/.test(navigator.platform));
+    try {
+      await page.mouse.click(400, 300);
+      ok((await shown()).ripples === 1, 'a click makes a ripple');
+      await page.click('#name');
+      await page.keyboard.type('secret words');
+      ok((await shown()).keys === null, 'typing is not shown');
+      await page.keyboard.down('Control');
+      await page.keyboard.press('KeyK');
+      await page.keyboard.up('Control');
+      ok((await shown()).keys === (mac ? '⌃K' : 'Ctrl+K'), `a shortcut is shown: ${(await shown()).keys}`);
+      await page.keyboard.press('Enter');
+      ok((await shown()).keys === 'Enter', 'a named key is shown');
+      await sleep(1500);
+      await page.click('#pw');
+      await page.keyboard.down('Control');
+      await page.keyboard.press('KeyV');
+      await page.keyboard.up('Control');
+      await page.keyboard.press('Enter');
+      ok((await shown()).keys === null, 'nothing at all in a password field');
+      // A page load during the recording would inject it again; a second call replaces it.
+      await inject(true);
+      ok((await page.evaluate(() => document.querySelectorAll('#__captode_inputs').length)) === 1, 'one layer, not two');
+      await inject(false);
+      ok(!(await shown()).layer, 'removed when the recording stops');
+    } finally {
+      await inject(false).catch(() => {});
+      await page.evaluate(() => document.querySelector('#fields')?.remove());
+    }
+  },
+
   async 'visible area matches the viewport'({ page, capture }) {
     const want = await page.evaluate(() => [Math.round(innerWidth * devicePixelRatio), Math.round(innerHeight * devicePixelRatio)]);
     const { ed, size } = await capture('visible');

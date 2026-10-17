@@ -29,12 +29,6 @@
   "popup_dismiss": {
     "message": "Schließen"
   },
-  "popup_new_in_captode_1_2": {
-    "message": "Neu in Captode 1.2"
-  },
-  "popup_a_review_tab_to_measure": {
-    "message": "Ein Tab „Prüfen“ zum Messen, Kontrastprüfen und Einblenden eines Rasters; Vergleichen; Zur Prüfung teilen; Export-Vorlagen; und 63 echte Geräte."
-  },
   "popup_this_page_can_t_be": {
     "message": "Diese Seite kann nicht aufgenommen werden"
   },
@@ -1879,5 +1873,20 @@
   },
   "pick_element_hint": {
     "message": "Einen Teil der Seite anklicken · ↑ nimmt den umgebenden Bereich · Esc zum Abbrechen"
+  },
+  "popup_show_inputs": {
+    "message": "Klicks und Tasten zeigen"
+  },
+  "popup_show_inputs_hint": {
+    "message": "Bei Tab-Aufnahmen; nie, was Sie tippen"
+  },
+  "popup_with_inputs": {
+    "message": "Klicks"
+  },
+  "popup_new_in_captode_1_3": {
+    "message": "Neu in Captode 1.3"
+  },
+  "popup_whats_new_1_3": {
+    "message": "Screenshots einzelner Elemente, eine Verzögerung für Menüs und Tooltips, ganze Seiten von Web-Apps und sichtbare Klicks in Aufnahmen."
   }
 }

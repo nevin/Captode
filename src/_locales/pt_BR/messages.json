@@ -29,12 +29,6 @@
   "popup_dismiss": {
     "message": "Fechar"
   },
-  "popup_new_in_captode_1_2": {
-    "message": "Novidades do Captode 1.2"
-  },
-  "popup_a_review_tab_to_measure": {
-    "message": "Uma guia Revisar para medir, verificar o contraste e mostrar uma grade; Comparar; Compartilhar para revisão; predefinições de exportação; e 63 dispositivos reais."
-  },
   "popup_this_page_can_t_be": {
     "message": "Esta página não pode ser capturada"
   },
@@ -1879,5 +1873,20 @@
   },
   "pick_element_hint": {
     "message": "Clique em uma parte da página · ↑ escolhe a área ao redor · Esc para cancelar"
+  },
+  "popup_show_inputs": {
+    "message": "Mostrar cliques e teclas"
+  },
+  "popup_show_inputs_hint": {
+    "message": "Em gravações de guia; nunca o que você digita"
+  },
+  "popup_with_inputs": {
+    "message": "Cliques"
+  },
+  "popup_new_in_captode_1_3": {
+    "message": "Novidades do Captode 1.3"
+  },
+  "popup_whats_new_1_3": {
+    "message": "Capturas de um único elemento, um atraso para pegar menus e dicas, páginas inteiras de aplicativos web e cliques visíveis nas gravações."
   }
 }

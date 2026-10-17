@@ -9,9 +9,16 @@ export to the format you need. Captode runs entirely in your browser. Nothing is
 
 ### Screenshots
 
-- **Full page:** the whole scrolling page, stitched together. Fixed headers appear once.
+- **Full page:** the whole scrolling page, stitched together. Fixed headers appear once. In
+  web apps that scroll a panel rather than the window (mail, chat, documents, dashboards),
+  that panel is captured at its full height.
 - **Visible area:** what is on screen now.
 - **Selected area:** drag out a rectangle.
+- **Element:** point at a card, button or section and click; **↑** takes the larger area
+  around it and **↓** goes back. One taller than the window is stitched together.
+- **Delay:** wait 3, 5 or 10 seconds first, to open a menu or tooltip (for a selected area or
+  an element, after choosing it). Esc cancels; if another tab is showing when the time is
+  up, nothing is captured.
 
 The capture opens in the editor, where you can:
 
@@ -94,8 +101,9 @@ the black space around it is left out. **Video size** records the page as shown 
 default), scaled (50%, 75%, 150% or 200%), or at a standard resolution (480p to 4K,
 measured on the shorter side so phone-shaped pages stay portrait).
 
-You can pick the frame rate (15, 24, 30 or 60 fps), include audio, and set a countdown of up
-to 30 seconds (or none) to get ready; press Esc, or Cancel for full-screen recordings, to
+You can pick the frame rate (15, 24, 30 or 60 fps), include audio, show clicks and keyboard
+shortcuts in tab recordings (never ordinary typing, and nothing in password fields), and set a
+countdown of up to 30 seconds (or none) to get ready; press Esc, or Cancel for full-screen recordings, to
 call it off. Click the Captode icon (or press **Alt+Shift+R**) to stop. The recording then
 opens in the video page, where you can:
 
@@ -238,7 +246,7 @@ two WebAssembly codecs in `src/vendor` (see [Credits](#credits)).
 src/
   manifest.json
   background.js          service worker: captures, recording state, toolbar icon
-  content/page.js        functions injected into the page (area picker, scrolling, countdown)
+  content/page.js        functions injected into the page (area and element pickers, scrolling, delays, clicks)
   popup/                 the toolbar popup
   settings/              the Settings page
   editor/                image editor; review-page.js builds the Share for review page

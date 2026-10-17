@@ -1090,7 +1090,7 @@ export const tests = {
   async 'after an update, the popup says what is new, once'({ browser, url }) {
     const pop = await open(browser, url('popup/popup.html'), { width: 340, height: 700 });
     ok(await pop.$eval('#whats-new', (e) => e.classList.contains('hidden')), 'nothing new on a fresh install');
-    await pop.evaluate(() => chrome.storage.local.set({ whatsNew: '1.2.0' }));
+    await pop.evaluate(() => chrome.storage.local.set({ whatsNew: '1.3.0' }));
     await pop.reload();
     await pop.waitForFunction(() => !document.querySelector('#whats-new').classList.contains('hidden'), { polling: 100 });
     await pop.click('#whats-new-close');

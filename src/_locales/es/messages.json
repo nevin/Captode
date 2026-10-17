@@ -29,12 +29,6 @@
   "popup_dismiss": {
     "message": "Cerrar"
   },
-  "popup_new_in_captode_1_2": {
-    "message": "Novedades de Captode 1.2"
-  },
-  "popup_a_review_tab_to_measure": {
-    "message": "Una pestaña Revisar para medir, comprobar el contraste y mostrar una cuadrícula; Comparar; Compartir para revisión; ajustes de exportación predefinidos; y 63 dispositivos reales."
-  },
   "popup_this_page_can_t_be": {
     "message": "No se puede capturar esta página"
   },
@@ -1879,5 +1873,20 @@
   },
   "pick_element_hint": {
     "message": "Haz clic en una parte de la página · ↑ elige la zona que la contiene · Esc para cancelar"
+  },
+  "popup_show_inputs": {
+    "message": "Mostrar clics y teclas"
+  },
+  "popup_show_inputs_hint": {
+    "message": "En grabaciones de pestañas; nunca lo que escribes"
+  },
+  "popup_with_inputs": {
+    "message": "Clics"
+  },
+  "popup_new_in_captode_1_3": {
+    "message": "Novedades de Captode 1.3"
+  },
+  "popup_whats_new_1_3": {
+    "message": "Capturas de un solo elemento, un retraso para captar menús e información sobre herramientas, páginas completas de aplicaciones web y clics visibles en las grabaciones."
   }
 }

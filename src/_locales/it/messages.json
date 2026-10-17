@@ -29,12 +29,6 @@
   "popup_dismiss": {
     "message": "Chiudi"
   },
-  "popup_new_in_captode_1_2": {
-    "message": "Novità di Captode 1.2"
-  },
-  "popup_a_review_tab_to_measure": {
-    "message": "Una scheda Revisione per misurare, controllare il contrasto e mostrare una griglia; Confronta; Condividi per la revisione; preimpostazioni di esportazione; e 63 dispositivi reali."
-  },
   "popup_this_page_can_t_be": {
     "message": "Impossibile acquisire questa pagina"
   },
@@ -1879,5 +1873,20 @@
   },
   "pick_element_hint": {
     "message": "Fai clic su una parte della pagina · ↑ prende l'area che la contiene · Esc per annullare"
+  },
+  "popup_show_inputs": {
+    "message": "Mostra clic e tasti"
+  },
+  "popup_show_inputs_hint": {
+    "message": "Nelle registrazioni di schede; mai ciò che digiti"
+  },
+  "popup_with_inputs": {
+    "message": "Clic"
+  },
+  "popup_new_in_captode_1_3": {
+    "message": "Novità di Captode 1.3"
+  },
+  "popup_whats_new_1_3": {
+    "message": "Screenshot di un singolo elemento, un ritardo per menu e suggerimenti, pagine intere delle app web e clic visibili nelle registrazioni."
   }
 }

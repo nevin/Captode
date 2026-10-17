@@ -3,7 +3,7 @@
 import { putCapture } from './lib/db.js';
 import {
   pickArea, pickElement, fullPagePrepare, fullPageScroll, fullPageRestore,
-  countdown, captureDelay, showOutline, hideOutline,
+  countdown, captureDelay, showOutline, hideOutline, showInputs,
 } from './content/page.js';
 import { t } from './lib/i18n.js';
 
@@ -334,7 +334,7 @@ async function ensureOffscreen() {
 /** Seconds of countdown asked for (older popups sent true for a fixed 3 seconds). */
 const countdownSeconds = (v) => (v === true ? 3 : Math.max(0, Math.min(30, Number(v) || 0)));
 
-async function startRecording({ mode, fps, audio, size = 'page', countdown: wantCountdown }, tab) {
+async function startRecording({ mode, fps, audio, size = 'page', countdown: wantCountdown, inputs = false }, tab) {
   if (mode === 'screen') {
     // Picking a screen or window needs a visible page for the browser's picker.
     await setRec({ state: 'starting', kind: 'page', tabId: tab.id });
@@ -373,9 +373,17 @@ async function startRecording({ mode, fps, audio, size = 'page', countdown: want
     await run(tab.id, hideOutline).catch(() => {});
     throw new Error(res?.error || t('error_recording_start'));
   }
-  await setRec({ state: 'recording', kind: 'offscreen', tabId: tab.id, outline: !!crop });
+  await setRec({ state: 'recording', kind: 'offscreen', tabId: tab.id, outline: !!crop, inputs: !!inputs });
+  if (inputs) await run(tab.id, showInputs, true).catch(() => {});
   await enterRecordingUi();
 }
+
+// Clicks and keys stay shown when the recorded tab loads another page.
+chrome.tabs.onUpdated.addListener(async (tabId, change) => {
+  if (change.status !== 'complete') return;
+  const rec = await getRec();
+  if (rec?.state === 'recording' && rec.inputs && rec.tabId === tabId) await run(tabId, showInputs, true).catch(() => {});
+});
 
 async function enterRecordingUi() {
   await chrome.action.setPopup({ popup: '' });
@@ -394,6 +402,7 @@ async function finishRecording(id, kind) {
   await setRec(null);
   await leaveRecordingUi();
   if (rec?.outline) await run(rec.tabId, hideOutline).catch(() => {});
+  if (rec?.inputs) await run(rec.tabId, showInputs, false).catch(() => {});
   if (kind === 'offscreen') {
     await chrome.offscreen.closeDocument().catch(() => {});
     const tab = rec ? await chrome.tabs.get(rec.tabId).catch(() => null) : null;
@@ -464,7 +473,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 });
 
 // After an update that adds features, the popup says what's new, once.
-const WHATS_NEW = '1.2.0';
+const WHATS_NEW = '1.3.0';
 chrome.runtime.onInstalled.addListener(({ reason, previousVersion }) => {
   const older = (a, b) => {
     const x = a.split('.').map(Number), y = b.split('.').map(Number);

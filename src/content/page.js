@@ -352,6 +352,71 @@ export function captureDelay(seconds, text) {
   });
 }
 
+/**
+ * While a tab is recorded: a ripple where each click lands, and a label for keyboard
+ * shortcuts (⌘K, Ctrl+Shift+P) and named keys (Enter, Tab, Esc, arrows). Plain typing
+ * is never shown, and nothing at all while a password field has focus. Drawn in the
+ * page, so the recording shows it; `on` false removes it.
+ */
+export function showInputs(on) {
+  window.__captodeInputs?.();
+  if (!on) return;
+  const host = document.createElement('div');
+  host.id = '__captode_inputs';
+  host.style.cssText = 'position:fixed;inset:0;z-index:2147483646;pointer-events:none;';
+  const root = host.attachShadow({ mode: 'open' }); // the page's styles can't reach it
+  root.innerHTML = `<style>
+    .ripple{position:fixed;width:44px;height:44px;margin:-22px 0 0 -22px;border-radius:50%;border:3px solid #5b4bff;background:rgba(91,75,255,.25);box-sizing:border-box;animation:r .6s ease-out forwards}
+    @keyframes r{from{transform:scale(.35);opacity:1}to{transform:scale(1.5);opacity:0}}
+    .keys{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);padding:8px 16px;border-radius:10px;background:rgba(23,23,28,.88);color:#fff;font:600 20px system-ui,sans-serif;letter-spacing:.02em;box-shadow:0 6px 20px rgba(0,0,0,.25);transition:opacity .25s}
+    .keys.out{opacity:0}
+  </style>`;
+  document.documentElement.appendChild(host);
+
+  const mac = /Mac|iPhone|iPad/.test(navigator.platform);
+  const NAMED = {
+    Enter: 'Enter', Tab: 'Tab', Escape: 'Esc', Backspace: 'Backspace', Delete: 'Delete', ' ': 'Space',
+    ArrowUp: '↑', ArrowDown: '↓', ArrowLeft: '←', ArrowRight: '→', PageUp: 'Page Up', PageDown: 'Page Down', Home: 'Home', End: 'End',
+  };
+  let pill = null, fade = 0;
+  const onDown = (e) => {
+    if (e.button !== 0 && e.pointerType === 'mouse') return;
+    const r = document.createElement('div');
+    r.className = 'ripple';
+    r.style.left = e.clientX + 'px';
+    r.style.top = e.clientY + 'px';
+    root.append(r);
+    setTimeout(() => r.remove(), 650);
+  };
+  const onKey = (e) => {
+    if (e.repeat || ['Shift', 'Control', 'Alt', 'Meta'].includes(e.key)) return;
+    const field = e.composedPath()[0];
+    if (field?.type === 'password' || document.activeElement?.type === 'password') return;
+    const mods = e.ctrlKey || e.metaKey || e.altKey;
+    const name = NAMED[e.key] || (/^F\d{1,2}$/.test(e.key) ? e.key : null);
+    if (!mods && !name) return; // typing: never shown
+    if (!mods && e.key === ' ') return; // a space while typing
+    const key = name || (e.key.length === 1 ? e.key.toUpperCase() : e.key);
+    const parts = mac
+      ? [e.ctrlKey && '⌃', e.altKey && '⌥', e.shiftKey && '⇧', e.metaKey && '⌘', key].filter(Boolean).join('')
+      : [e.ctrlKey && 'Ctrl', e.altKey && 'Alt', e.shiftKey && 'Shift', e.metaKey && 'Win', key].filter(Boolean).join('+');
+    if (!pill) { pill = document.createElement('div'); pill.className = 'keys'; root.append(pill); }
+    pill.textContent = parts;
+    pill.classList.remove('out');
+    clearTimeout(fade);
+    fade = setTimeout(() => pill.classList.add('out'), 1200);
+  };
+  addEventListener('pointerdown', onDown, true);
+  addEventListener('keydown', onKey, true);
+  window.__captodeInputs = () => {
+    removeEventListener('pointerdown', onDown, true);
+    removeEventListener('keydown', onKey, true);
+    clearTimeout(fade);
+    host.remove();
+    window.__captodeInputs = null;
+  };
+}
+
 /** Draws a dashed outline just outside the recorded area, so it is never recorded. */
 export function showOutline(rect) {
   document.getElementById('__captode_outline')?.remove();
