@@ -287,6 +287,7 @@ npm run bench     # compression benchmark; fails on a size or quality regression
 npm run icons     # every icon size from store/brand/logo.svg and logo-small.svg
 npm run store     # store screenshots and promo tiles in store/
 npm run package   # build dist/captode-<version>.zip for the stores
+npm run release   # set the version, test, build the zip, commit and tag (see Publishing)
 ```
 
 The tests load the extension into Chrome and drive real captures, edits and exports
@@ -323,10 +324,15 @@ than text, ever shows.
 
 ## Publishing
 
-1. Bump `version` in `src/manifest.json`.
-2. Run `npm test`, then `npm run icons` and `npm run store` if the logo or interface changed.
-3. Run `npm run package`.
-4. Upload `dist/captode-<version>.zip` to the
+1. Run `npm run icons` and `npm run store` if the logo or interface changed, and commit.
+2. Run `npm run release`. It releases the version in `src/manifest.json`, or the one you
+   give: `npm run release -- 1.3.1`, or `-- patch`, `-- minor`, `-- major`. It refuses a
+   version that isn't higher than the last tag (Chrome only installs higher versions) or
+   uncommitted changes; then it sets the version in the manifest, `package.json` and
+   `package-lock.json`, checks the translations, runs the tests, builds the zip, commits
+   and tags `v<version>`. Add `--push` to push the commit and tag, or `--dry-run` to see
+   what it would do.
+3. Upload `dist/captode-<version>.zip` to the
    [Chrome Web Store developer dashboard](https://chrome.google.com/webstore/devconsole) and to
    [Microsoft Edge Add-ons](https://partner.microsoft.com/dashboard/microsoftedge/).
    [`store/listing.md`](store/listing.md) has every dashboard field ready to paste
