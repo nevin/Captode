@@ -331,8 +331,10 @@ export const tests = {
     await ctl.evaluate((tabId) => chrome.runtime.sendMessage({ type: 'capture-image', mode: 'visible', tabId, delay: 3 }), tabId);
     await page.waitForSelector('#__captode_delay', { timeout: 5000 });
     await other.bringToFront();
-    await sleep(4500);
-    const lastError = await ctl.evaluate(async () => (await chrome.storage.session.get('lastError')).lastError);
+    // A page in the background runs its timers late, so the end of the wait (and the error)
+    // can come well after 3 s: wait for it, so it can't land in a later test.
+    const lastError = await ctl.waitForFunction(async () => (await chrome.storage.session.get('lastError')).lastError, { polling: 200, timeout: 20000 })
+      .then(() => ctl.evaluate(async () => (await chrome.storage.session.get('lastError')).lastError), () => null);
     ok(!browser.targets().some((x) => !before2.has(x) && x.url().includes('editor.html')) && /tab/i.test(lastError || ''), `switching tabs stops it: ${lastError}`);
     await ctl.evaluate(async () => { await chrome.storage.session.remove('lastError'); await chrome.action.setBadgeText({ text: '' }); });
     await other.close();
