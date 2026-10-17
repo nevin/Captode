@@ -1514,14 +1514,30 @@ function drawReview(ctx, px) {
   drawMeasures(ctx, list, px, (m) => measureLabel(m, pxRatio()));
 }
 
+/**
+ * A copy of `base` kept in memory for the review tools, which read pixels on every
+ * pointer move. `base` itself stays on the GPU for drawing; it is never changed in
+ * place (edits make a new one), so one copy per image is enough.
+ */
+const readable = new WeakMap();
+function baseReader() {
+  let ctx = readable.get(base);
+  if (!ctx) {
+    ctx = new OffscreenCanvas(base.width, base.height).getContext('2d', { willReadFrequently: true });
+    ctx.drawImage(base, 0, 0);
+    readable.set(base, ctx);
+  }
+  return ctx;
+}
+
 /** The edge nearest (x, y) along `axis` in the image, within a few screen pixels. */
-const edgeNear = (x, y, axis) => edgeIn((x0, y0, w, h) => base.getContext('2d').getImageData(x0, y0, w, h).data, base.width, base.height, x, y, axis, Math.max(2, Math.round(8 / zoom)));
+const edgeNear = (x, y, axis) => edgeIn((x0, y0, w, h) => baseReader().getImageData(x0, y0, w, h).data, base.width, base.height, x, y, axis, Math.max(2, Math.round(8 / zoom)));
 
 
 function pickColour(pt) {
   const x = Math.floor(pt.x), y = Math.floor(pt.y);
   if (x < 0 || y < 0 || x >= base.width || y >= base.height) return;
-  const d = base.getContext('2d').getImageData(x, y, 1, 1).data;
+  const d = baseReader().getImageData(x, y, 1, 1).data;
   review.colours[review.slot] = hexOf(d);
   // Then the other one, until both are picked.
   if (!review.colours[1 - review.slot]) review.slot = 1 - review.slot;
