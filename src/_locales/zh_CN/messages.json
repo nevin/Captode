@@ -206,15 +206,6 @@
   "settings_copy_screenshots_to_the_clipboard": {
     "message": "将截图复制到剪贴板"
   },
-  "settings_keyboard_shortcut": {
-    "message": "键盘快捷键"
-  },
-  "settings_open_captode_or_stop_a": {
-    "message": "打开 Captode 或停止录制："
-  },
-  "settings_change_shortcut": {
-    "message": "更改快捷键"
-  },
   "settings_about": {
     "message": "关于"
   },
@@ -1883,12 +1874,6 @@
   "popup_with_inputs": {
     "message": "点击"
   },
-  "popup_new_in_captode_1_3": {
-    "message": "Captode 1.3 新功能"
-  },
-  "popup_whats_new_1_3": {
-    "message": "单个元素截图、用于捕捉菜单和提示的延时、Web 应用的整页截图、录制中显示点击，以及从右键菜单截图。"
-  },
   "menu_full_page": {
     "message": "截取整个页面"
   },
@@ -1900,5 +1885,98 @@
   },
   "menu_element": {
     "message": "截取元素…"
+  },
+  "editor_private_one": {
+    "message": "发现 1 个可能属于隐私的邮箱地址或号码。"
+  },
+  "editor_private_many": {
+    "message": "发现 $1 个可能属于隐私的邮箱地址或号码。"
+  },
+  "editor_private_blur": {
+    "message": "模糊"
+  },
+  "editor_private_blurred_one": {
+    "message": "已模糊 1 处隐私信息"
+  },
+  "editor_private_blurred_many": {
+    "message": "已模糊 $1 处隐私信息"
+  },
+  "settings_keyboard_shortcuts": {
+    "message": "键盘快捷键"
+  },
+  "settings_shortcuts_work_everywhere": {
+    "message": "无需先打开 Captode，在任何页面都可使用。"
+  },
+  "settings_menu_too": {
+    "message": "所有截图方式也都在右键菜单中。"
+  },
+  "settings_change_shortcuts": {
+    "message": "更改快捷键"
+  },
+  "settings_copy_diagnostics": {
+    "message": "复制诊断信息"
+  },
+  "settings_diagnostics_tip": {
+    "message": "版本、设置和最近的错误，可粘贴到问题报告中。不会发送任何内容。"
+  },
+  "settings_diagnostics_copied": {
+    "message": "诊断信息已复制，请粘贴到报告中。"
+  },
+  "error_camera_mic": {
+    "message": "Captode 无法使用摄像头或麦克风。请在录制选项中关闭再打开相应开关以允许访问。"
+  },
+  "popup_mic": {
+    "message": "麦克风"
+  },
+  "popup_mic_hint": {
+    "message": "边录制边讲解"
+  },
+  "popup_camera": {
+    "message": "摄像头气泡"
+  },
+  "popup_camera_hint": {
+    "message": "在视频角落显示你自己"
+  },
+  "popup_with_mic": {
+    "message": "麦克风"
+  },
+  "popup_with_camera": {
+    "message": "摄像头"
+  },
+  "permission_title_both": {
+    "message": "允许 Captode 使用摄像头和麦克风"
+  },
+  "permission_title_camera": {
+    "message": "允许 Captode 使用摄像头"
+  },
+  "permission_title_mic": {
+    "message": "允许 Captode 使用麦克风"
+  },
+  "permission_why": {
+    "message": "Chrome 只会询问一次。Captode 仅在录制时使用，录制内容保存在你的电脑上。"
+  },
+  "permission_allow": {
+    "message": "允许"
+  },
+  "permission_ready": {
+    "message": "已就绪"
+  },
+  "permission_ready_text": {
+    "message": "之后的录制将包含它们。此标签页会自动关闭。"
+  },
+  "permission_blocked": {
+    "message": "Chrome 阻止了访问"
+  },
+  "permission_blocked_text": {
+    "message": "点击地址栏右侧的图标，允许 Captode 使用摄像头和麦克风，然后重试。"
+  },
+  "permission_try_again": {
+    "message": "重试"
+  },
+  "popup_new_in_captode_1_4": {
+    "message": "Captode 1.4 新功能"
+  },
+  "popup_whats_new_1_4": {
+    "message": "录制支持摄像头气泡和麦克风，每种截图都有快捷键，还可一键模糊邮箱地址和号码。"
   }
 }

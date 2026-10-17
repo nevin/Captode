@@ -206,15 +206,6 @@
   "settings_copy_screenshots_to_the_clipboard": {
     "message": "Copiar capturas para a área de transferência"
   },
-  "settings_keyboard_shortcut": {
-    "message": "Atalho de teclado"
-  },
-  "settings_open_captode_or_stop_a": {
-    "message": "Abrir o Captode ou parar uma gravação:"
-  },
-  "settings_change_shortcut": {
-    "message": "Alterar atalho"
-  },
   "settings_about": {
     "message": "Sobre"
   },
@@ -1883,12 +1874,6 @@
   "popup_with_inputs": {
     "message": "Cliques"
   },
-  "popup_new_in_captode_1_3": {
-    "message": "Novidades do Captode 1.3"
-  },
-  "popup_whats_new_1_3": {
-    "message": "Capturas de um único elemento, um atraso para pegar menus e dicas, páginas inteiras de aplicativos web, cliques visíveis nas gravações e capturas pelo menu do botão direito."
-  },
   "menu_full_page": {
     "message": "Capturar a página inteira"
   },
@@ -1900,5 +1885,98 @@
   },
   "menu_element": {
     "message": "Capturar um elemento…"
+  },
+  "editor_private_one": {
+    "message": "Encontramos um e-mail ou número que pode ser privado."
+  },
+  "editor_private_many": {
+    "message": "Encontramos $1 e-mails ou números que podem ser privados."
+  },
+  "editor_private_blur": {
+    "message": "Desfocar"
+  },
+  "editor_private_blurred_one": {
+    "message": "1 dado privado desfocado"
+  },
+  "editor_private_blurred_many": {
+    "message": "$1 dados privados desfocados"
+  },
+  "settings_keyboard_shortcuts": {
+    "message": "Atalhos de teclado"
+  },
+  "settings_shortcuts_work_everywhere": {
+    "message": "Funcionam em qualquer página, sem abrir o Captode antes."
+  },
+  "settings_menu_too": {
+    "message": "Todos os tipos de captura também estão no menu do botão direito."
+  },
+  "settings_change_shortcuts": {
+    "message": "Alterar atalhos"
+  },
+  "settings_copy_diagnostics": {
+    "message": "Copiar diagnóstico"
+  },
+  "settings_diagnostics_tip": {
+    "message": "Versões, configurações e o último erro, para colar num relato. Nada é enviado."
+  },
+  "settings_diagnostics_copied": {
+    "message": "Diagnóstico copiado. Cole-o no seu relato."
+  },
+  "error_camera_mic": {
+    "message": "O Captode não pode usar a câmera ou o microfone. Desligue e ligue a opção nas opções de gravação para permitir."
+  },
+  "popup_mic": {
+    "message": "Microfone"
+  },
+  "popup_mic_hint": {
+    "message": "Narre enquanto grava"
+  },
+  "popup_camera": {
+    "message": "Bolha da câmera"
+  },
+  "popup_camera_hint": {
+    "message": "Você, num canto do vídeo"
+  },
+  "popup_with_mic": {
+    "message": "Micro"
+  },
+  "popup_with_camera": {
+    "message": "Câmera"
+  },
+  "permission_title_both": {
+    "message": "Permita que o Captode use sua câmera e microfone"
+  },
+  "permission_title_camera": {
+    "message": "Permita que o Captode use sua câmera"
+  },
+  "permission_title_mic": {
+    "message": "Permita que o Captode use seu microfone"
+  },
+  "permission_why": {
+    "message": "O Chrome pergunta uma vez. O Captode só os usa enquanto você grava, e a gravação fica no seu computador."
+  },
+  "permission_allow": {
+    "message": "Permitir"
+  },
+  "permission_ready": {
+    "message": "Pronto"
+  },
+  "permission_ready_text": {
+    "message": "Suas próximas gravações vão incluí-los. Esta aba fecha sozinha."
+  },
+  "permission_blocked": {
+    "message": "O Chrome bloqueou o acesso"
+  },
+  "permission_blocked_text": {
+    "message": "Clique no ícone à direita da barra de endereço, permita a câmera e o microfone para o Captode e tente de novo."
+  },
+  "permission_try_again": {
+    "message": "Tentar de novo"
+  },
+  "popup_new_in_captode_1_4": {
+    "message": "Novidades do Captode 1.4"
+  },
+  "popup_whats_new_1_4": {
+    "message": "Bolha da câmera e microfone nas gravações, um atalho para cada tipo de captura e um clique para desfocar e-mails e números."
   }
 }

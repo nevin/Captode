@@ -12,10 +12,12 @@ let tabPixels = null; // this tab's page area in pixels, once known
 let fps = '30';
 let delay = 0; // seconds before a screenshot
 
-const settings = await chrome.storage.local.get({ kind: 'image', fps: '30', audio: false, countdown: true, countdownSeconds: null, device: false, videoSize: 'page', lastMode: {}, recOptsOpen: false, delay: 0, inputs: false });
+const settings = await chrome.storage.local.get({ kind: 'image', fps: '30', audio: false, countdown: true, countdownSeconds: null, device: false, videoSize: 'page', lastMode: {}, recOptsOpen: false, delay: 0, inputs: false, camera: false, mic: false });
 fps = String(settings.fps);
 $('#audio').checked = settings.audio;
 $('#inputs').checked = settings.inputs;
+$('#camera').checked = settings.camera;
+$('#mic').checked = settings.mic;
 // Seconds of countdown before a recording starts (0 = none): a second at a time up
 // to 10, then 5 at a time up to 30. Earlier versions only stored whether the
 // 3-second countdown was on.
@@ -153,6 +155,18 @@ $('#size').addEventListener('change', (e) => { setSize(e.target.value); chrome.s
 for (const id of ['audio', 'device', 'inputs']) {
   $('#' + id).addEventListener('change', (e) => { chrome.storage.local.set({ [id]: e.target.checked }); summarise(); });
 }
+// Chrome asks once whether Captode may use the camera or microphone. The popup can't
+// show that question, so a page of Captode's asks, and turns the switch on if allowed.
+for (const [id, name] of [['camera', 'camera'], ['mic', 'microphone']]) {
+  $('#' + id).addEventListener('change', async (e) => {
+    if (!e.target.checked) { chrome.storage.local.set({ [id]: false }); summarise(); return; }
+    const state = await navigator.permissions.query({ name }).then((p) => p.state, () => 'prompt');
+    if (state === 'granted') { chrome.storage.local.set({ [id]: true }); summarise(); return; }
+    e.target.checked = false;
+    await chrome.tabs.create({ url: chrome.runtime.getURL(`recorder/permission.html?${id}=1`) });
+    window.close();
+  });
+}
 $('#recent-all').addEventListener('click', () => $('#open-editor').click());
 $('#open-settings').addEventListener('click', () => { chrome.runtime.openOptionsPage(); window.close(); });
 $('#open-editor').addEventListener('click', async () => {
@@ -183,6 +197,7 @@ for (const b of document.querySelectorAll('.mode')) {
       : {
           type: 'record-start', mode: b.dataset.mode, tabId: tab.id,
           fps: Number(fps), audio: $('#audio').checked, countdown, size: $('#size').value, inputs: $('#inputs').checked,
+          camera: $('#camera').checked, mic: $('#mic').checked,
         };
     await chrome.runtime.sendMessage(msg);
     window.close();
@@ -227,6 +242,8 @@ function summarise() {
     countdown ? t('popup_countdown_short', countdown) : t('popup_no_countdown'),
     ...($('#audio').checked ? [t('popup_with_audio')] : []),
     ...($('#inputs').checked ? [t('popup_with_inputs')] : []),
+    ...($('#mic').checked ? [t('popup_with_mic')] : []),
+    ...($('#camera').checked ? [t('popup_with_camera')] : []),
   ].join(' · ');
 }
 

@@ -220,6 +220,96 @@ export function fullPagePrepare() {
 }
 
 /**
+ * Where the page shows details that may be private: email addresses, phone numbers and
+ * card numbers, in text or in form fields. Boxes are in CSS pixels from the top left of
+ * `region`, which is in the viewport ('viewport'), the whole page ('document') or the
+ * panel being captured at full height ('panel'). Nothing leaves the page but the boxes.
+ */
+export function findPrivate(region, space) {
+  const panel = space === 'panel' ? window.__captodeState?.panel : null;
+  if (space === 'panel' && !panel) return [];
+  let ox = 0, oy = 0;
+  if (space === 'document') { ox = window.scrollX; oy = window.scrollY; }
+  if (panel) {
+    const r = panel.getBoundingClientRect();
+    ox = -(r.left + panel.clientLeft);
+    oy = panel.scrollTop - (r.top + panel.clientTop);
+  }
+  const out = [];
+  const add = (rect, kind) => {
+    if (out.length >= 300 || rect.width < 2 || rect.height < 2) return;
+    let x = rect.left + ox - region.x, y = rect.top + oy - region.y, w = rect.width, h = rect.height;
+    if (x + w <= 0 || y + h <= 0 || x >= region.w || y >= region.h) return;
+    const x0 = Math.max(0, x), y0 = Math.max(0, y);
+    w = Math.min(region.w, x + w) - x0; h = Math.min(region.h, y + h) - y0;
+    out.push({ x: x0, y: y0, w, h, kind });
+  };
+
+  const EMAIL = /[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}/g;
+  const CARD = /(?<![\d.,])\d(?:[ -]?\d){12,18}(?![\d.,])/g;
+  const PHONE = /(?<![\w.,/-])(?:\+\d{1,3}[\s.-]?)?(?:\(\d{1,4}\)[\s.-]?)?\d{2,5}(?:[\s.-]\d{2,5}){1,4}(?![\w.,/-])/g;
+  const digits = (m) => m.replace(/\D/g, '');
+  const luhn = (d) => {
+    let sum = 0;
+    for (let i = 0; i < d.length; i++) {
+      let n = Number(d[d.length - 1 - i]);
+      if (i % 2) { n *= 2; if (n > 9) n -= 9; }
+      sum += n;
+    }
+    return sum % 10 === 0;
+  };
+  const isCard = (m) => { const d = digits(m); return d.length >= 13 && d.length <= 19 && luhn(d) && !/^(\d)\1+$/.test(d); };
+  // A phone number has a country code, an area code in brackets, or 10 to 12 digits in
+  // groups; dates, times, years and sums of money don't count.
+  const isPhone = (m) => {
+    const d = digits(m);
+    if (d.length < 8 || d.length > 15 || isCard(m)) return false;
+    if (/^\d{1,4}[./-]\d{1,2}[./-]\d{1,4}$/.test(m.trim())) return false;
+    return /^\s*[+(]/.test(m) || (d.length >= 10 && d.length <= 12);
+  };
+  const scan = (text) => {
+    const found = [];
+    for (const m of text.matchAll(EMAIL)) found.push([m.index, m[0].length, 'email']);
+    for (const m of text.matchAll(CARD)) if (isCard(m[0])) found.push([m.index, m[0].length, 'card']);
+    for (const m of text.matchAll(PHONE)) {
+      const at = m.index, len = m[0].length;
+      if (isPhone(m[0]) && !found.some(([i, l]) => at < i + l && i < at + len)) found.push([at, len, 'phone']);
+    }
+    return found;
+  };
+
+  const root = panel || document.body;
+  if (!root) return out;
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+    acceptNode(n) {
+      const el = n.parentElement;
+      if (!el || n.nodeValue.trim().length < 6) return NodeFilter.FILTER_REJECT;
+      if (el.closest('script,style,noscript,template,textarea,[id^="__captode"]')) return NodeFilter.FILTER_REJECT;
+      return NodeFilter.FILTER_ACCEPT;
+    },
+  });
+  const range = document.createRange();
+  for (let n = walker.nextNode(); n && out.length < 300; n = walker.nextNode()) {
+    for (const [at, len, kind] of scan(n.nodeValue)) {
+      range.setStart(n, at);
+      range.setEnd(n, at + len);
+      for (const rect of range.getClientRects()) add(rect, kind);
+    }
+  }
+  // Form fields: by their type or autofill purpose, or by what is typed in them.
+  for (const el of root.querySelectorAll('input:not([type=hidden]):not([type=password]), textarea')) {
+    const ac = el.getAttribute('autocomplete') || '';
+    const typed = el.value || '';
+    const kind = el.type === 'email' || /email/.test(ac) ? 'email'
+      : el.type === 'tel' || /\btel/.test(ac) ? 'phone'
+      : /cc-number/.test(ac) ? 'card'
+      : scan(typed)[0]?.[2];
+    if (kind && typed.trim()) add(el.getBoundingClientRect(), kind);
+  }
+  return out;
+}
+
+/**
  * Scrolls to (x, y), the window or the panel being captured. After the first tile it
  * hides what would repeat on every tile: fixed and sticky elements (inside the panel,
  * or floating over it), but never one that holds the panel.

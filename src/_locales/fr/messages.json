@@ -206,15 +206,6 @@
   "settings_copy_screenshots_to_the_clipboard": {
     "message": "Copier les captures dans le presse-papiers"
   },
-  "settings_keyboard_shortcut": {
-    "message": "Raccourci clavier"
-  },
-  "settings_open_captode_or_stop_a": {
-    "message": "Ouvrir Captode ou arrêter un enregistrement :"
-  },
-  "settings_change_shortcut": {
-    "message": "Modifier le raccourci"
-  },
   "settings_about": {
     "message": "À propos"
   },
@@ -1883,12 +1874,6 @@
   "popup_with_inputs": {
     "message": "Clics"
   },
-  "popup_new_in_captode_1_3": {
-    "message": "Nouveautés de Captode 1.3"
-  },
-  "popup_whats_new_1_3": {
-    "message": "Captures d'un seul élément, un délai pour saisir menus et infobulles, pages entières des applications web, clics visibles dans les enregistrements et captures depuis le menu du clic droit."
-  },
   "menu_full_page": {
     "message": "Capturer la page entière"
   },
@@ -1900,5 +1885,98 @@
   },
   "menu_element": {
     "message": "Capturer un élément…"
+  },
+  "editor_private_one": {
+    "message": "Une adresse e-mail ou un numéro peut-être privé a été trouvé."
+  },
+  "editor_private_many": {
+    "message": "$1 adresses e-mail ou numéros peut-être privés ont été trouvés."
+  },
+  "editor_private_blur": {
+    "message": "Flouter"
+  },
+  "editor_private_blurred_one": {
+    "message": "1 donnée privée floutée"
+  },
+  "editor_private_blurred_many": {
+    "message": "$1 données privées floutées"
+  },
+  "settings_keyboard_shortcuts": {
+    "message": "Raccourcis clavier"
+  },
+  "settings_shortcuts_work_everywhere": {
+    "message": "Ils fonctionnent sur toutes les pages, sans ouvrir Captode."
+  },
+  "settings_menu_too": {
+    "message": "Chaque type de capture est aussi dans le menu du clic droit."
+  },
+  "settings_change_shortcuts": {
+    "message": "Modifier les raccourcis"
+  },
+  "settings_copy_diagnostics": {
+    "message": "Copier le diagnostic"
+  },
+  "settings_diagnostics_tip": {
+    "message": "Versions, réglages et dernière erreur, à coller dans un signalement. Rien n'est envoyé."
+  },
+  "settings_diagnostics_copied": {
+    "message": "Diagnostic copié. Collez-le dans votre signalement."
+  },
+  "error_camera_mic": {
+    "message": "Captode ne peut pas utiliser la caméra ou le micro. Désactivez puis réactivez son option dans les options d'enregistrement pour l'autoriser."
+  },
+  "popup_mic": {
+    "message": "Micro"
+  },
+  "popup_mic_hint": {
+    "message": "Commentez pendant l'enregistrement"
+  },
+  "popup_camera": {
+    "message": "Bulle caméra"
+  },
+  "popup_camera_hint": {
+    "message": "Vous, dans un coin de la vidéo"
+  },
+  "popup_with_mic": {
+    "message": "Micro"
+  },
+  "popup_with_camera": {
+    "message": "Caméra"
+  },
+  "permission_title_both": {
+    "message": "Autorisez Captode à utiliser votre caméra et votre micro"
+  },
+  "permission_title_camera": {
+    "message": "Autorisez Captode à utiliser votre caméra"
+  },
+  "permission_title_mic": {
+    "message": "Autorisez Captode à utiliser votre micro"
+  },
+  "permission_why": {
+    "message": "Chrome le demande une fois. Captode ne les utilise que pendant l'enregistrement, qui reste sur votre ordinateur."
+  },
+  "permission_allow": {
+    "message": "Autoriser"
+  },
+  "permission_ready": {
+    "message": "C'est prêt"
+  },
+  "permission_ready_text": {
+    "message": "Vos prochains enregistrements les incluront. Cet onglet se ferme tout seul."
+  },
+  "permission_blocked": {
+    "message": "Chrome a bloqué l'accès"
+  },
+  "permission_blocked_text": {
+    "message": "Cliquez sur l'icône à droite de la barre d'adresse, autorisez la caméra et le micro pour Captode, puis réessayez."
+  },
+  "permission_try_again": {
+    "message": "Réessayer"
+  },
+  "popup_new_in_captode_1_4": {
+    "message": "Nouveau dans Captode 1.4"
+  },
+  "popup_whats_new_1_4": {
+    "message": "Bulle caméra et micro pour les enregistrements, un raccourci par type de capture, et un clic pour flouter e-mails et numéros."
   }
 }

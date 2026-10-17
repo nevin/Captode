@@ -3,7 +3,7 @@
 import { putCapture } from './lib/db.js';
 import {
   pickArea, pickElement, fullPagePrepare, fullPageScroll, fullPageRestore,
-  countdown, captureDelay, showOutline, hideOutline, showInputs,
+  countdown, captureDelay, showOutline, hideOutline, showInputs, findPrivate,
 } from './content/page.js';
 import { t } from './lib/i18n.js';
 
@@ -61,6 +61,21 @@ async function waitBeforeCapture(tab, seconds) {
   return true;
 }
 
+/**
+ * Details on the page that may be private (see findPrivate), as boxes in image pixels
+ * stored with the capture: the editor offers to blur them. A page that can't be read
+ * just has none.
+ */
+async function notePrivate(tab, meta, region, space, scale) {
+  const boxes = await run(tab.id, findPrivate, region, space).catch(() => null);
+  if (!boxes?.length) return;
+  const pad = 2 * scale;
+  meta.private = boxes.map((b) => ({
+    x: Math.round(b.x * scale - pad), y: Math.round(b.y * scale - pad),
+    w: Math.round(b.w * scale + pad * 2), h: Math.round(b.h * scale + pad * 2), kind: b.kind,
+  }));
+}
+
 async function captureImage(mode, tab, delay = 0) {
   let blob;
   const meta = { title: tab.title, url: tab.url, mode };
@@ -72,8 +87,11 @@ async function captureImage(mode, tab, delay = 0) {
     const bmp = await captureVisible(tab.windowId);
     blob = await toPng(bmp, 0, 0, bmp.width, bmp.height);
     // Image pixels per CSS pixel, for measuring in the editor.
-    const vw = await run(tab.id, () => innerWidth).catch(() => 0);
-    if (vw) meta.dpr = bmp.width / vw;
+    const view = await run(tab.id, () => [innerWidth, innerHeight]).catch(() => null);
+    if (view) {
+      meta.dpr = bmp.width / view[0];
+      await notePrivate(tab, meta, { x: 0, y: 0, w: view[0], h: view[1] }, 'viewport', meta.dpr);
+    }
   } else if (mode === 'area') {
     const rect = await run(tab.id, pickArea, t('pick_capture_hint'));
     if (!rect) return;
@@ -81,6 +99,7 @@ async function captureImage(mode, tab, delay = 0) {
     const bmp = await captureVisible(tab.windowId);
     const s = bmp.width / rect.vw;
     meta.dpr = s;
+    await notePrivate(tab, meta, rect, 'viewport', s);
     blob = await toPng(bmp, rect.x * s, rect.y * s, rect.w * s, rect.h * s);
   } else if (mode === 'element') {
     const rect = await run(tab.id, pickElement, t('pick_element_hint'));
@@ -163,6 +182,7 @@ async function capturePanel(tab, info, meta) {
 
   const height = Math.min(info.height, maxHeight(sw / scale, scale));
   if (height < info.height) meta.truncated = true;
+  await notePrivate(tab, meta, { x: 0, y: 0, w: sw / scale, h: height }, 'panel', scale);
   const canvas = new OffscreenCanvas(sw, Math.max(sh, Math.round(height * scale)));
   const ctx = canvas.getContext('2d');
   ctx.drawImage(await cut(first), 0, 0);
@@ -202,6 +222,7 @@ async function captureElement(tab, r, meta) {
     const s = bmp.width / r.vw;
     meta.dpr = s;
     const x = Math.max(0, r.x * s), y = Math.max(0, r.y * s);
+    await notePrivate(tab, meta, { x: x / s, y: y / s, w: r.w, h: r.h }, 'viewport', s);
     return toPng(bmp, x, y, Math.min(r.w * s, bmp.width - x), Math.min(r.h * s, bmp.height - y));
   }
   await run(tab.id, () => {
@@ -217,6 +238,7 @@ async function captureElement(tab, r, meta) {
     const x0 = Math.max(0, r.x), w = Math.min(r.w, r.vw - x0);
     const height = Math.min(r.h, maxHeight(w, scale));
     if (height < r.h) meta.truncated = true;
+    await notePrivate(tab, meta, { x: r.left + x0 - r.x, y: r.top, w, h: height }, 'document', scale);
     const canvas = new OffscreenCanvas(Math.round(w * scale), Math.round(height * scale));
     const ctx = canvas.getContext('2d');
     let paintedH = 0;
@@ -266,6 +288,7 @@ async function captureFullPage(tab, meta) {
     // Stay inside the browser's canvas limits; very long pages are cut off.
     const height = Math.min(info.height, maxHeight(info.width, scale));
     if (height < info.height) meta.truncated = true;
+    await notePrivate(tab, meta, { x: 0, y: 0, w: info.width, h: height }, 'document', scale);
 
     const canvas = new OffscreenCanvas(Math.round(info.width * scale), Math.round(height * scale));
     const ctx = canvas.getContext('2d');
@@ -334,12 +357,12 @@ async function ensureOffscreen() {
 /** Seconds of countdown asked for (older popups sent true for a fixed 3 seconds). */
 const countdownSeconds = (v) => (v === true ? 3 : Math.max(0, Math.min(30, Number(v) || 0)));
 
-async function startRecording({ mode, fps, audio, size = 'page', countdown: wantCountdown, inputs = false }, tab) {
+async function startRecording({ mode, fps, audio, size = 'page', countdown: wantCountdown, inputs = false, camera = false, mic = false }, tab) {
   if (mode === 'screen') {
     // Picking a screen or window needs a visible page for the browser's picker.
     await setRec({ state: 'starting', kind: 'page', tabId: tab.id });
     const seconds = countdownSeconds(wantCountdown);
-    await openPage(`recorder/screen.html?fps=${fps}&audio=${audio ? 1 : 0}&countdown=${seconds}&size=${encodeURIComponent(size)}`, tab);
+    await openPage(`recorder/screen.html?fps=${fps}&audio=${audio ? 1 : 0}&countdown=${seconds}&size=${encodeURIComponent(size)}&camera=${camera ? 1 : 0}&mic=${mic ? 1 : 0}`, tab);
     return;
   }
 
@@ -367,7 +390,7 @@ async function startRecording({ mode, fps, audio, size = 'page', countdown: want
   const streamId = await chrome.tabCapture.getMediaStreamId({ targetTabId: tab.id });
   await ensureOffscreen();
   const res = await chrome.runtime.sendMessage({
-    target: 'recorder', to: 'offscreen', type: 'rec-start', streamId, fps, audio, aspect, crop, size, pageWidth, title: tab.title,
+    target: 'recorder', to: 'offscreen', type: 'rec-start', streamId, fps, audio, aspect, crop, size, pageWidth, title: tab.title, camera: !!camera, mic: !!mic,
   });
   if (!res?.ok) {
     await run(tab.id, hideOutline).catch(() => {});
@@ -438,15 +461,19 @@ chrome.tabs.onRemoved.addListener(async (tabId) => {
 async function reportError(e) {
   await badge('');
   await chrome.storage.session.set({ lastError: explain(e) });
+  // Kept for Settings' Copy diagnostics, without the address of the page it happened on.
+  const message = String(e?.message || e).replace(/\b[a-z][\w+.-]*:\/\/[^\s"')]+/gi, '<url>').slice(0, 500);
+  await chrome.storage.local.set({ lastFailure: { message, when: Date.now(), version: chrome.runtime.getManifest().version } });
   await badge('!', '#d33');
 }
 
 // ---------- right-click menu ----------
 
-// Chrome groups an extension's items under its name. A click on one grants activeTab,
-// like the toolbar button does.
+// On pages Chrome groups an extension's items under its name; they are also in the
+// menu of Captode's toolbar icon. A click on one grants activeTab, like the toolbar
+// button does.
 const MENU = [['full', 'menu_full_page'], ['visible', 'menu_visible'], ['area', 'menu_area'], ['element', 'menu_element']];
-const MENU_CONTEXTS = ['page', 'frame', 'selection', 'link', 'editable', 'image', 'video', 'audio'];
+const MENU_CONTEXTS = ['page', 'frame', 'selection', 'link', 'editable', 'image', 'video', 'audio', 'action'];
 
 async function createMenu() {
   await chrome.contextMenus.removeAll();
@@ -456,6 +483,15 @@ async function createMenu() {
 chrome.contextMenus.onClicked.addListener((info, tab) => {
   if (!tab?.id || tab.id < 0 || !MENU.some(([id]) => id === info.menuItemId)) return;
   captureImage(info.menuItemId, tab).catch(reportError);
+});
+
+// A shortcut for each kind of screenshot (set or changed at chrome://extensions/shortcuts).
+chrome.commands.onCommand.addListener(async (command, tab) => {
+  const mode = /^capture-(full|visible|area|element)$/.exec(command)?.[1];
+  if (!mode) return;
+  tab ||= (await chrome.tabs.query({ active: true, lastFocusedWindow: true }))[0];
+  if (!tab?.id) return;
+  captureImage(mode, tab).catch(reportError);
 });
 
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
@@ -493,7 +529,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 });
 
 // After an update that adds features, the popup says what's new, once.
-const WHATS_NEW = '1.3.0';
+const WHATS_NEW = '1.4.0';
 chrome.runtime.onInstalled.addListener(({ reason, previousVersion }) => {
   createMenu();
   const older = (a, b) => {

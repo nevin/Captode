@@ -1,6 +1,6 @@
 // Records the whole screen or a window. This runs in a normal extension tab because
 // picking a screen needs a page the browser can show its picker over.
-import { record } from '../lib/recorder.js';
+import { record, openCameraAndMic } from '../lib/recorder.js';
 import { putCapture } from '../lib/db.js';
 import { t, localize } from '../lib/i18n.js';
 
@@ -10,6 +10,8 @@ const params = new URLSearchParams(location.search);
 const fps = Number(params.get('fps')) || 30;
 const audio = params.get('audio') === '1';
 const size = params.get('size') || 'page';
+const camera = params.get('camera') === '1';
+const mic = params.get('mic') === '1';
 const countdownFrom = Math.max(0, Math.min(30, Number(params.get('countdown') ?? 3) || 0));
 const $ = (id) => document.getElementById(id);
 
@@ -40,13 +42,25 @@ async function choose() {
     $('err').classList.remove('hidden');
     return;
   }
+  // The camera and microphone, if asked for; this page can ask the user for them.
+  let extras;
+  try {
+    extras = await openCameraAndMic({ camera, mic });
+  } catch {
+    for (const t of stream.getTracks()) t.stop();
+    $('err').textContent = t('error_camera_mic');
+    $('err').classList.remove('hidden');
+    return;
+  }
+  const dropExtras = () => { extras.camera?.stop(); extras.mic?.stop(); };
   $('pick').classList.add('hidden');
   if (countdownFrom && !(await countdown(countdownFrom, stream))) {
     for (const t of stream.getTracks()) t.stop();
+    dropExtras();
     $('pick').classList.remove('hidden');
     return;
   }
-  session = await record(stream, { fps, size, onEnded: stop });
+  session = await record(stream, { fps, size, ...extras, onEnded: stop });
   $('live').classList.remove('hidden');
   document.title = t('screen_title_recording');
   chrome.runtime.sendMessage({ type: 'rec-started', kind: 'page' });

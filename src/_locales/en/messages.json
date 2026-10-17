@@ -208,15 +208,6 @@
   "settings_copy_screenshots_to_the_clipboard": {
     "message": "Copy screenshots to the clipboard"
   },
-  "settings_keyboard_shortcut": {
-    "message": "Keyboard shortcut"
-  },
-  "settings_open_captode_or_stop_a": {
-    "message": "Open Captode, or stop a recording:"
-  },
-  "settings_change_shortcut": {
-    "message": "Change shortcut"
-  },
   "settings_about": {
     "message": "About"
   },
@@ -1885,12 +1876,6 @@
   "popup_with_inputs": {
     "message": "Clicks"
   },
-  "popup_new_in_captode_1_3": {
-    "message": "New in Captode 1.3"
-  },
-  "popup_whats_new_1_3": {
-    "message": "Screenshots of one element, a delay to catch menus and tooltips, full pages of web apps, clicks shown in recordings, and screenshots from the right-click menu."
-  },
   "menu_full_page": {
     "message": "Screenshot the full page"
   },
@@ -1902,5 +1887,98 @@
   },
   "menu_element": {
     "message": "Screenshot an element…"
+  },
+  "editor_private_one": {
+    "message": "Found an email address or number that may be private."
+  },
+  "editor_private_many": {
+    "message": "Found $1 email addresses or numbers that may be private."
+  },
+  "editor_private_blur": {
+    "message": "Blur"
+  },
+  "editor_private_blurred_one": {
+    "message": "Blurred 1 private detail"
+  },
+  "editor_private_blurred_many": {
+    "message": "Blurred $1 private details"
+  },
+  "settings_keyboard_shortcuts": {
+    "message": "Keyboard shortcuts"
+  },
+  "settings_shortcuts_work_everywhere": {
+    "message": "They work on any page, without opening Captode first."
+  },
+  "settings_menu_too": {
+    "message": "Every kind of screenshot is also in the page's right-click menu."
+  },
+  "settings_change_shortcuts": {
+    "message": "Change shortcuts"
+  },
+  "settings_copy_diagnostics": {
+    "message": "Copy diagnostics"
+  },
+  "settings_diagnostics_tip": {
+    "message": "Versions, settings and the last error, to paste into a report. Nothing is sent."
+  },
+  "settings_diagnostics_copied": {
+    "message": "Diagnostics copied. Paste them into your report."
+  },
+  "error_camera_mic": {
+    "message": "Captode can't use the camera or microphone. Turn its switch off and on in the recording options to allow it."
+  },
+  "popup_mic": {
+    "message": "Microphone"
+  },
+  "popup_mic_hint": {
+    "message": "Talk over the recording"
+  },
+  "popup_camera": {
+    "message": "Camera bubble"
+  },
+  "popup_camera_hint": {
+    "message": "You, in a corner of the video"
+  },
+  "popup_with_mic": {
+    "message": "Mic"
+  },
+  "popup_with_camera": {
+    "message": "Camera"
+  },
+  "permission_title_both": {
+    "message": "Let Captode use your camera and microphone"
+  },
+  "permission_title_camera": {
+    "message": "Let Captode use your camera"
+  },
+  "permission_title_mic": {
+    "message": "Let Captode use your microphone"
+  },
+  "permission_why": {
+    "message": "Chrome asks once. Captode uses them only while you record, and the recording stays on your computer."
+  },
+  "permission_allow": {
+    "message": "Allow"
+  },
+  "permission_ready": {
+    "message": "Ready"
+  },
+  "permission_ready_text": {
+    "message": "Your next recordings will include them. This tab closes by itself."
+  },
+  "permission_blocked": {
+    "message": "Chrome blocked access"
+  },
+  "permission_blocked_text": {
+    "message": "Click the icon at the right of the address bar, allow the camera and microphone for Captode, then try again."
+  },
+  "permission_try_again": {
+    "message": "Try again"
+  },
+  "popup_new_in_captode_1_4": {
+    "message": "New in Captode 1.4"
+  },
+  "popup_whats_new_1_4": {
+    "message": "A camera bubble and microphone for recordings, a shortcut for each kind of screenshot, and one click to blur email addresses and numbers."
   }
 }

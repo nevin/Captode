@@ -24,6 +24,11 @@
 .custom-row input[type="text"] { font-family: ui-monospace, Menlo, monospace; text-transform: uppercase; }
 .callout { margin: 14px 0 0; }
 .shortcut { justify-content: space-between; }
+.shortcut-list { margin: 0 0 14px; display: grid; }
+.shortcut-list > div { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--line); }
+.shortcut-list > div:last-child { border-bottom: 0; }
+.shortcut-list dt { min-width: 0; }
+.shortcut-list dd { margin: 0; flex: none; color: var(--muted); }
 .shortcut p { margin: 0; flex: 1; }
 .about { display: flex; align-items: center; gap: 12px; margin: 12px 0; }
 .about img { border-radius: 10px; }

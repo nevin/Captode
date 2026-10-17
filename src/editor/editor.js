@@ -1364,7 +1364,7 @@ function rememberWork(change) {
 // A first hint, until something has been added to an image.
 let firstHint = false;
 function showFirstHint() {
-  if (!firstHint || objects.length) return;
+  if (!firstHint || objects.length || !$('#private-bar').classList.contains('hidden')) return;
   $('#canvas-hint').classList.remove('hidden');
 }
 function hideFirstHint(done) {
@@ -1373,6 +1373,30 @@ function hideFirstHint(done) {
   if (done) { firstHint = false; chrome.storage?.local.set({ editorHintDone: true }); }
 }
 $('#canvas-hint-close').addEventListener('click', () => hideFirstHint(true));
+
+// Details on the page that may be private, found as it was captured (see findPrivate):
+// one click blurs them all, each as its own blur that can be moved or removed.
+function offerBlur(boxes) {
+  const inside = boxes
+    .map((b) => ({ x: clamp(b.x, 0, base.width), y: clamp(b.y, 0, base.height), x2: clamp(b.x + b.w, 0, base.width), y2: clamp(b.y + b.h, 0, base.height) }))
+    .filter((b) => b.x2 - b.x >= 2 && b.y2 - b.y >= 2);
+  if (!inside.length) return;
+  $('#private-text').textContent = inside.length === 1 ? t('editor_private_one') : t('editor_private_many', inside.length);
+  $('#private-bar').classList.remove('hidden');
+  hideFirstHint(false);
+  $('#private-blur').onclick = () => {
+    const added = inside.map((b) => ({ type: 'redact', ...propsFor('redact'), x1: b.x, y1: b.y, x2: b.x2, y2: b.y2 }));
+    objects.push(...added);
+    select(added);
+    setTool('select');
+    syncStyleUi();
+    renderFg();
+    commit();
+    $('#private-bar').classList.add('hidden');
+    toast(added.length === 1 ? t('editor_private_blurred_one') : t('editor_private_blurred_many', added.length), { ms: 6000, action: { label: t('editor_undo'), run: undo } });
+  };
+}
+$('#private-close').addEventListener('click', () => { $('#private-bar').classList.add('hidden'); showFirstHint(); });
 
 // ---------- tools ----------
 
@@ -2459,6 +2483,7 @@ document.addEventListener('keydown', (e) => {
     captureId = id;
     if (rec.edits) await restoreEdits(rec.edits);
     if (rec.meta?.truncated) toast(t('truncated'), { ms: 6000 });
+    if (rec.meta?.private?.length && !rec.edits && !new URLSearchParams(location.search).has('reopen')) offerBlur(rec.meta.private);
     // Only a capture that has just been taken, not one reopened from Recent captures.
     if (settings.autoCopy && !new URLSearchParams(location.search).has('reopen')) {
       window.history.replaceState(null, '', `?id=${id}&reopen=1`); // not again on reload (`history` here is the undo stack)

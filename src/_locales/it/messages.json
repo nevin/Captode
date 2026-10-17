@@ -206,15 +206,6 @@
   "settings_copy_screenshots_to_the_clipboard": {
     "message": "Copia gli screenshot negli appunti"
   },
-  "settings_keyboard_shortcut": {
-    "message": "Scorciatoia da tastiera"
-  },
-  "settings_open_captode_or_stop_a": {
-    "message": "Apri Captode o interrompi una registrazione:"
-  },
-  "settings_change_shortcut": {
-    "message": "Cambia scorciatoia"
-  },
   "settings_about": {
     "message": "Informazioni"
   },
@@ -1883,12 +1874,6 @@
   "popup_with_inputs": {
     "message": "Clic"
   },
-  "popup_new_in_captode_1_3": {
-    "message": "Novità di Captode 1.3"
-  },
-  "popup_whats_new_1_3": {
-    "message": "Screenshot di un singolo elemento, un ritardo per menu e suggerimenti, pagine intere delle app web, clic visibili nelle registrazioni e screenshot dal menu del tasto destro."
-  },
   "menu_full_page": {
     "message": "Screenshot della pagina intera"
   },
@@ -1900,5 +1885,98 @@
   },
   "menu_element": {
     "message": "Screenshot di un elemento…"
+  },
+  "editor_private_one": {
+    "message": "Trovato un indirizzo email o un numero che potrebbe essere privato."
+  },
+  "editor_private_many": {
+    "message": "Trovati $1 indirizzi email o numeri che potrebbero essere privati."
+  },
+  "editor_private_blur": {
+    "message": "Sfoca"
+  },
+  "editor_private_blurred_one": {
+    "message": "1 dato privato sfocato"
+  },
+  "editor_private_blurred_many": {
+    "message": "$1 dati privati sfocati"
+  },
+  "settings_keyboard_shortcuts": {
+    "message": "Scorciatoie da tastiera"
+  },
+  "settings_shortcuts_work_everywhere": {
+    "message": "Funzionano su qualsiasi pagina, senza aprire Captode."
+  },
+  "settings_menu_too": {
+    "message": "Ogni tipo di screenshot è anche nel menu del tasto destro."
+  },
+  "settings_change_shortcuts": {
+    "message": "Cambia scorciatoie"
+  },
+  "settings_copy_diagnostics": {
+    "message": "Copia diagnostica"
+  },
+  "settings_diagnostics_tip": {
+    "message": "Versioni, impostazioni e ultimo errore, da incollare in una segnalazione. Non viene inviato nulla."
+  },
+  "settings_diagnostics_copied": {
+    "message": "Diagnostica copiata. Incollala nella segnalazione."
+  },
+  "error_camera_mic": {
+    "message": "Captode non può usare la fotocamera o il microfono. Disattiva e riattiva l'opzione nelle opzioni di registrazione per consentirlo."
+  },
+  "popup_mic": {
+    "message": "Microfono"
+  },
+  "popup_mic_hint": {
+    "message": "Commenta mentre registri"
+  },
+  "popup_camera": {
+    "message": "Bolla fotocamera"
+  },
+  "popup_camera_hint": {
+    "message": "Tu, in un angolo del video"
+  },
+  "popup_with_mic": {
+    "message": "Micro"
+  },
+  "popup_with_camera": {
+    "message": "Fotocamera"
+  },
+  "permission_title_both": {
+    "message": "Consenti a Captode di usare fotocamera e microfono"
+  },
+  "permission_title_camera": {
+    "message": "Consenti a Captode di usare la fotocamera"
+  },
+  "permission_title_mic": {
+    "message": "Consenti a Captode di usare il microfono"
+  },
+  "permission_why": {
+    "message": "Chrome lo chiede una volta. Captode li usa solo mentre registri e la registrazione resta sul tuo computer."
+  },
+  "permission_allow": {
+    "message": "Consenti"
+  },
+  "permission_ready": {
+    "message": "Pronto"
+  },
+  "permission_ready_text": {
+    "message": "Le prossime registrazioni li includeranno. Questa scheda si chiude da sola."
+  },
+  "permission_blocked": {
+    "message": "Chrome ha bloccato l'accesso"
+  },
+  "permission_blocked_text": {
+    "message": "Fai clic sull'icona a destra della barra degli indirizzi, consenti fotocamera e microfono a Captode e riprova."
+  },
+  "permission_try_again": {
+    "message": "Riprova"
+  },
+  "popup_new_in_captode_1_4": {
+    "message": "Novità di Captode 1.4"
+  },
+  "popup_whats_new_1_4": {
+    "message": "Bolla fotocamera e microfono nelle registrazioni, una scorciatoia per ogni tipo di screenshot e un clic per sfocare email e numeri."
   }
 }

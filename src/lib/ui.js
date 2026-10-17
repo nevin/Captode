@@ -118,10 +118,10 @@ export const MOD = isMac ? '⌘' : 'Ctrl';
  * as the user has it set: Chrome reports it in the platform's own style, such as
  * "Alt+Shift+R" or "⌥⇧R". Says so when no shortcut is set.
  */
-export async function showShortcut(el) {
+export async function showShortcut(el, name = '_execute_action') {
   let key = '';
   try {
-    const cmd = (await chrome.commands.getAll()).find((c) => c.name === '_execute_action');
+    const cmd = (await chrome.commands.getAll()).find((c) => c.name === name);
     key = cmd?.shortcut || '';
   } catch { /* commands API unavailable */ }
   el.textContent = '';

@@ -206,15 +206,6 @@
   "settings_copy_screenshots_to_the_clipboard": {
     "message": "スクリーンショットをクリップボードにコピー"
   },
-  "settings_keyboard_shortcut": {
-    "message": "キーボードショートカット"
-  },
-  "settings_open_captode_or_stop_a": {
-    "message": "Captode を開く、または録画を停止："
-  },
-  "settings_change_shortcut": {
-    "message": "ショートカットを変更"
-  },
   "settings_about": {
     "message": "情報"
   },
@@ -1883,12 +1874,6 @@
   "popup_with_inputs": {
     "message": "クリック"
   },
-  "popup_new_in_captode_1_3": {
-    "message": "Captode 1.3 の新機能"
-  },
-  "popup_whats_new_1_3": {
-    "message": "要素だけのスクリーンショット、メニューやツールチップ用の遅延、Web アプリのページ全体、録画でのクリック表示、右クリックメニューからのスクリーンショット。"
-  },
   "menu_full_page": {
     "message": "ページ全体をスクリーンショット"
   },
@@ -1900,5 +1885,98 @@
   },
   "menu_element": {
     "message": "要素をスクリーンショット…"
+  },
+  "editor_private_one": {
+    "message": "非公開にしたいメールアドレスや番号が 1 件見つかりました。"
+  },
+  "editor_private_many": {
+    "message": "非公開にしたいメールアドレスや番号が $1 件見つかりました。"
+  },
+  "editor_private_blur": {
+    "message": "ぼかす"
+  },
+  "editor_private_blurred_one": {
+    "message": "非公開情報を 1 件ぼかしました"
+  },
+  "editor_private_blurred_many": {
+    "message": "非公開情報を $1 件ぼかしました"
+  },
+  "settings_keyboard_shortcuts": {
+    "message": "キーボードショートカット"
+  },
+  "settings_shortcuts_work_everywhere": {
+    "message": "Captode を開かなくても、どのページでも使えます。"
+  },
+  "settings_menu_too": {
+    "message": "すべてのスクリーンショットは右クリックメニューからも使えます。"
+  },
+  "settings_change_shortcuts": {
+    "message": "ショートカットを変更"
+  },
+  "settings_copy_diagnostics": {
+    "message": "診断情報をコピー"
+  },
+  "settings_diagnostics_tip": {
+    "message": "バージョン、設定、最後のエラーを報告に貼り付けられます。何も送信されません。"
+  },
+  "settings_diagnostics_copied": {
+    "message": "診断情報をコピーしました。報告に貼り付けてください。"
+  },
+  "error_camera_mic": {
+    "message": "Captode はカメラまたはマイクを使えません。録画オプションでスイッチをオフにしてからオンにし、許可してください。"
+  },
+  "popup_mic": {
+    "message": "マイク"
+  },
+  "popup_mic_hint": {
+    "message": "録画しながら話せます"
+  },
+  "popup_camera": {
+    "message": "カメラバブル"
+  },
+  "popup_camera_hint": {
+    "message": "動画の隅にあなたを表示"
+  },
+  "popup_with_mic": {
+    "message": "マイク"
+  },
+  "popup_with_camera": {
+    "message": "カメラ"
+  },
+  "permission_title_both": {
+    "message": "Captode にカメラとマイクの使用を許可"
+  },
+  "permission_title_camera": {
+    "message": "Captode にカメラの使用を許可"
+  },
+  "permission_title_mic": {
+    "message": "Captode にマイクの使用を許可"
+  },
+  "permission_why": {
+    "message": "Chrome が一度だけ確認します。Captode は録画中だけ使い、録画はお使いのコンピュータに残ります。"
+  },
+  "permission_allow": {
+    "message": "許可"
+  },
+  "permission_ready": {
+    "message": "準備完了"
+  },
+  "permission_ready_text": {
+    "message": "次の録画から使われます。このタブは自動的に閉じます。"
+  },
+  "permission_blocked": {
+    "message": "Chrome がアクセスをブロックしました"
+  },
+  "permission_blocked_text": {
+    "message": "アドレスバー右側のアイコンをクリックし、Captode にカメラとマイクを許可してから、もう一度お試しください。"
+  },
+  "permission_try_again": {
+    "message": "再試行"
+  },
+  "popup_new_in_captode_1_4": {
+    "message": "Captode 1.4 の新機能"
+  },
+  "popup_whats_new_1_4": {
+    "message": "録画にカメラバブルとマイク、スクリーンショットの種類ごとのショートカット、メールアドレスや番号をワンクリックでぼかす機能。"
   }
 }

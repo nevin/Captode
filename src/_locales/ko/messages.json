@@ -206,15 +206,6 @@
   "settings_copy_screenshots_to_the_clipboard": {
     "message": "스크린샷을 클립보드에 복사"
   },
-  "settings_keyboard_shortcut": {
-    "message": "단축키"
-  },
-  "settings_open_captode_or_stop_a": {
-    "message": "Captode 열기 또는 녹화 중지:"
-  },
-  "settings_change_shortcut": {
-    "message": "단축키 변경"
-  },
   "settings_about": {
     "message": "정보"
   },
@@ -1883,12 +1874,6 @@
   "popup_with_inputs": {
     "message": "클릭"
   },
-  "popup_new_in_captode_1_3": {
-    "message": "Captode 1.3의 새 기능"
-  },
-  "popup_whats_new_1_3": {
-    "message": "요소 하나만 캡처, 메뉴와 도구 설명을 위한 지연, 웹 앱 전체 페이지, 녹화 중 클릭 표시, 마우스 오른쪽 버튼 메뉴에서 캡처."
-  },
   "menu_full_page": {
     "message": "전체 페이지 스크린샷"
   },
@@ -1900,5 +1885,98 @@
   },
   "menu_element": {
     "message": "요소 스크린샷…"
+  },
+  "editor_private_one": {
+    "message": "개인 정보일 수 있는 이메일 주소나 번호를 1개 찾았습니다."
+  },
+  "editor_private_many": {
+    "message": "개인 정보일 수 있는 이메일 주소나 번호를 $1개 찾았습니다."
+  },
+  "editor_private_blur": {
+    "message": "흐리게"
+  },
+  "editor_private_blurred_one": {
+    "message": "개인 정보 1개를 흐리게 했습니다"
+  },
+  "editor_private_blurred_many": {
+    "message": "개인 정보 $1개를 흐리게 했습니다"
+  },
+  "settings_keyboard_shortcuts": {
+    "message": "키보드 단축키"
+  },
+  "settings_shortcuts_work_everywhere": {
+    "message": "Captode를 열지 않아도 모든 페이지에서 작동합니다."
+  },
+  "settings_menu_too": {
+    "message": "모든 스크린샷은 마우스 오른쪽 버튼 메뉴에도 있습니다."
+  },
+  "settings_change_shortcuts": {
+    "message": "단축키 변경"
+  },
+  "settings_copy_diagnostics": {
+    "message": "진단 정보 복사"
+  },
+  "settings_diagnostics_tip": {
+    "message": "버전, 설정, 마지막 오류를 보고서에 붙여 넣을 수 있습니다. 아무것도 전송되지 않습니다."
+  },
+  "settings_diagnostics_copied": {
+    "message": "진단 정보를 복사했습니다. 보고서에 붙여 넣으세요."
+  },
+  "error_camera_mic": {
+    "message": "Captode가 카메라나 마이크를 사용할 수 없습니다. 녹화 옵션에서 스위치를 껐다 켜서 허용하세요."
+  },
+  "popup_mic": {
+    "message": "마이크"
+  },
+  "popup_mic_hint": {
+    "message": "녹화하면서 설명하기"
+  },
+  "popup_camera": {
+    "message": "카메라 버블"
+  },
+  "popup_camera_hint": {
+    "message": "영상 모서리에 내 모습"
+  },
+  "popup_with_mic": {
+    "message": "마이크"
+  },
+  "popup_with_camera": {
+    "message": "카메라"
+  },
+  "permission_title_both": {
+    "message": "Captode에서 카메라와 마이크 사용 허용"
+  },
+  "permission_title_camera": {
+    "message": "Captode에서 카메라 사용 허용"
+  },
+  "permission_title_mic": {
+    "message": "Captode에서 마이크 사용 허용"
+  },
+  "permission_why": {
+    "message": "Chrome이 한 번만 묻습니다. Captode는 녹화하는 동안에만 사용하며, 녹화는 내 컴퓨터에 남습니다."
+  },
+  "permission_allow": {
+    "message": "허용"
+  },
+  "permission_ready": {
+    "message": "준비 완료"
+  },
+  "permission_ready_text": {
+    "message": "다음 녹화부터 포함됩니다. 이 탭은 자동으로 닫힙니다."
+  },
+  "permission_blocked": {
+    "message": "Chrome이 접근을 차단했습니다"
+  },
+  "permission_blocked_text": {
+    "message": "주소 표시줄 오른쪽 아이콘을 클릭해 Captode에 카메라와 마이크를 허용한 뒤 다시 시도하세요."
+  },
+  "permission_try_again": {
+    "message": "다시 시도"
+  },
+  "popup_new_in_captode_1_4": {
+    "message": "Captode 1.4의 새로운 기능"
+  },
+  "popup_whats_new_1_4": {
+    "message": "녹화용 카메라 버블과 마이크, 스크린샷 종류별 단축키, 이메일 주소와 번호를 한 번에 흐리게 하는 기능."
   }
 }

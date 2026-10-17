@@ -93,12 +93,44 @@ export function findPage(frame, aspect, lines = lineCanvases(frame.displayWidth,
 }
 
 /**
+ * The camera bubble: a round picture of the camera, mirrored like a mirror, in the
+ * bottom left corner, about a quarter of the video's shorter side across.
+ */
+function drawBubble(ctx, cam) {
+  const { width: W, height: H } = ctx.canvas;
+  const d = Math.round(Math.min(W, H) * 0.24);
+  const m = Math.round(Math.min(W, H) * 0.03);
+  const cx = m + d / 2, cy = H - m - d / 2;
+  const cw = cam.displayWidth, ch = cam.displayHeight, side = Math.min(cw, ch);
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(cx, cy, d / 2, 0, Math.PI * 2);
+  ctx.closePath();
+  ctx.shadowColor = 'rgba(0,0,0,.35)';
+  ctx.shadowBlur = d * 0.08;
+  ctx.fillStyle = '#000';
+  ctx.fill();
+  ctx.shadowColor = 'transparent';
+  ctx.clip();
+  ctx.translate(cx, cy);
+  ctx.scale(-1, 1);
+  ctx.drawImage(cam, (cw - side) / 2, (ch - side) / 2, side, side, -d / 2, -d / 2, d, d);
+  ctx.restore();
+  ctx.beginPath();
+  ctx.arc(cx, cy, d / 2, 0, Math.PI * 2);
+  ctx.lineWidth = Math.max(2, d * 0.025);
+  ctx.strokeStyle = '#fff';
+  ctx.stroke();
+}
+
+/**
  * Turns `track` into a new track showing only part of each frame, at a chosen size.
  * `aspect`: the page's width ÷ height, to find the page in a tab capture (it is
  * looked for again every second, in case the page is resized). `crop`: fractions of
- * that page. `size`: see outputSize. Resolves once the output size is known.
+ * that page. `size`: see outputSize. `camera`: a camera track shown as a bubble.
+ * Resolves once the output size is known.
  */
-function processTrack(track, { aspect = null, crop = null, size = 'page' }) {
+function processTrack(track, { aspect = null, crop = null, size = 'page', camera = null }) {
   const processor = new MediaStreamTrackProcessor({ track });
   const generator = new MediaStreamTrackGenerator({ kind: 'video' });
   const reader = processor.readable.getReader();
@@ -111,6 +143,10 @@ function processTrack(track, { aspect = null, crop = null, size = 'page' }) {
   let lastLook = -Infinity;
   let resolveSize;
   const sized = new Promise((r) => { resolveSize = r; });
+  let screen = null; // the latest picture, kept while a camera drives the frames
+  let cam = null; // the latest camera picture
+  let busy = false;
+  let ended = false;
 
   const look = (frame) => {
     const fw = frame.displayWidth;
@@ -122,63 +158,116 @@ function processTrack(track, { aspect = null, crop = null, size = 'page' }) {
     pending = found;
   };
 
+  /** Draws `frame` (the page part of it, fitted) and the bubble, and sends the result on. */
+  const compose = async (frame, timestamp) => {
+    let { x: sx, y: sy, w: sw, h: sh } = page;
+    if (crop) {
+      sx += crop.x * sw; sy += crop.y * sh; sw *= crop.w; sh *= crop.h;
+    }
+    sw = Math.max(1, Math.min(frame.displayWidth - sx, sw));
+    sh = Math.max(1, Math.min(frame.displayHeight - sy, sh));
+    // The output size is fixed by the first frame; encoders dislike size changes.
+    if (!canvas) {
+      canvas = new OffscreenCanvas(1, 1);
+      Object.assign(canvas, outputSize(sw, sh, size));
+      ctx = canvas.getContext('2d', { alpha: false });
+      ctx.imageSmoothingQuality = 'high';
+      resolveSize({ width: canvas.width, height: canvas.height });
+    }
+    // Fitted, should the page change shape mid-recording.
+    const s = Math.min(canvas.width / sw, canvas.height / sh);
+    const dw = sw * s, dh = sh * s;
+    if (dw < canvas.width - 1 || dh < canvas.height - 1) ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(frame, sx, sy, sw, sh, (canvas.width - dw) / 2, (canvas.height - dh) / 2, dw, dh);
+    if (cam) drawBubble(ctx, cam);
+    const out = new VideoFrame(canvas, { timestamp });
+    try {
+      await writer.write(out);
+    } catch {
+      out.close();
+      ended = true;
+    }
+  };
+  // With a camera, frames come as often as the camera's, whether or not the page
+  // changes (a still page sends none), on one clock; a frame is skipped rather than queued.
+  const now = () => Math.round(performance.now() * 1000);
+  const send = async (frame, timestamp) => {
+    if (busy || ended) return;
+    busy = true;
+    try { await compose(frame, timestamp); } finally { busy = false; }
+  };
+
   (async () => {
     for (;;) {
       const { value: frame, done } = await reader.read();
-      if (done) break;
+      if (done || ended) { frame?.close(); break; }
       if (frame.timestamp - lastLook >= 1e6 || !page) {
         lastLook = frame.timestamp;
         try { look(frame); } catch { page ||= { x: 0, y: 0, w: frame.displayWidth, h: frame.displayHeight }; }
       }
-      let { x: sx, y: sy, w: sw, h: sh } = page;
-      if (crop) {
-        sx += crop.x * sw; sy += crop.y * sh; sw *= crop.w; sh *= crop.h;
-      }
-      sw = Math.max(1, Math.min(frame.displayWidth - sx, sw));
-      sh = Math.max(1, Math.min(frame.displayHeight - sy, sh));
-      // The output size is fixed by the first frame; encoders dislike size changes.
-      if (!canvas) {
-        canvas = new OffscreenCanvas(1, 1);
-        Object.assign(canvas, outputSize(sw, sh, size));
-        ctx = canvas.getContext('2d', { alpha: false });
-        ctx.imageSmoothingQuality = 'high';
-        resolveSize({ width: canvas.width, height: canvas.height });
-      }
-      // Fitted, should the page change shape mid-recording.
-      const s = Math.min(canvas.width / sw, canvas.height / sh);
-      const dw = sw * s, dh = sh * s;
-      if (dw < canvas.width - 1 || dh < canvas.height - 1) ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(frame, sx, sy, sw, sh, (canvas.width - dw) / 2, (canvas.height - dh) / 2, dw, dh);
-      const out = new VideoFrame(canvas, { timestamp: frame.timestamp });
-      frame.close();
-      try {
-        await writer.write(out);
-      } catch {
-        out.close();
-        break;
+      if (camera) {
+        screen?.close();
+        screen = frame;
+        if (!cam) await send(screen, now());
+      } else {
+        await send(frame, frame.timestamp);
+        frame.close();
       }
     }
+    ended = true;
+    screen?.close();
+    screen = null;
     writer.close().catch(() => {});
     resolveSize(null);
   })();
 
+  if (camera) {
+    const camReader = new MediaStreamTrackProcessor({ track: camera }).readable.getReader();
+    (async () => {
+      for (;;) {
+        const { value: frame, done } = await camReader.read();
+        if (done || ended) { frame?.close(); break; }
+        cam?.close();
+        cam = frame;
+        if (screen) await send(screen, now());
+      }
+      cam?.close();
+      cam = null;
+      camReader.cancel().catch(() => {});
+    })();
+  }
+
   return { track: generator, sized };
+}
+
+/**
+ * The camera and microphone for a recording, as asked for: `{ camera, mic }` tracks
+ * (null when not wanted). Throws if the browser won't give them.
+ */
+export async function openCameraAndMic({ camera = false, mic = false } = {}) {
+  if (!camera && !mic) return { camera: null, mic: null };
+  const stream = await navigator.mediaDevices.getUserMedia({
+    video: camera ? { width: { ideal: 640 }, height: { ideal: 480 }, frameRate: { ideal: 30 } } : false,
+    audio: mic ? { echoCancellation: true, noiseSuppression: true, autoGainControl: true } : false,
+  });
+  return { camera: stream.getVideoTracks()[0] || null, mic: stream.getAudioTracks()[0] || null };
 }
 
 /**
  * Starts recording. `onEnded` is called if the source ends by itself (the user
  * pressed Chrome's "Stop sharing", or the captured tab closed). `aspect`, `crop` and
  * `size` choose what part of the picture is kept and how large (see processTrack).
- * Resolves to `{ stop(): Promise<{ blob, meta }>, started, width, height }`.
+ * `camera` and `mic` (see openCameraAndMic) add a camera bubble and narration; they
+ * are stopped with the recording. Resolves to `{ stop(): Promise<{ blob, meta }>, started, width, height }`.
  */
-export async function record(stream, { fps = 30, aspect = null, crop = null, size = 'page', onEnded } = {}) {
+export async function record(stream, { fps = 30, aspect = null, crop = null, size = 'page', camera = null, mic = null, onEnded } = {}) {
   const source = stream.getVideoTracks()[0];
   const settings = source.getSettings();
   let video = source;
   let w = settings.width || 1280;
   let h = settings.height || 720;
-  if (aspect || crop || size !== 'page') {
-    const processed = processTrack(source, { aspect, crop, size });
+  if (aspect || crop || size !== 'page' || camera) {
+    const processed = processTrack(source, { aspect, crop, size, camera });
     video = processed.track;
     const out = await Promise.race([processed.sized, new Promise((r) => setTimeout(r, 5000, null))]);
     if (out) ({ width: w, height: h } = out);
@@ -186,7 +275,18 @@ export async function record(stream, { fps = 30, aspect = null, crop = null, siz
   // Screen content: ask the encoder to keep text and edges sharp rather than motion
   // smooth. Sharper, steadier recordings also export to much smaller GIFs.
   if ('contentHint' in video) video.contentHint = 'detail';
-  const tracks = [video, ...stream.getAudioTracks()];
+  // The microphone, mixed with the tab's or screen's own sound if that is recorded too.
+  let audio = stream.getAudioTracks();
+  let mixer = null;
+  if (mic && audio.length) {
+    mixer = new AudioContext();
+    const out = mixer.createMediaStreamDestination();
+    for (const t of [...audio, mic]) mixer.createMediaStreamSource(new MediaStream([t])).connect(out);
+    audio = out.stream.getAudioTracks();
+  } else if (mic) {
+    audio = [mic];
+  }
+  const tracks = [video, ...audio];
   const recStream = new MediaStream(tracks);
 
   // About 0.18 bits per pixel: enough that still areas don't shimmer between
@@ -212,6 +312,9 @@ export async function record(stream, { fps = 30, aspect = null, crop = null, siz
       recorder.onstop = () => {
         stream.getTracks().forEach((t) => t.stop());
         tracks.forEach((t) => t.stop());
+        camera?.stop();
+        mic?.stop();
+        mixer?.close();
         const blob = new Blob(chunks, { type: recorder.mimeType || 'video/webm' });
         resolve({
           blob,
@@ -219,7 +322,9 @@ export async function record(stream, { fps = 30, aspect = null, crop = null, siz
             fps,
             mime: blob.type,
             duration: (performance.now() - started) / 1000,
-            hasAudio: stream.getAudioTracks().length > 0,
+            hasAudio: audio.length > 0,
+            ...(camera && { camera: true }),
+            ...(mic && { mic: true }),
           },
         });
       };

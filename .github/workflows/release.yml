@@ -1,0 +1,49 @@
+name: Release
+
+# When a version tag is pushed (npm run release -- --push), builds the extension from
+# exactly that commit, tests it, and attaches the zip to a GitHub release, so the file
+# uploaded to the Chrome Web Store can always be matched to tested code.
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: The tag matches the manifest's version
+        run: |
+          version=$(node -p "require('./src/manifest.json').version")
+          if [ "v$version" != "$GITHUB_REF_NAME" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME, but src/manifest.json says $version"
+            exit 1
+          fi
+          echo "VERSION=$version" >> "$GITHUB_ENV"
+      - name: Install (downloads Chrome for Testing)
+        run: npm ci
+      - name: Translations
+        run: npm run i18n
+      - name: Tests
+        run: npm test
+      - name: Package
+        run: npm run package
+      - name: GitHub release with the zip
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          zip="dist/captode-$VERSION.zip"
+          sha256sum "$zip" | tee "$zip.sha256"
+          if gh release view "$GITHUB_REF_NAME" > /dev/null 2>&1; then
+            gh release upload "$GITHUB_REF_NAME" "$zip" "$zip.sha256" --clobber
+          else
+            gh release create "$GITHUB_REF_NAME" "$zip" "$zip.sha256" --title "Captode $VERSION" --generate-notes --verify-tag
+          fi

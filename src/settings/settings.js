@@ -51,7 +51,41 @@ $('#device').addEventListener('change', async (e) => { await chrome.storage.loca
 $('#shortcuts').addEventListener('click', () => chrome.tabs.create({ url: 'chrome://extensions/shortcuts' }));
 $('#version').textContent = t('settings_version', chrome.runtime.getManifest().version);
 $('#reset').addEventListener('click', () => openDialog($('#reset-dialog')));
-const RESET_KEYS = ['settings', 'device', 'fps', 'audio', 'countdown', 'countdownSeconds', 'videoSize', 'kind', 'deviceOpts', 'deviceRecent', 'editorDefaults', 'exportPresets', 'lastExport'];
+
+/**
+ * What a bug report needs, as text to paste: versions, the browser's language and
+ * screen, shortcuts, settings and the last error. Nothing about pages or captures,
+ * and it is only copied, never sent.
+ */
+async function diagnostics() {
+  const ua = navigator.userAgentData;
+  const hi = await ua?.getHighEntropyValues(['platformVersion', 'fullVersionList', 'architecture']).catch(() => null);
+  const browser = hi?.fullVersionList?.filter((b) => !/Not.?A.?Brand|Chromium/i.test(b.brand)).map((b) => `${b.brand} ${b.version}`).join(', ')
+    || /Chrome\/[\d.]+/.exec(navigator.userAgent)?.[0] || navigator.userAgent;
+  const shortcuts = (await chrome.commands.getAll().catch(() => [])).map((c) => `${c.name} = ${c.shortcut || '-'}`).join(', ');
+  const { lastFailure } = await chrome.storage.local.get('lastFailure');
+  const local = await chrome.storage.local.get(['fps', 'videoSize', 'audio', 'inputs', 'camera', 'mic', 'delay', 'device']);
+  const m = chrome.runtime.getManifest();
+  return [
+    `Captode ${m.version}`,
+    `Browser: ${browser}`,
+    `OS: ${ua?.platform || navigator.platform}${hi?.platformVersion ? ` ${hi.platformVersion}` : ''}${hi?.architecture ? ` (${hi.architecture})` : ''}`,
+    `Language: ${chrome.i18n.getUILanguage()}`,
+    `Screen: ${screen.width} × ${screen.height} at ${devicePixelRatio}×`,
+    `Shortcuts: ${shortcuts}`,
+    `Settings: ${JSON.stringify({ ...settings, ...local })}`,
+    `Last error: ${lastFailure ? `${lastFailure.message} (${new Date(lastFailure.when).toISOString()}, ${lastFailure.version})` : 'none'}`,
+  ].join('\n');
+}
+$('#diagnostics').addEventListener('click', async () => {
+  try {
+    await navigator.clipboard.writeText(await diagnostics());
+    toast(t('settings_diagnostics_copied'), { kind: 'success', ms: 4000 });
+  } catch (e) {
+    toast(e.message || String(e), { kind: 'error' });
+  }
+});
+const RESET_KEYS = ['settings', 'device', 'fps', 'audio', 'countdown', 'countdownSeconds', 'videoSize', 'kind', 'deviceOpts', 'deviceRecent', 'editorDefaults', 'exportPresets', 'lastExport', 'inputs', 'camera', 'mic', 'delay'];
 $('#reset-yes').addEventListener('click', async () => {
   const before = await chrome.storage.local.get(RESET_KEYS);
   await chrome.storage.local.remove(RESET_KEYS);
@@ -74,7 +108,8 @@ $('#reset-yes').addEventListener('click', async () => {
   });
 });
 enhance();
-showShortcut(document.querySelector('.shortcut-keys'));
-// Pick up a shortcut changed on chrome://extensions/shortcuts when coming back.
-document.addEventListener('visibilitychange', () => { if (!document.hidden) showShortcut(document.querySelector('.shortcut-keys')); });
+const showShortcuts = () => { for (const row of document.querySelectorAll('#shortcut-list [data-command]')) showShortcut(row.querySelector('dd'), row.dataset.command); };
+showShortcuts();
+// Pick up shortcuts changed on chrome://extensions/shortcuts when coming back.
+document.addEventListener('visibilitychange', () => { if (!document.hidden) showShortcuts(); });
 render();

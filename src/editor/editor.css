@@ -209,3 +209,7 @@ body { display: flex; flex-direction: column; overflow: hidden; }
 }
 .canvas-hint kbd { margin: 0 1px; }
 .canvas-hint .btn { width: 28px; height: 28px; flex: none; }
+/* Offers to blur email addresses and numbers found on the page. */
+.private-bar { bottom: auto; top: 14px; color: var(--text); }
+.private-bar > .i { color: var(--accent); flex: none; }
+.canvas-hint.private-bar .btn.primary { width: auto; padding: 0 12px; font-weight: 600; }

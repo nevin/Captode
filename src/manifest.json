@@ -40,6 +40,21 @@
         "default": "Alt+Shift+R"
       },
       "description": "__MSG_commandAction__"
+    },
+    "capture-full": {
+      "suggested_key": { "default": "Alt+Shift+F" },
+      "description": "__MSG_menu_full_page__"
+    },
+    "capture-visible": {
+      "suggested_key": { "default": "Alt+Shift+V" },
+      "description": "__MSG_menu_visible__"
+    },
+    "capture-area": {
+      "suggested_key": { "default": "Alt+Shift+S" },
+      "description": "__MSG_menu_area__"
+    },
+    "capture-element": {
+      "description": "__MSG_menu_element__"
     }
   },
   "options_page": "settings/settings.html",

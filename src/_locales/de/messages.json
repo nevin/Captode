@@ -206,15 +206,6 @@
   "settings_copy_screenshots_to_the_clipboard": {
     "message": "Screenshots in die Zwischenablage kopieren"
   },
-  "settings_keyboard_shortcut": {
-    "message": "Tastenkürzel"
-  },
-  "settings_open_captode_or_stop_a": {
-    "message": "Captode öffnen oder eine Aufzeichnung beenden:"
-  },
-  "settings_change_shortcut": {
-    "message": "Tastenkürzel ändern"
-  },
   "settings_about": {
     "message": "Über"
   },
@@ -1883,12 +1874,6 @@
   "popup_with_inputs": {
     "message": "Klicks"
   },
-  "popup_new_in_captode_1_3": {
-    "message": "Neu in Captode 1.3"
-  },
-  "popup_whats_new_1_3": {
-    "message": "Screenshots einzelner Elemente, eine Verzögerung für Menüs und Tooltips, ganze Seiten von Web-Apps, sichtbare Klicks in Aufnahmen und Screenshots über das Rechtsklickmenü."
-  },
   "menu_full_page": {
     "message": "Ganze Seite aufnehmen"
   },
@@ -1900,5 +1885,98 @@
   },
   "menu_element": {
     "message": "Element aufnehmen…"
+  },
+  "editor_private_one": {
+    "message": "Eine E-Mail-Adresse oder Nummer gefunden, die privat sein könnte."
+  },
+  "editor_private_many": {
+    "message": "$1 E-Mail-Adressen oder Nummern gefunden, die privat sein könnten."
+  },
+  "editor_private_blur": {
+    "message": "Verwischen"
+  },
+  "editor_private_blurred_one": {
+    "message": "1 privates Detail verwischt"
+  },
+  "editor_private_blurred_many": {
+    "message": "$1 private Details verwischt"
+  },
+  "settings_keyboard_shortcuts": {
+    "message": "Tastenkombinationen"
+  },
+  "settings_shortcuts_work_everywhere": {
+    "message": "Sie funktionieren auf jeder Seite, ohne Captode vorher zu öffnen."
+  },
+  "settings_menu_too": {
+    "message": "Jede Art von Screenshot gibt es auch im Rechtsklickmenü."
+  },
+  "settings_change_shortcuts": {
+    "message": "Tastenkombinationen ändern"
+  },
+  "settings_copy_diagnostics": {
+    "message": "Diagnose kopieren"
+  },
+  "settings_diagnostics_tip": {
+    "message": "Versionen, Einstellungen und der letzte Fehler, zum Einfügen in eine Meldung. Nichts wird gesendet."
+  },
+  "settings_diagnostics_copied": {
+    "message": "Diagnose kopiert. Fügen Sie sie in Ihre Meldung ein."
+  },
+  "error_camera_mic": {
+    "message": "Captode kann Kamera oder Mikrofon nicht verwenden. Schalten Sie die Option in den Aufnahmeoptionen aus und wieder ein, um es zu erlauben."
+  },
+  "popup_mic": {
+    "message": "Mikrofon"
+  },
+  "popup_mic_hint": {
+    "message": "Sprechen Sie während der Aufnahme"
+  },
+  "popup_camera": {
+    "message": "Kamerablase"
+  },
+  "popup_camera_hint": {
+    "message": "Sie, in einer Ecke des Videos"
+  },
+  "popup_with_mic": {
+    "message": "Mikro"
+  },
+  "popup_with_camera": {
+    "message": "Kamera"
+  },
+  "permission_title_both": {
+    "message": "Captode Kamera und Mikrofon erlauben"
+  },
+  "permission_title_camera": {
+    "message": "Captode die Kamera erlauben"
+  },
+  "permission_title_mic": {
+    "message": "Captode das Mikrofon erlauben"
+  },
+  "permission_why": {
+    "message": "Chrome fragt einmal. Captode nutzt sie nur während der Aufnahme, und die Aufnahme bleibt auf Ihrem Computer."
+  },
+  "permission_allow": {
+    "message": "Erlauben"
+  },
+  "permission_ready": {
+    "message": "Fertig"
+  },
+  "permission_ready_text": {
+    "message": "Ihre nächsten Aufnahmen enthalten sie. Dieser Tab schließt sich von selbst."
+  },
+  "permission_blocked": {
+    "message": "Chrome hat den Zugriff blockiert"
+  },
+  "permission_blocked_text": {
+    "message": "Klicken Sie auf das Symbol rechts in der Adressleiste, erlauben Sie Kamera und Mikrofon für Captode und versuchen Sie es erneut."
+  },
+  "permission_try_again": {
+    "message": "Erneut versuchen"
+  },
+  "popup_new_in_captode_1_4": {
+    "message": "Neu in Captode 1.4"
+  },
+  "popup_whats_new_1_4": {
+    "message": "Kamerablase und Mikrofon für Aufnahmen, eine Tastenkombination für jede Screenshot-Art und ein Klick, um E-Mails und Nummern zu verwischen."
   }
 }
