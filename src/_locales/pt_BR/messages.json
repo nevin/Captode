@@ -872,14 +872,8 @@
   "video_trim_start": {
     "message": "Início do corte"
   },
-  "video_start_i": {
-    "message": "Início I"
-  },
   "video_trim_end": {
     "message": "Fim do corte"
-  },
-  "video_end_o": {
-    "message": "Fim O"
   },
   "video_recording_not_found": {
     "message": "Gravação não encontrada"
@@ -901,9 +895,6 @@
   },
   "video_end_at_the_playhead_o": {
     "message": "Terminar no cursor de reprodução O"
-  },
-  "video_drag_the_handles_on_the": {
-    "message": "Arraste as alças da linha do tempo, ou reproduza até um ponto e pressione <kbd>I</kbd> para o início e <kbd>O</kbd> para o fim."
   },
   "video_video": {
     "message": "Vídeo"
@@ -1840,5 +1831,20 @@
   },
   "editor_first_hint": {
     "message": "Escolha uma ferramenta acima ou pressione <kbd>T</kbd> para texto, <kbd>A</kbd> para uma seta ou <kbd>B</kbd> para desfocar."
+  },
+  "video_frame_to_editor": {
+    "message": "Quadro no editor"
+  },
+  "video_frame_to_editor_title": {
+    "message": "Abra o quadro visível no editor para anotar, copiar ou salvar (F)"
+  },
+  "video_drag_to_scrub": {
+    "message": "Arraste para percorrer"
+  },
+  "video_trim_hint": {
+    "message": "Arraste pela linha do tempo para escolher a parte a manter, ou arraste as bordas. Durante a reprodução, <kbd>I</kbd> marca o início e <kbd>O</kbd> o fim."
+  },
+  "video_size_up_to": {
+    "message": "até $1"
   }
 }

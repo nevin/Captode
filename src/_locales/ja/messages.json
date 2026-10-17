@@ -872,14 +872,8 @@
   "video_trim_start": {
     "message": "トリミングの開始"
   },
-  "video_start_i": {
-    "message": "開始 I"
-  },
   "video_trim_end": {
     "message": "トリミングの終了"
-  },
-  "video_end_o": {
-    "message": "終了 O"
   },
   "video_recording_not_found": {
     "message": "録画が見つかりません"
@@ -901,9 +895,6 @@
   },
   "video_end_at_the_playhead_o": {
     "message": "再生位置で終了 O"
-  },
-  "video_drag_the_handles_on_the": {
-    "message": "タイムラインのハンドルをドラッグするか、目的の位置まで再生して <kbd>I</kbd> で開始、<kbd>O</kbd> で終了を設定します。"
   },
   "video_video": {
     "message": "動画"
@@ -1840,5 +1831,20 @@
   },
   "editor_first_hint": {
     "message": "上のツールを選ぶか、<kbd>T</kbd> でテキスト、<kbd>A</kbd> で矢印、<kbd>B</kbd> でぼかしを使えます。"
+  },
+  "video_frame_to_editor": {
+    "message": "フレームを編集"
+  },
+  "video_frame_to_editor_title": {
+    "message": "表示中のフレームをエディタで開き、注釈・コピー・保存します（F）"
+  },
+  "video_drag_to_scrub": {
+    "message": "ドラッグして移動"
+  },
+  "video_trim_hint": {
+    "message": "タイムライン上をドラッグして残す範囲を選ぶか、両端をドラッグします。再生中は <kbd>I</kbd> で開始、<kbd>O</kbd> で終了を設定します。"
+  },
+  "video_size_up_to": {
+    "message": "最大 $1"
   }
 }

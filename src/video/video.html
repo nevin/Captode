@@ -15,6 +15,9 @@
   <div class="sep"></div>
   <div class="doc"><b id="doc-name" data-i18n="video_recording">Recording</b><span id="info">—</span></div>
   <div class="spacer"></div>
+  <button class="btn ghost" id="frame-to-editor" title="Open the frame on screen in the editor, to annotate, copy or save it (F)" data-i18n-title="video_frame_to_editor_title" data-i18n="video_frame_to_editor">
+    <svg class="i" viewBox="0 0 24 24"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3z"/><circle cx="12" cy="13" r="3"/></svg>Frame to editor
+  </button>
   <button class="btn ghost" id="dl-original" title="Download the recording as it was captured" data-i18n-title="video_download_the_recording_as_it" data-i18n="video_original_webm">
     <svg class="i" viewBox="0 0 24 24"><path d="M12 4v12M7 11l5 5 5-5M4 20h16"/></svg>Original WebM
   </button>
@@ -41,9 +44,10 @@
         <div class="shade left" id="shade-l"></div>
         <div class="shade right" id="shade-r"></div>
         <div class="range" id="range"></div>
-        <div class="handle" id="h-start" role="slider" tabindex="0" aria-label="Trim start" data-tip="Start  I" data-i18n-aria-label="video_trim_start" data-i18n-tip="video_start_i"></div>
-        <div class="handle" id="h-end" role="slider" tabindex="0" aria-label="Trim end" data-tip="End  O" data-i18n-aria-label="video_trim_end" data-i18n-tip="video_end_o"></div>
-        <div class="playhead" id="playhead"></div>
+        <div class="handle" id="h-start" role="slider" tabindex="0" aria-label="Trim start" data-i18n-aria-label="video_trim_start" aria-keyshortcuts="i"></div>
+        <div class="handle" id="h-end" role="slider" tabindex="0" aria-label="Trim end" data-i18n-aria-label="video_trim_end" aria-keyshortcuts="o"></div>
+        <div class="range-len" id="range-len" aria-hidden="true"></div>
+        <div class="playhead" id="playhead" title="Drag to scrub" data-i18n-title="video_drag_to_scrub"></div>
       </div>
       <span class="tc muted" id="tc-len">0:00.0</span>
     </div>
@@ -66,7 +70,7 @@
           <div class="with-btn"><input type="number" id="t-end" min="0" step="0.1"><button class="btn ghost icon" id="t-end-set" data-tip="End at the playhead  O" data-tip-align="end" data-i18n-tip="video_end_at_the_playhead_o"><svg class="i" viewBox="0 0 24 24"><path d="M20 4v16M16 12H4M10 6l-6 6 6 6"/></svg></button></div>
         </label>
       </div>
-      <p class="muted small" style="margin:0" data-i18n-html="video_drag_the_handles_on_the">Drag the handles on the timeline, or play to a point and press <kbd>I</kbd> for the start and <kbd>O</kbd> for the end.</p>
+      <p class="muted small" style="margin:0" data-i18n-html="video_trim_hint">Drag across the timeline to choose the part to keep, or drag its edges. While playing, <kbd>I</kbd> sets the start and <kbd>O</kbd> the end.</p>
     </section>
 
     <section class="section">
@@ -158,7 +162,7 @@
       </div>
       <div class="row">
         <button class="btn hidden" id="cancel" disabled data-i18n="settings_cancel">Cancel</button>
-        <button class="btn primary block" id="convert" data-i18n="editor_export">Export</button>
+        <button class="btn primary block download-big" id="convert"><span class="dl-label" data-i18n="editor_export">Export</span><span class="estimate" id="convert-size"></span></button>
         <button class="btn hidden" id="redo-export" data-tip="Change settings and export again" data-i18n-tip="video_change_settings_and_export_again" data-i18n="video_edit">Edit</button>
         <button class="btn primary block hidden" id="download" data-i18n="editor_download">
           <svg class="i" viewBox="0 0 24 24"><path d="M12 4v12M7 11l5 5 5-5M4 20h16"/></svg>Download

@@ -872,14 +872,8 @@
   "video_trim_start": {
     "message": "Inicio del recorte"
   },
-  "video_start_i": {
-    "message": "Inicio I"
-  },
   "video_trim_end": {
     "message": "Fin del recorte"
-  },
-  "video_end_o": {
-    "message": "Fin O"
   },
   "video_recording_not_found": {
     "message": "No se encuentra la grabación"
@@ -901,9 +895,6 @@
   },
   "video_end_at_the_playhead_o": {
     "message": "Terminar en el cabezal O"
-  },
-  "video_drag_the_handles_on_the": {
-    "message": "Arrastra los tiradores de la línea de tiempo, o reproduce hasta un punto y pulsa <kbd>I</kbd> para el inicio y <kbd>O</kbd> para el fin."
   },
   "video_video": {
     "message": "Vídeo"
@@ -1840,5 +1831,20 @@
   },
   "editor_first_hint": {
     "message": "Elige una herramienta arriba o pulsa <kbd>T</kbd> para texto, <kbd>A</kbd> para una flecha o <kbd>B</kbd> para difuminar."
+  },
+  "video_frame_to_editor": {
+    "message": "Fotograma al editor"
+  },
+  "video_frame_to_editor_title": {
+    "message": "Abre el fotograma visible en el editor para anotarlo, copiarlo o guardarlo (F)"
+  },
+  "video_drag_to_scrub": {
+    "message": "Arrastra para recorrer"
+  },
+  "video_trim_hint": {
+    "message": "Arrastra por la línea de tiempo para elegir la parte que quieres conservar, o arrastra sus bordes. Durante la reproducción, <kbd>I</kbd> marca el inicio y <kbd>O</kbd> el final."
+  },
+  "video_size_up_to": {
+    "message": "hasta $1"
   }
 }

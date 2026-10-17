@@ -872,14 +872,8 @@
   "video_trim_start": {
     "message": "자르기 시작"
   },
-  "video_start_i": {
-    "message": "시작 I"
-  },
   "video_trim_end": {
     "message": "자르기 끝"
-  },
-  "video_end_o": {
-    "message": "끝 O"
   },
   "video_recording_not_found": {
     "message": "녹화를 찾을 수 없습니다"
@@ -901,9 +895,6 @@
   },
   "video_end_at_the_playhead_o": {
     "message": "재생 위치에서 끝 O"
-  },
-  "video_drag_the_handles_on_the": {
-    "message": "타임라인의 핸들을 드래그하거나, 원하는 지점까지 재생한 뒤 <kbd>I</kbd>로 시작, <kbd>O</kbd>로 끝을 정하세요."
   },
   "video_video": {
     "message": "동영상"
@@ -1840,5 +1831,20 @@
   },
   "editor_first_hint": {
     "message": "위에서 도구를 고르거나 <kbd>T</kbd>(텍스트), <kbd>A</kbd>(화살표), <kbd>B</kbd>(흐리게)를 누르세요."
+  },
+  "video_frame_to_editor": {
+    "message": "프레임 편집"
+  },
+  "video_frame_to_editor_title": {
+    "message": "보이는 프레임을 편집기에서 열어 주석을 달거나 복사·저장합니다(F)"
+  },
+  "video_drag_to_scrub": {
+    "message": "드래그하여 탐색"
+  },
+  "video_trim_hint": {
+    "message": "타임라인을 드래그해 남길 부분을 고르거나 양 끝을 드래그하세요. 재생 중에는 <kbd>I</kbd>로 시작, <kbd>O</kbd>로 끝을 정합니다."
+  },
+  "video_size_up_to": {
+    "message": "최대 $1"
   }
 }

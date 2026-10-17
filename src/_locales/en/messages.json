@@ -874,14 +874,8 @@
   "video_trim_start": {
     "message": "Trim start"
   },
-  "video_start_i": {
-    "message": "Start I"
-  },
   "video_trim_end": {
     "message": "Trim end"
-  },
-  "video_end_o": {
-    "message": "End O"
   },
   "video_recording_not_found": {
     "message": "Recording not found"
@@ -903,9 +897,6 @@
   },
   "video_end_at_the_playhead_o": {
     "message": "End at the playhead O"
-  },
-  "video_drag_the_handles_on_the": {
-    "message": "Drag the handles on the timeline, or play to a point and press <kbd>I</kbd> for the start and <kbd>O</kbd> for the end."
   },
   "video_video": {
     "message": "Video"
@@ -1842,5 +1833,20 @@
   },
   "editor_first_hint": {
     "message": "Pick a tool above, or press <kbd>T</kbd> for text, <kbd>A</kbd> for an arrow, <kbd>B</kbd> to blur."
+  },
+  "video_frame_to_editor": {
+    "message": "Frame to editor"
+  },
+  "video_frame_to_editor_title": {
+    "message": "Open the frame on screen in the editor, to annotate, copy or save it (F)"
+  },
+  "video_drag_to_scrub": {
+    "message": "Drag to scrub"
+  },
+  "video_trim_hint": {
+    "message": "Drag across the timeline to choose the part to keep, or drag its edges. While playing, <kbd>I</kbd> sets the start and <kbd>O</kbd> the end."
+  },
+  "video_size_up_to": {
+    "message": "up to $1"
   }
 }

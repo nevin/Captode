@@ -1,4 +1,4 @@
-import { getCapture } from '../lib/db.js';
+import { getCapture, putCapture } from '../lib/db.js';
 import { GifEncoder } from '../lib/gif.js';
 import { buildPalette } from '../lib/quantize.js';
 import { getSettings } from '../lib/settings.js';
@@ -102,7 +102,7 @@ function fillFps(reset = false) {
 
 function syncUi() {
   for (const b of document.querySelectorAll('#formats button')) b.classList.toggle('on', b.dataset.f === format);
-  $('#convert').textContent = t('export_format', format.toUpperCase());
+  $('#convert .dl-label').textContent = t('export_format', format.toUpperCase());
   for (const el of document.querySelectorAll('[data-for]')) el.classList.toggle('hidden', !el.dataset.for.split(' ').includes(format));
   $('#w-quality-f').classList.toggle('hidden', $('#w-lossless').checked);
   $('#denoise-row').classList.toggle('hidden', !$('#optimize').checked);
@@ -117,6 +117,16 @@ function syncUi() {
   const { start, end } = trim();
   const frames = Math.max(1, Math.round((end - start) * p.fps));
   $('#dims').innerHTML = `<span>${t('video_dims', [`${p.width} × ${p.height}`, p.fps, frames])}</span><b>${(end - start).toFixed(1)} s</b>`;
+  // MP4 and WebM are encoded at a variable bitrate below this ceiling, so it is an
+  // upper limit; screen recordings, mostly still, usually come out well under it.
+  // GIF and WebP depend too much on the picture to guess.
+  if (format === 'mp4' || format === 'webm') {
+    const bitrate = Math.min(40e6, Math.max(300e3, p.width * p.height * p.fps * Number($('#v-quality').value)));
+    const audio = $('#v-audio').checked && meta.hasAudio ? 128e3 : 0;
+    $('#convert-size').textContent = t('video_size_up_to', fmtBytes(Math.round(((bitrate + audio) * (end - start)) / 8)));
+  } else {
+    $('#convert-size').textContent = '';
+  }
   stale();
 }
 
@@ -178,6 +188,12 @@ function drawTimeline() {
   $('#shade-l').style.width = pct(start);
   $('#shade-r').style.width = `calc(100% - ${pct(end)})`;
   $('#tc-len').textContent = t('trim_selected', (end - start).toFixed(1));
+  // The length on the kept part itself, and each end's time on its handle.
+  $('#range-len').style.left = `calc((${pct(start)} + ${pct(end)}) / 2)`;
+  $('#range-len').textContent = `${(end - start).toFixed(1)} s`;
+  $('#range-len').classList.toggle('hidden', end - start >= duration - 0.05);
+  $('#h-start').dataset.time = fmtTime(start);
+  $('#h-end').dataset.time = fmtTime(end);
   for (const [h, v] of [['#h-start', start], ['#h-end', end]]) {
     $(h).setAttribute('aria-valuemin', '0');
     $(h).setAttribute('aria-valuemax', duration.toFixed(1));
@@ -197,19 +213,38 @@ function timeAt(e) {
   return Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)) * duration;
 }
 
+// On the timeline: a click goes to that moment; a drag across it chooses the part to
+// keep; the handles move one end; the playhead's knob scrubs.
 $('#track').addEventListener('pointerdown', (e) => {
-  if (!duration) return;
+  if (!duration || busy) return;
   const handle = e.target.closest('.handle');
+  const scrub = e.target.closest('#playhead');
   $('#track').setPointerCapture(e.pointerId);
+  const from = timeAt(e), x0 = e.clientX;
+  let selecting = false;
+  $('#track').classList.add('dragging');
   const move = (ev) => {
-    const t = timeAt(ev);
-    if (handle?.id === 'h-start') { setStart(t); player.currentTime = trim().start; }
-    else if (handle?.id === 'h-end') { setEnd(t); player.currentTime = trim().end; }
-    else player.currentTime = t;
+    const at = timeAt(ev);
+    if (handle?.id === 'h-start') { setStart(at); player.currentTime = trim().start; }
+    else if (handle?.id === 'h-end') { setEnd(at); player.currentTime = trim().end; }
+    else if (scrub) player.currentTime = at;
+    else if (selecting || Math.abs(ev.clientX - x0) > 4) {
+      selecting = true;
+      const [a, b] = [Math.min(from, at), Math.max(from, at)];
+      $('#t-start').value = a.toFixed(1);
+      $('#t-end').value = Math.max(b, a + 0.1).toFixed(1);
+      syncUi();
+      player.currentTime = at;
+    }
     drawPlayhead();
   };
-  move(e);
-  const up = () => { $('#track').removeEventListener('pointermove', move); $('#track').removeEventListener('pointerup', up); };
+  if (handle || scrub) move(e);
+  const up = (ev) => {
+    if (!handle && !scrub && !selecting) { player.currentTime = timeAt(ev); drawPlayhead(); }
+    $('#track').classList.remove('dragging');
+    $('#track').removeEventListener('pointermove', move);
+    $('#track').removeEventListener('pointerup', up);
+  };
   $('#track').addEventListener('pointermove', move);
   $('#track').addEventListener('pointerup', up);
 });
@@ -258,6 +293,7 @@ document.addEventListener('keydown', (e) => {
   if (k === ' ' && !e.target.closest('button')) { e.preventDefault(); togglePlay(); }
   else if (k === 'i') setStart(player.currentTime);
   else if (k === 'o') setEnd(player.currentTime);
+  else if (k === 'f') frameToEditor();
   else if (k === 'arrowleft' && !e.target.closest('.handle')) { player.currentTime = Math.max(0, player.currentTime - (e.shiftKey ? 1 : 1 / (meta.fps || 30))); }
   else if (k === 'arrowright' && !e.target.closest('.handle')) { player.currentTime = Math.min(duration, player.currentTime + (e.shiftKey ? 1 : 1 / (meta.fps || 30))); }
 });
@@ -813,3 +849,18 @@ addEventListener('resize', () => { if (rv.tool !== 'off') placeOverlay(); });
   enhance();
   buildFilmstrip();
 })();
+
+// ---------- frame to editor ----------
+
+/** The frame on screen, at the recording's full size, opened in the editor. */
+async function frameToEditor() {
+  if (!player.videoWidth || $('#player').classList.contains('hidden')) return;
+  player.pause();
+  const c = new OffscreenCanvas(player.videoWidth, player.videoHeight);
+  c.getContext('2d').drawImage(player, 0, 0);
+  const blob = await c.convertToBlob({ type: 'image/png' });
+  const title = `${meta.title || t('video_recording')} · ${fmtTime(player.currentTime)}`;
+  const id = await putCapture(blob, { title, url: meta.url, mode: 'frame', dpr: meta.dpr });
+  await chrome.tabs.create({ url: chrome.runtime.getURL(`editor/editor.html?id=${id}&reopen=1`) });
+}
+$('#frame-to-editor').addEventListener('click', frameToEditor);

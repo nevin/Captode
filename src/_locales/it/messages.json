@@ -872,14 +872,8 @@
   "video_trim_start": {
     "message": "Inizio del taglio"
   },
-  "video_start_i": {
-    "message": "Inizio I"
-  },
   "video_trim_end": {
     "message": "Fine del taglio"
-  },
-  "video_end_o": {
-    "message": "Fine O"
   },
   "video_recording_not_found": {
     "message": "Registrazione non trovata"
@@ -901,9 +895,6 @@
   },
   "video_end_at_the_playhead_o": {
     "message": "Termina alla testina O"
-  },
-  "video_drag_the_handles_on_the": {
-    "message": "Trascina le maniglie sulla timeline, oppure riproduci fino a un punto e premi <kbd>I</kbd> per l'inizio e <kbd>O</kbd> per la fine."
   },
   "video_video": {
     "message": "Video"
@@ -1840,5 +1831,20 @@
   },
   "editor_first_hint": {
     "message": "Scegli uno strumento in alto, oppure premi <kbd>T</kbd> per il testo, <kbd>A</kbd> per una freccia, <kbd>B</kbd> per sfocare."
+  },
+  "video_frame_to_editor": {
+    "message": "Fotogramma nell'editor"
+  },
+  "video_frame_to_editor_title": {
+    "message": "Apri il fotogramma visibile nell'editor per annotarlo, copiarlo o salvarlo (F)"
+  },
+  "video_drag_to_scrub": {
+    "message": "Trascina per scorrere"
+  },
+  "video_trim_hint": {
+    "message": "Trascina sulla timeline per scegliere la parte da tenere, o trascinane i bordi. Durante la riproduzione, <kbd>I</kbd> imposta l'inizio e <kbd>O</kbd> la fine."
+  },
+  "video_size_up_to": {
+    "message": "fino a $1"
   }
 }

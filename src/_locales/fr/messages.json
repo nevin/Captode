@@ -872,14 +872,8 @@
   "video_trim_start": {
     "message": "Début du découpage"
   },
-  "video_start_i": {
-    "message": "Début I"
-  },
   "video_trim_end": {
     "message": "Fin du découpage"
-  },
-  "video_end_o": {
-    "message": "Fin O"
   },
   "video_recording_not_found": {
     "message": "Enregistrement introuvable"
@@ -901,9 +895,6 @@
   },
   "video_end_at_the_playhead_o": {
     "message": "Finir à la tête de lecture O"
-  },
-  "video_drag_the_handles_on_the": {
-    "message": "Faites glisser les poignées de la timeline, ou lisez jusqu'à un point et appuyez sur <kbd>I</kbd> pour le début et <kbd>O</kbd> pour la fin."
   },
   "video_video": {
     "message": "Vidéo"
@@ -1840,5 +1831,20 @@
   },
   "editor_first_hint": {
     "message": "Choisissez un outil ci-dessus, ou appuyez sur <kbd>T</kbd> pour du texte, <kbd>A</kbd> pour une flèche, <kbd>B</kbd> pour flouter."
+  },
+  "video_frame_to_editor": {
+    "message": "Image vers l'éditeur"
+  },
+  "video_frame_to_editor_title": {
+    "message": "Ouvre l'image affichée dans l'éditeur pour l'annoter, la copier ou l'enregistrer (F)"
+  },
+  "video_drag_to_scrub": {
+    "message": "Faites glisser pour parcourir"
+  },
+  "video_trim_hint": {
+    "message": "Faites glisser sur la timeline pour choisir la partie à garder, ou déplacez ses bords. Pendant la lecture, <kbd>I</kbd> fixe le début et <kbd>O</kbd> la fin."
+  },
+  "video_size_up_to": {
+    "message": "jusqu'à $1"
   }
 }

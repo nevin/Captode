@@ -872,14 +872,8 @@
   "video_trim_start": {
     "message": "剪辑起点"
   },
-  "video_start_i": {
-    "message": "起点 I"
-  },
   "video_trim_end": {
     "message": "剪辑终点"
-  },
-  "video_end_o": {
-    "message": "终点 O"
   },
   "video_recording_not_found": {
     "message": "找不到录制内容"
@@ -901,9 +895,6 @@
   },
   "video_end_at_the_playhead_o": {
     "message": "在播放头结束 O"
-  },
-  "video_drag_the_handles_on_the": {
-    "message": "拖动时间轴上的手柄，或播放到某一位置后按 <kbd>I</kbd> 设为起点、按 <kbd>O</kbd> 设为终点。"
   },
   "video_video": {
     "message": "视频"
@@ -1840,5 +1831,20 @@
   },
   "editor_first_hint": {
     "message": "在上方选择工具，或按 <kbd>T</kbd> 添加文字、<kbd>A</kbd> 添加箭头、<kbd>B</kbd> 进行模糊。"
+  },
+  "video_frame_to_editor": {
+    "message": "帧到编辑器"
+  },
+  "video_frame_to_editor_title": {
+    "message": "在编辑器中打开当前帧，以便标注、复制或保存 (F)"
+  },
+  "video_drag_to_scrub": {
+    "message": "拖动以浏览"
+  },
+  "video_trim_hint": {
+    "message": "在时间轴上拖动以选择要保留的部分，或拖动其边缘。播放时，按 <kbd>I</kbd> 设置开始，按 <kbd>O</kbd> 设置结束。"
+  },
+  "video_size_up_to": {
+    "message": "最多 $1"
   }
 }

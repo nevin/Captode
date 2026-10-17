@@ -230,6 +230,13 @@ details.section[open] > summary::after { transform: rotate(-135deg); margin-top:
   color: var(--muted); font-variant-numeric: tabular-nums; font-size: 12px;
 }
 .estimate b { color: var(--text); font-weight: 600; }
+.download-big { height: 44px; justify-content: flex-start; gap: 8px; padding: 0 14px; }
+.download-big .dl-label { flex: none; }
+/* The size of the file the button gives, on the button itself. */
+.download-big .estimate {
+  flex: 1; justify-content: flex-end; padding: 0; background: none; color: inherit; opacity: .8;
+  font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
 
 /* App chrome */
 .topbar {

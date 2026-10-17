@@ -77,9 +77,21 @@ body { display: flex; flex-direction: column; overflow: hidden; }
 }
 .handle::before { content: ""; width: 2px; height: 14px; border-radius: 1px; background: rgba(255,255,255,.85); }
 .handle:focus-visible { outline: 2px solid var(--text); outline-offset: 1px; }
-.handle[data-tip]::after { top: auto; bottom: calc(100% + 8px); }
+/* Each end's time, while it's pointed at, focused or dragged. */
+.handle::after {
+  content: attr(data-time); position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%);
+  padding: 2px 6px; border-radius: 5px; background: #17171c; color: #fff; font-size: 11px; font-variant-numeric: tabular-nums;
+  white-space: nowrap; pointer-events: none; opacity: 0; transition: opacity .1s;
+}
+.handle:hover::after, .handle:focus-visible::after, .track.dragging .handle::after { opacity: 1; }
+.range-len {
+  position: absolute; top: 4px; transform: translateX(-50%); padding: 1px 6px; border-radius: 5px; z-index: 1;
+  background: var(--accent); color: #fff; font-size: 11px; font-weight: 600; font-variant-numeric: tabular-nums; pointer-events: none; white-space: nowrap;
+}
 .playhead { position: absolute; top: -6px; bottom: -6px; width: 2px; margin-left: -1px; background: var(--text); border-radius: 1px; pointer-events: none; z-index: 3; }
-.playhead::before { content: ""; position: absolute; top: 0; left: -4px; width: 10px; height: 10px; border-radius: 50%; background: var(--text); }
+/* Only the knob can be grabbed, to scrub, so it never blocks a handle it sits on. */
+.playhead::before { content: ""; position: absolute; top: -2px; left: -6px; width: 14px; height: 14px; border-radius: 50%; background: var(--text); pointer-events: auto; cursor: grab; }
+.track.dragging, .track.dragging .playhead::before { cursor: grabbing; }
 .timeline [data-tip]:not(.handle)::after { top: auto; bottom: calc(100% + 8px); }
 
 .hint { margin: -8px 0 14px; }

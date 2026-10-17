@@ -82,8 +82,14 @@ export async function setup({ browser, url }) {
 }
 
 export const tests = {
-  async 'MP4 export: whole clip, faster than real time'({ exportAs }) {
+  async 'MP4 export: whole clip, faster than real time'({ exportAs, video }) {
+    await video.click('#formats [data-f="mp4"]');
+    // The button gives a ceiling for the size, which the file must stay under.
+    const est = await video.$eval('#convert-size', (e) => e.textContent);
+    const [, n, unit] = est.match(/([\d.]+) (KB|MB)/) || [];
+    const ceiling = Number(n) * (unit === 'MB' ? 1048576 : 1024);
     const r = await exportAs('mp4');
+    ok(ceiling && r.size <= ceiling * 1.05, `${r.size} bytes against "${est}"`);
     ok(!r.failed && r.type === 'video/mp4', `export failed: ${r.failed || r.type}`);
     ok(!r.fallback, `fell back to real-time export: ${r.fallback}`);
     ok(r.width === 1280 && r.height === 720, `size ${r.width}×${r.height}`);
@@ -91,6 +97,42 @@ export const tests = {
     near(r.first, 0, 0.05, 'first frame time');
     ok(r.ms < 8000, `took ${r.ms} ms for an 8 s clip`);
     return `${r.ms} ms, ${Math.round(r.size / 1024)} KB`;
+  },
+
+  async 'timeline: a drag chooses the part to keep, a click moves, F opens the frame in the editor'({ browser, video }) {
+    const tr = await video.evaluate(() => { const r = document.querySelector('#track').getBoundingClientRect(); return { x: r.x, y: r.y + r.height / 2, w: r.width }; });
+    const st = () => video.evaluate(() => ({ start: Number(document.querySelector('#t-start').value), end: Number(document.querySelector('#t-end').value), now: document.querySelector('#player').currentTime, len: document.querySelector('#range-len').textContent }));
+    try {
+      await video.mouse.move(tr.x + tr.w * 0.25, tr.y);
+      await video.mouse.down();
+      await video.mouse.move(tr.x + tr.w * 0.5, tr.y, { steps: 6 });
+      await video.mouse.up();
+      let r = await st();
+      near(r.start, 2, 0.15, 'start');
+      near(r.end, 4, 0.15, 'end');
+      ok(r.len === `${(r.end - r.start).toFixed(1)} s`, `length on the timeline: ${r.len}`);
+      await video.mouse.click(tr.x + tr.w * 0.75, tr.y);
+      await sleep(150);
+      r = await st();
+      near(r.now, 6, 0.15, 'a click moves the playhead');
+      ok(r.start > 1.8 && r.end < 4.2, 'a click keeps the trim');
+      // GIF and WebP have no size until they are made.
+      await video.click('#formats [data-f="gif"]');
+      ok(!(await video.$eval('#convert-size', (e) => e.textContent)), 'no guess for GIF');
+      await video.click('#formats [data-f="mp4"]');
+      const before = new Set(browser.targets());
+      await video.evaluate(() => document.activeElement?.blur());
+      await video.keyboard.press('f');
+      const target = await browser.waitForTarget((x) => !before.has(x) && x.url().includes('editor.html?id='), { timeout: 15000 });
+      const ed = await target.page();
+      await ed.waitForFunction(() => /px/.test(document.querySelector('#doc-dims').textContent), { polling: 100 });
+      const e = await ed.evaluate(() => ({ name: document.querySelector('#doc-name').textContent, size: captodeEditor.size() }));
+      ok(e.size.join() === '1280,720' && /0:06\.\d$/.test(e.name), JSON.stringify(e));
+      await ed.close();
+    } finally {
+      await video.evaluate(() => { const d = document.querySelector('#player').duration; document.querySelector('#t-start').value = '0'; document.querySelector('#t-end').value = d.toFixed(1); document.querySelector('#t-end').dispatchEvent(new Event('input', { bubbles: true })); });
+      await video.bringToFront();
+    }
   },
 
   async 'WebM export keeps the original audio'({ exportAs }) {

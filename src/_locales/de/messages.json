@@ -872,14 +872,8 @@
   "video_trim_start": {
     "message": "Anfang des Zuschnitts"
   },
-  "video_start_i": {
-    "message": "Anfang I"
-  },
   "video_trim_end": {
     "message": "Ende des Zuschnitts"
-  },
-  "video_end_o": {
-    "message": "Ende O"
   },
   "video_recording_not_found": {
     "message": "Aufzeichnung nicht gefunden"
@@ -901,9 +895,6 @@
   },
   "video_end_at_the_playhead_o": {
     "message": "Am Abspielkopf enden O"
-  },
-  "video_drag_the_handles_on_the": {
-    "message": "Ziehe die Griffe auf der Zeitleiste, oder spiele bis zu einer Stelle und drücke <kbd>I</kbd> für den Anfang und <kbd>O</kbd> für das Ende."
   },
   "video_video": {
     "message": "Video"
@@ -1840,5 +1831,20 @@
   },
   "editor_first_hint": {
     "message": "Wählen Sie oben ein Werkzeug oder drücken Sie <kbd>T</kbd> für Text, <kbd>A</kbd> für einen Pfeil, <kbd>B</kbd> zum Verpixeln."
+  },
+  "video_frame_to_editor": {
+    "message": "Bild in Editor"
+  },
+  "video_frame_to_editor_title": {
+    "message": "Das angezeigte Bild im Editor öffnen, um es zu beschriften, zu kopieren oder zu speichern (F)"
+  },
+  "video_drag_to_scrub": {
+    "message": "Ziehen zum Durchsuchen"
+  },
+  "video_trim_hint": {
+    "message": "Über die Zeitleiste ziehen, um den Teil zu wählen, der bleibt, oder seine Ränder ziehen. Beim Abspielen setzt <kbd>I</kbd> den Anfang und <kbd>O</kbd> das Ende."
+  },
+  "video_size_up_to": {
+    "message": "bis $1"
   }
 }
