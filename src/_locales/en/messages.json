@@ -1980,5 +1980,17 @@
   },
   "popup_whats_new_1_4": {
     "message": "A camera bubble and microphone for recordings, a shortcut for each kind of screenshot, and one click to blur email addresses and numbers."
+  },
+  "share_captode": {
+    "message": "Share Captode"
+  },
+  "share_tip_popup": {
+    "message": "Share Captode: copy its store link"
+  },
+  "share_text": {
+    "message": "Captode: free screenshots and screen recordings in your browser, with no account and no uploads."
+  },
+  "share_copied": {
+    "message": "Link copied. Paste it anywhere to share Captode."
   }
 }

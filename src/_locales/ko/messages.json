@@ -1978,5 +1978,17 @@
   },
   "popup_whats_new_1_4": {
     "message": "녹화용 카메라 버블과 마이크, 스크린샷 종류별 단축키, 이메일 주소와 번호를 한 번에 흐리게 하는 기능."
+  },
+  "share_captode": {
+    "message": "Captode 공유"
+  },
+  "share_tip_popup": {
+    "message": "Captode 공유: 스토어 링크 복사"
+  },
+  "share_text": {
+    "message": "Captode: 계정도 업로드도 필요 없는 브라우저용 무료 스크린샷 및 화면 녹화."
+  },
+  "share_copied": {
+    "message": "링크를 복사했습니다. 어디든 붙여 넣어 Captode를 공유하세요."
   }
 }

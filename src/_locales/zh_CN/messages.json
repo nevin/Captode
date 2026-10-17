@@ -1978,5 +1978,17 @@
   },
   "popup_whats_new_1_4": {
     "message": "录制支持摄像头气泡和麦克风，每种截图都有快捷键，还可一键模糊邮箱地址和号码。"
+  },
+  "share_captode": {
+    "message": "分享 Captode"
+  },
+  "share_tip_popup": {
+    "message": "分享 Captode：复制商店链接"
+  },
+  "share_text": {
+    "message": "Captode：在浏览器中免费截图和录屏，无需账号，不会上传。"
+  },
+  "share_copied": {
+    "message": "链接已复制，粘贴到任何地方即可分享 Captode。"
   }
 }

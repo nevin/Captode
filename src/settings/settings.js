@@ -1,5 +1,5 @@
 import { getSettings, saveSettings, DEFAULT_SETTINGS } from '../lib/settings.js';
-import { toast, enhance, openDialog, showShortcut } from '../lib/ui.js';
+import { toast, enhance, openDialog, showShortcut, shareCaptode } from '../lib/ui.js';
 import { t, localize } from '../lib/i18n.js';
 
 localize();
@@ -51,6 +51,7 @@ $('#device').addEventListener('change', async (e) => { await chrome.storage.loca
 $('#shortcuts').addEventListener('click', () => chrome.tabs.create({ url: 'chrome://extensions/shortcuts' }));
 $('#version').textContent = t('settings_version', chrome.runtime.getManifest().version);
 $('#reset').addEventListener('click', () => openDialog($('#reset-dialog')));
+$('#share').addEventListener('click', () => shareCaptode());
 
 /**
  * What a bug report needs, as text to paste: versions, the browser's language and

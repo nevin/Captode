@@ -1978,5 +1978,17 @@
   },
   "popup_whats_new_1_4": {
     "message": "Bulle caméra et micro pour les enregistrements, un raccourci par type de capture, et un clic pour flouter e-mails et numéros."
+  },
+  "share_captode": {
+    "message": "Partager Captode"
+  },
+  "share_tip_popup": {
+    "message": "Partager Captode : copier son lien du store"
+  },
+  "share_text": {
+    "message": "Captode : captures et enregistrements d'écran gratuits dans votre navigateur, sans compte ni envoi."
+  },
+  "share_copied": {
+    "message": "Lien copié. Collez-le où vous voulez pour partager Captode."
   }
 }

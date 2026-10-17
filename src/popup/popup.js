@@ -1,4 +1,4 @@
-import { enhance, tablist, showShortcut } from '../lib/ui.js';
+import { enhance, tablist, showShortcut, shareCaptode } from '../lib/ui.js';
 import { outputSize } from '../lib/recorder.js';
 import { t, localize } from '../lib/i18n.js';
 import { listCaptures } from '../lib/db.js';
@@ -168,6 +168,7 @@ for (const [id, name] of [['camera', 'camera'], ['mic', 'microphone']]) {
   });
 }
 $('#recent-all').addEventListener('click', () => $('#open-editor').click());
+$('#share').addEventListener('click', () => shareCaptode({ copyOnly: true }));
 $('#open-settings').addEventListener('click', () => { chrome.runtime.openOptionsPage(); window.close(); });
 $('#open-editor').addEventListener('click', async () => {
   await chrome.tabs.create({ url: chrome.runtime.getURL('editor/editor.html') });

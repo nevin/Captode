@@ -1978,5 +1978,17 @@
   },
   "popup_whats_new_1_4": {
     "message": "Bolha da câmera e microfone nas gravações, um atalho para cada tipo de captura e um clique para desfocar e-mails e números."
+  },
+  "share_captode": {
+    "message": "Compartilhar o Captode"
+  },
+  "share_tip_popup": {
+    "message": "Compartilhar o Captode: copiar o link da loja"
+  },
+  "share_text": {
+    "message": "Captode: capturas e gravações de tela grátis no navegador, sem conta e sem uploads."
+  },
+  "share_copied": {
+    "message": "Link copiado. Cole-o onde quiser para compartilhar o Captode."
   }
 }

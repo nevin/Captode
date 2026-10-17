@@ -1978,5 +1978,17 @@
   },
   "popup_whats_new_1_4": {
     "message": "録画にカメラバブルとマイク、スクリーンショットの種類ごとのショートカット、メールアドレスや番号をワンクリックでぼかす機能。"
+  },
+  "share_captode": {
+    "message": "Captode を共有"
+  },
+  "share_tip_popup": {
+    "message": "Captode を共有：ストアのリンクをコピー"
+  },
+  "share_text": {
+    "message": "Captode：ブラウザで使える無料のスクリーンショットと画面録画。アカウントもアップロードも不要。"
+  },
+  "share_copied": {
+    "message": "リンクをコピーしました。貼り付けて Captode を共有しましょう。"
   }
 }

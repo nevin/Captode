@@ -121,6 +121,38 @@ export const tests = {
     await st.close();
   },
 
+  async 'Share Captode gives the store link, from the popup and from Settings'({ browser, url }) {
+    const STORE = 'https://chromewebstore.google.com/detail/mphigcddnecjbnkcpiaabheopepcmgce?utm_source=item-share-cb';
+    // The clipboard and share sheet are stood in for, to see what they are given.
+    const watch = (p) => p.evaluate(() => {
+      window.__given = [];
+      navigator.clipboard.writeText = async (text) => { window.__given.push(['copy', text]); };
+      Object.defineProperty(navigator, 'share', { configurable: true, value: async (d) => { window.__given.push(['share', d.url]); } });
+    });
+    const pop = await open(browser, url('popup/popup.html'), { width: 340, height: 600 });
+    await watch(pop);
+    await pop.click('#share');
+    await pop.waitForFunction(() => window.__given.length && !document.querySelector('.toast').classList.contains('hidden'), { polling: 100 });
+    const fromPopup = await pop.evaluate(() => window.__given);
+    ok(fromPopup.length === 1 && fromPopup[0][0] === 'copy' && fromPopup[0][1] === STORE, `popup: ${JSON.stringify(fromPopup)}`);
+    // The header's buttons still fit beside the name.
+    const fits = await pop.evaluate(() => document.querySelector('header').scrollWidth <= document.querySelector('header').clientWidth);
+    ok(fits, 'popup header overflows');
+    await pop.close();
+
+    const st = await open(browser, url('settings/settings.html'));
+    await watch(st);
+    await st.click('#share');
+    await st.waitForFunction(() => window.__given.length, { polling: 100 });
+    ok(JSON.stringify(await st.evaluate(() => window.__given)) === JSON.stringify([['share', STORE]]), 'settings shares through the share sheet');
+    // Without a share sheet, the link is copied.
+    await st.evaluate(() => { window.__given = []; Object.defineProperty(navigator, 'share', { configurable: true, value: undefined }); });
+    await st.click('#share');
+    await st.waitForFunction(() => window.__given.length, { polling: 100 });
+    ok(JSON.stringify(await st.evaluate(() => window.__given)) === JSON.stringify([['copy', STORE]]), 'settings copies without a share sheet');
+    await st.close();
+  },
+
   async 'popup shows the keyboard shortcut as Chrome has it set'({ browser, url }) {
     const pop = await open(browser, url('popup/popup.html'), { width: 340, height: 600 });
     await sleep(300);

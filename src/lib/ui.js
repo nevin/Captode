@@ -137,3 +137,28 @@ export async function showShortcut(el, name = '_execute_action') {
     el.append(k, ' ');
   }
 }
+
+/** Captode's page on the Chrome Web Store, for telling others about it. */
+export const STORE_URL = 'https://chromewebstore.google.com/detail/mphigcddnecjbnkcpiaabheopepcmgce?utm_source=item-share-cb';
+
+/**
+ * Shares Captode's store page: the system's share sheet where Chrome has one (unless
+ * `copyOnly`, as in the popup, which closes when the sheet takes focus), otherwise the
+ * link is copied. Nothing is sent by Captode itself.
+ */
+export async function shareCaptode({ copyOnly = false } = {}) {
+  if (!copyOnly && navigator.share) {
+    try {
+      await navigator.share({ title: 'Captode', text: t('share_text'), url: STORE_URL });
+      return;
+    } catch (e) {
+      if (e.name === 'AbortError') return; // closed without sharing
+    }
+  }
+  try {
+    await navigator.clipboard.writeText(STORE_URL);
+    toast(t('share_copied'), { kind: 'success', ms: 4000 });
+  } catch (e) {
+    toast(e.message || String(e), { kind: 'error' });
+  }
+}

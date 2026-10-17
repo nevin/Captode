@@ -1978,5 +1978,17 @@
   },
   "popup_whats_new_1_4": {
     "message": "Bolla fotocamera e microfono nelle registrazioni, una scorciatoia per ogni tipo di screenshot e un clic per sfocare email e numeri."
+  },
+  "share_captode": {
+    "message": "Condividi Captode"
+  },
+  "share_tip_popup": {
+    "message": "Condividi Captode: copia il link dello store"
+  },
+  "share_text": {
+    "message": "Captode: screenshot e registrazioni dello schermo gratis nel browser, senza account e senza caricamenti."
+  },
+  "share_copied": {
+    "message": "Link copiato. Incollalo dove vuoi per condividere Captode."
   }
 }

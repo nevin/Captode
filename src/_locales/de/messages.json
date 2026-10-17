@@ -1978,5 +1978,17 @@
   },
   "popup_whats_new_1_4": {
     "message": "Kamerablase und Mikrofon für Aufnahmen, eine Tastenkombination für jede Screenshot-Art und ein Klick, um E-Mails und Nummern zu verwischen."
+  },
+  "share_captode": {
+    "message": "Captode teilen"
+  },
+  "share_tip_popup": {
+    "message": "Captode teilen: Store-Link kopieren"
+  },
+  "share_text": {
+    "message": "Captode: kostenlose Screenshots und Bildschirmaufnahmen im Browser, ohne Konto und ohne Uploads."
+  },
+  "share_copied": {
+    "message": "Link kopiert. Fügen Sie ihn irgendwo ein, um Captode zu teilen."
   }
 }

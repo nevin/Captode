@@ -1978,5 +1978,17 @@
   },
   "popup_whats_new_1_4": {
     "message": "Burbuja de cámara y micrófono en las grabaciones, un atajo para cada tipo de captura y un clic para difuminar correos y números."
+  },
+  "share_captode": {
+    "message": "Compartir Captode"
+  },
+  "share_tip_popup": {
+    "message": "Compartir Captode: copiar su enlace de la tienda"
+  },
+  "share_text": {
+    "message": "Captode: capturas y grabaciones de pantalla gratis en tu navegador, sin cuenta y sin subir nada."
+  },
+  "share_copied": {
+    "message": "Enlace copiado. Pégalo donde quieras para compartir Captode."
   }
 }
