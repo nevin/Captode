@@ -75,10 +75,10 @@
     "message": "Questa scheda"
   },
   "popup_everything_visible_in_this_tab": {
-    "message": "Tutto ciò che è visibile in questa scheda"
+    "message": "Ciò che si vede nella scheda"
   },
   "popup_record_only_part_of_this": {
-    "message": "Registra solo una parte di questa scheda"
+    "message": "Solo una parte della scheda"
   },
   "popup_frame_rate": {
     "message": "Fotogrammi al secondo"

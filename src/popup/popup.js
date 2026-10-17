@@ -40,7 +40,12 @@ setSize(settings.videoSize);
 setKind(settings.kind);
 setFps(fps);
 $('#rec-opts').open = settings.recOptsOpen;
-$('#rec-opts').addEventListener('toggle', () => chrome.storage.local.set({ recOptsOpen: $('#rec-opts').open }));
+let optsOpen = settings.recOptsOpen; // saved only when it changes, not as the popup opens
+$('#rec-opts').addEventListener('toggle', () => {
+  if ($('#rec-opts').open === optsOpen) return;
+  optsOpen = $('#rec-opts').open;
+  chrome.storage.local.set({ recOptsOpen: optsOpen });
+});
 markLastUsed();
 
 const { lastError } = await chrome.storage.session.get('lastError');

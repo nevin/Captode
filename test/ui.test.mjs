@@ -279,7 +279,7 @@ export const tests = {
     await prepare(pop);
     await pop.waitForFunction(() => !document.querySelector('#recent').classList.contains('hidden'), { polling: 100 });
     let r = await pop.evaluate(() => ({
-      height: document.body.scrollHeight,
+      height: Math.round(document.querySelector('footer').getBoundingClientRect().bottom), // where the content ends
       open: document.querySelector('#rec-opts').open,
       summary: document.querySelector('#opts-summary').textContent,
       summaryFits: document.querySelector('#rec-opts').getBoundingClientRect().right <= innerWidth,

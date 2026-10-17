@@ -45,8 +45,8 @@ The capture opens in the editor, where you can:
   colours for PNG-8 and GIF that still look right. GIF has **lossy compression** too.
 - **Export** as PNG, compressed 8-bit PNG, JPEG, WebP, GIF, BMP or PDF (one page, or A4 or
   Letter pages with long pages split across them). The quality and size controls compress the
-  file, and the live estimate shows the size before you download. You can also copy the image
-  to the clipboard, from the top bar or the Export panel, or have every new screenshot copied
+  file, and the Download button shows the file's size before you download. You can also copy the
+  image to the clipboard from the top bar, or have every new screenshot copied
   automatically (Settings → Copy screenshots to the clipboard). See [How compression works](#how-compression-works).
 - **Quick styles:** Bug, Review, Note, Approved, Neutral and Brand set the colours of every
   tool at once, and of whatever is selected.
@@ -59,9 +59,15 @@ The capture opens in the editor, where you can:
 - **Keyboard shortcuts** for every tool. Press **?** in the editor to see them all.
 - **Keyboard and screen readers:** every annotation is listed in words in the Annotate tab,
   where it can be chosen, moved, edited or removed from the keyboard, and changes are announced.
-- **Undo** for removing a capture, deleting annotations and resetting settings.
-- **Recent captures:** open the editor from the popup to get back any capture from the last
-  24 hours, even after closing its tab.
+- **Undo** for removing a capture, deleting annotations, clearing measurements, deleting a
+  preset and resetting settings.
+- **Recent captures:** the popup shows the last three, and the editor every capture from the
+  last 24 hours, even after closing its tab.
+- **Finding your way:** each tool's tooltip names its group and key and says what it does; a
+  first image shows a short hint; and the editor opens with the tab and tool you used last
+  (Crop and the hand excepted).
+- **Popup:** the recording options fold into one line, the mode you used last is marked and
+  **Enter** repeats it, and on pages Chrome protects, one click switches to recording the screen.
 
 ### Review tools
 
@@ -75,6 +81,7 @@ For checking a build against its design, in the editor's **Review** tab (nothing
 - **Compare:** two captures, or a capture and a design file, with a slider, side by side, as an
   overlay, or as a difference that highlights the changed pixels and says how many changed.
   Images of different widths (a 1× design and a 2× screenshot) are lined up automatically.
+  **Compare the last two captures** sets up a before-and-after in one click.
 
 ### Recordings
 
@@ -92,9 +99,13 @@ to 30 seconds (or none) to get ready; press Esc, or Cancel for full-screen recor
 call it off. Click the Captode icon (or press **Alt+Shift+R**) to stop. The recording then
 opens in the video page, where you can:
 
-- Trim on a timeline with thumbnails: drag the handles, or play to a point and press **I**
-  (start) or **O** (end). **Space** plays only the trimmed part; the arrow keys step frame by
-  frame.
+- Trim on a timeline with thumbnails: drag across it to choose the part to keep, drag its
+  edges, or play to a point and press **I** (start) or **O** (end). A click moves the playhead
+  and its knob scrubs. **Space** plays only the trimmed part; the arrow keys step frame by frame.
+- **Frame to editor** (or **F**): the frame on screen, at full size, opens in the editor to
+  annotate, copy or save.
+- For MP4 and WebM, the Export button shows the most the file can weigh; screen recordings
+  usually come out well under it.
 - Export as **MP4** (H.264, with AAC audio), **GIF**, **WebP** (animated) or **WebM** (VP9, with
   Opus audio). Exports run in the background and much faster than real time: a 20-second
   clip takes about 2 seconds. Trims are frame-accurate.
