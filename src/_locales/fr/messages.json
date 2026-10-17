@@ -1887,7 +1887,7 @@
     "message": "Nouveautés de Captode 1.3"
   },
   "popup_whats_new_1_3": {
-    "message": "Captures d'un seul élément, un délai pour saisir menus et infobulles, pages entières des applications web et clics visibles dans les enregistrements."
+    "message": "Captures d'un seul élément, un délai pour saisir menus et infobulles, pages entières des applications web, clics visibles dans les enregistrements et captures depuis le menu du clic droit."
   },
   "menu_full_page": {
     "message": "Capturer la page entière"

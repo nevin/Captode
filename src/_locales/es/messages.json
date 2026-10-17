@@ -1887,7 +1887,7 @@
     "message": "Novedades de Captode 1.3"
   },
   "popup_whats_new_1_3": {
-    "message": "Capturas de un solo elemento, un retraso para captar menús e información sobre herramientas, páginas completas de aplicaciones web y clics visibles en las grabaciones."
+    "message": "Capturas de un solo elemento, un retraso para captar menús e información sobre herramientas, páginas completas de aplicaciones web, clics visibles en las grabaciones y capturas desde el menú del botón derecho."
   },
   "menu_full_page": {
     "message": "Captura de la página completa"
