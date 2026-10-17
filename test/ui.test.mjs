@@ -386,6 +386,28 @@ export const tests = {
     await lab.close();
   },
 
+  async 'compare: the last two captures in one click, older as A'({ browser, url }) {
+    const lab = await open(browser, url('lab/lab.html'));
+    await lab.evaluate(async () => {
+      const { putCapture } = await import('/lib/db.js');
+      for (const title of ['Before', 'After']) {
+        const c = new OffscreenCanvas(300, 200);
+        c.getContext('2d').fillRect(0, 0, title === 'After' ? 120 : 100, 50);
+        await putCapture(await c.convertToBlob(), { title, mode: 'visible' });
+        await new Promise((r) => setTimeout(r, 20));
+      }
+    });
+    await lab.close();
+    const cmp = await open(browser, url('compare/compare.html'), { width: 1400, height: 900 });
+    await cmp.waitForSelector('#last-two:not(.hidden)');
+    ok(/“Before” as A.*“After” as B/.test(await cmp.$eval('#last-two-note', (e) => e.textContent)), 'says which is which');
+    await cmp.click('#last-two');
+    await cmp.waitForFunction(() => document.querySelector('#empty').classList.contains('hidden'), { polling: 100 });
+    const picked = await cmp.evaluate(() => ['#sel-a', '#sel-b'].map((s) => document.querySelector(s).selectedOptions[0].textContent.split(' · ')[0]));
+    ok(picked.join() === 'Before,After', `picked ${picked}`);
+    await cmp.close();
+  },
+
   async 'image exports say their colours are sRGB'({ browser, url }) {
     const lab = await open(browser, url('lab/lab.html'));
     const r = await lab.evaluate(async () => {
@@ -714,6 +736,10 @@ export const tests = {
       await ed.click('.preset-delete');
       await ed.waitForFunction(() => !document.querySelector('.preset-select optgroup[label="Yours"]'), { polling: 50, timeout: 5000 }).catch(() => {});
       ok(!(await state()).mine.length, 'deleted');
+      await ed.click('.toast .toast-action');
+      await ed.waitForFunction(() => document.querySelector('.preset-select optgroup[label="Yours"]'), { polling: 50, timeout: 5000 });
+      ok((await state()).mine.join() === 'Half-size mock-up', 'Undo brings the preset back');
+      await ed.click('.preset-delete');
     } finally {
       // Presets turn the device frame on: never leave it on for later tests.
       await ed.evaluate(() => chrome.storage.local.remove(['exportPresets', 'lastExport', 'device', 'deviceOpts'])).catch(() => {});
@@ -771,8 +797,13 @@ export const tests = {
     ok(await ed.$eval('#g-on', (e) => e.checked), 'G turns the grid on');
     const exported = await ed.evaluate(async () => { const d = await captodeEditor.render(); const i = (16 * d.width + 16) * 4; return [d.data[i], d.data[i + 1], d.data[i + 2], d.width]; });
     ok(exported.join() === '255,255,255,800', `the export has no grid or measurements: ${exported}`);
+    const measured = (await ed.evaluate(() => captodeEditor.review())).measures.length;
     await ed.click('#m-clear');
     ok(!(await ed.evaluate(() => captodeEditor.review())).measures.length, 'Clear all');
+    // Clear all can be undone from its message.
+    await ed.click('.toast .toast-action');
+    ok((await ed.evaluate(() => captodeEditor.review())).measures.length === measured, 'Undo brings the measurements back');
+    await ed.click('#m-clear');
     await ed.close();
   },
 

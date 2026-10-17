@@ -1846,5 +1846,17 @@
   },
   "video_size_up_to": {
     "message": "hasta $1"
+  },
+  "compare_last_two": {
+    "message": "Comparar las dos últimas capturas"
+  },
+  "compare_last_two_note": {
+    "message": "«$1» como A (antes) y «$2» como B (después)"
+  },
+  "measures_cleared": {
+    "message": "Medidas borradas ($1)"
+  },
+  "preset_deleted": {
+    "message": "Se eliminó el ajuste predefinido «$1»"
   }
 }

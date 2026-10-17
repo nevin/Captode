@@ -1637,7 +1637,13 @@ $('#c-copy').addEventListener('click', async () => {
   const lines = [a && `Text ${a.toUpperCase()}`, b && `Background ${b.toUpperCase()}`, a && b && `Contrast ${contrast(a, b).toFixed(2)}:1`].filter(Boolean);
   try { await navigator.clipboard.writeText(lines.join('\n')); toast(t('colours_copied'), { kind: 'success' }); } catch { toast(t('colours_copy_failed'), { kind: 'error' }); }
 });
-$('#m-clear').addEventListener('click', () => { review.measures = []; showMeasure(null); renderFg(); });
+$('#m-clear').addEventListener('click', () => {
+  const kept = review.measures;
+  review.measures = [];
+  showMeasure(null);
+  renderFg();
+  toast(t('measures_cleared', kept.length), { ms: 6000, action: { label: t('editor_undo'), run: () => { review.measures = kept; showMeasure(kept.at(-1)); renderFg(); } } });
+});
 $('#m-ratio').addEventListener('input', () => { syncRatioNote(); showMeasure(review.measures.at(-1) || null); renderFg(); });
 for (const id of ['g-on', 'g-step']) $('#' + id).addEventListener('input', () => renderFg());
 

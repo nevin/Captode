@@ -1846,5 +1846,17 @@
   },
   "video_size_up_to": {
     "message": "최대 $1"
+  },
+  "compare_last_two": {
+    "message": "최근 캡처 2개 비교"
+  },
+  "compare_last_two_note": {
+    "message": "\"$1\"을 A(이전), \"$2\"을 B(이후)로"
+  },
+  "measures_cleared": {
+    "message": "측정 지움($1)"
+  },
+  "preset_deleted": {
+    "message": "사전 설정 \"$1\" 삭제됨"
   }
 }

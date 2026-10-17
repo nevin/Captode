@@ -33,7 +33,7 @@ async function captureImage(id) {
   const rec = await getCapture(id);
   if (!rec) return null;
   const blob = rec.edits?.base || rec.blob;
-  return { bitmap: await createImageBitmap(blob), title: rec.meta?.title || 'Screenshot' };
+  return { bitmap: await createImageBitmap(blob), title: rec.meta?.title || t('popup_screenshot') };
 }
 
 async function setSide(s, img) {
@@ -253,6 +253,20 @@ $('#dl-diff').addEventListener('click', async () => {
   if (a && !b) b = items.find((it) => it.id !== a)?.id;
   if (a) { $('#sel-a').value = a; sides.a = await captureImage(a); }
   if (b) { $('#sel-b').value = b; sides.b = await captureImage(b); }
+  // With nothing chosen yet: the two most recent captures, older as A (before) and newer as B (after).
+  if (!a && items.length >= 2) {
+    const [after, before] = items;
+    $('#last-two').classList.remove('hidden');
+    $('#last-two-note').classList.remove('hidden');
+    $('#last-two-note').textContent = t('compare_last_two_note', [before.meta.title || t('popup_screenshot'), after.meta.title || t('popup_screenshot')]);
+    $('#last-two').addEventListener('click', async () => {
+      $('#sel-a').value = before.id;
+      $('#sel-b').value = after.id;
+      sides.a = await captureImage(before.id);
+      sides.b = await captureImage(after.id);
+      await redraw();
+    });
+  }
   await redraw();
 })();
 

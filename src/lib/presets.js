@@ -3,6 +3,7 @@
 // the values of the page's export controls, and whether a device frame is used.
 
 import { t } from './i18n.js';
+import { toast } from './ui.js';
 
 const KEY = 'exportPresets';
 
@@ -109,10 +110,16 @@ export async function mountPresets(el, { kind, capture, apply, watch }) {
   name.addEventListener('input', (e) => e.stopPropagation());
 
   el.querySelector('.preset-delete').addEventListener('click', async () => {
+    const before = mine;
+    const gone = mine.find((p) => p.id === chosen);
     mine = mine.filter((p) => p.id !== chosen);
     await store(kind, mine);
     chosen = '';
     render();
+    toast(t('preset_deleted', gone?.name || ''), {
+      ms: 6000,
+      action: { label: t('editor_undo'), run: async () => { mine = before; await store(kind, mine); chosen = gone?.id || ''; render(); } },
+    });
   });
 
   // Any change made by hand: the settings are now custom.

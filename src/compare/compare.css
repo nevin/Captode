@@ -44,3 +44,6 @@ body { display: flex; flex-direction: column; overflow: hidden; }
 .mode-opt { margin-top: 12px; }
 #modes { margin-bottom: 4px; }
 #modes button { flex: 1; padding: 0 2px; font-size: 12px; white-space: nowrap; }
+.empty-card #last-two { margin-top: 18px; }
+.empty-card #last-two-note { display: block; margin-top: 8px; font-size: 12px; overflow-wrap: anywhere; }
+.empty-card .hidden { display: none; }

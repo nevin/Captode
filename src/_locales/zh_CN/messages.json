@@ -1846,5 +1846,17 @@
   },
   "video_size_up_to": {
     "message": "最多 $1"
+  },
+  "compare_last_two": {
+    "message": "比较最近两张截图"
+  },
+  "compare_last_two_note": {
+    "message": "“$1”作为 A（之前），“$2”作为 B（之后）"
+  },
+  "measures_cleared": {
+    "message": "已清除测量（$1）"
+  },
+  "preset_deleted": {
+    "message": "已删除预设“$1”"
   }
 }

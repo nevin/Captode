@@ -1846,5 +1846,17 @@
   },
   "video_size_up_to": {
     "message": "bis $1"
+  },
+  "compare_last_two": {
+    "message": "Die letzten zwei Aufnahmen vergleichen"
+  },
+  "compare_last_two_note": {
+    "message": "„$1“ als A (vorher), „$2“ als B (nachher)"
+  },
+  "measures_cleared": {
+    "message": "Messungen gelöscht ($1)"
+  },
+  "preset_deleted": {
+    "message": "Vorlage „$1“ gelöscht"
   }
 }

@@ -1848,5 +1848,17 @@
   },
   "video_size_up_to": {
     "message": "up to $1"
+  },
+  "compare_last_two": {
+    "message": "Compare the last two captures"
+  },
+  "compare_last_two_note": {
+    "message": "“$1” as A, before; “$2” as B, after"
+  },
+  "measures_cleared": {
+    "message": "Measurements cleared ($1)"
+  },
+  "preset_deleted": {
+    "message": "Deleted the preset “$1”"
   }
 }

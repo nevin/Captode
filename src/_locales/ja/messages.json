@@ -1846,5 +1846,17 @@
   },
   "video_size_up_to": {
     "message": "最大 $1"
+  },
+  "compare_last_two": {
+    "message": "最新の 2 枚を比較"
+  },
+  "compare_last_two_note": {
+    "message": "「$1」を A（前）、「$2」を B（後）に"
+  },
+  "measures_cleared": {
+    "message": "測定を消去しました（$1）"
+  },
+  "preset_deleted": {
+    "message": "プリセット「$1」を削除しました"
   }
 }

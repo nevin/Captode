@@ -761,7 +761,13 @@ $('#rv-overlay').addEventListener('pointercancel', endMeasure);
 for (const b of document.querySelectorAll('#review-section .pick-slot')) {
   b.addEventListener('click', () => { rv.slot = Number(b.dataset.slot); setReviewTool('pick'); showReview(); });
 }
-$('#rv-clear').addEventListener('click', () => { rv.measures = []; drawOverlay(); showReview(); });
+$('#rv-clear').addEventListener('click', () => {
+  const kept = rv.measures;
+  rv.measures = [];
+  drawOverlay();
+  showReview();
+  toast(t('measures_cleared', kept.length), { ms: 6000, action: { label: t('editor_undo'), run: () => { rv.measures = kept; drawOverlay(); showReview(); } } });
+});
 $('#rv-ratio').addEventListener('input', () => { drawOverlay(); showReview(); });
 // Playing hides the layer; a new frame (after seeking) is measured afresh.
 player.addEventListener('play', () => { if (rv.tool !== 'off') setReviewTool('off'); });
