@@ -1870,5 +1870,14 @@
   },
   "error_tab_changed": {
     "message": "Beim Ende der Verzögerung war ein anderer Tab zu sehen, daher wurde nichts aufgenommen. Bleiben Sie auf dem Tab, bis der Screenshot erstellt ist."
+  },
+  "popup_element": {
+    "message": "Element"
+  },
+  "popup_element_desc": {
+    "message": "Eine Karte, Schaltfläche oder einen Bereich anklicken"
+  },
+  "pick_element_hint": {
+    "message": "Einen Teil der Seite anklicken · ↑ nimmt den umgebenden Bereich · Esc zum Abbrechen"
   }
 }

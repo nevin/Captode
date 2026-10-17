@@ -1870,5 +1870,14 @@
   },
   "error_tab_changed": {
     "message": "待ち時間の終了時に別のタブが表示されていたため、撮影しませんでした。撮影が終わるまで同じタブにとどまってください。"
+  },
+  "popup_element": {
+    "message": "要素"
+  },
+  "popup_element_desc": {
+    "message": "カード、ボタン、セクションをクリック"
+  },
+  "pick_element_hint": {
+    "message": "ページの一部をクリック · ↑ で外側の範囲 · Esc でキャンセル"
   }
 }

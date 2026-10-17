@@ -165,7 +165,7 @@ document.addEventListener('keydown', (e) => {
   const n = Number(e.key);
   if (e.key === 'Enter' && (e.target === document.body || e.target === document.documentElement)) {
     document.querySelector(`#modes-${kind} .mode:not(:disabled) .last`)?.closest('.mode').click();
-  } else if (n >= 1 && n <= 3) {
+  } else if (n >= 1 && n <= 4) {
     document.querySelectorAll(`#modes-${kind} .mode`)[n - 1]?.click();
   } else if (e.key === 'Tab') {
     document.body.classList.add('kbd-nav');

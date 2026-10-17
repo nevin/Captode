@@ -84,6 +84,95 @@ export function pickArea(hint) {
 }
 
 /**
+ * Lets the user pick one element: the one under the pointer is outlined, ↑ chooses the
+ * larger one around it and ↓ goes back; a click or Enter takes it, Esc cancels (null).
+ * The element is scrolled into view if it fits; resolves to its box in the viewport
+ * `{ x, y, w, h, vw, vh, top, left }` (top and left in the document, CSS pixels).
+ */
+export function pickElement(hint) {
+  return new Promise((resolve) => {
+    document.getElementById('__captode_pick')?.remove();
+    const root = document.createElement('div');
+    root.id = '__captode_pick';
+    root.style.cssText = 'position:fixed;inset:0;z-index:2147483647;cursor:pointer;font:13px system-ui,sans-serif;';
+    const box = document.createElement('div');
+    box.style.cssText = 'position:fixed;display:none;border:2px solid #5b4bff;background:rgba(91,75,255,.12);box-sizing:border-box;pointer-events:none;border-radius:2px;';
+    const label = document.createElement('div');
+    label.style.cssText = 'position:fixed;display:none;padding:3px 7px;border-radius:5px;background:#5b4bff;color:#fff;pointer-events:none;white-space:nowrap;';
+    const tip = document.createElement('div');
+    tip.textContent = hint;
+    tip.style.cssText =
+      'position:fixed;top:16px;left:50%;transform:translateX(-50%);padding:8px 14px;border-radius:8px;' +
+      'background:#17171c;color:#fff;box-shadow:0 6px 20px rgba(0,0,0,.3);pointer-events:none;';
+    root.append(box, label, tip);
+    document.documentElement.appendChild(root);
+
+    let chain = []; // the element under the pointer, then its ancestors as ↑ chooses them
+    let level = 0;
+    const current = () => chain[level];
+    const under = (x, y) => {
+      root.style.pointerEvents = 'none';
+      const el = document.elementFromPoint(x, y);
+      root.style.pointerEvents = '';
+      return el && el !== document.documentElement ? el : null;
+    };
+    const show = () => {
+      const el = current();
+      if (!el) { box.style.display = label.style.display = 'none'; return; }
+      const r = el.getBoundingClientRect();
+      Object.assign(box.style, { display: 'block', left: r.left + 'px', top: r.top + 'px', width: r.width + 'px', height: r.height + 'px' });
+      const cls = typeof el.className === 'string' && el.className.trim() ? '.' + el.className.trim().split(/\s+/)[0] : '';
+      label.textContent = el.tagName.toLowerCase() + (el.id ? '#' + el.id : cls) + '  ' + Math.round(r.width) + ' × ' + Math.round(r.height);
+      Object.assign(label.style, { display: 'block', left: Math.max(4, r.left) + 'px', top: (r.top > 30 ? r.top - 26 : Math.min(innerHeight - 26, r.bottom + 4)) + 'px' });
+    };
+    const finish = (el) => {
+      removeEventListener('keydown', onKey, true);
+      removeEventListener('scroll', show, true);
+      root.remove();
+      if (!el) return resolve(null);
+      // Bring it into view when it fits, so one screenshot holds it.
+      const r0 = el.getBoundingClientRect();
+      if (r0.height <= innerHeight && r0.width <= innerWidth) el.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        const r = el.getBoundingClientRect();
+        resolve({ x: r.left, y: r.top, w: r.width, h: r.height, vw: innerWidth, vh: innerHeight, top: r.top + scrollY, left: r.left + scrollX });
+      }));
+    };
+    const onKey = (e) => {
+      const keys = {
+        Escape: () => finish(null),
+        Enter: () => current() && finish(current()),
+        ArrowUp: () => {
+          const parent = current()?.parentElement;
+          if (!parent || parent === document.documentElement) return;
+          if (level === chain.length - 1) chain.push(parent);
+          level++;
+          show();
+        },
+        ArrowDown: () => { if (level > 0) { level--; show(); } },
+      };
+      if (!keys[e.key]) return;
+      e.preventDefault();
+      e.stopPropagation();
+      keys[e.key]();
+    };
+    addEventListener('keydown', onKey, true);
+    addEventListener('scroll', show, true);
+    root.addEventListener('pointermove', (e) => {
+      const el = under(e.clientX, e.clientY);
+      if (el && el !== chain[0]) { chain = [el]; level = 0; show(); }
+    });
+    root.addEventListener('pointerdown', (e) => {
+      if (e.button !== 0) return;
+      e.preventDefault();
+      const el = under(e.clientX, e.clientY);
+      if (!current() && el) { chain = [el]; level = 0; }
+      if (current()) finish(current());
+    });
+  });
+}
+
+/**
  * Prepares the page for a scrolling capture and reports its size. Many web apps (mail,
  * chat, documents, dashboards) don't scroll the window but a panel inside it; then the
  * largest such panel is captured instead, at its full height:

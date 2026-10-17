@@ -2,7 +2,7 @@
 // toolbar icon between "open the popup" and "stop recording".
 import { putCapture } from './lib/db.js';
 import {
-  pickArea, fullPagePrepare, fullPageScroll, fullPageRestore,
+  pickArea, pickElement, fullPagePrepare, fullPageScroll, fullPageRestore,
   countdown, captureDelay, showOutline, hideOutline,
 } from './content/page.js';
 import { t } from './lib/i18n.js';
@@ -65,8 +65,8 @@ async function captureImage(mode, tab, delay = 0) {
   let blob;
   const meta = { title: tab.title, url: tab.url, mode };
   delay = DELAYS.includes(Number(delay)) ? Number(delay) : 0;
-  // A selected area is chosen first, then the wait, so a menu can be opened inside it.
-  if (mode !== 'area' && !(await waitBeforeCapture(tab, delay))) return;
+  // A selected area or element is chosen first, then the wait, so a menu can be opened in it.
+  if (mode !== 'area' && mode !== 'element' && !(await waitBeforeCapture(tab, delay))) return;
 
   if (mode === 'visible') {
     const bmp = await captureVisible(tab.windowId);
@@ -82,6 +82,11 @@ async function captureImage(mode, tab, delay = 0) {
     const s = bmp.width / rect.vw;
     meta.dpr = s;
     blob = await toPng(bmp, rect.x * s, rect.y * s, rect.w * s, rect.h * s);
+  } else if (mode === 'element') {
+    const rect = await run(tab.id, pickElement, t('pick_element_hint'));
+    if (!rect) return;
+    if (!(await waitBeforeCapture(tab, delay))) return;
+    blob = await captureElement(tab, rect, meta);
   } else {
     blob = await captureFullPage(tab, meta);
   }
@@ -184,6 +189,67 @@ async function capturePanel(tab, info, meta) {
     return trimmed.convertToBlob({ type: 'image/png' });
   }
   return canvas.convertToBlob({ type: 'image/png' });
+}
+
+/**
+ * One element of the page, from its box in the viewport (see pickElement). One that fits
+ * the window is cut from a single screenshot; a taller one is stitched together as the
+ * page scrolls through it, like a full page.
+ */
+async function captureElement(tab, r, meta) {
+  if (r.h <= r.vh + 0.5 && r.w <= r.vw + 0.5) {
+    const bmp = await captureVisible(tab.windowId);
+    const s = bmp.width / r.vw;
+    meta.dpr = s;
+    const x = Math.max(0, r.x * s), y = Math.max(0, r.y * s);
+    return toPng(bmp, x, y, Math.min(r.w * s, bmp.width - x), Math.min(r.h * s, bmp.height - y));
+  }
+  await run(tab.id, () => {
+    window.__captodeState = { x: scrollX, y: scrollY, behavior: document.documentElement.style.scrollBehavior };
+    document.documentElement.style.scrollBehavior = 'auto';
+  });
+  try {
+    const scrollX = r.left - r.x;
+    let at = await run(tab.id, fullPageScroll, scrollX, r.top, false);
+    let bmp = await captureVisible(tab.windowId);
+    const scale = bmp.width / r.vw;
+    meta.dpr = scale;
+    const x0 = Math.max(0, r.x), w = Math.min(r.w, r.vw - x0);
+    const height = Math.min(r.h, maxHeight(w, scale));
+    if (height < r.h) meta.truncated = true;
+    const canvas = new OffscreenCanvas(Math.round(w * scale), Math.round(height * scale));
+    const ctx = canvas.getContext('2d');
+    let paintedH = 0;
+    const viewH = Math.max(1, Math.floor(bmp.height / scale) - OVERLAP);
+    const ys = steps(height, viewH);
+    for (let i = 0; i < ys.length; i++) {
+      if (i) {
+        at = await run(tab.id, fullPageScroll, scrollX, r.top + ys[i], true);
+        bmp = await captureVisible(tab.windowId);
+      }
+      // The rows of the element now on screen, and where they go in the image.
+      const from = Math.max(0, r.top - at.y + ys[i]);
+      const to = Math.min(r.vh, r.top - at.y + height);
+      if (to <= from) { bmp.close(); continue; }
+      const tile = await createImageBitmap(bmp, Math.round(x0 * scale), Math.round(from * scale), canvas.width, Math.max(1, Math.round((to - from) * scale)));
+      bmp.close();
+      const guess = Math.round((at.y + from - r.top) * scale);
+      const dy = i ? alignTile(ctx, tile, 0, guess, Math.round(OVERLAP * scale)) : guess;
+      ctx.drawImage(tile, 0, dy);
+      paintedH = Math.max(paintedH, dy + tile.height);
+      tile.close();
+      await badge(`${Math.round(((i + 1) / ys.length) * 100)}%`, '#5b4bff');
+    }
+    if (paintedH && paintedH < canvas.height) {
+      const trimmed = new OffscreenCanvas(canvas.width, paintedH);
+      trimmed.getContext('2d').drawImage(canvas, 0, 0);
+      return await trimmed.convertToBlob({ type: 'image/png' });
+    }
+    return await canvas.convertToBlob({ type: 'image/png' });
+  } finally {
+    await run(tab.id, fullPageRestore).catch(() => {});
+    await badge('');
+  }
 }
 
 async function captureFullPage(tab, meta) {

@@ -81,6 +81,81 @@ async function panelCapture(browser, url, site) {
   }
 }
 
+/** Captures elements of test/site/tall.html: a button, and a card taller than the window. */
+async function elementCapture(browser, url, site) {
+  const ctl = await open(browser, url('popup/popup.html'), { width: 340, height: 600 });
+  const el = await browser.newPage();
+  await el.goto(`${site}/tall.html`);
+  const tabId = await ctl.evaluate(async (site) => (await chrome.tabs.query({ url: `${site}/tall.html` }))[0].id, site);
+  const shoot = async (pick) => {
+    await el.bringToFront();
+    const before = new Set(browser.targets());
+    await ctl.evaluate((tabId) => chrome.runtime.sendMessage({ type: 'capture-image', mode: 'element', tabId }), tabId);
+    await el.waitForSelector('#__captode_pick');
+    await pick();
+    const target = await browser.waitForTarget((x) => !before.has(x) && x.url().includes('editor.html?id='), { timeout: 30000 });
+    const ed = await target.page();
+    await ed.waitForFunction(() => /px/.test(document.querySelector('#doc-dims').textContent), { timeout: 30000, polling: 100 });
+    return ed;
+  };
+  const centre = (sel) => el.evaluate((s) => { const r = document.querySelector(s).getBoundingClientRect(); return [r.x + r.width / 2, r.y + r.height / 2]; }, sel);
+  try {
+    const dpr = await el.evaluate(() => devicePixelRatio);
+    // The button: pointed at, outlined with its size, clicked.
+    const go = await el.evaluate(() => { const r = document.querySelector('#go').getBoundingClientRect(); return [r.width, r.height]; });
+    let ed = await shoot(async () => {
+      await el.mouse.move(...(await centre('#go')));
+      const label = await el.evaluate(() => [...document.querySelectorAll('#__captode_pick div')].map((d) => d.textContent).find((x) => x.startsWith('button')));
+      ok(label === `button#go  ${Math.round(go[0])} × ${Math.round(go[1])}`, `label: ${label}`);
+      await el.mouse.click(...(await centre('#go')));
+    });
+    let size = await ed.evaluate(() => captodeEditor.size());
+    near(size[0], go[0] * dpr, 1, 'button width');
+    near(size[1], go[1] * dpr, 1, 'button height');
+    await ed.close();
+
+    // A row, then ↑ for the card around it, taller than the window: stitched.
+    const card = await el.evaluate(() => {
+      const c = document.querySelector('#card');
+      const box = c.getBoundingClientRect();
+      const marks = [...c.querySelectorAll('.row i')].map((i) => { const r = i.getBoundingClientRect(); return { y: r.top - box.top + 12, x: r.left - box.left + 40, colour: getComputedStyle(i).backgroundColor.match(/\d+/g).map(Number) }; });
+      return { w: c.offsetWidth, h: c.offsetHeight, marks, vh: innerHeight };
+    });
+    ok(card.h > card.vh, 'the card is taller than the window');
+    ed = await shoot(async () => {
+      await el.mouse.move(...(await centre('.row:nth-child(3)')));
+      await el.keyboard.press('ArrowUp'); // from the row to the card (or from the row's text to the row)
+      const label = await el.evaluate(() => [...document.querySelectorAll('#__captode_pick div')].map((d) => d.textContent).find((x) => /^div/.test(x)));
+      if (!label?.startsWith('div#card')) await el.keyboard.press('ArrowUp');
+      await el.keyboard.press('Enter');
+    });
+    const r = await ed.evaluate((card) => {
+      const img = captodeEditor.pixels();
+      const s = img.width / card.w;
+      const at = (x, y) => { const i = (Math.round(y) * img.width + Math.round(x)) * 4; return [img.data[i], img.data[i + 1], img.data[i + 2]]; };
+      const wrong = card.marks.filter((m) => at(m.x * s, m.y * s).some((v, k) => Math.abs(v - m.colour[k]) > 6)).map((m) => m.y);
+      return { size: [img.width, img.height], wrong };
+    }, card);
+    near(r.size[0], card.w * dpr, 1, 'card width');
+    near(r.size[1], card.h * dpr, 3, 'card height, stitched');
+    ok(!r.wrong.length, `rows out of place at ${r.wrong.slice(0, 6)}`);
+    await ed.close();
+
+    // Esc cancels.
+    await el.bringToFront();
+    const before = new Set(browser.targets());
+    await ctl.evaluate((tabId) => chrome.runtime.sendMessage({ type: 'capture-image', mode: 'element', tabId }), tabId);
+    await el.waitForSelector('#__captode_pick');
+    await el.keyboard.press('Escape');
+    await sleep(1500);
+    ok(!(await el.$('#__captode_pick')) && !browser.targets().some((x) => !before.has(x) && x.url().includes('editor.html')), 'Esc cancels');
+    return `${dpr * 100}%: button ${size.join('×')}, card ${r.size.join('×')}`;
+  } finally {
+    await el.close();
+    await ctl.close();
+  }
+}
+
 export const tests = {
   async 'full page is stitched and the scroll position restored'({ page, capture }) {
     // Expected size from the page itself: window frames and scrollbars differ by OS.
@@ -176,6 +251,14 @@ export const tests = {
     near(size[1], 120 * s, 1, 'area height after the wait');
     await ed2.close();
     await page.bringToFront();
+  },
+
+  async 'element: pick one by pointing, take the larger one around it with ↑, tall ones stitched'({ browser, url, site, page }) {
+    const notes = [await elementCapture(browser, url, site)];
+    const env = await launch({ args: ['--force-device-scale-factor=1.5'] });
+    try { notes.push(await elementCapture(env.browser, env.url, site)); } finally { await env.close(); }
+    await page.bringToFront();
+    return notes.join('; ');
   },
 
   async 'visible area matches the viewport'({ page, capture }) {

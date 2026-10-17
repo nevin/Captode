@@ -1870,5 +1870,14 @@
   },
   "error_tab_changed": {
     "message": "Outra guia estava aberta quando a espera terminou, então nada foi capturado. Fique na guia até a captura ser feita."
+  },
+  "popup_element": {
+    "message": "Elemento"
+  },
+  "popup_element_desc": {
+    "message": "Clique em um cartão, botão ou seção"
+  },
+  "pick_element_hint": {
+    "message": "Clique em uma parte da página · ↑ escolhe a área ao redor · Esc para cancelar"
   }
 }

@@ -1870,5 +1870,14 @@
   },
   "error_tab_changed": {
     "message": "Un autre onglet était affiché à la fin du délai : rien n'a été capturé. Restez sur l'onglet jusqu'à la capture."
+  },
+  "popup_element": {
+    "message": "Élément"
+  },
+  "popup_element_desc": {
+    "message": "Cliquez sur une carte, un bouton ou une section"
+  },
+  "pick_element_hint": {
+    "message": "Cliquez sur une partie de la page · ↑ prend la zone qui l'entoure · Échap pour annuler"
   }
 }

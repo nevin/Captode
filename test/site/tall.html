@@ -1,0 +1,21 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Elements</title>
+<style>
+body{margin:0;padding:40px;font:14px system-ui,sans-serif;background:#f4f6fb}
+#go{display:inline-block;margin-bottom:24px;padding:12px 22px;border:0;border-radius:8px;background:#5b4bff;color:#fff;font:600 15px system-ui}
+#card{width:600px;background:#fff;border:1px solid #ddd;border-radius:12px;overflow:hidden}
+.row{height:40px;display:flex;align-items:center;gap:12px;padding:0 16px;border-bottom:1px solid #eee}
+.row i{width:80px;height:24px;flex:none}
+</style></head><body>
+<button id="go">Get started</button>
+<div id="card"></div>
+<script>
+// A card taller than the window, each row with a colour of its own.
+const card = document.getElementById('card');
+for (let i = 0; i < 60; i++) {
+  const row = document.createElement('div');
+  row.className = 'row';
+  row.innerHTML = `<i style="background:rgb(${(i * 41) % 256},${(i * 83 + 40) % 256},${(i * 29 + 150) % 256})"></i>Item ${i}`;
+  card.append(row);
+}
+</script>
+</body></html>

@@ -1870,5 +1870,14 @@
   },
   "error_tab_changed": {
     "message": "延时结束时显示的是另一个标签页，因此未截图。请停留在该标签页直到截图完成。"
+  },
+  "popup_element": {
+    "message": "元素"
+  },
+  "popup_element_desc": {
+    "message": "点击卡片、按钮或区块"
+  },
+  "pick_element_hint": {
+    "message": "点击页面的一部分 · ↑ 选择外围区域 · 按 Esc 取消"
   }
 }

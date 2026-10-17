@@ -1870,5 +1870,14 @@
   },
   "error_tab_changed": {
     "message": "Al terminar la espera se mostraba otra pestaña, así que no se capturó nada. Quédate en la pestaña hasta que se haga la captura."
+  },
+  "popup_element": {
+    "message": "Elemento"
+  },
+  "popup_element_desc": {
+    "message": "Haz clic en una tarjeta, un botón o una sección"
+  },
+  "pick_element_hint": {
+    "message": "Haz clic en una parte de la página · ↑ elige la zona que la contiene · Esc para cancelar"
   }
 }

@@ -1870,5 +1870,14 @@
   },
   "error_tab_changed": {
     "message": "Alla fine dell'attesa era visibile un'altra scheda, quindi non è stato acquisito nulla. Resta sulla scheda finché lo screenshot non è pronto."
+  },
+  "popup_element": {
+    "message": "Elemento"
+  },
+  "popup_element_desc": {
+    "message": "Fai clic su una scheda, un pulsante o una sezione"
+  },
+  "pick_element_hint": {
+    "message": "Fai clic su una parte della pagina · ↑ prende l'area che la contiene · Esc per annullare"
   }
 }

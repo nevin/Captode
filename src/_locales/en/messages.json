@@ -1872,5 +1872,14 @@
   },
   "error_tab_changed": {
     "message": "Another tab was showing when the delay ended, so nothing was captured. Stay on the tab until the screenshot is taken."
+  },
+  "popup_element": {
+    "message": "Element"
+  },
+  "popup_element_desc": {
+    "message": "Click a card, button or section"
+  },
+  "pick_element_hint": {
+    "message": "Click a part of the page · ↑ takes the larger area around it · Esc to cancel"
   }
 }
