@@ -1858,5 +1858,17 @@
   },
   "preset_deleted": {
     "message": "已删除预设“$1”"
+  },
+  "popup_delay": {
+    "message": "延时"
+  },
+  "popup_delay_hint": {
+    "message": "截图前留出打开菜单或提示的时间"
+  },
+  "delay_hint": {
+    "message": "$1 秒后截图 · 按 Esc 取消"
+  },
+  "error_tab_changed": {
+    "message": "延时结束时显示的是另一个标签页，因此未截图。请停留在该标签页直到截图完成。"
   }
 }

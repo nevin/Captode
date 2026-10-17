@@ -19,8 +19,8 @@ export async function setup({ browser, url, site }) {
 
   const seen = new Set(); // editors already handed out, so a stale one is never reused
   // Starts a capture of the test page and returns the editor it opens.
-  const capture = async (mode, during) => {
-    await ctl.evaluate((tabId, mode) => chrome.runtime.sendMessage({ type: 'capture-image', mode, tabId }), tabId, mode);
+  const capture = async (mode, during, extra = {}) => {
+    await ctl.evaluate((tabId, mode, extra) => chrome.runtime.sendMessage({ type: 'capture-image', mode, tabId, ...extra }), tabId, mode, extra);
     if (during) await during();
     const ed = await waitForTab(browser, (u) => u.includes('editor.html?id=') && !seen.has(u));
     seen.add(ed.url());
@@ -38,7 +38,7 @@ export async function setup({ browser, url, site }) {
     ok(!error, `capture reported an error: ${error}`);
     return { ed, size };
   };
-  return { page, capture };
+  return { page, capture, ctl, tabId };
 }
 
 /** Captures test/site/app.html in full and checks every row of its panel. */
@@ -94,12 +94,88 @@ export const tests = {
     await page.bringToFront();
   },
 
-  async 'full page of a web app that scrolls a panel, not the window, captures the panel in full'({ browser, url, site }) {
+  async 'full page of a web app that scrolls a panel, not the window, captures the panel in full'({ browser, url, site, page }) {
     const notes = [await panelCapture(browser, url, site)];
     // And at a fractional display scale, where tiles are hardest to line up.
     const env = await launch({ args: ['--force-device-scale-factor=1.5'] });
     try { notes.push(await panelCapture(env.browser, env.url, site)); } finally { await env.close(); }
+    await page.bringToFront();
     return notes.join('; ');
+  },
+
+  async 'a delayed screenshot waits, catches what was opened meanwhile, and leaves its countdown out'({ page, capture, ctl, tabId, browser }) {
+    await page.bringToFront();
+    const t0 = Date.now();
+    let pill = null;
+    const { ed } = await capture('visible', async () => {
+      // As a person would: open a menu while the countdown runs.
+      await page.waitForSelector('#__captode_delay', { timeout: 5000 });
+      pill = await page.$eval('#__captode_delay', (e) => ({ text: e.textContent, pointer: getComputedStyle(e).pointerEvents }));
+      await page.evaluate(() => {
+        const m = document.createElement('div');
+        m.id = 'menu';
+        m.style.cssText = 'position:fixed;left:40px;top:40px;width:200px;height:120px;background:rgb(0,200,120);z-index:9';
+        document.body.append(m);
+      });
+    }, { delay: 3 });
+    const waited = Date.now() - t0;
+    try {
+      ok(waited >= 2900, `waited ${waited} ms`);
+      ok(/^Screenshot in 3 s/.test(pill?.text) && pill.pointer === 'none', `countdown: ${JSON.stringify(pill)}`);
+      const pageWidth = await page.evaluate(() => innerWidth);
+      const r = await ed.evaluate((pageWidth) => {
+        const img = captodeEditor.pixels();
+        const s = img.width / pageWidth; // image pixels per CSS pixel
+        const at = (x, y) => { const i = (Math.round(y) * img.width + Math.round(x)) * 4; return [img.data[i], img.data[i + 1], img.data[i + 2]]; };
+        // The menu is in; the dark countdown pill (top right) is not.
+        let dark = 0;
+        for (let y = 14; y < 40; y += 2) for (let x = img.width - 120; x < img.width - 14; x += 4) { const [r, g, b] = at(x, y); if (r < 40 && g < 40 && b < 45) dark++; }
+        return { menu: at(140 * s, 100 * s), dark };
+      }, pageWidth);
+      ok(r.menu[0] < 20 && r.menu[1] > 180 && r.menu[2] > 100 && r.menu[2] < 140, `the menu opened during the wait is in the screenshot: ${r.menu}`);
+      ok(r.dark < 5, `the countdown is not in the screenshot (${r.dark} dark samples)`);
+    } finally {
+      await ed.close();
+      await page.evaluate(() => document.querySelector('#menu')?.remove());
+      await page.bringToFront();
+    }
+    // Esc during the wait cancels: no editor opens.
+    const before = new Set(browser.targets());
+    await ctl.evaluate((tabId) => chrome.runtime.sendMessage({ type: 'capture-image', mode: 'visible', tabId, delay: 5 }), tabId);
+    await page.waitForSelector('#__captode_delay', { timeout: 5000 });
+    await page.keyboard.press('Escape');
+    await sleep(6000);
+    ok(!browser.targets().some((x) => !before.has(x) && x.url().includes('editor.html')), 'Esc cancelled the screenshot');
+    ok(!(await page.$('#__captode_delay')), 'and the countdown is gone');
+    // Another tab brought to the front during the wait is never captured.
+    const other = await browser.newPage();
+    await page.bringToFront();
+    const before2 = new Set(browser.targets());
+    await ctl.evaluate(() => chrome.storage.session.remove('lastError'));
+    await ctl.evaluate((tabId) => chrome.runtime.sendMessage({ type: 'capture-image', mode: 'visible', tabId, delay: 3 }), tabId);
+    await page.waitForSelector('#__captode_delay', { timeout: 5000 });
+    await other.bringToFront();
+    await sleep(4500);
+    const lastError = await ctl.evaluate(async () => (await chrome.storage.session.get('lastError')).lastError);
+    ok(!browser.targets().some((x) => !before2.has(x) && x.url().includes('editor.html')) && /tab/i.test(lastError || ''), `switching tabs stops it: ${lastError}`);
+    await ctl.evaluate(async () => { await chrome.storage.session.remove('lastError'); await chrome.action.setBadgeText({ text: '' }); });
+    await other.close();
+    await page.bringToFront();
+    // A selected area is dragged out first; then the wait.
+    const { ed: ed2, size } = await capture('area', async () => {
+      await page.bringToFront();
+      await page.waitForSelector('#__captode_pick');
+      await page.mouse.move(100, 100);
+      await page.mouse.down();
+      await page.mouse.move(300, 220, { steps: 4 });
+      await page.mouse.up();
+      await page.waitForSelector('#__captode_delay', { timeout: 5000 });
+    }, { delay: 3 });
+    const s = await page.evaluate(() => devicePixelRatio);
+    near(size[0], 200 * s, 1, 'area width after the wait');
+    near(size[1], 120 * s, 1, 'area height after the wait');
+    await ed2.close();
+    await page.bringToFront();
   },
 
   async 'visible area matches the viewport'({ page, capture }) {

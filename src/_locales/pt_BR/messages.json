@@ -1858,5 +1858,17 @@
   },
   "preset_deleted": {
     "message": "Predefinição “$1” excluída"
+  },
+  "popup_delay": {
+    "message": "Atraso"
+  },
+  "popup_delay_hint": {
+    "message": "Tempo para abrir um menu ou dica antes da captura"
+  },
+  "delay_hint": {
+    "message": "Captura em $1 s · Esc para cancelar"
+  },
+  "error_tab_changed": {
+    "message": "Outra guia estava aberta quando a espera terminou, então nada foi capturado. Fique na guia até a captura ser feita."
   }
 }

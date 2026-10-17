@@ -1858,5 +1858,17 @@
   },
   "preset_deleted": {
     "message": "사전 설정 \"$1\" 삭제됨"
+  },
+  "popup_delay": {
+    "message": "지연"
+  },
+  "popup_delay_hint": {
+    "message": "스크린샷 전에 메뉴나 도구 설명을 열 시간"
+  },
+  "delay_hint": {
+    "message": "$1초 후 캡처 · Esc로 취소"
+  },
+  "error_tab_changed": {
+    "message": "지연이 끝났을 때 다른 탭이 표시되어 있어 캡처하지 않았습니다. 캡처가 끝날 때까지 탭에 머물러 주세요."
   }
 }

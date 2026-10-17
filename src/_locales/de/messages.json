@@ -1858,5 +1858,17 @@
   },
   "preset_deleted": {
     "message": "Vorlage „$1“ gelöscht"
+  },
+  "popup_delay": {
+    "message": "Verzögerung"
+  },
+  "popup_delay_hint": {
+    "message": "Zeit, um vor dem Screenshot ein Menü oder einen Tooltip zu öffnen"
+  },
+  "delay_hint": {
+    "message": "Screenshot in $1 s · Esc zum Abbrechen"
+  },
+  "error_tab_changed": {
+    "message": "Beim Ende der Verzögerung war ein anderer Tab zu sehen, daher wurde nichts aufgenommen. Bleiben Sie auf dem Tab, bis der Screenshot erstellt ist."
   }
 }

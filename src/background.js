@@ -3,7 +3,7 @@
 import { putCapture } from './lib/db.js';
 import {
   pickArea, fullPagePrepare, fullPageScroll, fullPageRestore,
-  countdown, showOutline, hideOutline,
+  countdown, captureDelay, showOutline, hideOutline,
 } from './content/page.js';
 import { t } from './lib/i18n.js';
 
@@ -49,9 +49,24 @@ function explain(err) {
 
 // ---------- screenshots ----------
 
-async function captureImage(mode, tab) {
+/** Seconds to wait before a screenshot (0, 3, 5 or 10): Esc during the wait cancels. */
+const DELAYS = [0, 3, 5, 10];
+async function waitBeforeCapture(tab, seconds) {
+  if (!seconds) return true;
+  const go = await run(tab.id, captureDelay, seconds, t('delay_hint', '{n}'));
+  if (go === 'hidden') throw new Error(t('error_tab_changed'));
+  if (!go) return false;
+  // The browser captures whichever tab is showing: never a different one than asked for.
+  if (!(await chrome.tabs.get(tab.id)).active) throw new Error(t('error_tab_changed'));
+  return true;
+}
+
+async function captureImage(mode, tab, delay = 0) {
   let blob;
   const meta = { title: tab.title, url: tab.url, mode };
+  delay = DELAYS.includes(Number(delay)) ? Number(delay) : 0;
+  // A selected area is chosen first, then the wait, so a menu can be opened inside it.
+  if (mode !== 'area' && !(await waitBeforeCapture(tab, delay))) return;
 
   if (mode === 'visible') {
     const bmp = await captureVisible(tab.windowId);
@@ -62,6 +77,7 @@ async function captureImage(mode, tab) {
   } else if (mode === 'area') {
     const rect = await run(tab.id, pickArea, t('pick_capture_hint'));
     if (!rect) return;
+    if (!(await waitBeforeCapture(tab, delay))) return;
     const bmp = await captureVisible(tab.windowId);
     const s = bmp.width / rect.vw;
     meta.dpr = s;
@@ -349,7 +365,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (msg.type === 'capture-image' || msg.type === 'record-start') {
     (async () => {
       const tab = await chrome.tabs.get(msg.tabId);
-      if (msg.type === 'capture-image') await captureImage(msg.mode, tab);
+      if (msg.type === 'capture-image') await captureImage(msg.mode, tab, msg.delay);
       else await startRecording(msg, tab);
     })().catch(async (e) => {
       await badge('');

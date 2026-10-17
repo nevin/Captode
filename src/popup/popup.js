@@ -10,8 +10,9 @@ const selectTab = tablist($('.kind'), (t) => { setKind(t.dataset.kind); chrome.s
 let kind = 'image';
 let tabPixels = null; // this tab's page area in pixels, once known
 let fps = '30';
+let delay = 0; // seconds before a screenshot
 
-const settings = await chrome.storage.local.get({ kind: 'image', fps: '30', audio: false, countdown: true, countdownSeconds: null, device: false, videoSize: 'page', lastMode: {}, recOptsOpen: false });
+const settings = await chrome.storage.local.get({ kind: 'image', fps: '30', audio: false, countdown: true, countdownSeconds: null, device: false, videoSize: 'page', lastMode: {}, recOptsOpen: false, delay: 0 });
 fps = String(settings.fps);
 $('#audio').checked = settings.audio;
 // Seconds of countdown before a recording starts (0 = none): a second at a time up
@@ -39,6 +40,13 @@ const SIZE_HINTS = {
 setSize(settings.videoSize);
 setKind(settings.kind);
 setFps(fps);
+setDelay(settings.delay);
+$('#delay').addEventListener('click', (e) => {
+  const b = e.target.closest('button[data-delay]');
+  if (!b) return;
+  setDelay(Number(b.dataset.delay));
+  chrome.storage.local.set({ delay: delay });
+});
 $('#rec-opts').open = settings.recOptsOpen;
 let optsOpen = settings.recOptsOpen; // saved only when it changes, not as the popup opens
 $('#rec-opts').addEventListener('toggle', () => {
@@ -170,7 +178,7 @@ for (const b of document.querySelectorAll('.mode')) {
     await chrome.storage.local.set({ lastMode: { ...settings.lastMode, [kind]: b.dataset.mode } });
     const tab = activeTab;
     const msg = kind === 'image'
-      ? { type: 'capture-image', mode: b.dataset.mode, tabId: tab.id }
+      ? { type: 'capture-image', mode: b.dataset.mode, tabId: tab.id, delay }
       : {
           type: 'record-start', mode: b.dataset.mode, tabId: tab.id,
           fps: Number(fps), audio: $('#audio').checked, countdown, size: $('#size').value,
@@ -251,4 +259,13 @@ async function showRecent() {
     row.append(a);
   }
   $('#recent').classList.remove('hidden');
+}
+
+function setDelay(v) {
+  delay = [0, 3, 5, 10].includes(v) ? v : 0;
+  for (const b of document.querySelectorAll('#delay button')) {
+    b.classList.toggle('on', Number(b.dataset.delay) === delay);
+    b.setAttribute('role', 'radio');
+    b.setAttribute('aria-checked', String(Number(b.dataset.delay) === delay));
+  }
 }

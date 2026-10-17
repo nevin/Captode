@@ -60,6 +60,12 @@
         <span class="ico"><svg class="i" viewBox="0 0 24 24"><path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3"/><rect x="8" y="8" width="8" height="8" rx="1"/></svg></span>
         <span class="txt"><b data-i18n="popup_selected_area">Selected area</b><small data-i18n="popup_drag_to_choose_a_region">Drag to choose a region</small></span><kbd class="num">3</kbd>
       </button>
+      <div class="delay-row">
+        <span id="delay-label" title="Time to open a menu or tooltip before the screenshot" data-i18n-title="popup_delay_hint" data-i18n="popup_delay">Delay</span>
+        <div class="seg" id="delay" role="radiogroup" aria-labelledby="delay-label">
+          <button data-delay="0" data-i18n="video_off">Off</button><button data-delay="3">3 s</button><button data-delay="5">5 s</button><button data-delay="10">10 s</button>
+        </div>
+      </div>
     </div>
 
     <p class="hint-top hidden" id="hint-video" data-i18n="popup_choose_what_to_record">Choose what to record</p>

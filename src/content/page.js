@@ -219,6 +219,50 @@ export function countdown(seconds, hintText = 'Recording starts soon · Esc to c
   });
 }
 
+/**
+ * Waits `seconds` before a screenshot, so a menu or tooltip can be opened first. A small
+ * pill in the corner counts down (it ignores the pointer, so hovering isn't disturbed)
+ * and is gone from the screen before resolving true; Esc cancels (false). If another tab
+ * is showing when the time is up, it resolves 'hidden' at once: hidden pages draw no
+ * frames, and the screenshot must not be taken later, by surprise.
+ * `text` has {n} where the seconds go.
+ */
+export function captureDelay(seconds, text) {
+  return new Promise((resolve) => {
+    document.getElementById('__captode_delay')?.remove();
+    const el = document.createElement('div');
+    el.id = '__captode_delay';
+    el.setAttribute('role', 'timer');
+    el.style.cssText =
+      'position:fixed;top:12px;right:12px;z-index:2147483647;pointer-events:none;padding:7px 12px;border-radius:999px;' +
+      'background:rgba(23,23,28,.88);color:#fff;font:600 13px system-ui,sans-serif;box-shadow:0 4px 16px rgba(0,0,0,.25);';
+    document.documentElement.appendChild(el);
+    let n = seconds;
+    let timer;
+    const finish = (result) => {
+      clearTimeout(timer);
+      removeEventListener('keydown', onKey, true);
+      el.remove();
+      if (result === true) requestAnimationFrame(() => requestAnimationFrame(() => resolve(true)));
+      else resolve(result);
+    };
+    const onKey = (e) => {
+      if (e.key !== 'Escape') return;
+      e.preventDefault();
+      e.stopPropagation();
+      finish(false);
+    };
+    addEventListener('keydown', onKey, true);
+    const tick = () => {
+      if (n === 0 && document.hidden) return finish('hidden');
+      if (n === 0) return finish(true);
+      el.textContent = text.replace('{n}', n--);
+      timer = setTimeout(tick, 1000);
+    };
+    tick();
+  });
+}
+
 /** Draws a dashed outline just outside the recorded area, so it is never recorded. */
 export function showOutline(rect) {
   document.getElementById('__captode_outline')?.remove();

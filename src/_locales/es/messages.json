@@ -1858,5 +1858,17 @@
   },
   "preset_deleted": {
     "message": "Se eliminó el ajuste predefinido «$1»"
+  },
+  "popup_delay": {
+    "message": "Retraso"
+  },
+  "popup_delay_hint": {
+    "message": "Tiempo para abrir un menú o una información sobre herramientas antes de la captura"
+  },
+  "delay_hint": {
+    "message": "Captura en $1 s · Esc para cancelar"
+  },
+  "error_tab_changed": {
+    "message": "Al terminar la espera se mostraba otra pestaña, así que no se capturó nada. Quédate en la pestaña hasta que se haga la captura."
   }
 }

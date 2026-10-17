@@ -1860,5 +1860,17 @@
   },
   "preset_deleted": {
     "message": "Deleted the preset “$1”"
+  },
+  "popup_delay": {
+    "message": "Delay"
+  },
+  "popup_delay_hint": {
+    "message": "Time to open a menu or tooltip before the screenshot"
+  },
+  "delay_hint": {
+    "message": "Screenshot in $1 s · Esc to cancel"
+  },
+  "error_tab_changed": {
+    "message": "Another tab was showing when the delay ended, so nothing was captured. Stay on the tab until the screenshot is taken."
   }
 }

@@ -1858,5 +1858,17 @@
   },
   "preset_deleted": {
     "message": "Préréglage « $1 » supprimé"
+  },
+  "popup_delay": {
+    "message": "Délai"
+  },
+  "popup_delay_hint": {
+    "message": "Le temps d'ouvrir un menu ou une infobulle avant la capture"
+  },
+  "delay_hint": {
+    "message": "Capture dans $1 s · Échap pour annuler"
+  },
+  "error_tab_changed": {
+    "message": "Un autre onglet était affiché à la fin du délai : rien n'a été capturé. Restez sur l'onglet jusqu'à la capture."
   }
 }

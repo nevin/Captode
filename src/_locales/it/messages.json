@@ -1858,5 +1858,17 @@
   },
   "preset_deleted": {
     "message": "Preimpostazione «$1» eliminata"
+  },
+  "popup_delay": {
+    "message": "Ritardo"
+  },
+  "popup_delay_hint": {
+    "message": "Il tempo per aprire un menu o un suggerimento prima dello screenshot"
+  },
+  "delay_hint": {
+    "message": "Screenshot tra $1 s · Esc per annullare"
+  },
+  "error_tab_changed": {
+    "message": "Alla fine dell'attesa era visibile un'altra scheda, quindi non è stato acquisito nulla. Resta sulla scheda finché lo screenshot non è pronto."
   }
 }
