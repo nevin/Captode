@@ -157,6 +157,69 @@ async function elementCapture(browser, url, site) {
 }
 
 export const tests = {
+  async 'email addresses, phone and card numbers are offered for blurring, and nothing else'({ browser, url, site, page }) {
+    const ctl = await open(browser, url('popup/popup.html'), { width: 340, height: 600 });
+    const pv = await browser.newPage();
+    await pv.goto(`${site}/private.html`);
+    const tabId = await ctl.evaluate(async (site) => (await chrome.tabs.query({ url: `${site}/private.html` }))[0].id, site);
+    const shoot = async (mode) => {
+      await pv.bringToFront();
+      const before = new Set(browser.targets());
+      await ctl.evaluate((tabId, mode) => chrome.runtime.sendMessage({ type: 'capture-image', mode, tabId }), tabId, mode);
+      const target = await browser.waitForTarget((x) => !before.has(x) && x.url().includes('editor.html?id='), { timeout: 45000 });
+      const ed = await target.page();
+      await ed.waitForFunction(() => /px/.test(document.querySelector('#doc-dims').textContent), { timeout: 45000, polling: 100 });
+      return ed;
+    };
+    // Where each detail is, in the page (`doc`) or the window, in CSS pixels.
+    const where = (doc) => pv.evaluate((doc) => Object.fromEntries(['email', 'phone', 'card', 'field', 'low', 'decoys'].map((id) => {
+      const r = document.getElementById(id).getBoundingClientRect();
+      return [id, { x: r.x + (doc ? scrollX : 0), y: r.y + (doc ? scrollY : 0), w: r.width, h: r.height }];
+    })), doc);
+    // Which of `boxes` (image pixels) cover the middle of a detail; and which touch the decoys.
+    const check = (boxes, at, dpr, ids) => {
+      const covers = (b, r) => { const cx = (r.x + r.w / 2) * dpr, cy = (r.y + r.h / 2) * dpr; return cx >= b.x1 && cx <= b.x2 && cy >= b.y1 && cy <= b.y2; };
+      const missing = ids.filter((id) => !boxes.some((b) => covers(b, at[id])));
+      const d = at.decoys;
+      const onDecoys = boxes.filter((b) => b.y1 < (d.y + d.h) * dpr - 2 && b.y2 > d.y * dpr + 2);
+      return { missing, onDecoys: onDecoys.length };
+    };
+    try {
+      const dpr = await pv.evaluate(() => devicePixelRatio);
+      await pv.evaluate(() => window.scrollTo(0, 0));
+      let ed = await shoot('visible');
+      await ed.waitForFunction(() => !document.querySelector('#private-bar').classList.contains('hidden'), { polling: 100, timeout: 5000 });
+      ok(await ed.evaluate(() => document.querySelector('#canvas-hint').classList.contains('hidden')), 'the first-use hint stays out of the way');
+      const text = await ed.evaluate(() => document.querySelector('#private-text').textContent);
+      ok(/\b4\b/.test(text), `four found in view: "${text}"`);
+      await ed.click('#private-blur');
+      let objs = await ed.evaluate(() => captodeEditor.objects());
+      ok(objs.length === 4 && objs.every((o) => o.type === 'redact'), `four blurs added: ${JSON.stringify(objs.map((o) => o.type))}`);
+      let r = check(objs, await where(false), dpr, ['email', 'phone', 'card', 'field']);
+      ok(!r.missing.length, `not blurred: ${r.missing}`);
+      ok(!r.onDecoys, `${r.onDecoys} blurs on dates, sums, versions or order numbers`);
+      ok(await ed.evaluate(() => document.querySelector('#private-bar').classList.contains('hidden')), 'the offer goes once taken');
+      await ed.keyboard.down(process.platform === 'darwin' ? 'Meta' : 'Control');
+      await ed.keyboard.press('z');
+      await ed.keyboard.up(process.platform === 'darwin' ? 'Meta' : 'Control');
+      ok((await ed.evaluate(() => captodeEditor.objects())).length === 0, 'one undo removes them all');
+      await ed.close();
+
+      // The whole page: the one far down too, where it is in the page.
+      ed = await shoot('full');
+      await ed.waitForFunction(() => !document.querySelector('#private-bar').classList.contains('hidden'), { polling: 100, timeout: 5000 });
+      await ed.click('#private-blur');
+      objs = await ed.evaluate(() => captodeEditor.objects());
+      r = check(objs, await where(true), dpr, ['email', 'phone', 'card', 'field', 'low']);
+      ok(objs.length === 5 && !r.missing.length && !r.onDecoys, `full page: ${objs.length} blurs, missing ${r.missing}, ${r.onDecoys} on decoys`);
+      await ed.close();
+    } finally {
+      await pv.close();
+      await ctl.close();
+      await page.bringToFront();
+    }
+  },
+
   async 'the right-click menu offers every screenshot mode'({ browser }) {
     const sw = await (await browser.waitForTarget((t) => t.type() === 'service_worker')).worker();
     // update() fails for an item that does not exist, so this shows all four were made.

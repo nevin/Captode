@@ -77,7 +77,7 @@ await pop.bringToFront();
 const popH = await pop.evaluate(() => Math.ceil(document.body.getBoundingClientRect().height));
 const popShot = await png(pop, { x: 0, y: 0, width: 340, height: popH });
 await compose('1-capture.jpg', 'Capture any page in one click',
-  'The whole scrolling page, just what you see, or a region you select',
+  'The whole scrolling page, what you see, a region or a single element',
   `<img class="full" src="${webShot}">
    <img src="${popShot}" style="position:absolute;right:28px;top:14px;width:340px;border-radius:12px;box-shadow:0 24px 60px rgba(0,0,0,.35),0 0 0 1px rgba(0,0,0,.08)">`);
 
@@ -218,7 +218,7 @@ await vp.click('#convert');
 await vp.waitForFunction(() => !document.querySelector('#result').classList.contains('hidden'), { timeout: 120000 });
 await sleep(500);
 await compose('5-record.jpg', 'Record, trim and share',
-  'Record a tab, a selected area or your whole screen, then trim and export it in seconds',
+  'Record a tab or your screen with your voice and camera, then trim and export it in seconds',
   `<img class="full" src="${await png(vp, { x: 0, y: 0, ...UI })}">`);
 
 // ---------- 6. Compare: before and after a change ----------

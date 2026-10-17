@@ -1,0 +1,20 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Account</title>
+<style>
+body{margin:0;padding:32px 40px;font:16px/1.6 system-ui,sans-serif;color:#222;background:#fff}
+p{margin:0 0 14px}
+input{font:inherit;padding:6px 8px;width:280px}
+#spacer{height:2200px}
+</style></head><body>
+<h1>Your account</h1>
+<!-- What should be found. -->
+<p>Signed in as <span id="email">jane.doe@example.com</span>.</p>
+<p>Phone: <span id="phone">+1 (415) 555-0134</span></p>
+<p>Card on file: <span id="card">4242 4242 4242 4242</span></p>
+<p><label>Backup email <input id="field" type="email" value="backup@example.org"></label></p>
+<!-- What shouldn't: dates, times, money, years, versions, order and book numbers. -->
+<p id="decoys">Joined 2024-05-12 at 10:30. Balance $1,299.00 (was €12,345.67). Member 2019–2024.
+Version 1.2.3.4. Order #100234, tracking 4242 4242 4242 4241. ISBN 978-3-16-148410-0.
+Released 12/05/2024. Reference 1234567890123.</p>
+<div id="spacer"></div>
+<p>Questions? Write to <span id="low">help@example.net</span>.</p>
+</body></html>

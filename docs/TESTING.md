@@ -16,8 +16,15 @@ the extension into Chrome for Testing and checks:
 - video export to MP4, WebM, GIF and WebP: speed, trims, audio length, device frames,
   and MP4 with Opus audio for systems without an AAC encoder (Chrome on Linux, and
   Windows without Media Foundation)
-- the popup, editor and settings, including the keyboard shortcut Chrome reports and
+- the popup, editor and settings, including every keyboard shortcut Chrome reports and
   Windows high-contrast mode
+- element and delayed screenshots, full pages of apps that scroll a panel, and the
+  right-click menu's items
+- the offer to blur email addresses and phone and card numbers (and not dates, sums or
+  order numbers), in visible and full-page screenshots
+- recordings with a camera bubble and microphone, with Chrome's stand-in camera: the
+  bubble is drawn, keeps moving on a still page, and both are let go afterwards
+- Share Captode and Copy diagnostics (no page addresses)
 
 ## What needs a person
 
@@ -73,6 +80,16 @@ or install the zip from `npm run package`.
    and the arrows, and delete it. Each step is announced.
 16. Remove a capture from Recent captures, delete an annotation and reset Settings: each
    toast offers Undo, which brings it back.
+17. **Camera and microphone:** in the popup's recording options turn on **Camera bubble**
+   and **Microphone**. Captode's page asks Chrome for them and shows a preview; allow, and
+   it closes. Then **Record → This tab** while talking: the video has you in the bottom
+   left corner, and your voice. (Tab recordings run in a hidden page that can't ask by
+   itself, so this checks that the permission given carries over.) Repeat with
+   **Record → Full screen**. Block the camera for Captode in Chrome's site settings and
+   record again: the popup reports that the camera can't be used.
+18. **Shortcuts and menus:** press Alt+Shift+F, Alt+Shift+V and Alt+Shift+S on a web page;
+   right-click the page and the toolbar icon and try each Captode item. On a page showing
+   an email address, **Blur** in the editor covers it.
 
 ### Windows
 

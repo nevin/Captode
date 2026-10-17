@@ -246,8 +246,10 @@ export function findPrivate(region, space) {
   };
 
   const EMAIL = /[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}/g;
-  const CARD = /(?<![\d.,])\d(?:[ -]?\d){12,18}(?![\d.,])/g;
-  const PHONE = /(?<![\w.,/-])(?:\+\d{1,3}[\s.-]?)?(?:\(\d{1,4}\)[\s.-]?)?\d{2,5}(?:[\s.-]\d{2,5}){1,4}(?![\w.,/-])/g;
+  // Whole numbers only: not the start or end of a longer one ("4242 4242 4242" in a
+  // 16-digit tracking number isn't a phone number).
+  const CARD = /(?<![\d.,]|\d[ -])\d(?:[ -]?\d){12,18}(?![\d.,]|[ -]\d)/g;
+  const PHONE = /(?<![\w.,/-]|\d[\s.-])(?:\+\d{1,3}[\s.-]?)?(?:\(\d{1,4}\)[\s.-]?)?\d{2,5}(?:[\s.-]\d{2,5}){1,4}(?![\w.,/-]|[\s.-]\d)/g;
   const digits = (m) => m.replace(/\D/g, '');
   const luhn = (d) => {
     let sum = 0;

@@ -3,13 +3,14 @@
 Everything to fill in the Chrome Web Store Developer Dashboard, field by field, plus the
 assets to upload. (Microsoft Edge Add-ons asks for the same things; notes at the end.)
 
-Build the package with `npm run package` and upload `dist/captode-1.2.0.zip`.
+Build the package with `npm run package` and upload `dist/captode-<version>.zip`
+(`npm run release` builds it; the GitHub release for the tag has the same file).
 
 ---
 
 ## Package (uploaded zip)
 
-- Manifest V3, version 1.3.0, minimum Chrome 116.
+- Manifest V3, version 1.4.0, minimum Chrome 116.
 - Translated into Spanish, Portuguese (Brazil), French, German, Italian, Japanese, Korean and
   Simplified Chinese. The Web Store shows the extension's name and short description in each of
   these languages from the package; the detailed description below can be added per language
@@ -44,13 +45,16 @@ and saves them to your computer. Everything happens in your browser: no account,
 uploads and no watermark.
 
 Screenshots
-Capture a whole scrolling page in one image, just what's on screen, or an area you drag
-out with a mouse, finger or pen. Long pages are stitched cleanly, with sticky headers
-shown once. Every kind of screenshot is also in the page's right-click menu.
+Capture a whole scrolling page in one image, just what's on screen, an area you drag
+out with a mouse, finger or pen, or a single part of the page you point at. Long pages
+and web apps that scroll inside a panel are stitched cleanly, with sticky headers shown
+once. Wait a few seconds first to catch an open menu, start from the right-click menu,
+or press a keyboard shortcut on any page.
 
 Mark up
 Add arrows, shapes, text, callouts, highlights and numbered steps, spotlight or magnify
-what matters, and blur or black out anything private before you share. Select several
+what matters, and blur or black out anything private before you share. When a screenshot
+shows email addresses or phone or card numbers, Captode offers to blur them in one click. Select several
 things to align, arrange or copy them, and pick up where you left off: your edits are
 kept with each capture. Crop, resize, or add padding, a background and a shadow. Every tool has a
 keyboard shortcut, and changes can be undone.
@@ -63,7 +67,8 @@ quality that fits.
 Record
 Record the current tab, an area of it, or your whole screen or a window, with sound if
 you like. Only the page is kept, even when DevTools shows it at a phone's size, and you can
-record it as shown, scaled up or down, or at a standard resolution. A countdown of up to 30
+record it as shown, scaled up or down, or at a standard resolution. Talk over it with your
+microphone, add yourself in a round camera bubble, and show your clicks. A countdown of up to 30
 seconds gives you time to get ready, and one click on the toolbar button stops the recording.
 
 Review designs
@@ -128,8 +133,8 @@ lets the user annotate, review, compare, trim and export them as image, PDF or v
 
 | Permission | Justification to paste |
 | --- | --- |
-| activeTab | Captures the tab the user is on, only after they click the Captode toolbar button, press its keyboard shortcut or choose a Captode item in the page's right-click menu. Captode has no host permissions and does nothing on pages until the user invokes it. |
-| contextMenus | Adds Captode's screenshot modes (full page, visible area, selected area, element) to the page's right-click menu, so a screenshot can be started without opening the toolbar popup. |
+| activeTab | Captures the tab the user is on, only after they click the Captode toolbar button, press one of its keyboard shortcuts or choose a Captode item in the page's or the toolbar icon's right-click menu. Captode has no host permissions and does nothing on pages until the user invokes it. |
+| contextMenus | Adds Captode's screenshot modes (full page, visible area, selected area, element) to the page's right-click menu and the toolbar icon's menu, so a screenshot can be started without opening the toolbar popup. |
 | scripting | After the user starts a capture, injects a temporary overlay for selecting an area and a recording countdown into the active tab, and scrolls the page to stitch full-page screenshots. Nothing stays injected afterwards. |
 | tabCapture | Records the current tab (or a selected area of it) when the user starts a tab recording from the popup. |
 | offscreen | Hosts the MediaRecorder for tab recordings in an offscreen document, because a service worker cannot hold a media stream. The recording keeps running after the popup closes. |
@@ -149,7 +154,10 @@ personal communications, location, web history, user activity, website content.
 
 Captures of website content are made at the user's request and never leave the device,
 so they are not "collected" in the Chrome Web Store's sense (data transmitted off the
-user's device).
+user's device). The same goes for the camera and microphone, which the user turns on for a
+recording (the browser asks them first) and which only go into that recording on their
+device, and for the email addresses and numbers Captode looks for on a captured page to
+offer to blur them: only their positions are kept, with the capture, on the device.
 
 Tick all three certifications:
 - I do not sell or transfer user data to third parties, outside of the approved use cases
@@ -179,6 +187,8 @@ No account or setup is needed.
    toolbar button to stop. The recording opens; choose GIF and click Export.
 4. Record > Full screen shows Chrome's own screen picker and records the chosen screen
    or window.
+5. Right-click any page and choose Captode > Screenshot the visible area, or press
+   Alt+Shift+V. On a page showing an email address, the editor offers to blur it.
 Captode cannot capture chrome:// pages or the Chrome Web Store (Chrome blocks this for all
 extensions); the popup says so on those pages.
 ```

@@ -153,6 +153,51 @@ export const tests = {
     await st.close();
   },
 
+  async 'Settings lists every shortcut as Chrome has it, and diagnostics leave out page addresses'({ browser, url }) {
+    const st = await open(browser, url('settings/settings.html'));
+    await sleep(300);
+    const rows = await st.evaluate(async () => {
+      const chromeHas = Object.fromEntries((await chrome.commands.getAll()).map((c) => [c.name, (c.shortcut || '').replace(/\+/g, '')]));
+      return [...document.querySelectorAll('#shortcut-list [data-command]')].map((r) => ({
+        name: r.dataset.command, label: r.querySelector('dt').textContent, shown: r.querySelector('dd').textContent.replace(/\s+/g, ''), chrome: chromeHas[r.dataset.command],
+      }));
+    });
+    ok(rows.length === 5 && rows.every((r) => r.chrome !== undefined && r.label), `rows: ${JSON.stringify(rows)}`);
+    const wrong = rows.filter((r) => (r.chrome ? r.shown !== r.chrome : r.shown !== 'noshortcutset'));
+    ok(!wrong.length, `shown differently from Chrome: ${JSON.stringify(wrong)}`);
+
+    // A failed capture on a page, as the service worker keeps it, then Copy diagnostics.
+    await st.evaluate(() => chrome.storage.local.set({ lastFailure: { message: 'Cannot access contents of <url>', when: Date.now(), version: '1.4.0' } }));
+    await st.evaluate(() => { navigator.clipboard.writeText = async (t) => { window.__copied = t; }; });
+    await st.click('#diagnostics');
+    await st.waitForFunction(() => window.__copied, { polling: 100 });
+    const text = await st.evaluate(() => window.__copied);
+    const version = await st.evaluate(() => chrome.runtime.getManifest().version);
+    ok(text.startsWith(`Captode ${version}\n`) && /\nBrowser: .*\d/.test(text) && /\nOS: /.test(text) && /\nShortcuts: .*capture-full/.test(text) && /Last error: Cannot access contents of <url>/.test(text), `diagnostics:\n${text}`);
+    ok(!/https?:\/\//.test(text), 'no web addresses');
+    await st.evaluate(() => chrome.storage.local.remove('lastFailure'));
+    await st.close();
+  },
+
+  async 'a failed capture is kept for diagnostics without the page address'({ browser, url, site }) {
+    // A page that can't be scripted: Chrome's error names its address.
+    const ctl = await open(browser, url('popup/popup.html'), { width: 340, height: 600 });
+    const page = await browser.newPage();
+    await page.goto('chrome://version');
+    await page.bringToFront();
+    // Captode can't read a chrome:// tab's address, so it is found as the one showing.
+    const tabId = await ctl.evaluate(async () => (await chrome.tabs.query({ active: true, lastFocusedWindow: true }))[0]?.id);
+    ok(tabId, 'found the tab');
+    await ctl.evaluate((tabId) => chrome.runtime.sendMessage({ type: 'capture-image', mode: 'full', tabId }), tabId);
+    await ctl.waitForFunction(async () => (await chrome.storage.local.get('lastFailure')).lastFailure, { polling: 100, timeout: 10000 });
+    const { message } = await ctl.evaluate(async () => (await chrome.storage.local.get('lastFailure')).lastFailure);
+    ok(message && /Cannot access|cannot be scripted/i.test(message) && !message.includes('chrome://version'), `kept as: ${message}`);
+    await ctl.evaluate(async () => { await chrome.storage.local.remove('lastFailure'); await chrome.storage.session.remove('lastError'); await chrome.action.setBadgeText({ text: '' }); });
+    await page.close();
+    await ctl.close();
+    return message;
+  },
+
   async 'popup shows the keyboard shortcut as Chrome has it set'({ browser, url }) {
     const pop = await open(browser, url('popup/popup.html'), { width: 340, height: 600 });
     await sleep(300);

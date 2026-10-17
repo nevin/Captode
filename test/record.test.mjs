@@ -1,6 +1,6 @@
 // Tab recordings, end to end: started and stopped as the toolbar does, with Chrome's
 // real tab capture (the test extension is allow-listed to record without a click).
-import { open, waitForTab, ok, near, sleep, Skip } from './helpers.mjs';
+import { open, waitForTab, ok, near, sleep, Skip, launch } from './helpers.mjs';
 
 export async function setup({ browser, url, site }) {
   const page = await open(browser, `${site}/rich.html`);
@@ -57,6 +57,78 @@ export async function setup({ browser, url, site }) {
 const black = (p) => p.every((v) => v < 16);
 
 export const tests = {
+  async 'the camera bubble and microphone are recorded, and the bubble moves while the page stands still'() {
+    // Chrome's stand-in camera (a moving picture) and microphone (a beep).
+    const env = await launch({ args: ['--use-fake-device-for-media-stream'] });
+    try {
+      const lab = await open(env.browser, env.url('lab/lab.html'));
+      await lab.bringToFront();
+      const r = await lab.evaluate(async () => {
+        const { record, openCameraAndMic } = await import('/lib/recorder.js');
+        // A still page: a canvas drawn once sends no further frames by itself.
+        const c = document.createElement('canvas'); c.width = 1280; c.height = 720; document.body.append(c);
+        const g = c.getContext('2d'); g.fillStyle = '#2050e0'; g.fillRect(0, 0, 1280, 720);
+        const stream = c.captureStream(30);
+        // And the page's own sound, to be mixed with the microphone.
+        const ac = new AudioContext(); const osc = ac.createOscillator(); const dest = ac.createMediaStreamDestination();
+        osc.connect(dest); osc.start();
+        stream.addTrack(dest.stream.getAudioTracks()[0]);
+        const extras = await openCameraAndMic({ camera: true, mic: true });
+        const session = await record(stream, { fps: 30, ...extras });
+        await new Promise((res) => setTimeout(res, 3000));
+        const { blob, meta } = await session.stop();
+        const ended = extras.camera.readyState === 'ended' && extras.mic.readyState === 'ended';
+        // Frames from early and late in the recording.
+        const v = document.createElement('video'); v.muted = true; v.src = URL.createObjectURL(blob);
+        await new Promise((res) => { v.onloadeddata = res; });
+        const grab = async (t) => {
+          v.currentTime = t; await new Promise((res) => { v.onseeked = res; });
+          const k = new OffscreenCanvas(v.videoWidth, v.videoHeight).getContext('2d', { willReadFrequently: true });
+          k.drawImage(v, 0, 0);
+          return k;
+        };
+        const b = await grab(2.4);
+        const W = v.videoWidth, H = v.videoHeight, d = Math.round(Math.min(W, H) * 0.24), m = Math.round(Math.min(W, H) * 0.03);
+        const px = (k, x, y) => [...k.getImageData(x, y, 1, 1).data.slice(0, 3)];
+        // How many frames the video holds: played through, counting each one shown.
+        v.currentTime = 0; await new Promise((res) => { v.onseeked = res; });
+        let frames = 0;
+        const count = (_, info) => { frames = info.presentedFrames; v.requestVideoFrameCallback(count); };
+        v.requestVideoFrameCallback(count);
+        await v.play();
+        await new Promise((res) => { v.onended = res; setTimeout(res, 6000); });
+        return {
+          size: [W, H], meta, ended, frames,
+          page: px(b, W - 40, 40), // away from the bubble: the page itself
+          bubble: px(b, m + d / 2, H - m - d / 2),
+        };
+      });
+      const blue = (p) => Math.abs(p[0] - 0x20) < 24 && Math.abs(p[1] - 0x50) < 24 && Math.abs(p[2] - 0xe0) < 24;
+      ok(r.size[0] === 1280 && r.size[1] === 720, `size ${r.size}`);
+      ok(blue(r.page), `the page shows around the bubble: ${r.page}`);
+      ok(!blue(r.bubble), `the camera shows in the bubble: ${r.bubble}`);
+      // The stand-in camera gives 20 a second; without it driving them, a still page gives one or two.
+      ok(r.frames > 25, `the bubble keeps moving on a still page: ${r.frames} frames in 3 s`);
+      ok(r.meta.hasAudio && r.meta.mic && r.meta.camera, `meta ${JSON.stringify(r.meta)}`);
+      ok(r.ended, 'camera and microphone are let go when the recording stops');
+
+      // The page the popup opens to ask for them: once allowed, the switches are on and
+      // the bubble is previewed. (Chrome answers by itself in tests.)
+      const perm = await open(env.browser, env.url('recorder/permission.html?camera=1&mic=1'));
+      await perm.click('#allow');
+      await perm.waitForFunction(() => !document.querySelector('#done').classList.contains('hidden'), { polling: 100, timeout: 10000 });
+      const after = await perm.evaluate(async () => ({
+        stored: await chrome.storage.local.get(['camera', 'mic']),
+        preview: !document.querySelector('#bubble').classList.contains('hidden') && document.querySelector('#preview').srcObject?.getVideoTracks().length === 1,
+        title: document.querySelector('#ask-title').textContent,
+      }));
+      ok(after.stored.camera === true && after.stored.mic === true && after.preview && after.title && !/permission_/.test(after.title), `permission page: ${JSON.stringify(after)}`);
+      return `${r.frames} frames in 3 s`;
+    } finally {
+      await env.close();
+    }
+  },
+
   async 'a tab recording is the page at its own size'({ page, record }) {
     const want = await page.evaluate(() => [innerWidth * devicePixelRatio, innerHeight * devicePixelRatio]);
     const r = await record();

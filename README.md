@@ -20,7 +20,11 @@ export to the format you need. Captode runs entirely in your browser. Nothing is
   an element, after choosing it). Esc cancels; if another tab is showing when the time is
   up, nothing is captured.
 - **Right-click menu:** every kind of screenshot can also be started from the page's
-  right-click menu, under Captode.
+  right-click menu, under Captode, or from the menu of Captode's toolbar icon.
+- **Keyboard shortcuts** that work on any page: **Alt+Shift+F** full page, **Alt+Shift+V**
+  visible area, **Alt+Shift+S** selected area. Element has none by default (Chrome allows
+  an extension four suggested shortcuts); set or change any of them at
+  `chrome://extensions/shortcuts`.
 
 The capture opens in the editor, where you can:
 
@@ -35,7 +39,11 @@ The capture opens in the editor, where you can:
   bold, italic, text colour and background colour.
 - **Number the steps:** each click adds a numbered marker (1, 2, 3…) in the colour and
   size you choose; start from any number, or renumber one.
-- **Blur, pixelate or black out** sensitive details.
+- **Blur, pixelate or black out** sensitive details. When a screenshot shows email
+  addresses, phone numbers or card numbers (in text or form fields), the editor offers to
+  blur them all in one click; each blur can then be moved or removed, and Undo takes them
+  all back. Dates, times, prices, years and order numbers are left alone. They are found on
+  the page as it is captured; nothing is sent anywhere.
 - Select, move, resize (handles on every annotation), restyle and delete anything you
   added. **Select several** with Shift-click or by dragging a box, then move, restyle,
   duplicate, copy and paste (between editor tabs too), bring to front or send to back,
@@ -103,6 +111,12 @@ the black space around it is left out. **Video size** records the page as shown 
 default), scaled (50%, 75%, 150% or 200%), or at a standard resolution (480p to 4K,
 measured on the shorter side so phone-shaped pages stay portrait).
 
+**Microphone** adds your voice, mixed with the tab's or screen's sound if that is
+recorded too. **Camera bubble** puts you in a round, mirrored picture in the bottom left
+corner of the video; it keeps moving even while the page stands still. The first time you
+turn either on, a Captode page asks Chrome for access once and shows a preview; both are
+used only while recording.
+
 You can pick the frame rate (15, 24, 30 or 60 fps), include audio, show clicks and keyboard
 shortcuts in tab recordings (never ordinary typing, and nothing in password fields), and set a
 countdown of up to 30 seconds (or none) to get ready; press Esc, or Cancel for full-screen recordings, to
@@ -165,8 +179,12 @@ Open **Settings** from the gear in the popup (or right-click the icon → Option
 - **Default formats** for screenshots and recordings (or the last one used), and whether
   device frames are on.
 
-Settings also has links to help, problem reports and the privacy policy, and a button that
-resets everything to the defaults.
+Settings also lists every keyboard shortcut (with a button to change them), has links to
+help, problem reports and the privacy policy, a **Share Captode** button (the system's
+share sheet, or the store link copied), **Copy diagnostics** (versions, operating system,
+shortcuts, settings and the last error, without page addresses, to paste into a problem
+report; nothing is sent), and a button that resets everything to the defaults. The popup's
+share icon copies the store link.
 
 On browser pages that Chrome protects (such as `chrome://` pages and the Web Store), the
 popup explains that the page can't be captured and leaves full-screen recording available.
@@ -341,8 +359,10 @@ than text, ever shows.
    uncommitted changes; then it sets the version in the manifest, `package.json` and
    `package-lock.json`, checks the translations, runs the tests, builds the zip, commits
    and tags `v<version>`. Add `--push` to push the commit and tag, or `--dry-run` to see
-   what it would do.
-3. Upload `dist/captode-<version>.zip` to the
+   what it would do. A pushed tag also starts the Release workflow on GitHub, which checks
+   that the tag matches the manifest, runs the tests, and attaches the zip (with its
+   SHA-256) to a GitHub release.
+3. Upload `dist/captode-<version>.zip` (or the one on the GitHub release) to the
    [Chrome Web Store developer dashboard](https://chrome.google.com/webstore/devconsole) and to
    [Microsoft Edge Add-ons](https://partner.microsoft.com/dashboard/microsoftedge/).
    [`store/listing.md`](store/listing.md) has every dashboard field ready to paste
