@@ -1,0 +1,28 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Web app</title>
+<style>
+/* Like a mail or chat app: the window never scrolls; the main panel does. */
+html,body{margin:0;height:100%;overflow:hidden;font:14px system-ui,sans-serif;color:#222}
+header{position:fixed;top:0;left:0;right:0;height:56px;background:#17171c;color:#fff;display:flex;align-items:center;padding:0 20px}
+nav{position:fixed;top:56px;left:0;bottom:0;width:200px;background:#eef0f6}
+main{position:fixed;top:56px;left:200px;right:0;bottom:0;overflow-y:auto;background:#fff}
+.sticky{position:sticky;top:0;height:40px;background:#ffd23f;display:flex;align-items:center;padding:0 16px;font-weight:700;z-index:1}
+.row{height:32px;display:flex;align-items:center;gap:12px;padding:0 16px;border-bottom:1px solid #ddd}
+.row i{width:60px;height:20px;flex:none}
+.fab{position:fixed;right:24px;bottom:24px;width:56px;height:56px;border-radius:50%;background:#e5484d}
+</style></head><body>
+<header>Mail</header>
+<nav></nav>
+<main id="panel"><div class="sticky">Inbox</div></main>
+<div class="fab"></div>
+<script>
+// Each row has a colour of its own, so a capture shows whether every row landed
+// where it belongs.
+const panel = document.getElementById('panel');
+for (let i = 0; i < 120; i++) {
+  const row = document.createElement('div');
+  row.className = 'row';
+  row.innerHTML = `<i style="background:rgb(${(i * 37) % 256},${(i * 91 + 60) % 256},${(i * 53 + 120) % 256})"></i>Message ${i}`;
+  panel.append(row);
+}
+</script>
+</body></html>

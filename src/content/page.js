@@ -83,38 +83,65 @@ export function pickArea(hint) {
   });
 }
 
-/** Prepares the page for a scrolling capture and reports its size. */
+/**
+ * Prepares the page for a scrolling capture and reports its size. Many web apps (mail,
+ * chat, documents, dashboards) don't scroll the window but a panel inside it; then the
+ * largest such panel is captured instead, at its full height:
+ * `{ panel: { x, y, w, h }, height }` in CSS pixels, the panel's box in the viewport.
+ */
 export function fullPagePrepare() {
   const de = document.documentElement;
-  const state = {
-    x: window.scrollX,
-    y: window.scrollY,
-    behavior: de.style.scrollBehavior,
-  };
-  window.__captodeState = state;
-  de.style.scrollBehavior = 'auto';
+  const body = document.body || de;
   const style = document.createElement('style');
   style.id = '__captode_fp';
   style.textContent =
-    'html::-webkit-scrollbar,body::-webkit-scrollbar{display:none!important}' +
-    'html,body{scrollbar-width:none!important}';
-  document.documentElement.appendChild(style);
-  const body = document.body || de;
-  return {
-    width: Math.max(de.scrollWidth, body.scrollWidth, de.clientWidth),
-    height: Math.max(de.scrollHeight, body.scrollHeight, de.clientHeight),
-    vw: window.innerWidth,
-    vh: window.innerHeight,
-    dpr: window.devicePixelRatio || 1,
-  };
+    'html::-webkit-scrollbar,body::-webkit-scrollbar,[data-captode-panel]::-webkit-scrollbar{display:none!important}' +
+    'html,body,[data-captode-panel]{scrollbar-width:none!important;scroll-behavior:auto!important}';
+  const vw = window.innerWidth, vh = window.innerHeight;
+  const docHeight = Math.max(de.scrollHeight, body.scrollHeight, de.clientHeight);
+
+  // The panel that scrolls furthest among those covering a good part of the window,
+  // if it scrolls further than the window itself does.
+  let panel = null, panelArea = 0;
+  for (const el of document.querySelectorAll('body *')) {
+    if (el.scrollHeight - el.clientHeight < 40 || el.clientHeight < 100) continue;
+    const oy = getComputedStyle(el).overflowY;
+    if (oy !== 'auto' && oy !== 'scroll' && oy !== 'overlay') continue;
+    const r = el.getBoundingClientRect();
+    const area = Math.max(0, Math.min(r.right, vw) - Math.max(r.left, 0)) * Math.max(0, Math.min(r.bottom, vh) - Math.max(r.top, 0));
+    if (area < vw * vh * 0.3 || area <= panelArea) continue;
+    panel = el;
+    panelArea = area;
+  }
+  if (panel && panel.scrollHeight - panel.clientHeight <= docHeight - vh) panel = null;
+
+  window.__captodeState = { x: window.scrollX, y: window.scrollY, behavior: de.style.scrollBehavior, panel, top: panel?.scrollTop };
+  de.style.scrollBehavior = 'auto';
+  if (panel) panel.setAttribute('data-captode-panel', '');
+  de.appendChild(style);
+  const dpr = window.devicePixelRatio || 1;
+  if (panel) {
+    // The panel's inside, without borders or a scrollbar (hidden above), on screen.
+    const r = panel.getBoundingClientRect();
+    const x = Math.max(0, r.left + panel.clientLeft), y = Math.max(0, r.top + panel.clientTop);
+    const w = Math.min(panel.clientWidth, vw - x), h = Math.min(panel.clientHeight, vh - y);
+    return { panel: { x, y, w, h }, width: w, height: panel.scrollHeight, vw, vh, dpr };
+  }
+  return { width: Math.max(de.scrollWidth, body.scrollWidth, de.clientWidth), height: docHeight, vw, vh, dpr };
 }
 
-/** Scrolls to (x, y), hiding fixed and sticky elements after the first tile. */
+/**
+ * Scrolls to (x, y), the window or the panel being captured. After the first tile it
+ * hides what would repeat on every tile: fixed and sticky elements (inside the panel,
+ * or floating over it), but never one that holds the panel.
+ */
 export function fullPageScroll(x, y, hideFixed) {
   return new Promise((resolve) => {
+    const panel = window.__captodeState?.panel;
     if (hideFixed && !window.__captodeHidden) {
       window.__captodeHidden = [];
       for (const el of document.querySelectorAll('body *')) {
+        if (panel && el.contains(panel)) continue;
         const pos = getComputedStyle(el).position;
         if (pos === 'fixed' || pos === 'sticky') {
           window.__captodeHidden.push([el, el.style.getPropertyValue('visibility'), el.style.getPropertyPriority('visibility')]);
@@ -122,9 +149,10 @@ export function fullPageScroll(x, y, hideFixed) {
         }
       }
     }
-    window.scrollTo(x, y);
+    if (panel) panel.scrollTop = y;
+    else window.scrollTo(x, y);
     // Give lazy content and repaint a moment before the tile is captured.
-    setTimeout(() => requestAnimationFrame(() => resolve({ x: window.scrollX, y: window.scrollY })), 120);
+    setTimeout(() => requestAnimationFrame(() => resolve(panel ? { x: 0, y: panel.scrollTop } : { x: window.scrollX, y: window.scrollY })), 120);
   });
 }
 
@@ -137,9 +165,14 @@ export function fullPageRestore() {
   document.getElementById('__captode_fp')?.remove();
   const s = window.__captodeState;
   if (s) {
+    if (s.panel) {
+      s.panel.removeAttribute('data-captode-panel');
+      s.panel.scrollTop = s.top;
+    }
     window.scrollTo(s.x, s.y);
     document.documentElement.style.scrollBehavior = s.behavior;
   }
+  window.__captodeState = null;
 }
 
 /**

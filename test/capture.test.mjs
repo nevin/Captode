@@ -41,6 +41,46 @@ export async function setup({ browser, url, site }) {
   return { page, capture };
 }
 
+/** Captures test/site/app.html in full and checks every row of its panel. */
+async function panelCapture(browser, url, site) {
+  const ctl = await open(browser, url('popup/popup.html'), { width: 340, height: 600 });
+  const app = await browser.newPage();
+  await app.goto(`${site}/app.html`);
+  await app.evaluate(() => { document.querySelector('#panel').scrollTop = 500; });
+  const want = await app.evaluate(() => {
+    const p = document.querySelector('#panel');
+    const marks = [...p.querySelectorAll('.row i')].map((i) => ({ y: i.getBoundingClientRect().top - p.getBoundingClientRect().top + p.scrollTop + 10, x: i.getBoundingClientRect().left - p.getBoundingClientRect().left + 30, colour: getComputedStyle(i).backgroundColor.match(/\d+/g).map(Number) }));
+    return { dpr: devicePixelRatio, w: p.offsetWidth, h: p.scrollHeight, marks };
+  });
+  const tabId = await ctl.evaluate(async (site) => (await chrome.tabs.query({ url: `${site}/app.html` }))[0].id, site);
+  await app.bringToFront();
+  await ctl.evaluate((tabId) => chrome.runtime.sendMessage({ type: 'capture-image', mode: 'full', tabId }), tabId);
+  const ed = await waitForTab(browser, (u) => u.includes('editor.html?id='));
+  try {
+    await ed.waitForFunction(() => /px/.test(document.querySelector('#doc-dims').textContent), { timeout: 45000, polling: 100 });
+    const r = await ed.evaluate((want) => {
+      const img = captodeEditor.pixels();
+      const at = (x, y) => { const i = (Math.round(y) * img.width + Math.round(x)) * 4; return [img.data[i], img.data[i + 1], img.data[i + 2]]; };
+      const wrong = want.marks.filter((m) => at(m.x * want.dpr, m.y * want.dpr).some((v, k) => Math.abs(v - m.colour[k]) > 6)).map((m) => Math.round(m.y));
+      // The sticky "Inbox" bar (yellow) is drawn once, at the top, not on every tile.
+      let yellowRows = 0;
+      for (let y = 0; y < img.height; y++) { const [r, g, b] = at(img.width - 4, y); if (r > 240 && g > 200 && g < 220 && b < 80) yellowRows++; }
+      return { size: [img.width, img.height], wrong, yellowRows };
+    }, want);
+    near(r.size[0], want.w * want.dpr, 2, 'the panel\'s width (the scrollbar hidden)');
+    near(r.size[1], want.h * want.dpr, 3, 'the panel\'s whole height');
+    ok(!r.wrong.length, `rows out of place at ${r.wrong.slice(0, 8)} (of ${want.marks.length})`);
+    near(r.yellowRows, 40 * want.dpr, 2, 'the sticky header once');
+    const after = await app.evaluate(() => ({ top: document.querySelector('#panel').scrollTop, marked: !!document.querySelector('[data-captode-panel]'), hidden: [...document.querySelectorAll('*')].filter((e) => e.style.visibility).length }));
+    ok(after.top === 500 && !after.marked && !after.hidden, `the page is as it was: ${JSON.stringify(after)}`);
+    return `${want.dpr * 100}%: ${r.size.join(' × ')}, ${want.marks.length} rows in place`;
+  } finally {
+    await ed.close();
+    await app.close();
+    await ctl.close();
+  }
+}
+
 export const tests = {
   async 'full page is stitched and the scroll position restored'({ page, capture }) {
     // Expected size from the page itself: window frames and scrollbars differ by OS.
@@ -52,6 +92,14 @@ export const tests = {
     near(await page.evaluate(() => window.scrollY), 700, 1, 'scroll position afterwards');
     await ed.close();
     await page.bringToFront();
+  },
+
+  async 'full page of a web app that scrolls a panel, not the window, captures the panel in full'({ browser, url, site }) {
+    const notes = [await panelCapture(browser, url, site)];
+    // And at a fractional display scale, where tiles are hardest to line up.
+    const env = await launch({ args: ['--force-device-scale-factor=1.5'] });
+    try { notes.push(await panelCapture(env.browser, env.url, site)); } finally { await env.close(); }
+    return notes.join('; ');
   },
 
   async 'visible area matches the viewport'({ page, capture }) {

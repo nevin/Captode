@@ -112,9 +112,68 @@ function alignTile(ctx, bmp, dx, guess, overlap) {
   return best;
 }
 
+/** Scroll positions that cover `total` in steps of `view`, the last one flush with the end. */
+function steps(total, view) {
+  const out = [];
+  for (let p = 0; p < total; p += view) out.push(Math.min(p, Math.max(0, total - view)));
+  return [...new Set(out)];
+}
+
+const OVERLAP = 24; // CSS pixels shared by neighbouring tiles, for lining them up
+
+/** The tallest image, in CSS pixels, that stays inside the browser's canvas limits. */
+const maxHeight = (width, scale) => Math.floor(Math.min(32000, 250e6 / (width * scale)) / scale);
+
+/**
+ * A panel that scrolls inside the page (as in mail, chat and document apps), at its
+ * full height: each tile is the panel's box cut from a capture of the window.
+ */
+async function capturePanel(tab, info, meta) {
+  await run(tab.id, fullPageScroll, 0, 0, false);
+  const first = await captureVisible(tab.windowId);
+  const scale = first.width / info.vw;
+  meta.dpr = scale;
+  meta.panel = true;
+  const p = info.panel;
+  const sx = Math.round(p.x * scale), sy = Math.round(p.y * scale);
+  const sw = Math.max(1, Math.min(first.width - sx, Math.round(p.w * scale)));
+  const sh = Math.max(1, Math.min(first.height - sy, Math.round(p.h * scale)));
+  const cut = (bmp) => createImageBitmap(bmp, sx, sy, sw, sh);
+
+  const height = Math.min(info.height, maxHeight(sw / scale, scale));
+  if (height < info.height) meta.truncated = true;
+  const canvas = new OffscreenCanvas(sw, Math.max(sh, Math.round(height * scale)));
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(await cut(first), 0, 0);
+  let paintedH = sh;
+
+  const viewH = Math.max(1, Math.floor(sh / scale) - OVERLAP);
+  const ys = steps(height, viewH);
+  let done = 1;
+  for (const y of ys) {
+    if (y === 0) continue;
+    const at = await run(tab.id, fullPageScroll, 0, y, true);
+    const bmp = await captureVisible(tab.windowId);
+    const tile = await cut(bmp);
+    bmp.close();
+    const dy = alignTile(ctx, tile, 0, Math.round(at.y * scale), Math.round(OVERLAP * scale));
+    ctx.drawImage(tile, 0, dy);
+    paintedH = Math.max(paintedH, dy + tile.height);
+    tile.close();
+    await badge(`${Math.round((++done / ys.length) * 100)}%`, '#5b4bff');
+  }
+  if (paintedH < canvas.height) {
+    const trimmed = new OffscreenCanvas(canvas.width, paintedH);
+    trimmed.getContext('2d').drawImage(canvas, 0, 0);
+    return trimmed.convertToBlob({ type: 'image/png' });
+  }
+  return canvas.convertToBlob({ type: 'image/png' });
+}
+
 async function captureFullPage(tab, meta) {
   const info = await run(tab.id, fullPagePrepare);
   try {
+    if (info.panel) return await capturePanel(tab, info, meta);
     const first = await (async () => {
       await run(tab.id, fullPageScroll, 0, 0, false);
       return captureVisible(tab.windowId);
@@ -123,8 +182,7 @@ async function captureFullPage(tab, meta) {
     meta.dpr = scale; // image pixels per CSS pixel, for measuring
 
     // Stay inside the browser's canvas limits; very long pages are cut off.
-    const maxH = Math.floor(Math.min(32000, 250e6 / (info.width * scale)) / scale);
-    const height = Math.min(info.height, maxH);
+    const height = Math.min(info.height, maxHeight(info.width, scale));
     if (height < info.height) meta.truncated = true;
 
     const canvas = new OffscreenCanvas(Math.round(info.width * scale), Math.round(height * scale));
@@ -135,16 +193,10 @@ async function captureFullPage(tab, meta) {
     let paintedW = first.width;
     let paintedH = first.height;
 
-    const steps = (total, view) => {
-      const out = [];
-      for (let p = 0; p < total; p += view) out.push(Math.min(p, Math.max(0, total - view)));
-      return [...new Set(out)];
-    };
     // Step by what a capture really holds. At fractional scales (125%, 150%) the
     // reported viewport is rounded up, and stepping by it would leave a blank row
     // between tiles; a pixel of overlap is harmless. Each tile is then placed at the
     // scroll position the page actually reached.
-    const OVERLAP = 24; // CSS pixels shared by neighbouring tiles, for lining them up
     const viewW = Math.max(1, Math.floor(first.width / scale) - 1);
     const viewH = Math.max(1, Math.floor(first.height / scale) - OVERLAP);
     const xs = steps(info.width, viewW);
