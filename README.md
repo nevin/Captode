@@ -39,11 +39,11 @@ The capture opens in the editor, where you can:
   bold, italic, text colour and background colour.
 - **Number the steps:** each click adds a numbered marker (1, 2, 3…) in the colour and
   size you choose; start from any number, or renumber one.
-- **Blur, pixelate or black out** sensitive details. When a screenshot shows email
-  addresses, phone numbers or card numbers (in text or form fields), the editor offers to
-  blur them all in one click; each blur can then be moved or removed, and Undo takes them
-  all back. Dates, times, prices, years and order numbers are left alone. They are found on
-  the page as it is captured; nothing is sent anywhere.
+- **Blur, pixelate or black out** sensitive details. With **Blur private details** on in
+  Settings (it is off at first), email addresses, phone numbers and card numbers in a new
+  screenshot (in text or form fields) are blurred as it opens; each blur can be moved or
+  removed, and Undo takes them all back. Dates, times, prices, years and order numbers are
+  left alone. They are found on the page as it is captured; nothing is sent anywhere.
 - Select, move, resize (handles on every annotation), restyle and delete anything you
   added. **Select several** with Shift-click or by dragging a box, then move, restyle,
   duplicate, copy and paste (between editor tabs too), bring to front or send to back,
@@ -178,6 +178,8 @@ Open **Settings** from the gear in the popup (or right-click the icon → Option
   they get white when Transparent is chosen.
 - **Default formats** for screenshots and recordings (or the last one used), and whether
   device frames are on.
+- **Blur private details:** blur email addresses and phone and card numbers in new
+  screenshots (off at first).
 
 Settings also lists every keyboard shortcut (with a button to change them), has links to
 help, problem reports and the privacy policy, a **Share Captode** button (the system's

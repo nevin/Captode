@@ -1886,15 +1886,6 @@
   "menu_element": {
     "message": "要素をスクリーンショット…"
   },
-  "editor_private_one": {
-    "message": "非公開にしたいメールアドレスや番号が 1 件見つかりました。"
-  },
-  "editor_private_many": {
-    "message": "非公開にしたいメールアドレスや番号が $1 件見つかりました。"
-  },
-  "editor_private_blur": {
-    "message": "ぼかす"
-  },
   "editor_private_blurred_one": {
     "message": "非公開情報を 1 件ぼかしました"
   },
@@ -1977,7 +1968,7 @@
     "message": "Captode 1.4 の新機能"
   },
   "popup_whats_new_1_4": {
-    "message": "録画にカメラバブルとマイク、スクリーンショットの種類ごとのショートカット、メールアドレスや番号をワンクリックでぼかす機能。"
+    "message": "録画にカメラバブルとマイク、スクリーンショットの種類ごとのショートカット、メールアドレスや番号をぼかす設定。"
   },
   "share_captode": {
     "message": "Captode を共有"
@@ -1990,5 +1981,11 @@
   },
   "share_copied": {
     "message": "リンクをコピーしました。貼り付けて Captode を共有しましょう。"
+  },
+  "settings_blur_private": {
+    "message": "非公開情報をぼかす"
+  },
+  "settings_blur_private_hint": {
+    "message": "新しいスクリーンショットでメールアドレス、電話番号、カード番号をぼかします。ぼかしは個別に削除できます"
   }
 }

@@ -53,8 +53,8 @@ or press a keyboard shortcut on any page.
 
 Mark up
 Add arrows, shapes, text, callouts, highlights and numbered steps, spotlight or magnify
-what matters, and blur or black out anything private before you share. When a screenshot
-shows email addresses or phone or card numbers, Captode offers to blur them in one click. Select several
+what matters, and blur or black out anything private before you share. Captode can also blur
+email addresses and phone or card numbers in every new screenshot, if you turn that on. Select several
 things to align, arrange or copy them, and pick up where you left off: your edits are
 kept with each capture. Crop, resize, or add padding, a background and a shadow. Every tool has a
 keyboard shortcut, and changes can be undone.
@@ -157,7 +157,7 @@ so they are not "collected" in the Chrome Web Store's sense (data transmitted of
 user's device). The same goes for the camera and microphone, which the user turns on for a
 recording (the browser asks them first) and which only go into that recording on their
 device, and for the email addresses and numbers Captode looks for on a captured page to
-offer to blur them: only their positions are kept, with the capture, on the device.
+blur them when the user has turned that on in Settings: only their positions are kept, with the capture, on the device.
 
 Tick all three certifications:
 - I do not sell or transfer user data to third parties, outside of the approved use cases
@@ -188,7 +188,8 @@ No account or setup is needed.
 4. Record > Full screen shows Chrome's own screen picker and records the chosen screen
    or window.
 5. Right-click any page and choose Captode > Screenshot the visible area, or press
-   Alt+Shift+V. On a page showing an email address, the editor offers to blur it.
+   Alt+Shift+V. With Settings > Blur private details on, an email address on the page
+   comes out blurred.
 Captode cannot capture chrome:// pages or the Chrome Web Store (Chrome blocks this for all
 extensions); the popup says so on those pages.
 ```

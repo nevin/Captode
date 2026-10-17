@@ -7,6 +7,7 @@ export const DEFAULT_SETTINGS = {
   imageFormat: 'last',       // 'last' (the editor remembers it) or a format
   videoFormat: 'last',
   autoCopy: false,           // copy new screenshots to the clipboard when the editor opens them
+  autoBlur: false,           // blur email addresses and phone and card numbers in new screenshots
 };
 
 export async function getSettings() {

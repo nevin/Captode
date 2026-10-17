@@ -20,8 +20,9 @@ the extension into Chrome for Testing and checks:
   Windows high-contrast mode
 - element and delayed screenshots, full pages of apps that scroll a panel, and the
   right-click menu's items
-- the offer to blur email addresses and phone and card numbers (and not dates, sums or
-  order numbers), in visible and full-page screenshots
+- Blur private details: off, nothing is looked for; on, email addresses and phone and
+  card numbers are blurred (and not dates, sums or order numbers), in visible and
+  full-page screenshots
 - recordings with a camera bubble and microphone, with Chrome's stand-in camera: the
   bubble is drawn, keeps moving on a still page, and both are let go afterwards
 - Share Captode and Copy diagnostics (no page addresses)
@@ -88,8 +89,8 @@ or install the zip from `npm run package`.
    **Record → Full screen**. Block the camera for Captode in Chrome's site settings and
    record again: the popup reports that the camera can't be used.
 18. **Shortcuts and menus:** press Alt+Shift+F, Alt+Shift+V and Alt+Shift+S on a web page;
-   right-click the page and the toolbar icon and try each Captode item. On a page showing
-   an email address, **Blur** in the editor covers it.
+   right-click the page and the toolbar icon and try each Captode item. With **Blur private
+   details** on in Settings, an email address on the page comes out blurred.
 
 ### Windows
 

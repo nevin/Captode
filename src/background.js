@@ -63,10 +63,11 @@ async function waitBeforeCapture(tab, seconds) {
 
 /**
  * Details on the page that may be private (see findPrivate), as boxes in image pixels
- * stored with the capture: the editor offers to blur them. A page that can't be read
+ * stored with the capture: the editor blurs them, if chosen in Settings. A page that can't be read
  * just has none.
  */
 async function notePrivate(tab, meta, region, space, scale) {
+  if (!(await chrome.storage.local.get('settings')).settings?.autoBlur) return; // off unless chosen in Settings
   const boxes = await run(tab.id, findPrivate, region, space).catch(() => null);
   if (!boxes?.length) return;
   const pad = 2 * scale;

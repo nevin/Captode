@@ -1886,15 +1886,6 @@
   "menu_element": {
     "message": "Element aufnehmen…"
   },
-  "editor_private_one": {
-    "message": "Eine E-Mail-Adresse oder Nummer gefunden, die privat sein könnte."
-  },
-  "editor_private_many": {
-    "message": "$1 E-Mail-Adressen oder Nummern gefunden, die privat sein könnten."
-  },
-  "editor_private_blur": {
-    "message": "Verwischen"
-  },
   "editor_private_blurred_one": {
     "message": "1 privates Detail verwischt"
   },
@@ -1977,7 +1968,7 @@
     "message": "Neu in Captode 1.4"
   },
   "popup_whats_new_1_4": {
-    "message": "Kamerablase und Mikrofon für Aufnahmen, eine Tastenkombination für jede Screenshot-Art und ein Klick, um E-Mails und Nummern zu verwischen."
+    "message": "Kamerablase und Mikrofon für Aufnahmen, eine Tastenkombination für jede Screenshot-Art und eine Einstellung, um E-Mails und Nummern zu verwischen."
   },
   "share_captode": {
     "message": "Captode teilen"
@@ -1990,5 +1981,11 @@
   },
   "share_copied": {
     "message": "Link kopiert. Fügen Sie ihn irgendwo ein, um Captode zu teilen."
+  },
+  "settings_blur_private": {
+    "message": "Private Details verwischen"
+  },
+  "settings_blur_private_hint": {
+    "message": "E-Mail-Adressen sowie Telefon- und Kartennummern werden in neuen Screenshots verwischt; jede Verwischung lässt sich entfernen"
   }
 }

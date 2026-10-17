@@ -1886,15 +1886,6 @@
   "menu_element": {
     "message": "Captura de un elemento…"
   },
-  "editor_private_one": {
-    "message": "Se encontró una dirección de correo o un número que puede ser privado."
-  },
-  "editor_private_many": {
-    "message": "Se encontraron $1 direcciones de correo o números que pueden ser privados."
-  },
-  "editor_private_blur": {
-    "message": "Difuminar"
-  },
   "editor_private_blurred_one": {
     "message": "Se difuminó 1 dato privado"
   },
@@ -1977,7 +1968,7 @@
     "message": "Novedades de Captode 1.4"
   },
   "popup_whats_new_1_4": {
-    "message": "Burbuja de cámara y micrófono en las grabaciones, un atajo para cada tipo de captura y un clic para difuminar correos y números."
+    "message": "Burbuja de cámara y micrófono en las grabaciones, un atajo para cada tipo de captura y una opción en Ajustes para difuminar correos y números."
   },
   "share_captode": {
     "message": "Compartir Captode"
@@ -1990,5 +1981,11 @@
   },
   "share_copied": {
     "message": "Enlace copiado. Pégalo donde quieras para compartir Captode."
+  },
+  "settings_blur_private": {
+    "message": "Difuminar datos privados"
+  },
+  "settings_blur_private_hint": {
+    "message": "Los correos y los números de teléfono y de tarjeta se difuminan en las capturas nuevas; cada difuminado se puede quitar"
   }
 }

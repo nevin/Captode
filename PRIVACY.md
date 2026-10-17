@@ -24,8 +24,9 @@ them. It does not collect, transmit, sell or share any personal or sensitive dat
   into that recording on your device and nowhere else. Your browser asks you before
   Captode can use them, and you can withdraw that at any time in the browser's site
   settings.
-- **Private details** (email addresses, phone and card numbers) are looked for on the page
-  you capture, at the moment you capture it, only to offer to blur them. Their positions
+- **Private details** (email addresses, phone and card numbers) are looked for only if you
+  turn on Blur private details in Settings, on the page you capture, at the moment you
+  capture it, to blur them. Their positions
   are kept with the capture; the text itself isn't kept or sent.
 - **Copy diagnostics** in Settings puts versions, settings and the last error on your
   clipboard for you to paste into a report yourself. Captode doesn't send it.

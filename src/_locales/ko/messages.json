@@ -1886,15 +1886,6 @@
   "menu_element": {
     "message": "요소 스크린샷…"
   },
-  "editor_private_one": {
-    "message": "개인 정보일 수 있는 이메일 주소나 번호를 1개 찾았습니다."
-  },
-  "editor_private_many": {
-    "message": "개인 정보일 수 있는 이메일 주소나 번호를 $1개 찾았습니다."
-  },
-  "editor_private_blur": {
-    "message": "흐리게"
-  },
   "editor_private_blurred_one": {
     "message": "개인 정보 1개를 흐리게 했습니다"
   },
@@ -1977,7 +1968,7 @@
     "message": "Captode 1.4의 새로운 기능"
   },
   "popup_whats_new_1_4": {
-    "message": "녹화용 카메라 버블과 마이크, 스크린샷 종류별 단축키, 이메일 주소와 번호를 한 번에 흐리게 하는 기능."
+    "message": "녹화용 카메라 버블과 마이크, 스크린샷 종류별 단축키, 이메일 주소와 번호를 흐리게 하는 설정."
   },
   "share_captode": {
     "message": "Captode 공유"
@@ -1990,5 +1981,11 @@
   },
   "share_copied": {
     "message": "링크를 복사했습니다. 어디든 붙여 넣어 Captode를 공유하세요."
+  },
+  "settings_blur_private": {
+    "message": "개인 정보 흐리게"
+  },
+  "settings_blur_private_hint": {
+    "message": "새 스크린샷에서 이메일 주소와 전화번호, 카드 번호를 흐리게 합니다. 흐림은 하나씩 지울 수 있습니다"
   }
 }

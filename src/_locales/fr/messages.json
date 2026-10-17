@@ -1886,15 +1886,6 @@
   "menu_element": {
     "message": "Capturer un élément…"
   },
-  "editor_private_one": {
-    "message": "Une adresse e-mail ou un numéro peut-être privé a été trouvé."
-  },
-  "editor_private_many": {
-    "message": "$1 adresses e-mail ou numéros peut-être privés ont été trouvés."
-  },
-  "editor_private_blur": {
-    "message": "Flouter"
-  },
   "editor_private_blurred_one": {
     "message": "1 donnée privée floutée"
   },
@@ -1977,7 +1968,7 @@
     "message": "Nouveau dans Captode 1.4"
   },
   "popup_whats_new_1_4": {
-    "message": "Bulle caméra et micro pour les enregistrements, un raccourci par type de capture, et un clic pour flouter e-mails et numéros."
+    "message": "Bulle caméra et micro pour les enregistrements, un raccourci par type de capture, et une option dans les réglages pour flouter e-mails et numéros."
   },
   "share_captode": {
     "message": "Partager Captode"
@@ -1990,5 +1981,11 @@
   },
   "share_copied": {
     "message": "Lien copié. Collez-le où vous voulez pour partager Captode."
+  },
+  "settings_blur_private": {
+    "message": "Flouter les données privées"
+  },
+  "settings_blur_private_hint": {
+    "message": "Les adresses e-mail et numéros de téléphone et de carte sont floutés dans les nouvelles captures ; chaque flou peut être retiré"
   }
 }

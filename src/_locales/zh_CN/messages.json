@@ -1886,15 +1886,6 @@
   "menu_element": {
     "message": "截取元素…"
   },
-  "editor_private_one": {
-    "message": "发现 1 个可能属于隐私的邮箱地址或号码。"
-  },
-  "editor_private_many": {
-    "message": "发现 $1 个可能属于隐私的邮箱地址或号码。"
-  },
-  "editor_private_blur": {
-    "message": "模糊"
-  },
   "editor_private_blurred_one": {
     "message": "已模糊 1 处隐私信息"
   },
@@ -1977,7 +1968,7 @@
     "message": "Captode 1.4 新功能"
   },
   "popup_whats_new_1_4": {
-    "message": "录制支持摄像头气泡和麦克风，每种截图都有快捷键，还可一键模糊邮箱地址和号码。"
+    "message": "录制支持摄像头气泡和麦克风，每种截图都有快捷键，设置中还可选择模糊邮箱地址和号码。"
   },
   "share_captode": {
     "message": "分享 Captode"
@@ -1990,5 +1981,11 @@
   },
   "share_copied": {
     "message": "链接已复制，粘贴到任何地方即可分享 Captode。"
+  },
+  "settings_blur_private": {
+    "message": "模糊隐私信息"
+  },
+  "settings_blur_private_hint": {
+    "message": "新截图中的邮箱地址、电话号码和卡号会被模糊；每处模糊都可以移除"
   }
 }

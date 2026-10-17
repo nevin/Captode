@@ -30,6 +30,7 @@ function render() {
   $('#imageFormat').value = settings.imageFormat;
   $('#videoFormat').value = settings.videoFormat;
   $('#autoCopy').checked = settings.autoCopy;
+  $('#autoBlur').checked = settings.autoBlur;
 }
 
 for (const group of ['theme', 'background']) {
@@ -46,6 +47,7 @@ $('#bg-hex').addEventListener('input', (e) => {
 $('#imageFormat').addEventListener('change', (e) => update({ imageFormat: e.target.value }));
 $('#videoFormat').addEventListener('change', (e) => update({ videoFormat: e.target.value }));
 $('#autoCopy').addEventListener('change', (e) => update({ autoCopy: e.target.checked }));
+$('#autoBlur').addEventListener('change', (e) => update({ autoBlur: e.target.checked }));
 $('#device').checked = device;
 $('#device').addEventListener('change', async (e) => { await chrome.storage.local.set({ device: e.target.checked }); saved(); });
 $('#shortcuts').addEventListener('click', () => chrome.tabs.create({ url: 'chrome://extensions/shortcuts' }));

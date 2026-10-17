@@ -1886,15 +1886,6 @@
   "menu_element": {
     "message": "Capturar um elemento…"
   },
-  "editor_private_one": {
-    "message": "Encontramos um e-mail ou número que pode ser privado."
-  },
-  "editor_private_many": {
-    "message": "Encontramos $1 e-mails ou números que podem ser privados."
-  },
-  "editor_private_blur": {
-    "message": "Desfocar"
-  },
   "editor_private_blurred_one": {
     "message": "1 dado privado desfocado"
   },
@@ -1977,7 +1968,7 @@
     "message": "Novidades do Captode 1.4"
   },
   "popup_whats_new_1_4": {
-    "message": "Bolha da câmera e microfone nas gravações, um atalho para cada tipo de captura e um clique para desfocar e-mails e números."
+    "message": "Bolha da câmera e microfone nas gravações, um atalho para cada tipo de captura e uma opção nas Configurações para desfocar e-mails e números."
   },
   "share_captode": {
     "message": "Compartilhar o Captode"
@@ -1990,5 +1981,11 @@
   },
   "share_copied": {
     "message": "Link copiado. Cole-o onde quiser para compartilhar o Captode."
+  },
+  "settings_blur_private": {
+    "message": "Desfocar dados privados"
+  },
+  "settings_blur_private_hint": {
+    "message": "E-mails e números de telefone e de cartão são desfocados nas novas capturas; cada desfoque pode ser removido"
   }
 }

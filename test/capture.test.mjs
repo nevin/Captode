@@ -157,18 +157,31 @@ async function elementCapture(browser, url, site) {
 }
 
 export const tests = {
-  async 'email addresses, phone and card numbers are offered for blurring, and nothing else'({ browser, url, site, page }) {
+  async 'with the setting on, email addresses, phone and card numbers are blurred, and nothing else'({ browser, url, site, page }) {
     const ctl = await open(browser, url('popup/popup.html'), { width: 340, height: 600 });
     const pv = await browser.newPage();
     await pv.goto(`${site}/private.html`);
     const tabId = await ctl.evaluate(async (site) => (await chrome.tabs.query({ url: `${site}/private.html` }))[0].id, site);
+    // Waits are done from here (waitForTab prepares the page), as Windows runners can stall
+    // a page's own polling. An editor still on its way when the test ends is closed, so a
+    // later test can't mistake it for its own.
+    let pending = null;
     const shoot = async (mode) => {
       await pv.bringToFront();
-      const before = new Set(browser.targets());
+      const old = new Set(browser.targets().map((x) => x.url()));
+      const isNew = (u) => u.includes('editor.html?id=') && !old.has(u);
+      pending = isNew;
       await ctl.evaluate((tabId, mode) => chrome.runtime.sendMessage({ type: 'capture-image', mode, tabId }), tabId, mode);
-      const target = await browser.waitForTarget((x) => !before.has(x) && x.url().includes('editor.html?id='), { timeout: 45000 });
-      const ed = await target.page();
-      await ed.waitForFunction(() => /px/.test(document.querySelector('#doc-dims').textContent), { timeout: 45000, polling: 100 });
+      const ed = await waitForTab(browser, isNew, 45000);
+      pending = null;
+      await ed.bringToFront();
+      try {
+        await ed.waitForFunction(() => /px/.test(document.querySelector('#doc-dims').textContent), { timeout: 45000, polling: 100 });
+      } catch (e) {
+        const error = await ctl.evaluate(async () => (await chrome.storage.session.get('lastError')).lastError);
+        await ed.close();
+        throw new Error(`the editor did not show the capture (lastError ${error}): ${e.message}`);
+      }
       return ed;
     };
     // Where each detail is, in the page (`doc`) or the window, in CSS pixels.
@@ -187,18 +200,27 @@ export const tests = {
     try {
       const dpr = await pv.evaluate(() => devicePixelRatio);
       await pv.evaluate(() => window.scrollTo(0, 0));
+      const setBlur = (on) => ctl.evaluate(async (on) => {
+        const { settings = {} } = await chrome.storage.local.get('settings');
+        await chrome.storage.local.set({ settings: { ...settings, autoBlur: on } });
+      }, on);
+      const meta = (ed) => ed.evaluate(async () => (await (await import('/lib/db.js')).getCapture(new URLSearchParams(location.search).get('id'))).meta);
+
+      // Off, as it starts: nothing is looked for, nothing blurred.
       let ed = await shoot('visible');
-      await ed.waitForFunction(() => !document.querySelector('#private-bar').classList.contains('hidden'), { polling: 100, timeout: 5000 });
-      ok(await ed.evaluate(() => document.querySelector('#canvas-hint').classList.contains('hidden')), 'the first-use hint stays out of the way');
-      const text = await ed.evaluate(() => document.querySelector('#private-text').textContent);
-      ok(/\b4\b/.test(text), `four found in view: "${text}"`);
-      await ed.click('#private-blur');
+      await sleep(500);
+      ok((await ed.evaluate(() => captodeEditor.objects())).length === 0, 'nothing blurred with the setting off');
+      ok(!(await meta(ed)).private, 'nothing looked for with the setting off');
+      await ed.close();
+
+      await setBlur(true);
+      ed = await shoot('visible');
+      await ed.waitForFunction(() => captodeEditor.objects().length > 0, { polling: 100, timeout: 5000 });
       let objs = await ed.evaluate(() => captodeEditor.objects());
-      ok(objs.length === 4 && objs.every((o) => o.type === 'redact'), `four blurs added: ${JSON.stringify(objs.map((o) => o.type))}`);
+      ok(objs.length === 4 && objs.every((o) => o.type === 'redact'), `four blurs: ${JSON.stringify(objs.map((o) => o.type))}`);
       let r = check(objs, await where(false), dpr, ['email', 'phone', 'card', 'field']);
       ok(!r.missing.length, `not blurred: ${r.missing}`);
       ok(!r.onDecoys, `${r.onDecoys} blurs on dates, sums, versions or order numbers`);
-      ok(await ed.evaluate(() => document.querySelector('#private-bar').classList.contains('hidden')), 'the offer goes once taken');
       await ed.keyboard.down(process.platform === 'darwin' ? 'Meta' : 'Control');
       await ed.keyboard.press('z');
       await ed.keyboard.up(process.platform === 'darwin' ? 'Meta' : 'Control');
@@ -207,21 +229,26 @@ export const tests = {
 
       // The whole page: the one far down too, where it is in the page.
       ed = await shoot('full');
-      await ed.waitForFunction(() => !document.querySelector('#private-bar').classList.contains('hidden'), { polling: 100, timeout: 5000 });
-      await ed.click('#private-blur');
+      await ed.waitForFunction(() => captodeEditor.objects().length > 0, { polling: 100, timeout: 5000 });
       objs = await ed.evaluate(() => captodeEditor.objects());
       r = check(objs, await where(true), dpr, ['email', 'phone', 'card', 'field', 'low']);
       ok(objs.length === 5 && !r.missing.length && !r.onDecoys, `full page: ${objs.length} blurs, missing ${r.missing}, ${r.onDecoys} on decoys`);
       await ed.close();
     } finally {
+      if (pending) await waitForTab(browser, pending, 20000).then((late) => late.close(), () => {});
+      await ctl.evaluate(async () => {
+        const { settings = {} } = await chrome.storage.local.get('settings');
+        await chrome.storage.local.set({ settings: { ...settings, autoBlur: false } });
+      }).catch(() => {});
       await pv.close();
       await ctl.close();
       await page.bringToFront();
     }
   },
 
-  async 'the right-click menu offers every screenshot mode'({ browser }) {
-    const sw = await (await browser.waitForTarget((t) => t.type() === 'service_worker')).worker();
+  async 'the right-click menu offers every screenshot mode'({ browser, url }) {
+    // Captode's own worker: Chrome can run others (on Linux, for instance).
+    const sw = await (await browser.waitForTarget((t) => t.type() === 'service_worker' && t.url() === url('background.js'))).worker();
     // update() fails for an item that does not exist, so this shows all four were made.
     const missing = await sw.evaluate(async () => {
       const out = [];
