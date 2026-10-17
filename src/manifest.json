@@ -27,6 +27,7 @@
   },
   "permissions": [
     "activeTab",
+    "contextMenus",
     "scripting",
     "tabCapture",
     "offscreen",

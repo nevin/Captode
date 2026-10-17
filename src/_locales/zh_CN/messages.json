@@ -1888,5 +1888,17 @@
   },
   "popup_whats_new_1_3": {
     "message": "单个元素截图、用于捕捉菜单和提示的延时、Web 应用的整页截图，以及录制中显示点击。"
+  },
+  "menu_full_page": {
+    "message": "截取整个页面"
+  },
+  "menu_visible": {
+    "message": "截取可见区域"
+  },
+  "menu_area": {
+    "message": "截取所选区域…"
+  },
+  "menu_element": {
+    "message": "截取元素…"
   }
 }

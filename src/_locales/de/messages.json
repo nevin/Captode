@@ -1888,5 +1888,17 @@
   },
   "popup_whats_new_1_3": {
     "message": "Screenshots einzelner Elemente, eine Verzögerung für Menüs und Tooltips, ganze Seiten von Web-Apps und sichtbare Klicks in Aufnahmen."
+  },
+  "menu_full_page": {
+    "message": "Ganze Seite aufnehmen"
+  },
+  "menu_visible": {
+    "message": "Sichtbaren Bereich aufnehmen"
+  },
+  "menu_area": {
+    "message": "Ausgewählten Bereich aufnehmen…"
+  },
+  "menu_element": {
+    "message": "Element aufnehmen…"
   }
 }

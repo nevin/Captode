@@ -1888,5 +1888,17 @@
   },
   "popup_whats_new_1_3": {
     "message": "Captures d'un seul élément, un délai pour saisir menus et infobulles, pages entières des applications web et clics visibles dans les enregistrements."
+  },
+  "menu_full_page": {
+    "message": "Capturer la page entière"
+  },
+  "menu_visible": {
+    "message": "Capturer la zone visible"
+  },
+  "menu_area": {
+    "message": "Capturer une zone sélectionnée…"
+  },
+  "menu_element": {
+    "message": "Capturer un élément…"
   }
 }

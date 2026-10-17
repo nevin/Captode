@@ -1888,5 +1888,17 @@
   },
   "popup_whats_new_1_3": {
     "message": "要素だけのスクリーンショット、メニューやツールチップ用の遅延、Web アプリのページ全体、録画でのクリック表示。"
+  },
+  "menu_full_page": {
+    "message": "ページ全体をスクリーンショット"
+  },
+  "menu_visible": {
+    "message": "表示範囲をスクリーンショット"
+  },
+  "menu_area": {
+    "message": "選択範囲をスクリーンショット…"
+  },
+  "menu_element": {
+    "message": "要素をスクリーンショット…"
   }
 }

@@ -1888,5 +1888,17 @@
   },
   "popup_whats_new_1_3": {
     "message": "요소 하나만 캡처, 메뉴와 도구 설명을 위한 지연, 웹 앱 전체 페이지, 녹화 중 클릭 표시."
+  },
+  "menu_full_page": {
+    "message": "전체 페이지 스크린샷"
+  },
+  "menu_visible": {
+    "message": "보이는 영역 스크린샷"
+  },
+  "menu_area": {
+    "message": "선택 영역 스크린샷…"
+  },
+  "menu_element": {
+    "message": "요소 스크린샷…"
   }
 }

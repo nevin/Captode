@@ -9,12 +9,12 @@ Build the package with `npm run package` and upload `dist/captode-1.2.0.zip`.
 
 ## Package (uploaded zip)
 
-- Manifest V3, version 1.2.0, minimum Chrome 116.
+- Manifest V3, version 1.3.0, minimum Chrome 116.
 - Translated into Spanish, Portuguese (Brazil), French, German, Italian, Japanese, Korean and
   Simplified Chinese. The Web Store shows the extension's name and short description in each of
   these languages from the package; the detailed description below can be added per language
   in the dashboard (optional).
-- Permissions: `activeTab`, `scripting`, `tabCapture`, `offscreen`, `storage`,
+- Permissions: `activeTab`, `contextMenus`, `scripting`, `tabCapture`, `offscreen`, `storage`,
   `unlimitedStorage`. **No host permissions** and no content scripts: Captode only touches
   a page after the user invokes it, which avoids the extra review that broad host access
   triggers.
@@ -46,7 +46,7 @@ uploads and no watermark.
 Screenshots
 Capture a whole scrolling page in one image, just what's on screen, or an area you drag
 out with a mouse, finger or pen. Long pages are stitched cleanly, with sticky headers
-shown once.
+shown once. Every kind of screenshot is also in the page's right-click menu.
 
 Mark up
 Add arrows, shapes, text, callouts, highlights and numbered steps, spotlight or magnify
@@ -128,7 +128,8 @@ lets the user annotate, review, compare, trim and export them as image, PDF or v
 
 | Permission | Justification to paste |
 | --- | --- |
-| activeTab | Captures the tab the user is on, only after they click the Captode toolbar button or press its keyboard shortcut. Captode has no host permissions and does nothing on pages until the user invokes it. |
+| activeTab | Captures the tab the user is on, only after they click the Captode toolbar button, press its keyboard shortcut or choose a Captode item in the page's right-click menu. Captode has no host permissions and does nothing on pages until the user invokes it. |
+| contextMenus | Adds Captode's screenshot modes (full page, visible area, selected area, element) to the page's right-click menu, so a screenshot can be started without opening the toolbar popup. |
 | scripting | After the user starts a capture, injects a temporary overlay for selecting an area and a recording countdown into the active tab, and scrolls the page to stitch full-page screenshots. Nothing stays injected afterwards. |
 | tabCapture | Records the current tab (or a selected area of it) when the user starts a tab recording from the popup. |
 | offscreen | Hosts the MediaRecorder for tab recordings in an offscreen document, because a service worker cannot hold a media stream. The recording keeps running after the popup closes. |

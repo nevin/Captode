@@ -1888,5 +1888,17 @@
   },
   "popup_whats_new_1_3": {
     "message": "Capturas de un solo elemento, un retraso para captar menús e información sobre herramientas, páginas completas de aplicaciones web y clics visibles en las grabaciones."
+  },
+  "menu_full_page": {
+    "message": "Captura de la página completa"
+  },
+  "menu_visible": {
+    "message": "Captura del área visible"
+  },
+  "menu_area": {
+    "message": "Captura de un área seleccionada…"
+  },
+  "menu_element": {
+    "message": "Captura de un elemento…"
   }
 }

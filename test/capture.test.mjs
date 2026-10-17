@@ -157,6 +157,17 @@ async function elementCapture(browser, url, site) {
 }
 
 export const tests = {
+  async 'the right-click menu offers every screenshot mode'({ browser }) {
+    const sw = await (await browser.waitForTarget((t) => t.type() === 'service_worker')).worker();
+    // update() fails for an item that does not exist, so this shows all four were made.
+    const missing = await sw.evaluate(async () => {
+      const out = [];
+      for (const id of ['full', 'visible', 'area', 'element']) await chrome.contextMenus.update(id, {}).catch(() => out.push(id));
+      return out;
+    });
+    ok(!missing.length, `menu items missing: ${missing}`);
+  },
+
   async 'full page is stitched and the scroll position restored'({ page, capture }) {
     // Expected size from the page itself: window frames and scrollbars differ by OS.
     const want = await page.evaluate(() => ({ w: Math.round(document.documentElement.clientWidth * devicePixelRatio), h: Math.round(document.documentElement.scrollHeight * devicePixelRatio), sb: window.innerWidth - document.documentElement.clientWidth }));

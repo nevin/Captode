@@ -1888,5 +1888,17 @@
   },
   "popup_whats_new_1_3": {
     "message": "Screenshot di un singolo elemento, un ritardo per menu e suggerimenti, pagine intere delle app web e clic visibili nelle registrazioni."
+  },
+  "menu_full_page": {
+    "message": "Screenshot della pagina intera"
+  },
+  "menu_visible": {
+    "message": "Screenshot dell'area visibile"
+  },
+  "menu_area": {
+    "message": "Screenshot di un'area selezionata…"
+  },
+  "menu_element": {
+    "message": "Screenshot di un elemento…"
   }
 }

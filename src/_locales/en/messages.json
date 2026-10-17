@@ -1890,5 +1890,17 @@
   },
   "popup_whats_new_1_3": {
     "message": "Screenshots of one element, a delay to catch menus and tooltips, full pages of web apps, and clicks shown in recordings."
+  },
+  "menu_full_page": {
+    "message": "Screenshot the full page"
+  },
+  "menu_visible": {
+    "message": "Screenshot the visible area"
+  },
+  "menu_area": {
+    "message": "Screenshot a selected area…"
+  },
+  "menu_element": {
+    "message": "Screenshot an element…"
   }
 }

@@ -434,6 +434,30 @@ chrome.tabs.onRemoved.addListener(async (tabId) => {
   }
 });
 
+/** Shows a failed capture on the toolbar icon; the popup explains it when opened. */
+async function reportError(e) {
+  await badge('');
+  await chrome.storage.session.set({ lastError: explain(e) });
+  await badge('!', '#d33');
+}
+
+// ---------- right-click menu ----------
+
+// Chrome groups an extension's items under its name. A click on one grants activeTab,
+// like the toolbar button does.
+const MENU = [['full', 'menu_full_page'], ['visible', 'menu_visible'], ['area', 'menu_area'], ['element', 'menu_element']];
+const MENU_CONTEXTS = ['page', 'frame', 'selection', 'link', 'editable', 'image', 'video', 'audio'];
+
+async function createMenu() {
+  await chrome.contextMenus.removeAll();
+  for (const [id, key] of MENU) chrome.contextMenus.create({ id, title: t(key), contexts: MENU_CONTEXTS }, () => void chrome.runtime.lastError);
+}
+
+chrome.contextMenus.onClicked.addListener((info, tab) => {
+  if (!tab?.id || tab.id < 0 || !MENU.some(([id]) => id === info.menuItemId)) return;
+  captureImage(info.menuItemId, tab).catch(reportError);
+});
+
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (msg.target) return; // addressed to a recorder, not to us
 
@@ -442,11 +466,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       const tab = await chrome.tabs.get(msg.tabId);
       if (msg.type === 'capture-image') await captureImage(msg.mode, tab, msg.delay);
       else await startRecording(msg, tab);
-    })().catch(async (e) => {
-      await badge('');
-      await chrome.storage.session.set({ lastError: explain(e) });
-      await badge('!', '#d33');
-    });
+    })().catch(reportError);
     sendResponse({ ok: true });
     return;
   }
@@ -475,6 +495,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 // After an update that adds features, the popup says what's new, once.
 const WHATS_NEW = '1.3.0';
 chrome.runtime.onInstalled.addListener(({ reason, previousVersion }) => {
+  createMenu();
   const older = (a, b) => {
     const x = a.split('.').map(Number), y = b.split('.').map(Number);
     for (let i = 0; i < 3; i++) if ((x[i] || 0) !== (y[i] || 0)) return (x[i] || 0) < (y[i] || 0);
@@ -484,6 +505,7 @@ chrome.runtime.onInstalled.addListener(({ reason, previousVersion }) => {
 });
 
 chrome.runtime.onStartup.addListener(async () => {
+  createMenu(); // in the browser's current language
   await setRec(null);
   await leaveRecordingUi();
 });

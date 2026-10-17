@@ -19,6 +19,8 @@ export to the format you need. Captode runs entirely in your browser. Nothing is
 - **Delay:** wait 3, 5 or 10 seconds first, to open a menu or tooltip (for a selected area or
   an element, after choosing it). Esc cancels; if another tab is showing when the time is
   up, nothing is captured.
+- **Right-click menu:** every kind of screenshot can also be started from the page's
+  right-click menu, under Captode.
 
 The capture opens in the editor, where you can:
 
