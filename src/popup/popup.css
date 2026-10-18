@@ -75,6 +75,7 @@ details.opts[open] { padding-bottom: 8px; }
 /* Screenshot delay, to open a menu or tooltip first. */
 .delay-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 3px; padding: 0 2px 0 10px; }
 .delay-row > span { color: var(--muted); font-size: 12px; font-weight: 600; cursor: help; }
-.delay-row .seg { flex: none; width: 190px; background: var(--panel-2); }
-.delay-row .seg > button { height: 26px; font-size: 12px; }
+.delay-row .seg { flex: none; min-width: 190px; background: var(--panel-2); }
+/* "Off" is long in some languages: the choices stay on one line, the row widens instead. */
+.delay-row .seg > button { height: 26px; font-size: 12px; white-space: nowrap; padding: 0 8px; }
 .delay-row .seg > button.on { background: var(--accent); color: #fff; }

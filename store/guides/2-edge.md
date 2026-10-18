@@ -49,6 +49,9 @@ Download these files:
    4. **Large promotional tile:** upload `promo-marquee.jpg`.
    5. **Screenshots:** upload `1-capture.jpg`, `2-annotate.jpg`, `3-review.jpg`,
       `4-devices.jpg` and `5-record.jpg`.
+      If you add listings in other languages, each has its own five in
+      `store/screenshots/<language>`, the same as for Chrome (see the table in
+      [the Chrome guide](1-chrome.md), step 5).
    6. **Search terms:** copy the seven from the Edge section of
       [`../listing.md`](../listing.md).
    7. Click **Save**.

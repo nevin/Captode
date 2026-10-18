@@ -33,6 +33,24 @@ Don't unzip it. The store wants the zip file itself.
    2. Remove the old ones.
    3. Upload these five files from the `store/screenshots` folder, in this order:
       `1-capture.jpg`, `2-annotate.jpg`, `3-review.jpg`, `4-devices.jpg`, `5-record.jpg`.
+   4. **Localised screenshots** (up to 5 per language, at least 1 required): Captode
+      shows its menus in each language, so each one has its own set. For each language
+      the dashboard lists, upload the same five file names from that language's folder:
+
+      | Language in the dashboard | Folder |
+      | --- | --- |
+      | English | `store/screenshots` (the files themselves, not a subfolder) |
+      | German | `store/screenshots/de` |
+      | Spanish | `store/screenshots/es` |
+      | French | `store/screenshots/fr` |
+      | Italian | `store/screenshots/it` |
+      | Japanese | `store/screenshots/ja` |
+      | Korean | `store/screenshots/ko` |
+      | Portuguese (Brazil) | `store/screenshots/pt_BR` |
+      | Chinese (Simplified) | `store/screenshots/zh_CN` |
+
+      To switch language, use the language menu at the top of the **Store listing** page.
+      Every file is 1280 × 800 JPEG, as the store requires.
 6. **Explain the new permission**
    1. Click **Privacy**.
    2. In the permissions list there's now one called **contextMenus** (for the right-click

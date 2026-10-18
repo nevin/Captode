@@ -111,7 +111,9 @@ Captode is open source: https://github.com/nevin/Captode
 | Small promo tile | `store/promo-small.jpg` | 440 × 280 |
 | Marquee promo tile | `store/promo-marquee.jpg` | 1400 × 560 |
 
-Regenerate them after any interface or logo change: `npm run icons`, then `npm run store`.
+Each translation has its own five (1 to 5) in `store/screenshots/<language>/`, for the
+dashboard's localised screenshots. Regenerate them after any interface or logo change:
+`npm run icons`, then `npm run store -- all` (English and every translation).
 
 **Official URL:** none (needs a verified domain; leave blank)
 **Homepage URL:** https://github.com/nevin/Captode

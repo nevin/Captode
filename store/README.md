@@ -10,7 +10,7 @@ build stops if a package mentions another browser's store, ID or pages.
 
 ## Every release
 
-1. If the interface or logo changed: `npm run icons`, `npm run store`, and commit.
+1. If the interface or logo changed: `npm run icons` and `npm run store -- all` (every language).
 2. Without committing your changes, run
    `npm run release -- patch --push --message="What changed"` (or `minor`, `major`, or a
    version). It sets the version, checks the translations, runs every test (Chrome, and

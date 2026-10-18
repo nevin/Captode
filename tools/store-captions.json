@@ -1,0 +1,79 @@
+{
+  "1-capture.jpg": {
+    "en": ["Capture any page in one click", "The whole scrolling page, what you see, a region or a single element"],
+    "es": ["Captura cualquier página con un clic", "La página entera con desplazamiento, lo que ves, una región o un solo elemento"],
+    "pt_BR": ["Capture qualquer página com um clique", "A página inteira com rolagem, o que você vê, uma região ou um único elemento"],
+    "fr": ["Capturez n'importe quelle page en un clic", "La page entière, ce que vous voyez, une zone ou un seul élément"],
+    "de": ["Jede Seite mit einem Klick aufnehmen", "Die ganze Seite, den sichtbaren Bereich, eine Auswahl oder ein einzelnes Element"],
+    "it": ["Cattura qualsiasi pagina con un clic", "L'intera pagina, ciò che vedi, un'area o un singolo elemento"],
+    "ja": ["どんなページもワンクリックで撮影", "スクロールするページ全体、表示範囲、選択範囲、または 1 つの要素"],
+    "ko": ["클릭 한 번으로 어떤 페이지든 캡처", "스크롤되는 페이지 전체, 보이는 화면, 선택 영역 또는 요소 하나"],
+    "zh_CN": ["一键截取任意页面", "整个滚动页面、可见区域、选定区域或单个元素"]
+  },
+  "2-annotate.jpg": {
+    "en": ["Mark it up in seconds", "Callouts, numbered steps, arrows and highlights, and blur for anything private"],
+    "es": ["Anota en segundos", "Bocadillos, pasos numerados, flechas y resaltados, y difuminado para lo privado"],
+    "pt_BR": ["Anote em segundos", "Balões, passos numerados, setas e destaques, e desfoque para o que é privado"],
+    "fr": ["Annotez en quelques secondes", "Bulles, étapes numérotées, flèches et surlignages, et flou pour ce qui est privé"],
+    "de": ["In Sekunden markiert", "Sprechblasen, nummerierte Schritte, Pfeile und Markierungen, und Unschärfe für Privates"],
+    "it": ["Annota in pochi secondi", "Fumetti, passaggi numerati, frecce ed evidenziazioni, e sfocatura per ciò che è privato"],
+    "ja": ["数秒で書き込み", "吹き出し、番号付きステップ、矢印、ハイライト、そして非公開情報のぼかし"],
+    "ko": ["몇 초 만에 표시하기", "말풍선, 번호 단계, 화살표와 강조, 개인 정보 흐리게"],
+    "zh_CN": ["几秒内完成标注", "标注气泡、编号步骤、箭头和高亮，还可模糊隐私内容"]
+  },
+  "3-review.jpg": {
+    "en": ["Check the build against the design", "Measure in CSS pixels, check colour contrast against WCAG, and lay a spacing grid over the page"],
+    "es": ["Compara el resultado con el diseño", "Mide en píxeles CSS, comprueba el contraste según WCAG y superpone una cuadrícula de espaciado"],
+    "pt_BR": ["Compare o resultado com o design", "Meça em pixels CSS, verifique o contraste pela WCAG e sobreponha uma grade de espaçamento"],
+    "fr": ["Vérifiez le rendu face à la maquette", "Mesurez en pixels CSS, vérifiez le contraste selon les WCAG et superposez une grille d'espacement"],
+    "de": ["Umsetzung mit dem Design vergleichen", "In CSS-Pixeln messen, Kontrast nach WCAG prüfen und ein Abstandsraster einblenden"],
+    "it": ["Confronta il risultato con il design", "Misura in pixel CSS, verifica il contrasto secondo le WCAG e sovrapponi una griglia di spaziatura"],
+    "ja": ["実装をデザインと照合", "CSS ピクセルで計測し、WCAG に沿ってコントラストを確認、余白グリッドも重ねられます"],
+    "ko": ["구현을 디자인과 비교", "CSS 픽셀로 측정하고, WCAG 기준 명암비를 확인하고, 간격 격자를 겹쳐 보세요"],
+    "zh_CN": ["对照设计检查实现", "以 CSS 像素测量，按 WCAG 检查颜色对比度，并叠加间距网格"]
+  },
+  "4-devices.jpg": {
+    "en": ["Show it on a real device", "63 phones and tablets at their true sizes, portrait or landscape. Your pixels stay exact."],
+    "es": ["Muéstralo en un dispositivo real", "63 teléfonos y tabletas a su tamaño real, en vertical u horizontal. Tus píxeles no cambian."],
+    "pt_BR": ["Mostre num dispositivo real", "63 celulares e tablets no tamanho real, em retrato ou paisagem. Seus pixels ficam exatos."],
+    "fr": ["Montrez-le sur un vrai appareil", "63 téléphones et tablettes à leur taille réelle, en portrait ou paysage. Vos pixels restent exacts."],
+    "de": ["Auf einem echten Gerät zeigen", "63 Smartphones und Tablets in echter Größe, hoch oder quer. Ihre Pixel bleiben exakt."],
+    "it": ["Mostralo su un dispositivo reale", "63 telefoni e tablet alle dimensioni reali, in verticale od orizzontale. I tuoi pixel restano esatti."],
+    "ja": ["実機の中に表示", "63 機種のスマートフォンとタブレットを実寸で、縦でも横でも。ピクセルはそのままです。"],
+    "ko": ["실제 기기 안에 보여주기", "휴대폰과 태블릿 63종을 실제 크기로, 세로 또는 가로로. 픽셀은 그대로입니다."],
+    "zh_CN": ["在真实设备中展示", "63 款手机和平板，按真实尺寸，竖屏或横屏。像素保持不变。"]
+  },
+  "5-record.jpg": {
+    "en": ["Record, trim and share", "Record a tab or your screen with your voice and camera, then trim and export it in seconds"],
+    "es": ["Graba, recorta y comparte", "Graba una pestaña o tu pantalla con tu voz y tu cámara, y recórtala y expórtala en segundos"],
+    "pt_BR": ["Grave, corte e compartilhe", "Grave uma aba ou sua tela com sua voz e câmera, depois corte e exporte em segundos"],
+    "fr": ["Enregistrez, coupez, partagez", "Enregistrez un onglet ou votre écran avec votre voix et votre caméra, puis coupez et exportez en quelques secondes"],
+    "de": ["Aufnehmen, kürzen, teilen", "Einen Tab oder den Bildschirm mit Stimme und Kamera aufnehmen, dann in Sekunden kürzen und exportieren"],
+    "it": ["Registra, taglia e condividi", "Registra una scheda o lo schermo con voce e fotocamera, poi taglia ed esporta in pochi secondi"],
+    "ja": ["録画、トリミング、共有", "タブや画面を声とカメラ付きで録画し、数秒でトリミングして書き出し"],
+    "ko": ["녹화하고, 자르고, 공유하기", "탭이나 화면을 목소리와 카메라와 함께 녹화하고, 몇 초 만에 잘라서 내보내세요"],
+    "zh_CN": ["录制、剪辑、分享", "带上声音和摄像头录制标签页或屏幕，几秒内剪辑并导出"]
+  },
+  "6-compare.jpg": {
+    "en": ["See exactly what changed", "Compare two captures, or a capture and a design, with a slider or a highlight of every changed pixel"],
+    "es": ["Ve exactamente qué cambió", "Compara dos capturas, o una captura y un diseño, con un deslizador o resaltando cada píxel cambiado"],
+    "pt_BR": ["Veja exatamente o que mudou", "Compare duas capturas, ou uma captura e um design, com um controle deslizante ou destacando cada pixel alterado"],
+    "fr": ["Voyez exactement ce qui a changé", "Comparez deux captures, ou une capture et une maquette, avec un curseur ou chaque pixel modifié en surbrillance"],
+    "de": ["Genau sehen, was sich geändert hat", "Zwei Aufnahmen oder eine Aufnahme und ein Design vergleichen, per Schieberegler oder mit jedem geänderten Pixel markiert"],
+    "it": ["Guarda esattamente cosa è cambiato", "Confronta due catture, o una cattura e un design, con un cursore o evidenziando ogni pixel cambiato"],
+    "ja": ["変わった箇所がひと目で", "2 つのキャプチャ、またはキャプチャとデザインを、スライダーや変化したピクセルの強調表示で比較"],
+    "ko": ["바뀐 부분을 정확히 확인", "캡처 두 개 또는 캡처와 디자인을 슬라이더나 바뀐 픽셀 강조로 비교하세요"],
+    "zh_CN": ["清楚看到哪里变了", "用滑块或高亮每个变化的像素，比较两张截图，或截图与设计稿"]
+  },
+  "7-private.jpg": {
+    "en": ["Private by design", "Everything stays on your device: no account, no uploads, no tracking. Light and dark themes."],
+    "es": ["Privado desde el diseño", "Todo se queda en tu dispositivo: sin cuenta, sin subidas, sin rastreo. Temas claro y oscuro."],
+    "pt_BR": ["Privado por padrão", "Tudo fica no seu dispositivo: sem conta, sem uploads, sem rastreamento. Temas claro e escuro."],
+    "fr": ["Confidentiel par conception", "Tout reste sur votre appareil : pas de compte, pas d'envoi, pas de pistage. Thèmes clair et sombre."],
+    "de": ["Privat von Grund auf", "Alles bleibt auf Ihrem Gerät: kein Konto, keine Uploads, kein Tracking. Helles und dunkles Design."],
+    "it": ["Privato per progettazione", "Tutto resta sul tuo dispositivo: nessun account, nessun caricamento, nessun tracciamento. Temi chiaro e scuro."],
+    "ja": ["設計からプライベート", "すべてはお使いのデバイスの中に。アカウントもアップロードも追跡もなし。ライトとダークのテーマ。"],
+    "ko": ["처음부터 개인 정보 보호", "모든 것이 내 기기에 남습니다. 계정도, 업로드도, 추적도 없습니다. 밝은 테마와 어두운 테마."],
+    "zh_CN": ["从设计上保护隐私", "一切都留在你的设备上：无需账号，不上传，不追踪。支持浅色和深色主题。"]
+  }
+}

@@ -1,17 +1,31 @@
 // Makes the store screenshots and promo tiles from the real extension:
-//   node tools/store-assets.mjs
-// Writes store/screenshots/1-capture.jpg … 5-private.jpg (1280 × 800),
-// store/promo-small.jpg (440 × 280) and store/promo-marquee.jpg (1400 × 560).
+//   npm run store             English: store/screenshots/1-capture.jpg … 7-private.jpg
+//                             (1280 × 800), store/promo-small.jpg (440 × 280) and
+//                             store/promo-marquee.jpg (1400 × 560)
+//   npm run store -- de       one language's five screenshots (1 to 5), in store/screenshots/de/
+//   npm run store -- all      English and every translation
+// Captions are in tools/store-captions.json; the extension runs in that language.
 // JPEG, because the stores want screenshots without an alpha channel.
 // Run tools/brand.mjs first so the pages show the current logo.
-import { readFileSync, existsSync, mkdirSync } from 'node:fs';
+import { readFileSync, existsSync, mkdirSync, readdirSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { launch, open, serveSite, waitForTab, sleep } from '../test/helpers.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const store = join(root, 'store');
-mkdirSync(join(store, 'screenshots'), { recursive: true });
+const LANGS = readdirSync(join(root, 'src', '_locales')).sort((a, b) => (a === 'en' ? -1 : b === 'en' ? 1 : a.localeCompare(b)));
+const lang = process.argv[2] || 'en';
+if (lang === 'all') {
+  // One Chrome per language: Chrome picks its language as it starts.
+  for (const l of LANGS) execFileSync(process.execPath, [fileURLToPath(import.meta.url), l], { stdio: 'inherit' });
+  process.exit(0);
+}
+if (!LANGS.includes(lang)) throw new Error(`no translation "${lang}"; one of: ${LANGS.join(', ')}, or all`);
+const CAPTIONS = JSON.parse(readFileSync(join(root, 'tools', 'store-captions.json'), 'utf8'));
+const shots = lang === 'en' ? join(store, 'screenshots') : join(store, 'screenshots', lang);
+mkdirSync(shots, { recursive: true });
 // The tiles and captions sit on the brand's violet, so they use the logo with white
 // brackets (store/brand/logo-reverse.svg) when there is one.
 const reverse = join(store, 'brand', 'logo-reverse.svg');
@@ -26,7 +40,13 @@ const site = await serveSite();
 // No vsync pacing: with a Mac's display asleep, Chrome otherwise stops producing
 // frames and screenshots hang. (Not used for tests: unpaced animation makes the
 // test recordings drop frames.)
-const env = await launch({ args: ['--window-size=1280,777', '--disable-gpu-vsync', '--disable-frame-rate-limit'] });
+// Chrome's language: --lang on Windows, LANGUAGE on Linux, AppleLanguages on macOS.
+const bcp = lang.replace('_', '-');
+const env = await launch({
+  args: ['--window-size=1280,777', '--disable-gpu-vsync', '--disable-frame-rate-limit', `--lang=${bcp}`,
+    ...(process.platform === 'darwin' ? ['-AppleLanguages', `(${bcp})`] : [])],
+  env: { LANGUAGE: lang },
+});
 const { browser, url } = env;
 const UI = { width: 1280, height: 690 }; // the UI part of each screenshot, under the caption
 
@@ -34,11 +54,13 @@ const light = (page) => page.emulateMediaFeatures([{ name: 'prefers-color-scheme
 // Puppeteer's clip is measured from the top of the document, so add the scroll.
 const png = async (page, clip) => 'data:image/png;base64,' + (await page.screenshot({ encoding: 'base64', clip }));
 
-/** Lays out a caption band over a UI image and saves it as a store screenshot. */
-async function compose(file, title, subtitle, stageHtml) {
+const esc = (t) => t.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+/** Lays out the caption band (in this language) over a UI image and saves it as a store screenshot. */
+async function compose(file, stageHtml) {
+  const [title, subtitle] = (CAPTIONS[file][lang] || CAPTIONS[file].en).map(esc);
   const page = await browser.newPage();
   await page.setViewport({ width: 1280, height: 800 });
-  await page.setContent(`<!doctype html><html><head><style>
+  await page.setContent(`<!doctype html><html lang="${bcp}"><head><style>
     * { box-sizing: border-box; }
     body { margin: 0; width: 1280px; height: 800px; overflow: hidden; font-family: -apple-system, "Segoe UI", system-ui, sans-serif; background: #0f0f1a; }
     header { height: 110px; display: flex; align-items: center; gap: 22px; padding: 0 40px;
@@ -53,9 +75,9 @@ async function compose(file, title, subtitle, stageHtml) {
     <div class="stage">${stageHtml}</div>
   </body></html>`);
   await page.evaluate(() => Promise.all([...document.images].map((i) => i.decode())));
-  await page.screenshot({ path: join(store, 'screenshots', file), type: 'jpeg', quality: 92 });
+  await page.screenshot({ path: join(shots, file), type: 'jpeg', quality: 92 });
   await page.close();
-  console.log('wrote store/screenshots/' + file);
+  console.log(`wrote ${join(shots, file).slice(root.length + 1)}`);
 }
 
 // ---------- 1. The popup over a page ----------
@@ -76,8 +98,7 @@ await sleep(400);
 await pop.bringToFront();
 const popH = await pop.evaluate(() => Math.ceil(document.body.getBoundingClientRect().height));
 const popShot = await png(pop, { x: 0, y: 0, width: 340, height: popH });
-await compose('1-capture.jpg', 'Capture any page in one click',
-  'The whole scrolling page, what you see, a region or a single element',
+await compose('1-capture.jpg',
   `<img class="full" src="${webShot}">
    <img src="${popShot}" style="position:absolute;right:28px;top:14px;width:340px;border-radius:12px;box-shadow:0 24px 60px rgba(0,0,0,.35),0 0 0 1px rgba(0,0,0,.08)">`);
 
@@ -121,8 +142,7 @@ await ed.keyboard.press('v');
 await ed.keyboard.press('Escape');
 await ed.keyboard.press('Escape');
 await sleep(300);
-await compose('2-annotate.jpg', 'Mark it up in seconds',
-  'Callouts, numbered steps, arrows and highlights, and blur for anything private',
+await compose('2-annotate.jpg',
   `<img class="full" src="${await png(ed, { x: 0, y: 0, ...UI })}">`);
 
 // ---------- 3. Review: measure in CSS pixels and check contrast ----------
@@ -146,8 +166,7 @@ await ed.mouse.click(...at(button.x + button.w + 0.06, mid));                   
 await ed.select('#g-step', '16');
 await ed.keyboard.press('g');
 await sleep(300);
-await compose('3-review.jpg', 'Check the build against the design',
-  'Measure in CSS pixels, check colour contrast against WCAG, and lay a spacing grid over the page',
+await compose('3-review.jpg',
   `<img class="full" src="${await png(ed, { x: 0, y: 0, ...UI })}">`);
 await ed.keyboard.press('g');
 await ed.click('#m-clear');
@@ -167,8 +186,9 @@ await ed.keyboard.press('Enter');
 await ed.waitForFunction(() => !document.querySelector('#export-preview').classList.contains('hidden') && document.querySelector('#device-preview').width > 300, { timeout: 20000 });
 await sleep(800);
 await ed.waitForFunction(() => /KB|MB/.test(document.querySelector('#x-estimate').textContent), { timeout: 30000 });
-await compose('4-devices.jpg', 'Show it on a real device',
-  '63 phones and tablets at their true sizes, portrait or landscape. Your pixels stay exact.',
+// Leaving the Review tab cleared the measurements; its Undo notice isn't part of the scene.
+await ed.evaluate(() => document.querySelectorAll('.toast').forEach((t) => t.classList.add('hidden')));
+await compose('4-devices.jpg',
   `<img class="full" src="${await png(ed, { x: 0, y: 0, ...UI })}">`);
 await ed.evaluate(() => document.querySelector('#device-panel input[data-k="enabled"]').scrollIntoView({ block: 'center' }));
 await ed.click('#device-panel input[data-k="enabled"]'); // leave the setting off again
@@ -207,7 +227,7 @@ const clip = await lab.evaluate(async (shot) => {
 const vp = await open(browser, url(`video/video.html?id=${clip}`), UI);
 await light(vp);
 await vp.bringToFront();
-await vp.waitForFunction(() => /fps/.test(document.querySelector('#dims').textContent));
+await vp.waitForFunction(() => /\d × \d/.test(document.querySelector('#dims').textContent)); // the size: the same in every language
 await vp.waitForFunction(() => document.querySelectorAll('#film canvas').length > 3, { timeout: 20000 });
 await vp.click('#formats [data-f="gif"]');
 await vp.evaluate(() => {
@@ -217,10 +237,12 @@ await vp.evaluate(() => {
 await vp.click('#convert');
 await vp.waitForFunction(() => !document.querySelector('#result').classList.contains('hidden'), { timeout: 120000 });
 await sleep(500);
-await compose('5-record.jpg', 'Record, trim and share',
-  'Record a tab or your screen with your voice and camera, then trim and export it in seconds',
+await compose('5-record.jpg',
   `<img class="full" src="${await png(vp, { x: 0, y: 0, ...UI })}">`);
 
+// The Chrome Web Store takes five screenshots per language: 6 and 7 are only made in
+// English, for addons.mozilla.org, which takes more.
+if (lang === 'en') {
 // ---------- 6. Compare: before and after a change ----------
 
 const captureNow = async () => {
@@ -248,8 +270,7 @@ await cmp.waitForFunction(() => !document.querySelector('#view').classList.conta
 await cmp.click('#modes [data-mode="diff"]');
 await cmp.waitForFunction(() => /%/.test(document.querySelector('#stats').textContent));
 await sleep(300);
-await compose('6-compare.jpg', 'See exactly what changed',
-  'Compare two captures, or a capture and a design, with a slider or a highlight of every changed pixel',
+await compose('6-compare.jpg',
   `<img class="full" src="${await png(cmp, { x: 0, y: 0, ...UI })}">`);
 
 // ---------- 7. Settings, dark ----------
@@ -259,9 +280,9 @@ await st.emulateMediaFeatures([{ name: 'prefers-color-scheme', value: 'dark' }])
 await st.evaluate(() => document.scrollingElement.scrollTo(0, 1e6)); // show About and the privacy note
 await sleep(300);
 const scrolled = await st.evaluate(() => window.scrollY);
-await compose('7-private.jpg', 'Private by design',
-  'Everything stays on your device: no account, no uploads, no tracking. Light and dark themes.',
+await compose('7-private.jpg',
   `<img class="full" src="${await png(st, { x: 0, y: scrolled, ...UI })}">`);
+}
 
 // ---------- promo tiles ----------
 
@@ -279,6 +300,8 @@ async function tile(file, w, h, body) {
   console.log('wrote store/' + file);
 }
 
+// The tiles carry English text: made with the English screenshots only.
+if (lang === 'en') {
 await tile('promo-small.jpg', 440, 280, `
   <div style="height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center">
     <img src="${logo}" style="width:118px;height:118px;filter:drop-shadow(0 8px 24px rgba(0,0,0,.35))">
@@ -298,6 +321,7 @@ await tile('promo-marquee.jpg', 1400, 560, `
     </div>
     <img src="${await png(ed, { x: 0, y: 0, ...UI })}" style="width:760px;border-radius:14px;box-shadow:0 30px 80px rgba(0,0,0,.45)">
   </div>`);
+}
 
 await env.close();
 site.close();

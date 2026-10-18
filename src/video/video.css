@@ -99,3 +99,5 @@ body { display: flex; flex-direction: column; overflow: hidden; }
 /* Review a frame */
 #rv-overlay { position: absolute; z-index: 2; max-width: none; max-height: none; border-radius: 0; box-shadow: none; background: none; cursor: crosshair; touch-action: none; }
 #rv-tools button { flex: 1; font-size: 12px; }
+/* Side-by-side fields line up by their boxes, whichever label wraps (long in some languages). */
+.grid2 { align-items: end; }
