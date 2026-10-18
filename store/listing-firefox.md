@@ -45,7 +45,7 @@ offered there.)
 
 **Support site:** https://github.com/nevin/Captode
 **Support email:** none (issues on GitHub)
-**Licence:** MIT License
+**Licence:** GNU General Public License v3.0 (GPL-3.0-or-later)
 **Privacy policy:** paste the text of `PRIVACY.md`
 
 **Screenshots:** `store/screenshots/` 1, 2, 3, 4, 6 and 7 (5 shows tab recording, which

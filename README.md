@@ -403,4 +403,12 @@ are in `src/vendor`.
 
 ## License
 
-[MIT](LICENSE)
+Captode is free software, and stays free: you can use it, share it and change it under the
+[GNU General Public License](LICENSE), version 3 or (at your option) any later version.
+Anyone who shares Captode or a version of it must share it under the same licence, with its
+source code, so it can't be turned into a closed product. It comes with no warranty.
+
+Copyright © 2026 Nevin Paul. Versions up to 1.5.3 were released under the MIT licence.
+
+The bundled codecs keep their own licences (Apache-2.0, MIT and the IJG/BSD licence; see
+[`src/vendor/README.md`](src/vendor/README.md)), all of which may be combined with the GPL.

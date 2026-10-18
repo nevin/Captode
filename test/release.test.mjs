@@ -15,7 +15,7 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 /** A git repository holding Captode's files, with v1.2.0 tagged. */
 function sandbox() {
   const dir = mkdtempSync(join(tmpdir(), 'captode-release-'));
-  for (const p of ['src', 'tools', 'package.json', 'package-lock.json']) cpSync(join(root, p), join(dir, p), { recursive: true });
+  for (const p of ['src', 'tools', 'package.json', 'package-lock.json', 'LICENSE']) cpSync(join(root, p), join(dir, p), { recursive: true });
   writeFileSync(join(dir, '.gitignore'), 'dist/\n');
   const set = (file, v) => { const p = join(dir, file); writeFileSync(p, readFileSync(p, 'utf8').replace(/^(\s*"version": )"[^"]*"/m, `$1"${v}"`)); };
   set('src/manifest.json', '1.2.0');
@@ -37,18 +37,21 @@ function sandbox() {
   return { dir, git, release, version: (file) => JSON.parse(readFileSync(join(dir, file), 'utf8')).version };
 }
 
-/** The manifest inside a zip built by tools/package.mjs. */
-function zippedManifest(zip) {
+/** A file's text inside a zip built by tools/package.mjs. */
+function zippedFile(zip, wanted) {
   const buf = readFileSync(zip);
   for (let at = 0; buf.readUInt32LE(at) === 0x04034b50;) {
     const method = buf.readUInt16LE(at + 8), size = buf.readUInt32LE(at + 18), nameLen = buf.readUInt16LE(at + 26), extra = buf.readUInt16LE(at + 28);
     const name = buf.toString('utf8', at + 30, at + 30 + nameLen);
     const body = buf.subarray(at + 30 + nameLen + extra, at + 30 + nameLen + extra + size);
-    if (name === 'manifest.json') return JSON.parse((method ? inflateRawSync(body) : body).toString());
+    if (name === wanted) return (method ? inflateRawSync(body) : body).toString();
     at += 30 + nameLen + extra + size;
   }
   return null;
 }
+
+/** The manifest inside a zip built by tools/package.mjs. */
+const zippedManifest = (zip) => JSON.parse(zippedFile(zip, 'manifest.json') ?? 'null');
 
 export const tests = {
   async 'release: versions Chrome accepts, compared number by number'() {
@@ -89,9 +92,11 @@ export const tests = {
       ok(!r.code && /Releasing Captode 1\.3\.0/.test(r.out) && s.version('src/manifest.json') === '1.2.0', `dry run: ${r.out}`);
       // A change not yet committed goes into the one release commit, with the version.
       writeFileSync(join(s.dir, 'src', 'new-feature.js'), '// new\n');
+      writeFileSync(join(s.dir, 'src', 'lib', 'i18n.js'), `${readFileSync(join(s.dir, 'src', 'lib', 'i18n.js'), 'utf8')}// changed\n`);
       const commits = Number(s.git('rev-list', '--count', 'HEAD'));
       r = s.release('minor', '--skip-tests', '--message=A new feature');
-      ok(!r.code && /Including 1 changed file/.test(r.out), r.out);
+      // A changed file comes first in git's list, after a leading space: named in full.
+      ok(!r.code && /Including 2 changed files/.test(r.out) && /\n  src\/lib\/i18n\.js\n  src\/new-feature\.js\n/.test(r.out), r.out);
       ok(Number(s.git('rev-list', '--count', 'HEAD')) === commits + 1, 'one commit for the release');
       ok(s.git('show', '--name-only', '--format=', 'HEAD').split('\n').includes('src/new-feature.js'), 'the change is in the release commit');
       ok(s.git('log', '-1', '--format=%b') === 'A new feature', 'with the description given');
@@ -112,6 +117,7 @@ export const tests = {
       const sm = JSON.parse(readFileSync(join(s.dir, 'dist', 'captode-1.3.0-safari', 'manifest.json'), 'utf8'));
       ok(sm.version === '1.3.0' && !sm.permissions.includes('tabCapture') && sm.browser_specific_settings.safari, `Safari manifest: ${JSON.stringify(sm.browser_specific_settings)}`);
       ok(existsSync(join(s.dir, 'dist', 'captode-1.3.0-source.zip')), 'and the source zip for addons.mozilla.org');
+      ok(zippedFile(zip, 'LICENSE')?.includes('GNU GENERAL PUBLIC LICENSE'), 'each package carries the licence');
       ok(s.git('log', '-1', '--format=%s') === 'Captode 1.3.0' && s.git('describe', '--exact-match', 'HEAD') === 'v1.3.0', 'committed and tagged');
       ok(!s.git('status', '--porcelain'), 'nothing left over');
       // With the version already set in the manifest, releasing with no argument tags it.

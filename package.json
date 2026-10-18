@@ -1,9 +1,9 @@
 {
   "name": "captode",
-  "version": "1.5.3",
+  "version": "1.5.4",
   "private": true,
   "description": "Screenshot and screen recorder browser extension with an image editor and GIF/MP4/WebP export.",
-  "license": "MIT",
+  "license": "GPL-3.0-or-later",
   "type": "module",
   "scripts": {
     "test": "node test/run.mjs",

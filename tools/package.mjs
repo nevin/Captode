@@ -89,6 +89,8 @@ function writeZip(file, entries) {
 }
 
 const files = walk(src).map((path) => [relative(src, path).split(sep).join('/'), readFileSync(path)]);
+// The GPL goes with every copy of Captode: each package carries its licence.
+files.push(['LICENSE', readFileSync(join(root, 'LICENSE'))]);
 const only = process.argv[2]; // one browser, or all of them
 
 let failed = false;

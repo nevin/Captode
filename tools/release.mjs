@@ -61,7 +61,8 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
   if (tags.includes(version)) fail(`v${version} is already tagged; choose a higher version`);
   if (compare(version, latest) <= 0) fail(`${version} is not higher than the last release, ${latest}; Chrome only installs higher versions`);
   // Changes not committed yet go into the release commit, with the version.
-  const pending = git('status', '--porcelain', '--untracked-files=all').split('\n').filter(Boolean).map((l) => l.slice(3));
+  // Untrimmed: each line starts with two status columns, which may be spaces.
+  const pending = run('git', ['status', '--porcelain', '--untracked-files=all']).split('\n').filter(Boolean).map((l) => l.slice(3));
   const branch = git('rev-parse', '--abbrev-ref', 'HEAD');
   if (branch === 'HEAD') fail('not on a branch');
 

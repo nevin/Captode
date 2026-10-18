@@ -45,7 +45,7 @@ project's `dist` folder, download these two files. Don't unzip either of them.
       single tab, so that paragraph leaves it out.
    5. **Categories:** Photos, Music & Videos; Productivity.
    6. **Support website:** `https://github.com/nevin/Captode`
-   7. **License:** MIT License.
+   7. **License:** GNU General Public License v3.0.
    8. **Privacy policy:** tick "This add-on has a privacy policy" and paste the text of
       `PRIVACY.md`.
    9. **Notes to reviewer:** copy the whole box under **Notes to reviewer**, changing
