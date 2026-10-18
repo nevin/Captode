@@ -105,7 +105,7 @@ export const tests = {
       ok(cm.background.service_worker && cm.permissions.includes('tabCapture') && !cm.browser_specific_settings, `Chrome manifest: ${JSON.stringify(cm.background)}`);
       ok(fm?.version === '1.3.0' && fm.background.scripts?.[0] === 'background.js' && !fm.background.service_worker
         && !fm.permissions.includes('tabCapture') && !fm.permissions.includes('offscreen') && !fm.minimum_chrome_version
-        && fm.browser_specific_settings.gecko.id === 'captode@nevin.github.io'
+        && fm.browser_specific_settings.gecko.id === 'captode@thecodersworld.com'
         && fm.browser_specific_settings.gecko.data_collection_permissions.required[0] === 'none', `Firefox manifest: ${JSON.stringify(fm)}`);
       const em = zippedManifest(join(s.dir, 'dist', 'captode-1.3.0-edge.zip'));
       ok(em?.version === '1.3.0' && em.background.service_worker && em.permissions.includes('tabCapture'), `Edge manifest: ${JSON.stringify(em?.background)}`);

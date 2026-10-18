@@ -6,7 +6,7 @@
 // src/ itself holds the Chrome versions of both, for loading unpacked while developing.
 
 /** Firefox's add-on ID. It is permanent: AMO and every installed copy know Captode by it. */
-export const GECKO_ID = 'captode@nevin.github.io';
+export const GECKO_ID = 'captode@thecodersworld.com';
 
 // Permissions only Chromium browsers have. Captode checks for the APIs before using them
 // (src/lib/platform.js), and other browsers' validators reject permissions they don't know.

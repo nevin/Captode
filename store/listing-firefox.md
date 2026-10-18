@@ -7,7 +7,7 @@ code, answer yes (WebAssembly) and upload `dist/captode-<version>-source.zip`.
 ## Package
 
 - Manifest V3, background event page, Firefox 140 or later (desktop only).
-- Add-on ID `captode@nevin.github.io` (permanent).
+- Add-on ID `ccaptode@thecodersworld.com` (permanent).
 - Permissions: `activeTab`, `contextMenus`, `scripting`, `storage`, `unlimitedStorage`.
   No host permissions, no content scripts, no remote code.
 - `data_collection_permissions`: `none`. Captode collects and transmits nothing.

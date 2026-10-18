@@ -1,6 +1,6 @@
 // Screenshots of a page: full page, visible area and a dragged selection, opened in
 // the editor, then exported in every format.
-import { open, waitForTab, ok, near, sleep, launch } from './helpers.mjs';
+import { open, waitForTab, ok, near, sleep, launch, prepare } from './helpers.mjs';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -94,7 +94,9 @@ async function elementCapture(browser, url, site) {
     await el.waitForSelector('#__captode_pick');
     await pick();
     const target = await browser.waitForTarget((x) => !before.has(x) && x.url().includes('editor.html?id='), { timeout: 30000 });
-    const ed = await target.page();
+    // Waited on from here (prepare): a Windows runner's unfocused page can stall its own polling.
+    const ed = await prepare(await target.page());
+    await ed.bringToFront();
     await ed.waitForFunction(() => /px/.test(document.querySelector('#doc-dims').textContent), { timeout: 30000, polling: 100 });
     return ed;
   };

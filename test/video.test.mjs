@@ -1,6 +1,6 @@
 // Video page: exporting a recording to MP4, WebM, GIF and WebP in the worker,
 // with trims that land on the right frames, audio, and device frames.
-import { open, recordClip, ok, near, sleep } from './helpers.mjs';
+import { open, recordClip, ok, near, sleep, prepare } from './helpers.mjs';
 
 export async function setup({ browser, url }) {
   const ctl = await open(browser, url('lab/lab.html'));
@@ -124,7 +124,8 @@ export const tests = {
       await video.evaluate(() => document.activeElement?.blur());
       await video.keyboard.press('f');
       const target = await browser.waitForTarget((x) => !before.has(x) && x.url().includes('editor.html?id='), { timeout: 15000 });
-      const ed = await target.page();
+      const ed = await prepare(await target.page()); // waited on from here, as Windows runners need
+      await ed.bringToFront();
       await ed.waitForFunction(() => /px/.test(document.querySelector('#doc-dims').textContent), { polling: 100 });
       const e = await ed.evaluate(() => ({ name: document.querySelector('#doc-name').textContent, size: captodeEditor.size() }));
       ok(e.size.join() === '1280,720' && /0:06\.\d$/.test(e.name), JSON.stringify(e));

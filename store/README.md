@@ -46,7 +46,7 @@ the App Store gives Captode a page, put its address in `storeUrl` there.
 
 ## Firefox
 
-- The add-on ID `captode@nevin.github.io` is permanent; never change it.
+- The add-on ID `captode@thecodersworld.com` is permanent; never change it.
 - `data_collection_permissions` says Captode collects nothing, which matches the
   privacy policy; keep them in step.
 - Upload the source zip when asked: the packages hold WebAssembly (oxipng, MozJPEG from
