@@ -1,12 +1,14 @@
-// Makes a release: sets the version everywhere it is written, checks the translations,
-// runs the tests, builds the packages for both stores (see tools/package.mjs) and checks
-// the Firefox one with Mozilla's validator, then commits and tags it.
+// Makes a release in one commit: sets the version everywhere it is written, checks the
+// translations, runs the tests, builds the packages for every browser (see
+// tools/package.mjs) and checks the Firefox one with Mozilla's validator, then commits the
+// version together with any changes not yet committed, and tags it.
 //
 //   npm run release                 release the version in src/manifest.json (if not tagged yet)
 //   npm run release -- 1.3.1        or a given version
 //   npm run release -- patch        or the next patch, minor or major version
 //
-// Options: --push (push the commit and tag), --skip-tests, --dry-run (say what would happen).
+// Options: --push (push the commit and tag), --skip-tests, --dry-run (say what would happen),
+// --message="What changed" (the commit's description, under "Captode <version>").
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { dirname, join } from 'node:path';
@@ -16,6 +18,7 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const args = process.argv.slice(2);
 const flag = (name) => args.includes(`--${name}`);
 const wanted = args.find((a) => !a.startsWith('--'));
+const message = args.find((a) => a.startsWith('--message='))?.slice('--message='.length).trim();
 
 const run = (cmd, cmdArgs, opts = {}) => execFileSync(cmd, cmdArgs, { cwd: root, encoding: 'utf8', stdio: opts.show ? 'inherit' : 'pipe', shell: process.platform === 'win32' && cmd === 'npm' });
 const git = (...a) => run('git', a).trim();
@@ -44,7 +47,7 @@ function setVersion(file, version, { lock = false } = {}) {
   if (!pattern.test(text)) fail(`no version found in ${file}`);
   text = text.replace(pattern, `$1"${version}"`);
   if (JSON.parse(text).version !== version) fail(`could not set the version in ${file}`);
-  return { path, text };
+  return { path, text, original: readFileSync(path, 'utf8') };
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
@@ -57,7 +60,8 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
   if (!valid(version)) fail(`"${version}" is not a version Chrome accepts (up to four numbers, like 1.3.0)`);
   if (tags.includes(version)) fail(`v${version} is already tagged; choose a higher version`);
   if (compare(version, latest) <= 0) fail(`${version} is not higher than the last release, ${latest}; Chrome only installs higher versions`);
-  if (git('status', '--porcelain')) fail('there are uncommitted changes; commit or stash them first');
+  // Changes not committed yet go into the release commit, with the version.
+  const pending = git('status', '--porcelain', '--untracked-files=all').split('\n').filter(Boolean).map((l) => l.slice(3));
   const branch = git('rev-parse', '--abbrev-ref', 'HEAD');
   if (branch === 'HEAD') fail('not on a branch');
 
@@ -65,6 +69,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
   if (existsSync(join(root, 'package-lock.json'))) files.push(setVersion('package-lock.json', version, { lock: true }));
 
   console.log(`Releasing Captode ${version} from ${branch} (last release: ${latest === '0' ? 'none' : latest}).`);
+  if (pending.length) console.log(`Including ${pending.length} changed file${pending.length === 1 ? '' : 's'} in the release commit:\n  ${pending.join('\n  ')}`);
   if (flag('dry-run')) {
     console.log(`Would set the version in ${files.map((f) => f.path.slice(root.length + 1)).join(', ')}, check the translations,${flag('skip-tests') ? '' : ' run the tests,'} build the packages for every browser${flag('skip-tests') ? '' : ', check the Firefox one'}, commit "Captode ${version}", tag v${version}${flag('push') ? ' and push both' : ''}.`);
     process.exit(0);
@@ -77,12 +82,12 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
     run('npm', ['run', '-s', 'package'], { show: true });
     if (!flag('skip-tests')) run('npm', ['run', '-s', 'lint:firefox'], { show: true });
   } catch {
-    run('git', ['checkout', '--', ...files.map((f) => f.path)]);
+    for (const f of files) writeFileSync(f.path, f.original); // other changes are left as they were
     fail('stopped; the version change was undone');
   }
   if (git('status', '--porcelain')) {
-    git('add', ...files.map((f) => f.path));
-    git('commit', '-m', `Captode ${version}`);
+    git('add', '-A');
+    git('commit', '-m', `Captode ${version}`, ...(message ? ['-m', message] : []));
   }
   git('tag', '-a', `v${version}`, '-m', `Captode ${version}`);
   console.log(`Tagged v${version}. In dist/: captode-${version}-chrome.zip for the Chrome Web Store, -edge.zip for Edge Add-ons, -firefox.zip (with -source.zip) for addons.mozilla.org, and the -safari folder for Xcode. See store/README.md.`);

@@ -76,9 +76,6 @@ export const tests = {
       ok(r.code && /not higher than the last release, 1\.2\.0/.test(r.out), `lower version: ${r.out}`);
       r = s.release('1.3.0.0.1', '--skip-tests');
       ok(r.code && /not a version Chrome accepts/.test(r.out), `bad version: ${r.out}`);
-      writeFileSync(join(s.dir, 'src', 'stray.txt'), 'x');
-      r = s.release('1.3.0', '--skip-tests');
-      ok(r.code && /uncommitted changes/.test(r.out), `dirty tree: ${r.out}`);
       ok(s.version('src/manifest.json') === '1.2.0', 'nothing changed');
     } finally {
       rmSync(s.dir, { recursive: true, force: true });
@@ -90,8 +87,14 @@ export const tests = {
     try {
       let r = s.release('minor', '--dry-run');
       ok(!r.code && /Releasing Captode 1\.3\.0/.test(r.out) && s.version('src/manifest.json') === '1.2.0', `dry run: ${r.out}`);
-      r = s.release('minor', '--skip-tests');
-      ok(!r.code, r.out);
+      // A change not yet committed goes into the one release commit, with the version.
+      writeFileSync(join(s.dir, 'src', 'new-feature.js'), '// new\n');
+      const commits = Number(s.git('rev-list', '--count', 'HEAD'));
+      r = s.release('minor', '--skip-tests', '--message=A new feature');
+      ok(!r.code && /Including 1 changed file/.test(r.out), r.out);
+      ok(Number(s.git('rev-list', '--count', 'HEAD')) === commits + 1, 'one commit for the release');
+      ok(s.git('show', '--name-only', '--format=', 'HEAD').split('\n').includes('src/new-feature.js'), 'the change is in the release commit');
+      ok(s.git('log', '-1', '--format=%b') === 'A new feature', 'with the description given');
       ok(['src/manifest.json', 'package.json', 'package-lock.json'].every((f) => s.version(f) === '1.3.0'), 'version set in all three files');
       const lock = JSON.parse(readFileSync(join(s.dir, 'package-lock.json'), 'utf8'));
       ok(lock.packages[''].version === '1.3.0', 'and in the lock file\'s own entry');

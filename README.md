@@ -363,11 +363,15 @@ than text, ever shows.
 
 ## Publishing
 
-`npm run release -- patch --push` (or `minor`, `major`, or a version) checks the
-translations, runs the tests, builds a package for each browser, checks the Firefox one
-with Mozilla's validator, then commits, tags and pushes; the tag's GitHub release gets the
-same packages. It refuses a version that isn't higher than the last tag (stores only
-install higher versions) or uncommitted changes; `--dry-run` shows what it would do.
+Make your changes, then run `npm run release -- patch --push --message="What changed"` (or
+`minor`, `major`, or a version) without committing them first. It sets the version, checks
+the translations, runs the tests, builds a package for each browser and checks the Firefox
+one with Mozilla's validator; then it makes **one commit** ("Captode <version>", with your
+description) holding your changes and the new version, tags it and pushes. The tag's GitHub
+release gets the same packages. If a check fails, only the version number is put back and
+your changes stay as they were. It refuses a version that isn't higher than the last tag
+(stores only install higher versions); `--dry-run` shows what it would do and which files it
+would include.
 
 | Package in `dist/` | For |
 | --- | --- |

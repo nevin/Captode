@@ -11,9 +11,11 @@ build stops if a package mentions another browser's store, ID or pages.
 ## Every release
 
 1. If the interface or logo changed: `npm run icons`, `npm run store`, and commit.
-2. `npm run release -- patch` (or `minor`, `major`, or a version) `--push`. It checks the
-   translations, runs every test (Chrome, and Firefox when installed), builds the packages,
-   checks the Firefox one with Mozilla's validator, commits, tags and pushes. The tag's
+2. Without committing your changes, run
+   `npm run release -- patch --push --message="What changed"` (or `minor`, `major`, or a
+   version). It sets the version, checks the translations, runs every test (Chrome, and
+   Firefox when installed), builds the packages and checks the Firefox one with Mozilla's
+   validator, then commits your changes and the version as one commit, tags and pushes. The tag's
    GitHub release gets the same packages with their SHA-256 sums.
 3. Upload from `dist/` (or the GitHub release):
 
