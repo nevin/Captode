@@ -32,9 +32,6 @@
   "popup_this_page_can_t_be": {
     "message": "このページはキャプチャできません"
   },
-  "popup_chrome_protects_its_own_pages": {
-    "message": "Chrome は自身のページと Chrome ウェブストアを保護しています。キャプチャするにはウェブサイトを開くか、画面全体を録画してください。"
-  },
   "popup_choose_what_to_capture": {
     "message": "キャプチャする対象を選択"
   },
@@ -1299,7 +1296,7 @@
     "message": "何も共有されなかったため、何も録画されませんでした。"
   },
   "screen_mac_permission": {
-    "message": "画面を選んだ場合は、システム設定 → プライバシーとセキュリティ → 画面収録 で Chrome を許可し、Chrome を再起動してください。"
+    "message": "画面を選んだ場合は、システム設定 → プライバシーとセキュリティ → 画面収録 でブラウザを許可し、ブラウザを再起動してください。"
   },
   "screen_title_recording": {
     "message": "● 録画中 — Captode"
@@ -1602,7 +1599,7 @@
     "message": "$1 秒を選択"
   },
   "no_mp4": {
-    "message": "このブラウザでは MP4 を作成できません。Chrome をバージョン 126 以降に更新するか、WebM で書き出してください。"
+    "message": "このブラウザは MP4 を書き出せません。ブラウザを更新するか、WebM で書き出してください。"
   },
   "no_webm": {
     "message": "このブラウザでは WebM を作成できません。"
@@ -1944,7 +1941,7 @@
     "message": "Captode にマイクの使用を許可"
   },
   "permission_why": {
-    "message": "Chrome が一度だけ確認します。Captode は録画中だけ使い、録画はお使いのコンピュータに残ります。"
+    "message": "ブラウザが一度だけ確認します。Captode は録画中だけ使い、録画はお使いのコンピュータに残ります。"
   },
   "permission_allow": {
     "message": "許可"
@@ -1956,10 +1953,10 @@
     "message": "次の録画から使われます。このタブは自動的に閉じます。"
   },
   "permission_blocked": {
-    "message": "Chrome がアクセスをブロックしました"
+    "message": "ブラウザがアクセスをブロックしました"
   },
   "permission_blocked_text": {
-    "message": "アドレスバー右側のアイコンをクリックし、Captode にカメラとマイクを許可してから、もう一度お試しください。"
+    "message": "アドレスバー横の権限アイコンから Captode にカメラとマイクを許可し、もう一度お試しください。"
   },
   "permission_try_again": {
     "message": "再試行"
@@ -1987,5 +1984,8 @@
   },
   "settings_blur_private_hint": {
     "message": "新しいスクリーンショットでメールアドレス、電話番号、カード番号をぼかします。ぼかしは個別に削除できます"
+  },
+  "popup_browser_protects_its_own_pages": {
+    "message": "ブラウザ自身のページと拡張機能ストアは保護されています。Web サイトを開いてキャプチャするか、画面全体を録画してください。"
   }
 }

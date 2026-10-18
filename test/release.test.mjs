@@ -8,6 +8,7 @@ import { fileURLToPath } from 'node:url';
 import { inflateRawSync } from 'node:zlib';
 import { ok } from './helpers.mjs';
 import { valid, compare, bump } from '../tools/release.mjs';
+import { leaks, targetModule } from '../tools/targets.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -56,6 +57,16 @@ export const tests = {
     ok(bump('1.2.0', 'patch') === '1.2.1' && bump('1.2.3', 'minor') === '1.3.0' && bump('1.2.3', 'major') === '2.0.0', 'bump');
   },
 
+  async 'packages: none names another browser'() {
+    const file = (name, text) => [name, Buffer.from(text)];
+    ok(leaks('chrome', [file('lib/x.js', "const u = 'https://addons.mozilla.org/firefox/addon/captode/';")]).length === 1, 'another store in code');
+    ok(leaks('firefox', [file('_locales/en/messages.json', '{"a":{"message":"Chrome protects its pages"}}')]).length === 1, 'another browser in what users read');
+    ok(leaks('edge', [file('manifest.json', '{"minimum_chrome_version":"116"}')]).length === 0, "Chromium's manifest key is Edge's too");
+    ok(leaks('firefox', [file('lib/x.js', '// Chrome draws this differently')]).length === 0, 'a code comment may explain a browser');
+    // src/ holds Chrome's settings, as the Chrome package does, for loading unpacked.
+    ok(readFileSync(join(root, 'src', 'lib', 'target.js'), 'utf8') === targetModule('chrome'), 'src/lib/target.js is out of date: node -e "import(\'./tools/targets.mjs\').then(m => process.stdout.write(m.targetModule(\'chrome\')))" > src/lib/target.js');
+  },
+
   async 'release: refuses what Chrome or git would reject, and changes nothing'() {
     const s = sandbox();
     try {
@@ -84,8 +95,20 @@ export const tests = {
       ok(['src/manifest.json', 'package.json', 'package-lock.json'].every((f) => s.version(f) === '1.3.0'), 'version set in all three files');
       const lock = JSON.parse(readFileSync(join(s.dir, 'package-lock.json'), 'utf8'));
       ok(lock.packages[''].version === '1.3.0', 'and in the lock file\'s own entry');
-      const zip = join(s.dir, 'dist', 'captode-1.3.0.zip');
+      const zip = join(s.dir, 'dist', 'captode-1.3.0-chrome.zip');
       ok(existsSync(zip) && zippedManifest(zip)?.version === '1.3.0', 'the zip holds 1.3.0');
+      // One build for each store: Chrome's manifest as written, Firefox's made from it.
+      const cm = zippedManifest(zip), fm = zippedManifest(join(s.dir, 'dist', 'captode-1.3.0-firefox.zip'));
+      ok(cm.background.service_worker && cm.permissions.includes('tabCapture') && !cm.browser_specific_settings, `Chrome manifest: ${JSON.stringify(cm.background)}`);
+      ok(fm?.version === '1.3.0' && fm.background.scripts?.[0] === 'background.js' && !fm.background.service_worker
+        && !fm.permissions.includes('tabCapture') && !fm.permissions.includes('offscreen') && !fm.minimum_chrome_version
+        && fm.browser_specific_settings.gecko.id === 'captode@nevin.github.io'
+        && fm.browser_specific_settings.gecko.data_collection_permissions.required[0] === 'none', `Firefox manifest: ${JSON.stringify(fm)}`);
+      const em = zippedManifest(join(s.dir, 'dist', 'captode-1.3.0-edge.zip'));
+      ok(em?.version === '1.3.0' && em.background.service_worker && em.permissions.includes('tabCapture'), `Edge manifest: ${JSON.stringify(em?.background)}`);
+      const sm = JSON.parse(readFileSync(join(s.dir, 'dist', 'captode-1.3.0-safari', 'manifest.json'), 'utf8'));
+      ok(sm.version === '1.3.0' && !sm.permissions.includes('tabCapture') && sm.browser_specific_settings.safari, `Safari manifest: ${JSON.stringify(sm.browser_specific_settings)}`);
+      ok(existsSync(join(s.dir, 'dist', 'captode-1.3.0-source.zip')), 'and the source zip for addons.mozilla.org');
       ok(s.git('log', '-1', '--format=%s') === 'Captode 1.3.0' && s.git('describe', '--exact-match', 'HEAD') === 'v1.3.0', 'committed and tagged');
       ok(!s.git('status', '--porcelain'), 'nothing left over');
       // With the version already set in the manifest, releasing with no argument tags it.

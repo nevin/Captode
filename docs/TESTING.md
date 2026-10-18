@@ -26,6 +26,11 @@ the extension into Chrome for Testing and checks:
 - recordings with a camera bubble and microphone, with Chrome's stand-in camera: the
   bubble is drawn, keeps moving on a still page, and both are let go afterwards
 - Share Captode and Copy diagnostics (no page addresses)
+- in Firefox, from the Firefox package: it installs, the popup offers only what Firefox can
+  do, a full-page screenshot has the page's height, and Settings, the editor, the video
+  page and Compare open without errors
+- every package holds only its own browser's manifest, settings and store (the build
+  stops otherwise), and the Firefox one passes Mozilla's validator
 
 ## What needs a person
 
@@ -91,6 +96,10 @@ or install the zip from `npm run package`.
 18. **Shortcuts and menus:** press Alt+Shift+F, Alt+Shift+V and Alt+Shift+S on a web page;
    right-click the page and the toolbar icon and try each Captode item. With **Blur private
    details** on in Settings, an email address on the page comes out blurred.
+19. **Firefox** (from about:debugging → This Firefox → Load Temporary Add-on, choosing
+   `manifest.json` in an unpacked `captode-<version>-firefox.zip`): every screenshot mode,
+   the right-click menu, shortcuts, **Record → Full screen** with the microphone, an MP4
+   and a GIF export, and Copy in the editor.
 
 ### Windows
 

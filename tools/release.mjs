@@ -1,5 +1,6 @@
 // Makes a release: sets the version everywhere it is written, checks the translations,
-// runs the tests, builds dist/captode-<version>.zip, then commits and tags it.
+// runs the tests, builds the packages for both stores (see tools/package.mjs) and checks
+// the Firefox one with Mozilla's validator, then commits and tags it.
 //
 //   npm run release                 release the version in src/manifest.json (if not tagged yet)
 //   npm run release -- 1.3.1        or a given version
@@ -65,7 +66,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
 
   console.log(`Releasing Captode ${version} from ${branch} (last release: ${latest === '0' ? 'none' : latest}).`);
   if (flag('dry-run')) {
-    console.log(`Would set the version in ${files.map((f) => f.path.slice(root.length + 1)).join(', ')}, check the translations,${flag('skip-tests') ? '' : ' run the tests,'} build dist/captode-${version}.zip, commit "Captode ${version}", tag v${version}${flag('push') ? ' and push both' : ''}.`);
+    console.log(`Would set the version in ${files.map((f) => f.path.slice(root.length + 1)).join(', ')}, check the translations,${flag('skip-tests') ? '' : ' run the tests,'} build the packages for every browser${flag('skip-tests') ? '' : ', check the Firefox one'}, commit "Captode ${version}", tag v${version}${flag('push') ? ' and push both' : ''}.`);
     process.exit(0);
   }
 
@@ -74,6 +75,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
     run('npm', ['run', '-s', 'i18n'], { show: true });
     if (!flag('skip-tests')) run('npm', ['test'], { show: true });
     run('npm', ['run', '-s', 'package'], { show: true });
+    if (!flag('skip-tests')) run('npm', ['run', '-s', 'lint:firefox'], { show: true });
   } catch {
     run('git', ['checkout', '--', ...files.map((f) => f.path)]);
     fail('stopped; the version change was undone');
@@ -83,7 +85,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
     git('commit', '-m', `Captode ${version}`);
   }
   git('tag', '-a', `v${version}`, '-m', `Captode ${version}`);
-  console.log(`Tagged v${version}. Upload dist/captode-${version}.zip to the Chrome Web Store.`);
+  console.log(`Tagged v${version}. In dist/: captode-${version}-chrome.zip for the Chrome Web Store, -edge.zip for Edge Add-ons, -firefox.zip (with -source.zip) for addons.mozilla.org, and the -safari folder for Xcode. See store/README.md.`);
   if (flag('push')) {
     git('push', 'origin', branch);
     git('push', 'origin', `v${version}`);

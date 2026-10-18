@@ -367,6 +367,9 @@ async function startRecording({ mode, fps, audio, size = 'page', countdown: want
     return;
   }
 
+  // Without tab capture the popup only offers full-screen recording; never get here.
+  if (!chrome.tabCapture || !chrome.offscreen) throw new Error(t('error_recording_start'));
+
   let crop = null;
   let aspect = null;
   let pageWidth = null; // CSS pixels, so the video page can measure in them
@@ -470,7 +473,7 @@ async function reportError(e) {
 
 // ---------- right-click menu ----------
 
-// On pages Chrome groups an extension's items under its name; they are also in the
+// On pages the browser groups an extension's items under its name; they are also in the
 // menu of Captode's toolbar icon. A click on one grants activeTab, like the toolbar
 // button does.
 const MENU = [['full', 'menu_full_page'], ['visible', 'menu_visible'], ['area', 'menu_area'], ['element', 'menu_element']];
@@ -486,7 +489,7 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
   captureImage(info.menuItemId, tab).catch(reportError);
 });
 
-// A shortcut for each kind of screenshot (set or changed at chrome://extensions/shortcuts).
+// A shortcut for each kind of screenshot (set or changed in the browser's shortcut settings).
 chrome.commands.onCommand.addListener(async (command, tab) => {
   const mode = /^capture-(full|visible|area|element)$/.exec(command)?.[1];
   if (!mode) return;

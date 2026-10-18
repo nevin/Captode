@@ -2,6 +2,7 @@ import { enhance, tablist, showShortcut, shareCaptode } from '../lib/ui.js';
 import { outputSize } from '../lib/recorder.js';
 import { t, localize } from '../lib/i18n.js';
 import { listCaptures } from '../lib/db.js';
+import { PROTECTED, STORE_URL, canRecordTabs, canProcessVideo } from '../lib/platform.js';
 
 localize();
 
@@ -40,6 +41,22 @@ const SIZE_HINTS = {
   scale: t('popup_size_hint_scale'),
   res: t('popup_size_hint_res'),
 };
+// Only what this browser can do is offered: tab recording and reworking a video's frames
+// need APIs not every browser has.
+if (!canRecordTabs) {
+  for (const el of document.querySelectorAll('#modes-video .mode:not([data-mode="screen"])')) el.classList.add('hidden');
+  $('#inputs').closest('.toggle').classList.add('hidden');
+}
+if (!canProcessVideo) {
+  $('#camera').closest('.toggle').classList.add('hidden');
+  $('#size').closest('.toggle').classList.add('hidden');
+  settings.videoSize = 'page';
+  $('#camera').checked = false;
+}
+// The number keys follow the modes on show.
+for (const list of document.querySelectorAll('.modes')) {
+  [...list.querySelectorAll('.mode:not(.hidden) .num')].forEach((k, i) => { k.textContent = i + 1; });
+}
 setSize(settings.videoSize);
 setKind(settings.kind);
 setFps(fps);
@@ -73,10 +90,9 @@ const { whatsNew } = await chrome.storage.local.get('whatsNew');
 if (whatsNew && !lastError) $('#whats-new').classList.remove('hidden');
 $('#whats-new-close').addEventListener('click', () => { $('#whats-new').classList.add('hidden'); chrome.storage.local.remove('whatsNew'); });
 
-// Chrome doesn't let extensions capture its own pages or the Web Store, so say so
+// Browsers don't let extensions capture their own pages or add-on stores, so say so
 // up front instead of failing after a click. Recording the whole screen still works.
 const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
-const PROTECTED = /^(chrome|edge|brave|opera|vivaldi|about|devtools|chrome-extension|view-source|chrome-search):|^https:\/\/(chrome\.google\.com\/webstore|chromewebstore\.google\.com|microsoftedge\.microsoft\.com\/addons)/;
 const blocked = !activeTab?.url || PROTECTED.test(activeTab.url);
 if (blocked) {
   $('#blocked').classList.remove('hidden');
@@ -155,7 +171,7 @@ $('#size').addEventListener('change', (e) => { setSize(e.target.value); chrome.s
 for (const id of ['audio', 'device', 'inputs']) {
   $('#' + id).addEventListener('change', (e) => { chrome.storage.local.set({ [id]: e.target.checked }); summarise(); });
 }
-// Chrome asks once whether Captode may use the camera or microphone. The popup can't
+// The browser asks once whether Captode may use the camera or microphone. The popup can't
 // show that question, so a page of Captode's asks, and turns the switch on if allowed.
 for (const [id, name] of [['camera', 'camera'], ['mic', 'microphone']]) {
   $('#' + id).addEventListener('change', async (e) => {
@@ -168,6 +184,7 @@ for (const [id, name] of [['camera', 'camera'], ['mic', 'microphone']]) {
   });
 }
 $('#recent-all').addEventListener('click', () => $('#open-editor').click());
+$('#share').classList.toggle('hidden', !STORE_URL); // until listed in this browser's store
 $('#share').addEventListener('click', () => shareCaptode({ copyOnly: true }));
 $('#open-settings').addEventListener('click', () => { chrome.runtime.openOptionsPage(); window.close(); });
 $('#open-editor').addEventListener('click', async () => {
@@ -182,7 +199,7 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'Enter' && (e.target === document.body || e.target === document.documentElement)) {
     document.querySelector(`#modes-${kind} .mode:not(:disabled) .last`)?.closest('.mode').click();
   } else if (n >= 1 && n <= 4) {
-    document.querySelectorAll(`#modes-${kind} .mode`)[n - 1]?.click();
+    document.querySelectorAll(`#modes-${kind} .mode:not(.hidden)`)[n - 1]?.click();
   } else if (e.key === 'Tab') {
     document.body.classList.add('kbd-nav');
   }
@@ -239,12 +256,12 @@ function summarise() {
   if (!out || !$('#size').selectedOptions[0]) return;
   out.textContent = [
     `${fps} fps`,
-    $('#size').selectedOptions[0].textContent,
+    ...(canProcessVideo ? [$('#size').selectedOptions[0].textContent] : []),
     countdown ? t('popup_countdown_short', countdown) : t('popup_no_countdown'),
     ...($('#audio').checked ? [t('popup_with_audio')] : []),
-    ...($('#inputs').checked ? [t('popup_with_inputs')] : []),
+    ...($('#inputs').checked && canRecordTabs ? [t('popup_with_inputs')] : []),
     ...($('#mic').checked ? [t('popup_with_mic')] : []),
-    ...($('#camera').checked ? [t('popup_with_camera')] : []),
+    ...($('#camera').checked && canProcessVideo ? [t('popup_with_camera')] : []),
   ].join(' · ');
 }
 
@@ -253,7 +270,7 @@ function markLastUsed() {
   for (const el of document.querySelectorAll('.mode .last')) el.remove();
   for (const [k, mode] of Object.entries(settings.lastMode)) {
     const b = document.querySelector(`#modes-${k === 'video' ? 'video' : 'image'} .mode[data-mode="${mode}"]`);
-    if (!b || b.disabled) continue;
+    if (!b || b.disabled || b.classList.contains('hidden')) continue;
     b.querySelector('.num').insertAdjacentHTML('beforebegin', `<span class="last" title="${t('popup_enter_repeats')}">${t('popup_last_used')}</span>`);
   }
 }

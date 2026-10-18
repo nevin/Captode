@@ -1,6 +1,7 @@
 // Shared interface helpers: notifications, accessible tabs and tooltips, dialogs.
 
 import { t } from './i18n.js';
+import { STORE_URL } from './platform.js';
 
 const ICONS = {
   success: '<path d="m5 12 5 5 9-10"/>',
@@ -137,9 +138,6 @@ export async function showShortcut(el, name = '_execute_action') {
     el.append(k, ' ');
   }
 }
-
-/** Captode's page on the Chrome Web Store, for telling others about it. */
-export const STORE_URL = 'https://chromewebstore.google.com/detail/mphigcddnecjbnkcpiaabheopepcmgce?utm_source=item-share-cb';
 
 /**
  * Shares Captode's store page: the system's share sheet where Chrome has one (unless

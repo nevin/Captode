@@ -1,11 +1,11 @@
 {
   "extName": {
     "message": "Captode — Screenshot & Screen Recorder",
-    "description": "The extension name in Chrome and the Web Store (75 characters at most)."
+    "description": "The extension name in the browser and its add-on store (75 characters at most)."
   },
   "extDescription": {
     "message": "Take full-page, visible or selected-area screenshots and screen recordings, mark them up, and save them as images, PDFs or videos.",
-    "description": "Shown in the Web Store and on the extensions page (132 characters at most)."
+    "description": "Shown in the add-on store and on the browser's extensions page (132 characters at most)."
   },
   "commandAction": {
     "message": "Open Captode, or stop the current recording"
@@ -33,9 +33,6 @@
   },
   "popup_this_page_can_t_be": {
     "message": "This page can't be captured"
-  },
-  "popup_chrome_protects_its_own_pages": {
-    "message": "Chrome protects its own pages and the Web Store. Open a website to capture it, or record your whole screen."
   },
   "popup_choose_what_to_capture": {
     "message": "Choose what to capture"
@@ -1301,7 +1298,7 @@
     "message": "Nothing was shared, so nothing was recorded."
   },
   "screen_mac_permission": {
-    "message": "If you did choose a screen, allow Chrome under System Settings → Privacy & Security → Screen Recording, then restart Chrome."
+    "message": "If you did choose a screen, allow your browser under System Settings → Privacy & Security → Screen Recording, then restart the browser."
   },
   "screen_title_recording": {
     "message": "● Recording — Captode"
@@ -1604,7 +1601,7 @@
     "message": "$1 s selected"
   },
   "no_mp4": {
-    "message": "This browser cannot write MP4. Update Chrome (version 126 or later), or export WebM."
+    "message": "This browser cannot write MP4. Update it, or export WebM."
   },
   "no_webm": {
     "message": "This browser cannot write WebM."
@@ -1946,7 +1943,7 @@
     "message": "Let Captode use your microphone"
   },
   "permission_why": {
-    "message": "Chrome asks once. Captode uses them only while you record, and the recording stays on your computer."
+    "message": "Your browser asks once. Captode uses them only while you record, and the recording stays on your computer."
   },
   "permission_allow": {
     "message": "Allow"
@@ -1958,10 +1955,10 @@
     "message": "Your next recordings will include them. This tab closes by itself."
   },
   "permission_blocked": {
-    "message": "Chrome blocked access"
+    "message": "Your browser blocked access"
   },
   "permission_blocked_text": {
-    "message": "Click the icon at the right of the address bar, allow the camera and microphone for Captode, then try again."
+    "message": "Allow the camera and microphone for Captode with the permissions icon beside the address bar, then try again."
   },
   "permission_try_again": {
     "message": "Try again"
@@ -1989,5 +1986,8 @@
   },
   "settings_blur_private_hint": {
     "message": "Email addresses and phone and card numbers are blurred in new screenshots; each blur can be removed"
+  },
+  "popup_browser_protects_its_own_pages": {
+    "message": "Your browser protects its own pages and its add-on store. Open a website to capture it, or record your whole screen."
   }
 }

@@ -22,6 +22,9 @@ jobs:
           cache: npm
       - name: Install (downloads Chrome for Testing)
         run: npm ci
+      - name: Firefox, for testing the Firefox package
+        shell: bash
+        run: echo "FIREFOX_PATH=$(npx puppeteer browsers install firefox@stable | tail -1 | cut -d' ' -f2-)" >> "$GITHUB_ENV"
       - name: Tests
         run: npm test
       # Fonts and rendering differ between machines, so CI reports the numbers
@@ -36,6 +39,8 @@ jobs:
         run: npm run bench -- --report
       - name: Package
         run: npm run package
+      - name: Firefox package passes Mozilla's validator
+        run: npm run lint:firefox
       - if: matrix.os == 'ubuntu-latest'
         uses: actions/upload-artifact@v4
         with:

@@ -32,9 +32,6 @@
   "popup_this_page_can_t_be": {
     "message": "Diese Seite kann nicht aufgenommen werden"
   },
-  "popup_chrome_protects_its_own_pages": {
-    "message": "Chrome schützt seine eigenen Seiten und den Chrome Web Store. Öffne eine Website, um sie aufzunehmen, oder zeichne den ganzen Bildschirm auf."
-  },
   "popup_choose_what_to_capture": {
     "message": "Was soll aufgenommen werden?"
   },
@@ -1299,7 +1296,7 @@
     "message": "Es wurde nichts freigegeben, also wurde nichts aufgezeichnet."
   },
   "screen_mac_permission": {
-    "message": "Falls du einen Bildschirm gewählt hast: Erlaube Chrome unter Systemeinstellungen → Datenschutz & Sicherheit → Bildschirmaufnahme und starte Chrome neu."
+    "message": "Wenn Sie einen Bildschirm gewählt haben, erlauben Sie Ihren Browser unter Systemeinstellungen → Datenschutz & Sicherheit → Bildschirmaufnahme und starten Sie ihn neu."
   },
   "screen_title_recording": {
     "message": "● Aufzeichnung — Captode"
@@ -1602,7 +1599,7 @@
     "message": "$1 s ausgewählt"
   },
   "no_mp4": {
-    "message": "Dieser Browser kann kein MP4 erstellen. Aktualisiere Chrome (Version 126 oder neuer) oder exportiere als WebM."
+    "message": "Dieser Browser kann kein MP4 schreiben. Aktualisieren Sie ihn oder exportieren Sie WebM."
   },
   "no_webm": {
     "message": "Dieser Browser kann kein WebM erstellen."
@@ -1944,7 +1941,7 @@
     "message": "Captode das Mikrofon erlauben"
   },
   "permission_why": {
-    "message": "Chrome fragt einmal. Captode nutzt sie nur während der Aufnahme, und die Aufnahme bleibt auf Ihrem Computer."
+    "message": "Ihr Browser fragt einmal. Captode nutzt sie nur während der Aufnahme, und die Aufnahme bleibt auf Ihrem Computer."
   },
   "permission_allow": {
     "message": "Erlauben"
@@ -1956,10 +1953,10 @@
     "message": "Ihre nächsten Aufnahmen enthalten sie. Dieser Tab schließt sich von selbst."
   },
   "permission_blocked": {
-    "message": "Chrome hat den Zugriff blockiert"
+    "message": "Ihr Browser hat den Zugriff blockiert"
   },
   "permission_blocked_text": {
-    "message": "Klicken Sie auf das Symbol rechts in der Adressleiste, erlauben Sie Kamera und Mikrofon für Captode und versuchen Sie es erneut."
+    "message": "Erlauben Sie Kamera und Mikrofon für Captode über das Berechtigungssymbol neben der Adressleiste und versuchen Sie es erneut."
   },
   "permission_try_again": {
     "message": "Erneut versuchen"
@@ -1987,5 +1984,8 @@
   },
   "settings_blur_private_hint": {
     "message": "E-Mail-Adressen sowie Telefon- und Kartennummern werden in neuen Screenshots verwischt; jede Verwischung lässt sich entfernen"
+  },
+  "popup_browser_protects_its_own_pages": {
+    "message": "Ihr Browser schützt seine eigenen Seiten und seinen Add-on-Store. Öffnen Sie eine Website, um sie aufzunehmen, oder nehmen Sie den ganzen Bildschirm auf."
   }
 }

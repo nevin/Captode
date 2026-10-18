@@ -32,9 +32,6 @@
   "popup_this_page_can_t_be": {
     "message": "Esta página não pode ser capturada"
   },
-  "popup_chrome_protects_its_own_pages": {
-    "message": "O Chrome protege as próprias páginas e a Chrome Web Store. Abra um site para capturá-lo ou grave a tela inteira."
-  },
   "popup_choose_what_to_capture": {
     "message": "Escolha o que capturar"
   },
@@ -1299,7 +1296,7 @@
     "message": "Nada foi compartilhado, então nada foi gravado."
   },
   "screen_mac_permission": {
-    "message": "Se você escolheu uma tela, permita o Chrome em Ajustes do Sistema → Privacidade e Segurança → Gravação de Tela e reinicie o Chrome."
+    "message": "Se você escolheu uma tela, permita seu navegador em Ajustes do Sistema → Privacidade e Segurança → Gravação de Tela e reinicie o navegador."
   },
   "screen_title_recording": {
     "message": "● Gravando — Captode"
@@ -1602,7 +1599,7 @@
     "message": "$1 s selecionados"
   },
   "no_mp4": {
-    "message": "Este navegador não consegue gerar MP4. Atualize o Chrome (versão 126 ou mais recente) ou exporte WebM."
+    "message": "Este navegador não consegue gerar MP4. Atualize-o ou exporte em WebM."
   },
   "no_webm": {
     "message": "Este navegador não consegue gerar WebM."
@@ -1944,7 +1941,7 @@
     "message": "Permita que o Captode use seu microfone"
   },
   "permission_why": {
-    "message": "O Chrome pergunta uma vez. O Captode só os usa enquanto você grava, e a gravação fica no seu computador."
+    "message": "Seu navegador pergunta uma vez. O Captode só os usa enquanto você grava, e a gravação fica no seu computador."
   },
   "permission_allow": {
     "message": "Permitir"
@@ -1956,10 +1953,10 @@
     "message": "Suas próximas gravações vão incluí-los. Esta aba fecha sozinha."
   },
   "permission_blocked": {
-    "message": "O Chrome bloqueou o acesso"
+    "message": "Seu navegador bloqueou o acesso"
   },
   "permission_blocked_text": {
-    "message": "Clique no ícone à direita da barra de endereço, permita a câmera e o microfone para o Captode e tente de novo."
+    "message": "Permita a câmera e o microfone para o Captode pelo ícone de permissões ao lado da barra de endereço e tente de novo."
   },
   "permission_try_again": {
     "message": "Tentar de novo"
@@ -1987,5 +1984,8 @@
   },
   "settings_blur_private_hint": {
     "message": "E-mails e números de telefone e de cartão são desfocados nas novas capturas; cada desfoque pode ser removido"
+  },
+  "popup_browser_protects_its_own_pages": {
+    "message": "Seu navegador protege as próprias páginas e a loja de extensões. Abra um site para capturá-lo ou grave a tela inteira."
   }
 }

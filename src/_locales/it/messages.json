@@ -32,9 +32,6 @@
   "popup_this_page_can_t_be": {
     "message": "Impossibile acquisire questa pagina"
   },
-  "popup_chrome_protects_its_own_pages": {
-    "message": "Chrome protegge le proprie pagine e il Chrome Web Store. Apri un sito web per acquisirlo o registra l'intero schermo."
-  },
   "popup_choose_what_to_capture": {
     "message": "Scegli cosa acquisire"
   },
@@ -1299,7 +1296,7 @@
     "message": "Non è stato condiviso nulla, quindi non è stato registrato nulla."
   },
   "screen_mac_permission": {
-    "message": "Se hai scelto uno schermo, consenti Chrome in Impostazioni di Sistema → Privacy e sicurezza → Registrazione schermo, poi riavvia Chrome."
+    "message": "Se hai scelto uno schermo, consenti il browser in Impostazioni di Sistema → Privacy e sicurezza → Registrazione schermo, poi riavvialo."
   },
   "screen_title_recording": {
     "message": "● Registrazione — Captode"
@@ -1602,7 +1599,7 @@
     "message": "$1 s selezionati"
   },
   "no_mp4": {
-    "message": "Questo browser non può creare MP4. Aggiorna Chrome (versione 126 o successiva) o esporta in WebM."
+    "message": "Questo browser non può creare MP4. Aggiornalo oppure esporta in WebM."
   },
   "no_webm": {
     "message": "Questo browser non può creare WebM."
@@ -1944,7 +1941,7 @@
     "message": "Consenti a Captode di usare il microfono"
   },
   "permission_why": {
-    "message": "Chrome lo chiede una volta. Captode li usa solo mentre registri e la registrazione resta sul tuo computer."
+    "message": "Il browser lo chiede una volta. Captode li usa solo mentre registri e la registrazione resta sul tuo computer."
   },
   "permission_allow": {
     "message": "Consenti"
@@ -1956,10 +1953,10 @@
     "message": "Le prossime registrazioni li includeranno. Questa scheda si chiude da sola."
   },
   "permission_blocked": {
-    "message": "Chrome ha bloccato l'accesso"
+    "message": "Il browser ha bloccato l'accesso"
   },
   "permission_blocked_text": {
-    "message": "Fai clic sull'icona a destra della barra degli indirizzi, consenti fotocamera e microfono a Captode e riprova."
+    "message": "Consenti fotocamera e microfono a Captode con l'icona delle autorizzazioni accanto alla barra degli indirizzi, poi riprova."
   },
   "permission_try_again": {
     "message": "Riprova"
@@ -1987,5 +1984,8 @@
   },
   "settings_blur_private_hint": {
     "message": "Indirizzi email e numeri di telefono e di carta vengono sfocati nei nuovi screenshot; ogni sfocatura si può rimuovere"
+  },
+  "popup_browser_protects_its_own_pages": {
+    "message": "Il browser protegge le proprie pagine e il suo store di estensioni. Apri un sito web per catturarlo, oppure registra tutto lo schermo."
   }
 }

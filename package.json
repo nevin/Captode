@@ -11,10 +11,12 @@
     "icons": "node tools/brand.mjs",
     "store": "node tools/store-assets.mjs",
     "package": "node tools/package.mjs",
+    "lint:firefox": "node tools/lint-firefox.mjs",
     "i18n": "node tools/i18n-check.mjs",
     "release": "node tools/release.mjs"
   },
   "devDependencies": {
+    "addons-linter": "10.13.0",
     "puppeteer": "24.43.1"
   },
   "engines": {

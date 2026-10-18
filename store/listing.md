@@ -3,8 +3,9 @@
 Everything to fill in the Chrome Web Store Developer Dashboard, field by field, plus the
 assets to upload. (Microsoft Edge Add-ons asks for the same things; notes at the end.)
 
-Build the package with `npm run package` and upload `dist/captode-<version>.zip`
-(`npm run release` builds it; the GitHub release for the tag has the same file).
+Upload `dist/captode-<version>-chrome.zip` (Edge: `-edge.zip`), built by `npm run release`;
+the GitHub release for the tag has the same files. Firefox has its own sheet,
+[`listing-firefox.md`](listing-firefox.md); [`README.md`](README.md) covers every store.
 
 ---
 
@@ -210,13 +211,15 @@ extensions); the popup says so on those pages.
 - [x] Tests pass on Windows, macOS and Linux (`npm test`, GitHub Actions)
 - [ ] Go through the manual checklist in `docs/TESTING.md` (recording can't be automated)
 - [ ] Developer account: one-time registration fee paid, contact email verified
-- [ ] Upload `dist/captode-1.2.0.zip` and fill in the fields above
+- [ ] Upload `dist/captode-<version>-chrome.zip` and fill in the fields above
 
 ---
 
 ## Microsoft Edge Add-ons
 
-Same zip, description and screenshots. Differences:
+Upload `dist/captode-<version>-edge.zip`; same description and screenshots. Once listed,
+put the listing's address in `storeUrl` for Edge in `tools/targets.mjs`, so Share works
+there too. Differences:
 - Store logo: `store/icon-300.png` (300 × 300)
 - Small promo tile 440 × 280: `store/promo-small.jpg`; large promo tile 1400 × 560:
   `store/promo-marquee.jpg`

@@ -32,9 +32,6 @@
   "popup_this_page_can_t_be": {
     "message": "Impossible de capturer cette page"
   },
-  "popup_chrome_protects_its_own_pages": {
-    "message": "Chrome protège ses propres pages et le Chrome Web Store. Ouvrez un site web pour le capturer, ou enregistrez tout l'écran."
-  },
   "popup_choose_what_to_capture": {
     "message": "Choisissez quoi capturer"
   },
@@ -1299,7 +1296,7 @@
     "message": "Rien n'a été partagé, donc rien n'a été enregistré."
   },
   "screen_mac_permission": {
-    "message": "Si vous avez bien choisi un écran, autorisez Chrome dans Réglages Système → Confidentialité et sécurité → Enregistrement de l'écran, puis redémarrez Chrome."
+    "message": "Si vous avez choisi un écran, autorisez votre navigateur dans Réglages Système → Confidentialité et sécurité → Enregistrement de l'écran, puis redémarrez-le."
   },
   "screen_title_recording": {
     "message": "● Enregistrement — Captode"
@@ -1602,7 +1599,7 @@
     "message": "$1 s sélectionnées"
   },
   "no_mp4": {
-    "message": "Ce navigateur ne peut pas créer de MP4. Mettez Chrome à jour (version 126 ou plus récente) ou exportez en WebM."
+    "message": "Ce navigateur ne peut pas créer de MP4. Mettez-le à jour ou exportez en WebM."
   },
   "no_webm": {
     "message": "Ce navigateur ne peut pas créer de WebM."
@@ -1944,7 +1941,7 @@
     "message": "Autorisez Captode à utiliser votre micro"
   },
   "permission_why": {
-    "message": "Chrome le demande une fois. Captode ne les utilise que pendant l'enregistrement, qui reste sur votre ordinateur."
+    "message": "Votre navigateur le demande une fois. Captode ne les utilise que pendant l'enregistrement, qui reste sur votre ordinateur."
   },
   "permission_allow": {
     "message": "Autoriser"
@@ -1956,10 +1953,10 @@
     "message": "Vos prochains enregistrements les incluront. Cet onglet se ferme tout seul."
   },
   "permission_blocked": {
-    "message": "Chrome a bloqué l'accès"
+    "message": "Votre navigateur a bloqué l'accès"
   },
   "permission_blocked_text": {
-    "message": "Cliquez sur l'icône à droite de la barre d'adresse, autorisez la caméra et le micro pour Captode, puis réessayez."
+    "message": "Autorisez la caméra et le micro pour Captode avec l'icône des autorisations près de la barre d'adresse, puis réessayez."
   },
   "permission_try_again": {
     "message": "Réessayer"
@@ -1987,5 +1984,8 @@
   },
   "settings_blur_private_hint": {
     "message": "Les adresses e-mail et numéros de téléphone et de carte sont floutés dans les nouvelles captures ; chaque flou peut être retiré"
+  },
+  "popup_browser_protects_its_own_pages": {
+    "message": "Votre navigateur protège ses propres pages et sa boutique d'extensions. Ouvrez un site web pour le capturer, ou enregistrez tout l'écran."
   }
 }

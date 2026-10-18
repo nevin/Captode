@@ -1741,7 +1741,11 @@ for (const box of document.querySelectorAll('.swatches')) {
     input.dispatchEvent(new Event('input', { bubbles: true }));
   });
 }
-$('#t-font').innerHTML = FONTS.map((f) => `<option style="font-family:${JSON.stringify(f).replaceAll('"', "'")}">${f}</option>`).join('');
+for (const f of FONTS) {
+  const o = new Option(f);
+  o.style.fontFamily = JSON.stringify(f).replaceAll('"', "'");
+  $('#t-font').add(o);
+}
 
 /** The kind of annotation the style panel is for: the selection's, if all one kind, or the tool's. */
 function currentType() {
@@ -2367,11 +2371,12 @@ async function renderRecent() {
     thumb.alt = '';
     const title = it.meta.title || (it.kind === 'video' ? t('video_recording') : t('popup_screenshot'));
     a.innerHTML = `<span class="thumb"></span><span class="meta"><b></b><small></small></span>
-      <button class="btn ghost icon remove" data-tip="${t('remove')}" aria-label="${t('remove_named', title.replace(/"/g, ''))}"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>`;
+      <button class="btn ghost icon remove" data-tip="${t('remove')}"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>`;
     a.querySelector('.thumb').append(thumb);
     if (it.kind === 'video') a.querySelector('.thumb').insertAdjacentHTML('beforeend', `<span class="badge">${t('badge_video')}</span>`);
     else if (it.edited) a.querySelector('.thumb').insertAdjacentHTML('beforeend', `<span class="badge">${t('badge_edited')}</span>`);
     a.querySelector('b').textContent = title;
+    a.querySelector('.remove').setAttribute('aria-label', t('remove_named', title)); // the page's title, as text
     a.querySelector('small').textContent = `${ago(it.created)} · ${fmtBytes(it.size)}`;
     a.querySelector('.remove').addEventListener('click', async (e) => {
       e.preventDefault();

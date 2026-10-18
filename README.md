@@ -234,8 +234,12 @@ recording (WebM) also writes its colours into the file.
 ## Supported platforms
 
 Captode runs on **Windows, macOS, Linux and ChromeOS**, in Chrome 116 or later and other
-Chromium browsers (Edge, Brave, Opera, Arc). The automated tests run on Windows, macOS
-and Linux on every push, including captures at 125%, 150% and 200% display scale, touch
+Chromium browsers (Edge, Brave, Opera, Arc), and in **Firefox 140** or later. Firefox has
+no tab capture, so there it records the screen or a window but not a single tab, and
+offers no camera bubble or video sizes; everything else is the same. A Safari package is
+built too (see [store/README.md](store/README.md)) but not yet tested. The automated tests
+run in Chrome on Windows, macOS and Linux on every push, and in Firefox (a full-page
+screenshot, the popup and every page), including captures at 125%, 150% and 200% display scale, touch
 input and Windows high-contrast mode. [docs/TESTING.md](docs/TESTING.md) has the manual
 checklist for what automation can't reach: recording (which needs a real click) and
 Chromebooks.
@@ -307,7 +311,9 @@ test/
 tools/
   brand.mjs              makes every icon from the vector logo in store/brand/
   store-assets.mjs       makes the store screenshots and promo tiles from the real UI
-  package.mjs            builds the store zip
+  package.mjs            builds a package for each browser
+  targets.mjs            what differs by browser: manifests, store links, protected pages
+  lint-firefox.mjs       runs Mozilla's validator on the Firefox package
 ```
 
 ```bash
@@ -316,15 +322,18 @@ npm test          # run the browser tests (npm test -- video runs only matching 
 npm run bench     # compression benchmark; fails on a size or quality regression
 npm run icons     # every icon size from store/brand/logo.svg and logo-small.svg
 npm run store     # store screenshots and promo tiles in store/
-npm run package   # build dist/captode-<version>.zip for the stores
-npm run release   # set the version, test, build the zip, commit and tag (see Publishing)
+npm run package   # build a package for each browser in dist/ (see Publishing)
+npm run lint:firefox  # check the Firefox package with Mozilla's validator
+npm run release   # set the version, test, build the packages, commit and tag (see Publishing)
 ```
 
 The tests load the extension into Chrome and drive real captures, edits and exports
 against a local test page. They check what the encoders promise: lossless output is
 pixel-identical, JPEG is at least as faithful as Chrome's own at the same quality and no
 larger, size limits are met, trims land on the right frame, and audio lasts as long as
-the video. Set `CHROME_PATH` to use another Chrome. GitHub Actions runs the tests and the
+the video. Set `CHROME_PATH` to use another Chrome. The Firefox test runs when Firefox for
+Puppeteer is installed (`npx puppeteer browsers install firefox@stable`) or `FIREFOX_PATH`
+is set, and is skipped otherwise. GitHub Actions runs the tests and the
 benchmark on every push.
 
 The logo is vector artwork in `store/brand/`: `logo.svg` (the full mark),
@@ -354,25 +363,24 @@ than text, ever shows.
 
 ## Publishing
 
-1. Run `npm run icons` and `npm run store` if the logo or interface changed, and commit.
-2. Run `npm run release`. It releases the version in `src/manifest.json`, or the one you
-   give: `npm run release -- 1.3.1`, or `-- patch`, `-- minor`, `-- major`. It refuses a
-   version that isn't higher than the last tag (Chrome only installs higher versions) or
-   uncommitted changes; then it sets the version in the manifest, `package.json` and
-   `package-lock.json`, checks the translations, runs the tests, builds the zip, commits
-   and tags `v<version>`. Add `--push` to push the commit and tag, or `--dry-run` to see
-   what it would do. A pushed tag also starts the Release workflow on GitHub, which checks
-   that the tag matches the manifest, runs the tests, and attaches the zip (with its
-   SHA-256) to a GitHub release.
-3. Upload `dist/captode-<version>.zip` (or the one on the GitHub release) to the
-   [Chrome Web Store developer dashboard](https://chrome.google.com/webstore/devconsole) and to
-   [Microsoft Edge Add-ons](https://partner.microsoft.com/dashboard/microsoftedge/).
-   [`store/listing.md`](store/listing.md) has every dashboard field ready to paste
-   (description, single purpose, permission justifications, data-use answers) and lists
-   the assets in `store/` to upload.
+`npm run release -- patch --push` (or `minor`, `major`, or a version) checks the
+translations, runs the tests, builds a package for each browser, checks the Firefox one
+with Mozilla's validator, then commits, tags and pushes; the tag's GitHub release gets the
+same packages. It refuses a version that isn't higher than the last tag (stores only
+install higher versions) or uncommitted changes; `--dry-run` shows what it would do.
 
-Firefox is not supported yet. It has no offscreen documents or `tabCapture`, which tab
-recording relies on.
+| Package in `dist/` | For |
+| --- | --- |
+| `captode-<version>-chrome.zip` | Chrome Web Store |
+| `captode-<version>-edge.zip` | Microsoft Edge Add-ons |
+| `captode-<version>-firefox.zip` and `-source.zip` | addons.mozilla.org |
+| `captode-<version>-safari/` | Xcode's Safari web extension converter, then the App Store |
+
+Each package has only its own browser's manifest and settings, made by
+`tools/targets.mjs`; the build stops if one mentions another browser's store, ID or pages.
+[`store/README.md`](store/README.md) has the steps for each store, and
+[`store/listing.md`](store/listing.md) and
+[`store/listing-firefox.md`](store/listing-firefox.md) every listing field ready to paste.
 
 ## Privacy
 

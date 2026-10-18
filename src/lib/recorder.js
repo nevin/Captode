@@ -266,7 +266,10 @@ export async function record(stream, { fps = 30, aspect = null, crop = null, siz
   let video = source;
   let w = settings.width || 1280;
   let h = settings.height || 720;
-  if (aspect || crop || size !== 'page' || camera) {
+  // Without MediaStreamTrackProcessor the picture is recorded as it comes.
+  const canProcess = typeof MediaStreamTrackProcessor === 'function';
+  if (!canProcess && camera) { camera.stop(); camera = null; }
+  if (canProcess && (aspect || crop || size !== 'page' || camera)) {
     const processed = processTrack(source, { aspect, crop, size, camera });
     video = processed.track;
     const out = await Promise.race([processed.sized, new Promise((r) => setTimeout(r, 5000, null))]);

@@ -32,9 +32,6 @@
   "popup_this_page_can_t_be": {
     "message": "无法截取此页面"
   },
-  "popup_chrome_protects_its_own_pages": {
-    "message": "Chrome 会保护自身页面和 Chrome 应用商店。请打开一个网站进行截图，或录制整个屏幕。"
-  },
   "popup_choose_what_to_capture": {
     "message": "选择要截取的内容"
   },
@@ -1299,7 +1296,7 @@
     "message": "没有共享任何内容，因此没有录制。"
   },
   "screen_mac_permission": {
-    "message": "如果你确实选择了屏幕，请在“系统设置 → 隐私与安全性 → 录屏与系统录音”中允许 Chrome，然后重启 Chrome。"
+    "message": "如果你已选择屏幕，请在“系统设置 → 隐私与安全性 → 录屏”中允许你的浏览器，然后重启浏览器。"
   },
   "screen_title_recording": {
     "message": "● 正在录制 — Captode"
@@ -1602,7 +1599,7 @@
     "message": "已选 $1 秒"
   },
   "no_mp4": {
-    "message": "此浏览器无法生成 MP4。请将 Chrome 更新到 126 或更高版本，或导出为 WebM。"
+    "message": "此浏览器无法生成 MP4。请更新浏览器，或导出为 WebM。"
   },
   "no_webm": {
     "message": "此浏览器无法生成 WebM。"
@@ -1944,7 +1941,7 @@
     "message": "允许 Captode 使用麦克风"
   },
   "permission_why": {
-    "message": "Chrome 只会询问一次。Captode 仅在录制时使用，录制内容保存在你的电脑上。"
+    "message": "浏览器只会询问一次。Captode 仅在录制时使用，录制内容保存在你的电脑上。"
   },
   "permission_allow": {
     "message": "允许"
@@ -1956,10 +1953,10 @@
     "message": "之后的录制将包含它们。此标签页会自动关闭。"
   },
   "permission_blocked": {
-    "message": "Chrome 阻止了访问"
+    "message": "浏览器阻止了访问"
   },
   "permission_blocked_text": {
-    "message": "点击地址栏右侧的图标，允许 Captode 使用摄像头和麦克风，然后重试。"
+    "message": "通过地址栏旁的权限图标允许 Captode 使用摄像头和麦克风，然后重试。"
   },
   "permission_try_again": {
     "message": "重试"
@@ -1987,5 +1984,8 @@
   },
   "settings_blur_private_hint": {
     "message": "新截图中的邮箱地址、电话号码和卡号会被模糊；每处模糊都可以移除"
+  },
+  "popup_browser_protects_its_own_pages": {
+    "message": "浏览器会保护自身页面和扩展商店。请打开一个网站进行截图，或录制整个屏幕。"
   }
 }

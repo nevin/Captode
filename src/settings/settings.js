@@ -1,6 +1,7 @@
 import { getSettings, saveSettings, DEFAULT_SETTINGS } from '../lib/settings.js';
 import { toast, enhance, openDialog, showShortcut, shareCaptode } from '../lib/ui.js';
 import { t, localize } from '../lib/i18n.js';
+import { openShortcutSettings, canChangeShortcuts, STORE_URL } from '../lib/platform.js';
 
 localize();
 
@@ -50,9 +51,11 @@ $('#autoCopy').addEventListener('change', (e) => update({ autoCopy: e.target.che
 $('#autoBlur').addEventListener('change', (e) => update({ autoBlur: e.target.checked }));
 $('#device').checked = device;
 $('#device').addEventListener('change', async (e) => { await chrome.storage.local.set({ device: e.target.checked }); saved(); });
-$('#shortcuts').addEventListener('click', () => chrome.tabs.create({ url: 'chrome://extensions/shortcuts' }));
+$('#shortcuts').classList.toggle('hidden', !canChangeShortcuts);
+$('#shortcuts').addEventListener('click', () => openShortcutSettings());
 $('#version').textContent = t('settings_version', chrome.runtime.getManifest().version);
 $('#reset').addEventListener('click', () => openDialog($('#reset-dialog')));
+$('#share').classList.toggle('hidden', !STORE_URL); // until listed in this browser's store
 $('#share').addEventListener('click', () => shareCaptode());
 
 /**
@@ -113,6 +116,6 @@ $('#reset-yes').addEventListener('click', async () => {
 enhance();
 const showShortcuts = () => { for (const row of document.querySelectorAll('#shortcut-list [data-command]')) showShortcut(row.querySelector('dd'), row.dataset.command); };
 showShortcuts();
-// Pick up shortcuts changed on chrome://extensions/shortcuts when coming back.
+// Pick up shortcuts changed in the browser's shortcut settings when coming back.
 document.addEventListener('visibilitychange', () => { if (!document.hidden) showShortcuts(); });
 render();
