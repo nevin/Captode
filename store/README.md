@@ -1,5 +1,9 @@
 # Publishing to every store
 
+**Step-by-step guides, one per store:** [Chrome](guides/1-chrome.md) ·
+[Edge](guides/2-edge.md) · [Firefox](guides/3-firefox.md) · [Safari](guides/4-safari.md).
+The rest of this page is how the packages are made.
+
 One release, one set of packages, one upload to each store. Each package is built from the
 same files with only its own browser's manifest and settings (`tools/targets.mjs`), and the
 build stops if a package mentions another browser's store, ID or pages.
