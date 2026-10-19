@@ -37,6 +37,8 @@ async function captureImage(id) {
 }
 
 async function setSide(s, img) {
+  // The image it replaces is let go now rather than whenever memory is collected.
+  if (sides[s] && sides[s] !== img && sides[s] !== sides[s === 'a' ? 'b' : 'a']) sides[s].bitmap?.close();
   sides[s] = img;
   await redraw();
 }

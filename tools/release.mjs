@@ -7,9 +7,12 @@
 //   npm run release -- 1.3.1        or a given version
 //   npm run release -- patch        or the next patch, minor or major version
 //
+// The Safari app's Xcode project (safari/, if there) gets the new Safari package and
+// version too, so the commit always carries a project that builds this release.
+//
 // Options: --push (push the commit and tag), --skip-tests, --dry-run (say what would happen),
 // --message="What changed" (the commit's description, under "Captode <version>").
-import { readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, readdirSync, rmSync, cpSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -82,9 +85,10 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
     if (!flag('skip-tests')) run('npm', ['test'], { show: true });
     run('npm', ['run', '-s', 'package'], { show: true });
     if (!flag('skip-tests')) run('npm', ['run', '-s', 'lint:firefox'], { show: true });
-  } catch {
+    updateSafariProject(version);
+  } catch (e) {
     for (const f of files) writeFileSync(f.path, f.original); // other changes are left as they were
-    fail('stopped; the version change was undone');
+    fail(`stopped${e?.safari ? ` (${e.message})` : ''}; the version change was undone`);
   }
   if (git('status', '--porcelain')) {
     git('add', '-A');
@@ -99,4 +103,24 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
   } else {
     console.log(`To publish the tag: git push origin ${branch} v${version}`);
   }
+}
+
+/**
+ * Puts the new Safari package into the Xcode project in place of the old one, and sets
+ * the app's version. The project lists the package's top-level files and folders by
+ * name, so a new one there needs the converter again (see safari/README.md).
+ */
+function updateSafariProject(version) {
+  const project = join(root, 'safari/Captode/Captode.xcodeproj/project.pbxproj');
+  if (!existsSync(project)) return;
+  const pkg = join(root, `dist/captode-${version}-safari`);
+  const resources = join(root, 'safari/Captode/Captode Extension/Resources');
+  let pbx = readFileSync(project, 'utf8');
+  const unknown = readdirSync(pkg).filter((n) => !pbx.includes(`path = Resources/${n};`) && !pbx.includes(`path = "Resources/${n}";`));
+  if (unknown.length) throw Object.assign(new Error(`the Xcode project doesn't include ${unknown.join(', ')}; run the converter again, see safari/README.md`), { safari: true });
+  rmSync(resources, { recursive: true, force: true });
+  cpSync(pkg, resources, { recursive: true });
+  pbx = pbx.replace(/MARKETING_VERSION = [^;]+;/g, `MARKETING_VERSION = ${version};`);
+  writeFileSync(project, pbx);
+  console.log(`Updated the Safari Xcode project to ${version}.`);
 }

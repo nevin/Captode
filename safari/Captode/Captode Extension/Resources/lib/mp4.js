@@ -151,8 +151,12 @@ function trak(id, kind, { width = 0, height = 0, timescale, stbl, mediaDuration,
  * or Opus `{ codec: 'opus', channels, opusHead, frames }`.
  */
 export function muxMp4({ video, audio = null }) {
-  const vData = concat(video.frames.map((f) => f.data));
-  const aData = audio ? concat(audio.frames.map((f) => f.data)) : new Uint8Array(0);
+  // The frames go into the file as they are (a Blob copies its parts once), rather
+  // than joined into one array first, which would hold the whole video twice more.
+  const vData = video.frames.map((f) => f.data);
+  const aData = audio ? audio.frames.map((f) => f.data) : [];
+  const vLen = vData.reduce((n, d) => n + d.length, 0);
+  const aLen = aData.reduce((n, d) => n + d.length, 0);
   const ftyp = box('ftyp', str('isom'), u32(0x200), str('isom'), str('iso2'), str('avc1'), str('mp41'));
   const VTS = 90000;
 
@@ -175,7 +179,7 @@ export function muxMp4({ video, audio = null }) {
   };
   const moovLen = build(0, 0).length;
   const mdatStart = ftyp.length + moovLen + 8;
-  const moov = build(mdatStart, mdatStart + vData.length);
-  const mdatHead = new Uint8Array([...u32(8 + vData.length + aData.length), ...str('mdat')]);
-  return new Blob([ftyp, moov, mdatHead, vData, aData], { type: 'video/mp4' });
+  const moov = build(mdatStart, mdatStart + vLen);
+  const mdatHead = new Uint8Array([...u32(8 + vLen + aLen), ...str('mdat')]);
+  return new Blob([ftyp, moov, mdatHead, ...vData, ...aData], { type: 'video/mp4' });
 }

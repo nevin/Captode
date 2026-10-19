@@ -1989,5 +1989,8 @@
   },
   "popup_browser_protects_its_own_pages": {
     "message": "Your browser protects its own pages and its add-on store. Open a website to capture it, or record your whole screen."
+  },
+  "screen_no_sound": {
+    "message": "No sound was shared, so the recording has none (except your microphone, if it's on)."
   }
 }

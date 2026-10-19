@@ -53,6 +53,8 @@ async function choose() {
     return;
   }
   const dropExtras = () => { extras.camera?.stop(); extras.mic?.stop(); };
+  // Sound was asked for, but not every browser or picker choice shares any: say so.
+  $('no-sound').classList.toggle('hidden', !audio || stream.getAudioTracks().length > 0);
   $('pick').classList.add('hidden');
   if (countdownFrom && !(await countdown(countdownFrom, stream))) {
     for (const t of stream.getTracks()) t.stop();

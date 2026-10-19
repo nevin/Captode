@@ -130,8 +130,9 @@ function snapshot() {
 }
 
 // Undo keeps a reference to the image in each step, so crops and resizes each hold a
-// full copy. Old steps go once those copies pass this budget (or 100 steps).
-const HISTORY_BYTES = 768 * 2 ** 20;
+// full copy. Old steps go once those copies pass this budget (or 100 steps): 768 MB,
+// less on a computer with under 8 GB of memory (deviceMemory, where the browser gives it).
+const HISTORY_BYTES = Math.min(8, navigator.deviceMemory || 8) * 96 * 2 ** 20;
 const HISTORY_STEPS = 100;
 
 function trimHistory() {
@@ -154,9 +155,13 @@ function commit() {
   hIndex = history.length - 1;
   trimHistory();
   updateButtons();
-  refreshExport();
+  exportChanged();
   if (captureId) persistSoon();
 }
+
+// The export's size estimate draws and encodes the whole image, so it's only worked
+// out while the Export tab shows it; opening the tab works it out afresh (showPane).
+const exportChanged = () => { if (document.body.dataset.pane === 'export') refreshExport(); };
 
 // ---------- keeping edits ----------
 // Edits to a capture are saved with it (on this device, like the capture), so
@@ -191,6 +196,7 @@ async function restoreEdits(edits) {
     const bmp = await createImageBitmap(edits.base);
     const c = canvas(bmp.width, bmp.height);
     c.getContext('2d').drawImage(bmp, 0, 0);
+    bmp.close();
     base = c;
   }
   objects = edits.objects || [];
@@ -214,7 +220,7 @@ function restore(s) {
   layout();
   syncStyleUi();
   updateButtons();
-  refreshExport();
+  exportChanged();
 }
 
 function undo() { if (hIndex > 0) { restore(history[--hIndex]); announce(t('announce_undone')); } }
@@ -1598,17 +1604,18 @@ function drawReview(ctx, px) {
 /**
  * A copy of `base` kept in memory for the review tools, which read pixels on every
  * pointer move. `base` itself stays on the GPU for drawing; it is never changed in
- * place (edits make a new one), so one copy per image is enough.
+ * place (edits make a new one), so a copy stays right until the image changes. Only
+ * the current image's copy is kept: undo steps hold their images, and a copy each
+ * would double that.
  */
-const readable = new WeakMap();
+let readable = { base: null, ctx: null };
 function baseReader() {
-  let ctx = readable.get(base);
-  if (!ctx) {
-    ctx = new OffscreenCanvas(base.width, base.height).getContext('2d', { willReadFrequently: true });
+  if (readable.base !== base) {
+    const ctx = new OffscreenCanvas(base.width, base.height).getContext('2d', { willReadFrequently: true });
     ctx.drawImage(base, 0, 0);
-    readable.set(base, ctx);
+    readable = { base, ctx };
   }
-  return ctx;
+  return readable.ctx;
 }
 
 /** The edge nearest (x, y) along `axis` in the image, within a few screen pixels. */
@@ -1971,6 +1978,7 @@ $('#rs-apply').addEventListener('click', async () => {
   const bmp = await createImageBitmap(base, { resizeWidth: w, resizeHeight: h, resizeQuality: 'high' });
   const c = canvas(w, h);
   c.getContext('2d').drawImage(bmp, 0, 0);
+  bmp.close();
   const sx = w / base.width, sy = h / base.height;
   for (const o of objects) scaleObj(o, sx, sy);
   base = c;
@@ -2144,6 +2152,7 @@ async function finalCanvas({ scaled = true, deviceOpts = device?.get() } = {}) {
     const bmp = await createImageBitmap(c, { resizeWidth: w, resizeHeight: h, resizeQuality: 'high' });
     c = canvas(w, h);
     c.getContext('2d').drawImage(bmp, 0, 0);
+    bmp.close();
   }
   return c;
 }
@@ -2317,6 +2326,7 @@ async function loadBlob(blob, info = {}) {
   const bmp = await createImageBitmap(blob);
   const c = canvas(bmp.width, bmp.height);
   c.getContext('2d').drawImage(bmp, 0, 0);
+  bmp.close(); // the decoded image, as big as the canvas: not needed once drawn
   base = c;
   objects = [];
   select([]);
@@ -2356,9 +2366,12 @@ function showEmpty() {
 }
 
 // Captures from the last day, so a closed tab isn't a lost screenshot.
+let recentUrls = []; // the thumbnails' object URLs, let go when the list is drawn again
 async function renderRecent() {
   if (!globalThis.chrome?.runtime) return;
   const items = await listCaptures(12);
+  for (const u of recentUrls) URL.revokeObjectURL(u);
+  recentUrls = [];
   $('#recent').classList.toggle('hidden', !items.length);
   $('#recent-list').innerHTML = '';
   for (const it of items) {
@@ -2366,7 +2379,9 @@ async function renderRecent() {
     a.className = 'recent-item';
     a.href = it.kind === 'video' ? `../video/video.html?id=${it.id}` : `?id=${it.id}&reopen=1`;
     const thumb = document.createElement(it.kind === 'video' ? 'video' : 'img');
-    thumb.src = URL.createObjectURL(it.blob) + (it.kind === 'video' ? '#t=0.1' : '');
+    const url = URL.createObjectURL(it.blob);
+    recentUrls.push(url);
+    thumb.src = url + (it.kind === 'video' ? '#t=0.1' : '');
     if (it.kind === 'video') { thumb.muted = true; thumb.preload = 'metadata'; }
     thumb.alt = '';
     const title = it.meta.title || (it.kind === 'video' ? t('video_recording') : t('popup_screenshot'));

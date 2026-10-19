@@ -1987,5 +1987,8 @@
   },
   "popup_browser_protects_its_own_pages": {
     "message": "Ihr Browser schützt seine eigenen Seiten und seinen Add-on-Store. Öffnen Sie eine Website, um sie aufzunehmen, oder nehmen Sie den ganzen Bildschirm auf."
+  },
+  "screen_no_sound": {
+    "message": "Es wurde kein Ton geteilt, daher hat die Aufnahme keinen (außer Ihrem Mikrofon, falls eingeschaltet)."
   }
 }
