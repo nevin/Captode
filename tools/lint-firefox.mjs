@@ -1,11 +1,8 @@
 // Checks the Firefox package with addons-linter, the validator addons.mozilla.org runs on
 // every upload. Fails on any error, and on any warning that isn't one of those reviewed:
-//   UNSUPPORTED_API for tabCapture and offscreen: Chrome-only, checked for before use
-//     (src/lib/platform.js), so never reached in Firefox.
 //   UNSAFE_VAR_ASSIGNMENT: innerHTML with fixed markup, numbers and Captode's own
 //     translations; text from pages, files or the user goes in as text (textContent,
 //     .value, new Option) or escaped.
-//   KEY_FIREFOX_ANDROID_UNSUPPORTED_BY_MIN_VERSION: Captode isn't offered for Android.
 // Run after `npm run package`: npm run lint:firefox
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
@@ -17,9 +14,7 @@ const { version } = JSON.parse(readFileSync(join(root, 'src', 'manifest.json'), 
 const zip = join(root, 'dist', `captode-${version}-firefox.zip`);
 
 const REVIEWED = [
-  (m) => m.code === 'UNSUPPORTED_API' && /^(tabCapture|offscreen)\./.test(m.message),
   (m) => m.code === 'UNSAFE_VAR_ASSIGNMENT',
-  (m) => m.code === 'KEY_FIREFOX_ANDROID_UNSUPPORTED_BY_MIN_VERSION',
 ];
 
 const result = await linter.createInstance({

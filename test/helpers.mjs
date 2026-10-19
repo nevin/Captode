@@ -31,7 +31,7 @@ export async function serveSite() {
  * It gets a key, so its id is known before Chrome starts: Chrome is then told to let
  * it record tabs without that click (--allowlisted-extension-id), as a test switch.
  */
-function testCopy() {
+function testCopy(patch) {
   const dir = mkdtempSync(join(tmpdir(), 'captode-ext-'));
   cpSync(join(root, 'src'), dir, { recursive: true });
   cpSync(join(here, 'lab'), join(dir, 'lab'), { recursive: true });
@@ -40,6 +40,7 @@ function testCopy() {
   const der = generateKeyPairSync('rsa', { modulusLength: 2048 }).publicKey.export({ type: 'spki', format: 'der' });
   m.key = der.toString('base64');
   writeFileSync(join(dir, 'manifest.json'), JSON.stringify(m, null, 2));
+  patch?.(dir); // e.g. another browser's settings, for store screenshots
   // An extension's id: the first 128 bits of its key's SHA-256, written with a–p.
   const id = [...createHash('sha256').update(der).digest('hex').slice(0, 32)].map((c) => String.fromCharCode(97 + parseInt(c, 16))).join('');
   return { dir, id };
@@ -60,9 +61,9 @@ function keepDisplayAwake() {
 
 const defaultFeatures = puppeteer.defaultArgs({ headless: true }).find((a) => a.startsWith('--disable-features='));
 
-export async function launch({ scheme = 'light', args = [], env } = {}) {
+export async function launch({ scheme = 'light', args = [], env, patch } = {}) {
   keepDisplayAwake();
-  const { dir: ext, id: expectedId } = testCopy();
+  const { dir: ext, id: expectedId } = testCopy(patch);
   const profile = mkdtempSync(join(tmpdir(), 'captode-profile-'));
   const browser = await puppeteer.launch({
     executablePath: process.env.CHROME_PATH || undefined,

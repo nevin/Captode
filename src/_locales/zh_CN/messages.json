@@ -1987,5 +1987,8 @@
   },
   "popup_browser_protects_its_own_pages": {
     "message": "浏览器会保护自身页面和扩展商店。请打开一个网站进行截图，或录制整个屏幕。"
+  },
+  "screen_no_sound": {
+    "message": "未共享声音，因此录制内容没有声音（如已开启麦克风，则包含麦克风声音）。"
   }
 }

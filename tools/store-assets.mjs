@@ -7,11 +7,12 @@
 // Captions are in tools/store-captions.json; the extension runs in that language.
 // JPEG, because the stores want screenshots without an alpha channel.
 // Run tools/brand.mjs first so the pages show the current logo.
-import { readFileSync, existsSync, mkdirSync, readdirSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { launch, open, serveSite, waitForTab, sleep } from '../test/helpers.mjs';
+import { makePackageIn } from './targets.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const store = join(root, 'store');
@@ -75,6 +76,7 @@ async function compose(file, stageHtml) {
     <div class="stage">${stageHtml}</div>
   </body></html>`);
   await page.evaluate(() => Promise.all([...document.images].map((i) => i.decode())));
+  mkdirSync(dirname(join(shots, file)), { recursive: true });
   await page.screenshot({ path: join(shots, file), type: 'jpeg', quality: 92 });
   await page.close();
   console.log(`wrote ${join(shots, file).slice(root.length + 1)}`);
@@ -237,8 +239,47 @@ await vp.evaluate(() => {
 await vp.click('#convert');
 await vp.waitForFunction(() => !document.querySelector('#result').classList.contains('hidden'), { timeout: 120000 });
 await sleep(500);
-await compose('5-record.jpg',
-  `<img class="full" src="${await png(vp, { x: 0, y: 0, ...UI })}">`);
+const videoShot = await png(vp, { x: 0, y: 0, ...UI });
+await compose('5-record.jpg', `<img class="full" src="${videoShot}">`);
+
+// Firefox records only the screen or a window, without the camera bubble or video sizes,
+// so addons.mozilla.org gets its own: the popup's Record tab as Firefox shows it, from the
+// popup's own code run with Firefox's settings and without the APIs Firefox lacks.
+if (lang === 'en') {
+  const ff = await launch({
+    args: ['--window-size=1280,777', '--disable-gpu-vsync', '--disable-frame-rate-limit'],
+    // Firefox's package (its manifest, settings and no tab capture), except for the test
+    // copy's own manifest keys; and no MediaStreamTrackProcessor, which Firefox lacks.
+    patch: (dir) => {
+      const manifest = readFileSync(join(dir, 'manifest.json'), 'utf8');
+      makePackageIn('firefox', dir, root);
+      writeFileSync(join(dir, 'manifest.json'), manifest);
+      const path = join(dir, 'lib', 'platform.js');
+      const code = readFileSync(path, 'utf8').replace(/export const canProcessVideo = [^;]+;/, 'export const canProcessVideo = false;');
+      if (!code.includes('canProcessVideo = false;')) throw new Error('platform.js has no canProcessVideo to turn off');
+      writeFileSync(path, code);
+    },
+  });
+  const ffWeb = await ff.browser.newPage();
+  await ffWeb.setViewport(UI);
+  await ffWeb.goto(`${site.url}/rich.html`);
+  const ffPop = await ff.browser.newPage();
+  await ffPop.setViewport({ width: 340, height: 700 });
+  await light(ffPop);
+  await ffWeb.bringToFront();
+  await ffPop.goto(ff.url('popup/popup.html'));
+  await sleep(400);
+  await ffPop.bringToFront();
+  await ffPop.click('.kind [data-kind="video"]');
+  await ffPop.evaluate(() => { document.querySelector('#rec-opts').open = true; document.querySelector('#whats-new').classList.add('hidden'); });
+  await sleep(300);
+  const ffH = await ffPop.evaluate(() => Math.ceil(document.body.getBoundingClientRect().height));
+  const ffPopShot = await png(ffPop, { x: 0, y: 0, width: 340, height: ffH });
+  await ff.close();
+  await compose('firefox/5-record.jpg',
+    `<img class="full" src="${videoShot}">
+     <img src="${ffPopShot}" style="position:absolute;left:28px;top:14px;width:340px;border-radius:12px;box-shadow:0 24px 60px rgba(0,0,0,.35),0 0 0 1px rgba(0,0,0,.08)">`);
+}
 
 // The Chrome Web Store takes five screenshots per language: 6 and 7 are only made in
 // English, for addons.mozilla.org, which takes more.

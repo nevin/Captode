@@ -1987,5 +1987,8 @@
   },
   "popup_browser_protects_its_own_pages": {
     "message": "Il browser protegge le proprie pagine e il suo store di estensioni. Apri un sito web per catturarlo, oppure registra tutto lo schermo."
+  },
+  "screen_no_sound": {
+    "message": "Non è stato condiviso alcun suono, quindi la registrazione non ne avrà (tranne il microfono, se attivo)."
   }
 }

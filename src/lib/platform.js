@@ -3,8 +3,8 @@
 // lib/target.js, made for each browser's package by tools/targets.mjs.
 import { TARGET } from './target.js';
 
-/** Recording a tab needs tab capture and an offscreen document to hold the stream. */
-export const canRecordTabs = !!(globalThis.chrome?.tabCapture && globalThis.chrome?.offscreen);
+/** Recording a tab needs tab capture and an offscreen document (lib/tab-capture.js). */
+export { canRecordTabs } from './tab-capture.js';
 
 /** Reworking a video's frames (camera bubble, video size) needs MediaStreamTrackProcessor. */
 export const canProcessVideo = typeof globalThis.MediaStreamTrackProcessor === 'function'

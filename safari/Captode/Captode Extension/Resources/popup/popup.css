@@ -1,0 +1,81 @@
+body { width: 340px; background: var(--panel); }
+header { display: flex; align-items: center; justify-content: space-between; padding: 10px 10px 8px 16px; }
+.kind { margin: 0 16px 6px; }
+.kind > button { height: 32px; }
+main { padding: 0 16px 12px; }
+.hint-top { margin: 8px 0 6px; font-size: 12px; font-weight: 600; color: var(--muted); }
+.modes { display: grid; gap: 5px; }
+.mode {
+  display: flex; align-items: center; gap: 12px; width: 100%; text-align: left;
+  padding: 7px 10px; border-radius: 10px; border: 1px solid var(--line);
+  background: var(--panel); cursor: pointer; transition: border-color .12s, background .12s, transform .06s;
+}
+.mode:hover { border-color: var(--accent); background: var(--accent-soft); }
+.mode:active { transform: scale(.99); }
+.mode .ico {
+  width: 32px; height: 32px; flex: none; display: grid; place-items: center;
+  border-radius: 9px; background: var(--accent-soft); color: var(--accent);
+}
+.mode .txt { display: grid; flex: 1; min-width: 0; }
+.mode .num { opacity: 0; transition: opacity .12s; }
+.mode:hover .num, .mode:focus-visible .num, body.kbd-nav .mode .num { opacity: 1; }
+.mode:disabled { opacity: .45; cursor: not-allowed; }
+.mode:disabled:hover { border-color: var(--line); background: var(--panel); }
+#modes-video .mode:disabled:hover { border-color: var(--line); background: var(--panel); }
+.mode b { font-weight: 600; }
+.mode small { color: var(--muted); font-size: 12px; }
+#modes-video .mode .ico { background: rgba(229, 72, 77, .1); color: var(--rec); }
+#modes-video .mode:hover { border-color: var(--rec); background: rgba(229, 72, 77, .06); }
+.opts { margin-top: 8px; padding: 10px 12px; border-radius: 10px; background: var(--panel-2); }
+.opts .field { margin-bottom: 8px; }
+.opts .seg { background: var(--panel); }
+.opts .seg > button.on { background: var(--accent); color: #fff; }
+.opts .toggle { margin: 0; padding: 5px 0; }
+.opts .toggle.setting { cursor: default; }
+.opts .toggle.setting > label { display: grid; gap: 1px; }
+#size { width: 150px; flex: none; height: 30px; }
+.stop-hint { margin: 8px 0 0; font-size: 12px; color: var(--muted); }
+footer { padding: 4px 16px 4px; border-top: 1px solid var(--line); background: var(--panel-2); }
+footer .toggle { margin: 0; }
+.banner { margin: 8px 16px 0; }
+.banner span { color: var(--muted); }
+.head-actions { display: flex; gap: 2px; }
+.banner .btn.small { display: inline-flex; height: 28px; margin-top: 8px; padding: 0 10px; font-size: 12px; font-weight: 600; }
+
+/* Recording options: one summary line, opened on demand, so the popup fits in Chrome's 600 px. */
+details.opts { padding: 0; min-width: 0; }
+details.opts > summary {
+  display: grid; grid-template-columns: 1fr auto; align-items: center; column-gap: 8px; padding: 7px 12px; cursor: pointer;
+  list-style: none; font-weight: 600; border-radius: 10px;
+}
+details.opts > summary::-webkit-details-marker { display: none; }
+/* The options in one line, on its own row so it has the popup's width in every language. */
+details.opts > summary small { grid-column: 1; grid-row: 2; color: var(--muted); font-weight: 400; font-size: 12px; }
+details.opts > summary::after { content: ""; grid-column: 2; grid-row: 1 / span 2; width: 7px; height: 7px; border-right: 1.5px solid var(--muted); border-bottom: 1.5px solid var(--muted); transform: rotate(45deg); margin: -4px 2px 0 0; }
+details.opts[open] > summary::after { transform: rotate(-135deg); margin-top: 3px; }
+details.opts[open] > summary small { display: none; }
+details.opts > :not(summary) { margin-left: 12px; margin-right: 12px; }
+details.opts[open] { padding-bottom: 8px; }
+
+/* The mode used last: Enter repeats it. */
+.mode .last { flex: none; padding: 1px 6px; border-radius: 5px; background: var(--accent-soft); color: var(--accent); font-size: 11px; font-weight: 600; white-space: nowrap; }
+#modes-video .mode .last { background: rgba(229, 72, 77, .1); color: var(--rec); }
+
+/* The last few captures, to get back to one in a click. */
+.recent { margin-top: 10px; }
+.recent h3 { display: flex; align-items: baseline; justify-content: space-between; margin: 0 0 6px; font-size: 12px; font-weight: 600; color: var(--muted); }
+.recent .link { border: 0; background: none; padding: 0; color: var(--accent); font: inherit; font-weight: 600; cursor: pointer; }
+.recent .link:hover { text-decoration: underline; }
+.recent-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.recent-row a { position: relative; display: block; aspect-ratio: 2 / 1; border-radius: 8px; overflow: hidden; border: 1px solid var(--line); background: var(--panel-2); }
+.recent-row a:hover, .recent-row a:focus-visible { border-color: var(--accent); }
+.recent-row img, .recent-row video { width: 100%; height: 100%; object-fit: cover; object-position: top; display: block; }
+.recent-row .badge { position: absolute; left: 4px; bottom: 4px; padding: 0 5px; border-radius: 4px; background: rgba(0,0,0,.65); color: #fff; font-size: 10px; font-weight: 600; line-height: 16px; }
+
+/* Screenshot delay, to open a menu or tooltip first. */
+.delay-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 3px; padding: 0 2px 0 10px; }
+.delay-row > span { color: var(--muted); font-size: 12px; font-weight: 600; cursor: help; }
+.delay-row .seg { flex: none; min-width: 190px; background: var(--panel-2); }
+/* "Off" is long in some languages: the choices stay on one line, the row widens instead. */
+.delay-row .seg > button { height: 26px; font-size: 12px; white-space: nowrap; padding: 0 8px; }
+.delay-row .seg > button.on { background: var(--accent); color: #fff; }

@@ -2,3 +2,6 @@ dist/
 node_modules/
 .DS_Store
 test/output/
+safari/Captode/build/
+safari/Captode/Captode.xcodeproj/xcuserdata/
+safari/Captode/Captode.xcodeproj/project.xcworkspace/xcuserdata/

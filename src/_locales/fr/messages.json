@@ -1987,5 +1987,8 @@
   },
   "popup_browser_protects_its_own_pages": {
     "message": "Votre navigateur protège ses propres pages et sa boutique d'extensions. Ouvrez un site web pour le capturer, ou enregistrez tout l'écran."
+  },
+  "screen_no_sound": {
+    "message": "Aucun son n'a été partagé : l'enregistrement n'en aura pas (sauf votre micro, s'il est activé)."
   }
 }

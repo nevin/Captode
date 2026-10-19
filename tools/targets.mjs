@@ -12,6 +12,13 @@ export const GECKO_ID = 'captode@thecodersworld.com';
 // (src/lib/platform.js), and other browsers' validators reject permissions they don't know.
 const CHROMIUM_ONLY_PERMISSIONS = ['tabCapture', 'offscreen'];
 
+// Browsers without tab capture get a lib/tab-capture.js that offers none, and no offscreen
+// recorder: their packages hold no code for APIs they don't have.
+const WITHOUT_TAB_CAPTURE = {
+  replace: { 'lib/tab-capture.js': 'tools/tab-capture-none.js' },
+  drop: ['recorder/offscreen.html', 'recorder/offscreen.js'],
+};
+
 const withoutChromium = (m) => {
   m.permissions = m.permissions.filter((p) => !CHROMIUM_ONLY_PERMISSIONS.includes(p));
   delete m.minimum_chrome_version;
@@ -48,6 +55,7 @@ export const TARGETS = {
   },
   firefox: {
     name: 'addons.mozilla.org',
+    files: WITHOUT_TAB_CAPTURE,
     file: (v) => `captode-${v}-firefox.zip`,
     manifest: (m) => {
       withoutChromium(m);
@@ -61,6 +69,9 @@ export const TARGETS = {
           strict_min_version: '140.0',
           data_collection_permissions: { required: ['none'] }, // nothing leaves the device
         },
+        // Android reads data_collection_permissions from 142. This only sets the minimum:
+        // Captode is offered for Android only if that is chosen when uploading.
+        gecko_android: { strict_min_version: '142.0' },
       };
       return m;
     },
@@ -73,6 +84,7 @@ export const TARGETS = {
   },
   safari: {
     name: 'Safari (App Store, through Xcode)',
+    files: WITHOUT_TAB_CAPTURE,
     // Safari takes a web extension inside a Mac app: this folder is the input to
     // `xcrun safari-web-extension-converter` (see README, Publishing).
     folder: (v) => `captode-${v}-safari`,
@@ -145,4 +157,20 @@ export function leaks(id, files) {
     }
   }
   return found;
+}
+
+/**
+ * Makes an unpacked copy of src/ in `dir` into `id`'s package, as tools/package.mjs builds
+ * it: its manifest, settings, and the files it replaces or leaves out. For tests and
+ * screenshots that run one browser's package from a folder.
+ */
+export function makePackageIn(id, dir, root) {
+  const { readFileSync, writeFileSync, rmSync } = process.getBuiltinModule('node:fs');
+  const { join } = process.getBuiltinModule('node:path');
+  const manifest = JSON.parse(readFileSync(join(root, 'src', 'manifest.json'), 'utf8'));
+  writeFileSync(join(dir, 'manifest.json'), `${JSON.stringify(manifestFor(id, manifest), null, 2)}\n`);
+  writeFileSync(join(dir, 'lib', 'target.js'), targetModule(id));
+  const files = TARGETS[id].files || {};
+  for (const [name, from] of Object.entries(files.replace || {})) writeFileSync(join(dir, name), readFileSync(join(root, from)));
+  for (const name of files.drop || []) rmSync(join(dir, name), { force: true });
 }

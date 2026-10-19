@@ -1,0 +1,1991 @@
+{
+  "extName": {
+    "message": "Captode — スクリーンショットと画面録画"
+  },
+  "extDescription": {
+    "message": "ページ全体・表示領域・選択範囲のキャプチャと画面録画。注釈を付けて画像、PDF、動画として保存できます。"
+  },
+  "commandAction": {
+    "message": "Captode を開く、または録画を停止"
+  },
+  "popup_editor_and_recent_captures": {
+    "message": "エディタと最近のキャプチャ"
+  },
+  "popup_settings": {
+    "message": "設定"
+  },
+  "popup_screenshot": {
+    "message": "キャプチャ"
+  },
+  "popup_record": {
+    "message": "録画"
+  },
+  "popup_capture_type": {
+    "message": "キャプチャの種類"
+  },
+  "popup_the_last_capture_didn_t": {
+    "message": "前回のキャプチャはうまくいきませんでした"
+  },
+  "popup_dismiss": {
+    "message": "閉じる"
+  },
+  "popup_this_page_can_t_be": {
+    "message": "このページはキャプチャできません"
+  },
+  "popup_choose_what_to_capture": {
+    "message": "キャプチャする対象を選択"
+  },
+  "popup_full_page": {
+    "message": "ページ全体"
+  },
+  "popup_the_whole_page_top_to": {
+    "message": "ページの上から下まで全体"
+  },
+  "popup_visible_area": {
+    "message": "表示領域"
+  },
+  "popup_what_s_on_screen_right": {
+    "message": "いま画面に表示されている部分"
+  },
+  "popup_selected_area": {
+    "message": "選択範囲"
+  },
+  "popup_drag_to_choose_a_region": {
+    "message": "ドラッグして範囲を選択"
+  },
+  "popup_choose_what_to_record": {
+    "message": "録画する対象を選択"
+  },
+  "popup_full_screen": {
+    "message": "画面全体"
+  },
+  "popup_your_whole_screen_or_a": {
+    "message": "画面全体またはウィンドウ"
+  },
+  "popup_this_tab": {
+    "message": "このタブ"
+  },
+  "popup_everything_visible_in_this_tab": {
+    "message": "このタブに表示されているすべて"
+  },
+  "popup_record_only_part_of_this": {
+    "message": "このタブの一部だけを録画"
+  },
+  "popup_frame_rate": {
+    "message": "フレームレート"
+  },
+  "popup_just_the_page_as_shown": {
+    "message": "表示どおりのページのみ"
+  },
+  "popup_video_size": {
+    "message": "動画のサイズ"
+  },
+  "popup_page_size": {
+    "message": "ページのサイズ"
+  },
+  "popup_scale": {
+    "message": "倍率"
+  },
+  "popup_resolution": {
+    "message": "解像度"
+  },
+  "popup_sound_from_the_tab_or": {
+    "message": "タブまたは画面の音声"
+  },
+  "popup_record_audio": {
+    "message": "音声を録音"
+  },
+  "popup_time_to_get_ready_first": {
+    "message": "準備のための時間"
+  },
+  "popup_countdown": {
+    "message": "カウントダウン"
+  },
+  "popup_shorter_countdown": {
+    "message": "カウントダウンを短く"
+  },
+  "popup_longer_countdown": {
+    "message": "カウントダウンを長く"
+  },
+  "popup_stop_click_the_captode_icon": {
+    "message": "停止：Captode アイコンをクリックするか次のキーを押す"
+  },
+  "popup_export_inside_a_phone_or": {
+    "message": "スマートフォンやタブレットの枠に入れて書き出し"
+  },
+  "popup_device_frame": {
+    "message": "デバイスフレーム"
+  },
+  "settings_changes_are_saved_automatically": {
+    "message": "変更は自動的に保存されます"
+  },
+  "settings_appearance": {
+    "message": "外観"
+  },
+  "settings_how_captode_s_own_pages": {
+    "message": "Captode のページの見た目。"
+  },
+  "settings_system": {
+    "message": "システム"
+  },
+  "settings_match_your_browser_and_computer": {
+    "message": "ブラウザとパソコンに合わせる"
+  },
+  "settings_light": {
+    "message": "ライト"
+  },
+  "settings_always_light": {
+    "message": "常にライト"
+  },
+  "settings_dark": {
+    "message": "ダーク"
+  },
+  "settings_always_dark": {
+    "message": "常にダーク"
+  },
+  "settings_theme": {
+    "message": "テーマ"
+  },
+  "settings_export_background": {
+    "message": "書き出し時の背景"
+  },
+  "settings_the_background_behind_device_frames": {
+    "message": "ダウンロードするファイルで、デバイスフレームの背後や余白付きスクリーンショットの周囲に使う背景。書き出しごとに変更することもできます。"
+  },
+  "settings_transparent": {
+    "message": "透明"
+  },
+  "settings_no_background": {
+    "message": "背景なし"
+  },
+  "settings_white": {
+    "message": "白"
+  },
+  "settings_plain_white": {
+    "message": "無地の白"
+  },
+  "settings_custom_colour": {
+    "message": "カスタムカラー"
+  },
+  "settings_pick_any_colour": {
+    "message": "好きな色を選択"
+  },
+  "settings_colour": {
+    "message": "色"
+  },
+  "settings_hex_colour": {
+    "message": "16 進数カラー"
+  },
+  "settings_jpeg_bmp_pdf_mp4_and": {
+    "message": "JPEG、BMP、PDF、MP4、WebM は透明にできません。「透明」を選ぶと白い背景になります。"
+  },
+  "settings_defaults": {
+    "message": "デフォルト"
+  },
+  "settings_screenshot_format": {
+    "message": "スクリーンショットの形式"
+  },
+  "settings_the_last_one_used": {
+    "message": "前回使ったもの"
+  },
+  "settings_png_8_compressed": {
+    "message": "PNG-8（圧縮）"
+  },
+  "settings_recording_format": {
+    "message": "録画の形式"
+  },
+  "settings_show_captures_in_a_phone": {
+    "message": "キャプチャをデフォルトでスマートフォンやタブレットの枠に表示"
+  },
+  "settings_each_new_screenshot_is_copied": {
+    "message": "新しいスクリーンショットは開いたときにコピーされ、すぐに貼り付けられます"
+  },
+  "settings_copy_screenshots_to_the_clipboard": {
+    "message": "スクリーンショットをクリップボードにコピー"
+  },
+  "settings_about": {
+    "message": "情報"
+  },
+  "settings_everything_happens_on_your_computer": {
+    "message": "すべてお使いのパソコン上で処理されます。Captode にはアカウントもサーバーもなく、キャプチャをアップロードすることはありません。"
+  },
+  "settings_help_and_guide": {
+    "message": "ヘルプとガイド"
+  },
+  "settings_report_a_problem": {
+    "message": "問題を報告"
+  },
+  "settings_privacy_policy": {
+    "message": "プライバシー ポリシー"
+  },
+  "settings_reset_all_settings": {
+    "message": "すべての設定をリセット"
+  },
+  "settings_reset_all_settings_2": {
+    "message": "すべての設定をリセットしますか？"
+  },
+  "settings_theme_export_background_default_formats": {
+    "message": "テーマ、書き出し時の背景、デフォルトの形式、デバイスフレーム、録画のオプションがインストール時の状態に戻ります。キャプチャには影響しません。"
+  },
+  "settings_cancel": {
+    "message": "キャンセル"
+  },
+  "settings_reset": {
+    "message": "リセット"
+  },
+  "editor_untitled": {
+    "message": "無題"
+  },
+  "editor_keyboard_shortcuts": {
+    "message": "キーボードショートカット ?"
+  },
+  "editor_compare_this_image_with_another": {
+    "message": "この画像を別のキャプチャやデザインと比較"
+  },
+  "editor_compare": {
+    "message": "比較"
+  },
+  "editor_open_an_image_from_your": {
+    "message": "パソコンから画像を開く"
+  },
+  "editor_open": {
+    "message": "開く"
+  },
+  "editor_copy_the_image_to_the": {
+    "message": "画像をクリップボードにコピー（⌘⇧C）"
+  },
+  "editor_copy": {
+    "message": "コピー"
+  },
+  "editor_download_s": {
+    "message": "ダウンロード（⌘S）"
+  },
+  "editor_download": {
+    "message": "ダウンロード"
+  },
+  "editor_undo_all_changes": {
+    "message": "すべての変更を元に戻す"
+  },
+  "editor_undo_z": {
+    "message": "元に戻す ⌘Z"
+  },
+  "editor_redo_z": {
+    "message": "やり直す ⇧⌘Z"
+  },
+  "editor_delete": {
+    "message": "削除 ⌫"
+  },
+  "editor_tools": {
+    "message": "ツール"
+  },
+  "editor_start_with_an_image": {
+    "message": "画像から始めましょう"
+  },
+  "editor_capture_one_with_the_captode": {
+    "message": "ツールバーの Captode ボタンでキャプチャするか、<kbd>⌘</kbd> <kbd>V</kbd> で貼り付けるか、ここにファイルをドロップしてください。"
+  },
+  "editor_choose_an_image": {
+    "message": "画像を選択"
+  },
+  "editor_kept_on_this_device_for": {
+    "message": "このデバイスに 24 時間保存されます"
+  },
+  "editor_recent_captures": {
+    "message": "最近のキャプチャ"
+  },
+  "editor_the_image_being_edited": {
+    "message": "編集中の画像"
+  },
+  "editor_export_preview": {
+    "message": "書き出しのプレビュー"
+  },
+  "editor_back_to_editing": {
+    "message": "編集に戻る"
+  },
+  "editor_zoom_out": {
+    "message": "縮小 −"
+  },
+  "editor_fit_or_actual_size_0": {
+    "message": "ウィンドウに合わせる／実寸 0"
+  },
+  "editor_zoom_in": {
+    "message": "拡大 +"
+  },
+  "editor_annotate": {
+    "message": "注釈"
+  },
+  "editor_adjust": {
+    "message": "調整"
+  },
+  "editor_review": {
+    "message": "レビュー"
+  },
+  "editor_export": {
+    "message": "書き出し"
+  },
+  "editor_inspector": {
+    "message": "インスペクタ"
+  },
+  "editor_quick_styles": {
+    "message": "クイックスタイル"
+  },
+  "editor_colours_for_every_tool_at": {
+    "message": "すべてのツールと選択中の項目に、まとめて色を適用します。"
+  },
+  "editor_style": {
+    "message": "スタイル"
+  },
+  "editor_pick_a_tool_from_the": {
+    "message": "ツールバーからツールを選ぶか、追加した項目をクリックして変更します。"
+  },
+  "editor_draw_a_straight_line_or": {
+    "message": "直線や正方形を描く"
+  },
+  "editor_drag": {
+    "message": "+ ドラッグ"
+  },
+  "editor_edit_text": {
+    "message": "テキストを編集"
+  },
+  "editor_double_click": {
+    "message": "ダブルクリック"
+  },
+  "editor_nudge_the_selection": {
+    "message": "選択範囲を少しずつ移動"
+  },
+  "editor_zoom": {
+    "message": "ズーム"
+  },
+  "editor_scroll": {
+    "message": "+ スクロール"
+  },
+  "editor_thickness": {
+    "message": "太さ"
+  },
+  "editor_opacity": {
+    "message": "不透明度"
+  },
+  "editor_line": {
+    "message": "線"
+  },
+  "editor_solid": {
+    "message": "実線"
+  },
+  "editor_dashed": {
+    "message": "破線"
+  },
+  "editor_dotted": {
+    "message": "点線"
+  },
+  "editor_arrow_heads": {
+    "message": "矢印の先端"
+  },
+  "editor_at_the_end": {
+    "message": "終点のみ"
+  },
+  "editor_both_ends": {
+    "message": "両端"
+  },
+  "editor_fill": {
+    "message": "塗り"
+  },
+  "editor_font": {
+    "message": "フォント"
+  },
+  "editor_add_installed_fonts": {
+    "message": "インストール済みのフォントを追加"
+  },
+  "editor_size": {
+    "message": "サイズ"
+  },
+  "editor_smaller": {
+    "message": "小さく"
+  },
+  "editor_font_size": {
+    "message": "フォントサイズ"
+  },
+  "editor_bigger": {
+    "message": "大きく"
+  },
+  "editor_bold": {
+    "message": "太字"
+  },
+  "editor_italic": {
+    "message": "斜体"
+  },
+  "editor_text_colour": {
+    "message": "文字の色"
+  },
+  "editor_background": {
+    "message": "背景"
+  },
+  "editor_next_number": {
+    "message": "次の番号"
+  },
+  "editor_click_to_add_a_step": {
+    "message": "クリックでステップを追加します。番号は前のステップから続きます。ドラッグで移動できます。"
+  },
+  "editor_dim_the_rest": {
+    "message": "周囲を暗くする"
+  },
+  "editor_rounded_corners": {
+    "message": "角の丸み"
+  },
+  "editor_everything_outside_the_spotlights_is": {
+    "message": "スポットライトの外側はすべて暗くなります。複数描くと複数の場所を強調できます。"
+  },
+  "editor_magnification": {
+    "message": "倍率"
+  },
+  "editor_border": {
+    "message": "枠線"
+  },
+  "editor_effect": {
+    "message": "効果"
+  },
+  "editor_pixelate": {
+    "message": "モザイク"
+  },
+  "editor_blur": {
+    "message": "ぼかし"
+  },
+  "editor_solid_box": {
+    "message": "塗りつぶし"
+  },
+  "editor_strength": {
+    "message": "強さ"
+  },
+  "editor_arrange": {
+    "message": "重なり順"
+  },
+  "editor_bring_to_front": {
+    "message": "最前面へ ⌘]"
+  },
+  "editor_send_to_back": {
+    "message": "最背面へ ⌘["
+  },
+  "editor_duplicate_d": {
+    "message": "複製 ⌘D"
+  },
+  "editor_align": {
+    "message": "整列"
+  },
+  "editor_align_left": {
+    "message": "左揃え"
+  },
+  "editor_align_centres": {
+    "message": "中央揃え"
+  },
+  "editor_align_right": {
+    "message": "右揃え"
+  },
+  "editor_align_top": {
+    "message": "上揃え"
+  },
+  "editor_align_middles": {
+    "message": "上下中央揃え"
+  },
+  "editor_align_bottom": {
+    "message": "下揃え"
+  },
+  "editor_space_evenly_across": {
+    "message": "左右に均等配置"
+  },
+  "editor_space_evenly_down": {
+    "message": "上下に均等配置"
+  },
+  "editor_aspect_ratio": {
+    "message": "縦横比"
+  },
+  "editor_freeform": {
+    "message": "自由"
+  },
+  "editor_square_1_1": {
+    "message": "正方形（1:1）"
+  },
+  "editor_widescreen_16_9": {
+    "message": "ワイド（16:9）"
+  },
+  "editor_standard_4_3": {
+    "message": "標準（4:3）"
+  },
+  "editor_portrait_9_16": {
+    "message": "縦長（9:16）"
+  },
+  "editor_portrait_3_4": {
+    "message": "縦長（3:4）"
+  },
+  "editor_drag_on_the_image_to": {
+    "message": "画像上をドラッグして、残す範囲を選びます。"
+  },
+  "editor_apply_crop": {
+    "message": "切り抜きを適用"
+  },
+  "editor_annotations": {
+    "message": "注釈"
+  },
+  "editor_front_to_back_arrow_keys": {
+    "message": "前面から背面の順。矢印キーで選択（Shift：複数）、Alt と矢印キーで移動（Shift：10 px）、Enter でテキスト編集、Delete で削除。"
+  },
+  "editor_image_size": {
+    "message": "画像サイズ"
+  },
+  "editor_width": {
+    "message": "幅"
+  },
+  "editor_keep_proportions": {
+    "message": "縦横比を維持"
+  },
+  "editor_height": {
+    "message": "高さ"
+  },
+  "editor_resize": {
+    "message": "サイズを変更"
+  },
+  "editor_rotate_and_flip": {
+    "message": "回転と反転"
+  },
+  "editor_rotate_left": {
+    "message": "左に回転"
+  },
+  "editor_rotate_right": {
+    "message": "右に回転"
+  },
+  "editor_flip_horizontally": {
+    "message": "左右反転"
+  },
+  "editor_flip_vertically": {
+    "message": "上下反転"
+  },
+  "editor_frame": {
+    "message": "フレーム"
+  },
+  "editor_padding": {
+    "message": "余白"
+  },
+  "editor_backdrop": {
+    "message": "背景"
+  },
+  "editor_shown_when_there_is_padding": {
+    "message": "余白があるときに表示されます"
+  },
+  "editor_drop_shadow": {
+    "message": "ドロップシャドウ"
+  },
+  "editor_measure": {
+    "message": "計測"
+  },
+  "editor_drag_across_the_image_with": {
+    "message": "計測ツール（U）で画像上をドラッグします。線はまっすぐに補正され、端はエッジに吸着します。Alt を押すとどちらも行いません。"
+  },
+  "editor_no_measurements_yet": {
+    "message": "まだ計測はありません"
+  },
+  "editor_pixel_ratio": {
+    "message": "ピクセル比"
+  },
+  "editor_automatic": {
+    "message": "自動"
+  },
+  "editor_clear_all": {
+    "message": "すべて消去"
+  },
+  "editor_colours_and_contrast": {
+    "message": "色とコントラスト"
+  },
+  "editor_click_the_image_with_the": {
+    "message": "スポイト（I）で画像をクリックします。次に設定する色を選べます。"
+  },
+  "editor_text": {
+    "message": "文字"
+  },
+  "editor_not_picked": {
+    "message": "未選択"
+  },
+  "editor_colour_to_set_next": {
+    "message": "次に設定する色"
+  },
+  "editor_pick_two_colours_to_check": {
+    "message": "2 つの色を選んでコントラストを確認します"
+  },
+  "editor_copy_colours": {
+    "message": "色をコピー"
+  },
+  "editor_swap": {
+    "message": "入れ替え"
+  },
+  "editor_spacing_grid": {
+    "message": "間隔グリッド"
+  },
+  "editor_over_the_image_only_not": {
+    "message": "画像の上にだけ表示され、書き出されません"
+  },
+  "editor_show_a_grid": {
+    "message": "グリッドを表示"
+  },
+  "editor_every": {
+    "message": "間隔"
+  },
+  "editor_format": {
+    "message": "形式"
+  },
+  "editor_png_compressed": {
+    "message": "PNG — 圧縮"
+  },
+  "editor_quality": {
+    "message": "画質"
+  },
+  "editor_colours": {
+    "message": "色数"
+  },
+  "editor_auto": {
+    "message": "自動"
+  },
+  "editor_dither": {
+    "message": "ディザ"
+  },
+  "editor_lossy_compression": {
+    "message": "非可逆圧縮"
+  },
+  "editor_same_as_the_image": {
+    "message": "画像と同じ"
+  },
+  "editor_us_letter": {
+    "message": "US レター"
+  },
+  "editor_continue_tall_images_onto_more": {
+    "message": "縦長の画像を複数ページに分ける"
+  },
+  "editor_split_long_images": {
+    "message": "長い画像を分割"
+  },
+  "editor_100_original_size": {
+    "message": "100% — 元のサイズ"
+  },
+  "editor_size_limit": {
+    "message": "サイズの上限"
+  },
+  "editor_no_limit": {
+    "message": "上限なし"
+  },
+  "editor_file_name": {
+    "message": "ファイル名"
+  },
+  "editor_one_image_for_each_of": {
+    "message": "複数のデバイスごとに 1 枚ずつ、zip で"
+  },
+  "editor_several_devices": {
+    "message": "複数のデバイス…"
+  },
+  "editor_share_for_review": {
+    "message": "レビュー用に共有"
+  },
+  "editor_a_single_web_page_with": {
+    "message": "画像、各ステップのメモ、キャプチャ元をまとめた 1 つのウェブページです。チケットに添付したりチャットで送ったりでき、どのブラウザでも開けます。"
+  },
+  "editor_share_for_review_2": {
+    "message": "レビュー用に共有…"
+  },
+  "editor_copy_the_image_to_the_2": {
+    "message": "画像を PNG でクリップボードにコピー（⌘⇧C）"
+  },
+  "editor_export_for_several_devices": {
+    "message": "複数のデバイス向けに書き出し"
+  },
+  "editor_one_image_for_each_in": {
+    "message": "それぞれ 1 枚ずつ、書き出しで設定した形式とオプションで zip にまとめます。どれもキャプチャのピクセルをそのまま保ちます。"
+  },
+  "editor_download_zip": {
+    "message": "zip をダウンロード"
+  },
+  "editor_title": {
+    "message": "タイトル"
+  },
+  "editor_optional": {
+    "message": "任意"
+  },
+  "editor_summary": {
+    "message": "概要"
+  },
+  "editor_what_should_reviewers_look_at": {
+    "message": "レビュー担当者に見てほしい点は？"
+  },
+  "editor_add_numbered_steps_n_to": {
+    "message": "画像に番号付きステップ（N）を追加すると、それぞれにメモを書けます。"
+  },
+  "editor_download_review_page": {
+    "message": "レビュー用ページをダウンロード"
+  },
+  "editor_keyboard_shortcuts_2": {
+    "message": "キーボードショートカット"
+  },
+  "editor_close": {
+    "message": "閉じる"
+  },
+  "editor_select_and_move": {
+    "message": "選択して移動"
+  },
+  "editor_pan": {
+    "message": "表示を移動"
+  },
+  "editor_or_hold": {
+    "message": "、または押したまま"
+  },
+  "editor_crop": {
+    "message": "切り抜き"
+  },
+  "editor_pen": {
+    "message": "ペン"
+  },
+  "editor_highlighter": {
+    "message": "蛍光ペン"
+  },
+  "editor_arrow": {
+    "message": "矢印"
+  },
+  "editor_rectangle": {
+    "message": "四角形"
+  },
+  "editor_ellipse": {
+    "message": "楕円"
+  },
+  "editor_callout_speech_bubble": {
+    "message": "吹き出し"
+  },
+  "editor_step_number": {
+    "message": "ステップ番号"
+  },
+  "editor_spotlight": {
+    "message": "スポットライト"
+  },
+  "editor_magnifier": {
+    "message": "ルーペ"
+  },
+  "editor_colour_picker": {
+    "message": "スポイト"
+  },
+  "editor_spacing_grid_on_or_off": {
+    "message": "間隔グリッドの表示／非表示"
+  },
+  "editor_blur_or_pixelate": {
+    "message": "ぼかし／モザイク"
+  },
+  "editor_editing": {
+    "message": "編集"
+  },
+  "editor_undo": {
+    "message": "元に戻す"
+  },
+  "editor_redo": {
+    "message": "やり直す"
+  },
+  "editor_toolbar_button": {
+    "message": "ツールバーのボタン"
+  },
+  "editor_delete_selection": {
+    "message": "選択項目を削除"
+  },
+  "editor_select_several": {
+    "message": "複数を選択"
+  },
+  "editor_click_or_drag_a_box": {
+    "message": "+ クリック、または範囲をドラッグ"
+  },
+  "editor_select_all": {
+    "message": "すべて選択"
+  },
+  "editor_duplicate": {
+    "message": "複製"
+  },
+  "editor_copy_paste_annotations": {
+    "message": "注釈のコピー／貼り付け"
+  },
+  "editor_bring_to_front_send_to": {
+    "message": "最前面へ／最背面へ"
+  },
+  "editor_deselect": {
+    "message": "選択を解除"
+  },
+  "editor_nudge_10_px_with": {
+    "message": "少しずつ移動（⇧ で 10 px）"
+  },
+  "editor_straight_line_or_square": {
+    "message": "直線または正方形"
+  },
+  "editor_move_or_resize_without_snapping": {
+    "message": "吸着せずに移動・サイズ変更"
+  },
+  "editor_view_and_file": {
+    "message": "表示とファイル"
+  },
+  "editor_zoom_in_out": {
+    "message": "拡大／縮小"
+  },
+  "editor_fit_to_window": {
+    "message": "ウィンドウに合わせる"
+  },
+  "editor_copy_image": {
+    "message": "画像をコピー"
+  },
+  "editor_paste_an_image": {
+    "message": "画像を貼り付け"
+  },
+  "editor_this_list": {
+    "message": "この一覧"
+  },
+  "video_recording": {
+    "message": "録画"
+  },
+  "video_download_the_recording_as_it": {
+    "message": "録画をキャプチャしたままの状態でダウンロード"
+  },
+  "video_original_webm": {
+    "message": "元の WebM"
+  },
+  "video_exported_animation": {
+    "message": "書き出したアニメーション"
+  },
+  "video_measuring_layer_over_the_paused": {
+    "message": "一時停止中のフレーム上の計測レイヤー"
+  },
+  "video_play_or_pause_space": {
+    "message": "再生／一時停止 Space"
+  },
+  "video_trim_start": {
+    "message": "トリミングの開始"
+  },
+  "video_trim_end": {
+    "message": "トリミングの終了"
+  },
+  "video_recording_not_found": {
+    "message": "録画が見つかりません"
+  },
+  "video_recordings_are_kept_for_a": {
+    "message": "録画は 1 日保存されます。ツールバーの Captode ボタンで新しく録画してください。"
+  },
+  "video_trim": {
+    "message": "トリミング"
+  },
+  "video_start": {
+    "message": "開始"
+  },
+  "video_start_at_the_playhead_i": {
+    "message": "再生位置から開始 I"
+  },
+  "video_end": {
+    "message": "終了"
+  },
+  "video_end_at_the_playhead_o": {
+    "message": "再生位置で終了 O"
+  },
+  "video_video": {
+    "message": "動画"
+  },
+  "video_animation": {
+    "message": "アニメーション"
+  },
+  "video_highest_visually_lossless": {
+    "message": "最高 — 見た目は劣化なし"
+  },
+  "video_balanced": {
+    "message": "バランス"
+  },
+  "video_small_file": {
+    "message": "小さいファイル"
+  },
+  "video_smallest_file": {
+    "message": "最小のファイル"
+  },
+  "video_this_recording_has_no_sound": {
+    "message": "この録画には音声がありません"
+  },
+  "video_include_audio": {
+    "message": "音声を含める"
+  },
+  "video_lets_colours_shift_slightly_where": {
+    "message": "圧縮しやすい箇所で色がわずかに変わるのを許可します。多くの場合 30〜50% 小さくなりますが、値を上げると粒状感が目立ちます。"
+  },
+  "video_exact_pixels_larger_file": {
+    "message": "ピクセルはそのまま、ファイルは大きめ"
+  },
+  "video_lossless_frames": {
+    "message": "可逆圧縮のフレーム"
+  },
+  "video_merge_repeated_frames_and_store": {
+    "message": "重複するフレームをまとめ、変化したピクセルだけを保存します。どのフレームも見た目はまったく同じです。"
+  },
+  "video_reduce_size_losslessly": {
+    "message": "画質を保ったままサイズを縮小"
+  },
+  "video_tiny_changes_from_recording_noise": {
+    "message": "録画ノイズによるごく小さな変化（255 段階中 2 段階）は動きとして扱いません。見た目は変わらず、ファイルがずっと小さくなります。"
+  },
+  "video_ignore_flicker": {
+    "message": "ちらつきを無視"
+  },
+  "video_loop_forever": {
+    "message": "無限にループ"
+  },
+  "video_review_a_frame": {
+    "message": "フレームをレビュー"
+  },
+  "video_measure_or_pick_colours_on": {
+    "message": "表示中のフレームで計測や色の取得を行います。動画は一時停止し、ここでの操作は書き出されません。"
+  },
+  "video_off": {
+    "message": "オフ"
+  },
+  "video_review_tool": {
+    "message": "レビューツール"
+  },
+  "video_change_settings_and_export_again": {
+    "message": "設定を変えて再度書き出す"
+  },
+  "video_edit": {
+    "message": "編集"
+  },
+  "compare_choose_two_images": {
+    "message": "2 枚の画像を選択"
+  },
+  "compare_download_the_difference_image_as": {
+    "message": "差分画像を PNG でダウンロード"
+  },
+  "compare_difference_image": {
+    "message": "差分画像"
+  },
+  "compare_divide_between_a_and_b": {
+    "message": "A と B の境界"
+  },
+  "compare_compare_two_images": {
+    "message": "2 枚の画像を比較"
+  },
+  "compare_pick_two_captures_on_the": {
+    "message": "右側で 2 つのキャプチャを選ぶか、画像ファイルを開きます。書き出したデザインと実装のスクリーンショット、変更前後のページなどを比べられます。"
+  },
+  "compare_images": {
+    "message": "画像"
+  },
+  "compare_open_an_image_file_for": {
+    "message": "A の画像ファイルを開く"
+  },
+  "compare_open_an_image_file_for_2": {
+    "message": "B の画像ファイルを開く"
+  },
+  "compare_swap_a_and_b": {
+    "message": "A と B を入れ替え"
+  },
+  "compare_view": {
+    "message": "表示"
+  },
+  "compare_slider": {
+    "message": "スライダー"
+  },
+  "compare_side_by_side": {
+    "message": "左右に並べる"
+  },
+  "compare_overlay": {
+    "message": "重ねる"
+  },
+  "compare_difference": {
+    "message": "差分"
+  },
+  "compare_b_s_opacity": {
+    "message": "B の不透明度"
+  },
+  "compare_tolerance": {
+    "message": "許容値"
+  },
+  "compare_fit": {
+    "message": "ウィンドウに合わせる"
+  },
+  "compare_line_up": {
+    "message": "位置合わせ"
+  },
+  "compare_scale_b_to_a_s": {
+    "message": "B を A の幅に合わせる"
+  },
+  "compare_match_widths": {
+    "message": "幅を揃える"
+  },
+  "compare_move_b_across": {
+    "message": "B を左右に移動"
+  },
+  "compare_move_b_down": {
+    "message": "B を上下に移動"
+  },
+  "compare_in_a_s_pixels_with": {
+    "message": "A のピクセル単位。表示にフォーカスがあるとき、Alt と矢印キーで B を 1 ピクセルずつ移動します（Shift：10）。"
+  },
+  "screen_record_your_screen": {
+    "message": "画面を録画"
+  },
+  "screen_choose_your_whole_screen_a": {
+    "message": "画面全体、ウィンドウ、タブのいずれかを選びます。停止するには Captode アイコンをクリックするか、ここに戻ってください。"
+  },
+  "screen_recording_starts_in": {
+    "message": "録画開始まで"
+  },
+  "screen_stop_recording": {
+    "message": "録画を停止"
+  },
+  "screen_saving_your_recording": {
+    "message": "録画を保存しています…"
+  },
+  "editor_zoom_keys": {
+    "message": "<kbd>+</kbd> <kbd>−</kbd>、またはポインタ位置で <kbd>⌘</kbd> + スクロール"
+  },
+  "popup_size_hint_scale": {
+    "message": "ページを拡大または縮小"
+  },
+  "popup_size_hint_res": {
+    "message": "短辺の長さ、縦横比はそのまま"
+  },
+  "popup_seconds_short": {
+    "message": "$1 秒"
+  },
+  "popup_countdown_off_hint": {
+    "message": "録画はすぐに始まります"
+  },
+  "popup_size_hint_title": {
+    "message": "$1。このタブの場合のサイズです。画面全体の録画は画面のサイズが基準になります。"
+  },
+  "popup_one_second": {
+    "message": "1 秒"
+  },
+  "popup_n_seconds": {
+    "message": "$1 秒"
+  },
+  "settings_saved": {
+    "message": "保存しました"
+  },
+  "settings_version": {
+    "message": "バージョン $1"
+  },
+  "settings_reset_done": {
+    "message": "設定をリセットしました"
+  },
+  "settings_restored": {
+    "message": "設定を元に戻しました"
+  },
+  "ago_just_now": {
+    "message": "たった今"
+  },
+  "ago_minutes": {
+    "message": "$1 分前"
+  },
+  "ago_hours": {
+    "message": "$1 時間前"
+  },
+  "shortcut_none": {
+    "message": "ショートカット未設定"
+  },
+  "finish_midnight": {
+    "message": "ミッドナイト"
+  },
+  "finish_titanium": {
+    "message": "ナチュラルチタニウム"
+  },
+  "finish_silver": {
+    "message": "シルバー"
+  },
+  "finish_gold": {
+    "message": "ゴールド"
+  },
+  "finish_blue": {
+    "message": "ブルー"
+  },
+  "dev_info_device": {
+    "message": "$1：$2 px、$3（$4×）"
+  },
+  "dev_info_matches": {
+    "message": "このキャプチャと完全に一致"
+  },
+  "dev_info_closest": {
+    "message": "このキャプチャに最も近い"
+  },
+  "dev_info_exact": {
+    "message": "キャプチャの $1 ピクセルをそのまま保持"
+  },
+  "dev_info_scaled": {
+    "message": "キャプチャを $1% で表示"
+  },
+  "dev_show": {
+    "message": "デバイスフレームに表示"
+  },
+  "dev_show_hint": {
+    "message": "実際のスマートフォンやタブレットの枠をキャプチャの周りに"
+  },
+  "dev_device": {
+    "message": "デバイス"
+  },
+  "dev_preview": {
+    "message": "デバイス内のキャプチャのプレビュー"
+  },
+  "dev_orientation": {
+    "message": "向き"
+  },
+  "dev_portrait": {
+    "message": "縦向き"
+  },
+  "dev_landscape": {
+    "message": "横向き"
+  },
+  "dev_finish": {
+    "message": "仕上げ"
+  },
+  "dev_size_exact": {
+    "message": "キャプチャのピクセルそのまま（正確）"
+  },
+  "dev_size_device": {
+    "message": "デバイスの画面解像度"
+  },
+  "dev_fit": {
+    "message": "画面への収め方"
+  },
+  "dev_fit_width": {
+    "message": "幅に合わせて上から"
+  },
+  "dev_fit_cover": {
+    "message": "画面を埋める"
+  },
+  "dev_fit_contain": {
+    "message": "全体を表示"
+  },
+  "dev_change_default": {
+    "message": "デフォルトを変更"
+  },
+  "dev_background_colour": {
+    "message": "背景色"
+  },
+  "dev_status_bar": {
+    "message": "ステータスバー"
+  },
+  "dev_status_above": {
+    "message": "ページの上"
+  },
+  "dev_status_over": {
+    "message": "ページに重ねる"
+  },
+  "dev_none": {
+    "message": "なし"
+  },
+  "dev_status_text": {
+    "message": "ステータスバーの文字"
+  },
+  "dev_dark_on_light": {
+    "message": "暗い文字"
+  },
+  "dev_light_on_dark": {
+    "message": "明るい文字"
+  },
+  "picker_all": {
+    "message": "すべて"
+  },
+  "picker_android": {
+    "message": "Android"
+  },
+  "picker_tablets": {
+    "message": "タブレット"
+  },
+  "picker_search": {
+    "message": "デバイスを検索"
+  },
+  "picker_kind": {
+    "message": "デバイスの種類"
+  },
+  "picker_devices": {
+    "message": "デバイス"
+  },
+  "picker_best_match": {
+    "message": "最適なデバイス"
+  },
+  "picker_best_match_is": {
+    "message": "最適なデバイス：$1"
+  },
+  "picker_best_match_full": {
+    "message": "キャプチャに最適なデバイス"
+  },
+  "picker_recent": {
+    "message": "最近使用"
+  },
+  "picker_none": {
+    "message": "一致するデバイスはありません"
+  },
+  "group_android_tablets": {
+    "message": "Android タブレット"
+  },
+  "preset_chat": {
+    "message": "Slack または Teams（PNG、5 MB まで）"
+  },
+  "preset_issue": {
+    "message": "Jira または GitHub の Issue（PNG、10 MB まで）"
+  },
+  "preset_email": {
+    "message": "メール（JPEG、1 MB まで）"
+  },
+  "preset_review": {
+    "message": "デザインレビュー（正確な PNG、上限なし）"
+  },
+  "preset_mockup": {
+    "message": "スマートフォンのモックアップ（透過 PNG）"
+  },
+  "preset_web": {
+    "message": "ウェブサイトやドキュメント（WebP）"
+  },
+  "preset_chat_gif": {
+    "message": "チャット用 GIF（480p、15 fps）"
+  },
+  "preset_share_mp4": {
+    "message": "どこでも共有（MP4、1080p）"
+  },
+  "preset_original": {
+    "message": "最高画質（MP4、元のサイズ）"
+  },
+  "preset_docs_webp": {
+    "message": "ドキュメントやヘルプ（WebP、720p、20 fps）"
+  },
+  "preset_mockup_mp4": {
+    "message": "スマートフォンのモックアップ動画（MP4）"
+  },
+  "preset_label": {
+    "message": "プリセット"
+  },
+  "preset_delete": {
+    "message": "このプリセットを削除"
+  },
+  "preset_name_placeholder": {
+    "message": "プリセットの名前"
+  },
+  "preset_name": {
+    "message": "プリセット名"
+  },
+  "preset_save": {
+    "message": "保存"
+  },
+  "preset_custom": {
+    "message": "カスタム"
+  },
+  "preset_builtin": {
+    "message": "組み込み"
+  },
+  "preset_yours": {
+    "message": "マイプリセット"
+  },
+  "preset_save_current": {
+    "message": "現在の設定をプリセットとして保存…"
+  },
+  "error_protected_page": {
+    "message": "このページはキャプチャできません。ブラウザのページと拡張機能ストアは保護されています。"
+  },
+  "pick_capture_hint": {
+    "message": "ドラッグしてキャプチャ範囲を選択  ·  Esc でキャンセル"
+  },
+  "pick_record_hint": {
+    "message": "ドラッグして録画範囲を選択  ·  Esc でキャンセル"
+  },
+  "countdown_hint": {
+    "message": "まもなく録画が始まります · Esc でキャンセル"
+  },
+  "error_recording_start": {
+    "message": "録画を開始できませんでした。"
+  },
+  "action_stop_title": {
+    "message": "Captode — クリックして録画を停止"
+  },
+  "screen_nothing_shared": {
+    "message": "何も共有されなかったため、何も録画されませんでした。"
+  },
+  "screen_mac_permission": {
+    "message": "画面を選んだ場合は、システム設定 → プライバシーとセキュリティ → 画面収録 でブラウザを許可し、ブラウザを再起動してください。"
+  },
+  "screen_title_recording": {
+    "message": "● 録画中 — Captode"
+  },
+  "screen_title": {
+    "message": "Captode — 画面録画"
+  },
+  "screen_title_countdown": {
+    "message": "あと $1 秒で録画… — Captode"
+  },
+  "tool_pan": {
+    "message": "表示を移動（または Space を押したまま）"
+  },
+  "tool_callout": {
+    "message": "吹き出し"
+  },
+  "name_redact": {
+    "message": "ぼかし／モザイク"
+  },
+  "edits_back": {
+    "message": "編集内容が戻りました"
+  },
+  "start_over": {
+    "message": "最初からやり直す"
+  },
+  "all_undone": {
+    "message": "すべての変更を元に戻しました"
+  },
+  "announce_undone": {
+    "message": "元に戻しました"
+  },
+  "announce_redone": {
+    "message": "やり直しました"
+  },
+  "announce_added_step": {
+    "message": "ステップ $1 を追加しました"
+  },
+  "announce_added": {
+    "message": "追加しました：$1"
+  },
+  "deleted_one": {
+    "message": "注釈を削除しました"
+  },
+  "deleted_many": {
+    "message": "$1 個の注釈を削除しました"
+  },
+  "copied_one": {
+    "message": "注釈をコピーしました"
+  },
+  "copied_many": {
+    "message": "$1 個の注釈をコピーしました"
+  },
+  "copy_failed": {
+    "message": "コピーできませんでした：$1"
+  },
+  "announce_moved": {
+    "message": "$1, $2 に移動しました"
+  },
+  "ratio_note": {
+    "message": "サイズは CSS ピクセルです：画像のピクセル ÷ $1。"
+  },
+  "colours_copied": {
+    "message": "色をコピーしました"
+  },
+  "colours_copy_failed": {
+    "message": "色をコピーできませんでした"
+  },
+  "look_new": {
+    "message": "新しい注釈に「$1」スタイルを使用"
+  },
+  "look_applied_one": {
+    "message": "選択項目に「$1」スタイルを適用しました"
+  },
+  "look_applied_many": {
+    "message": "$2 個の注釈に「$1」スタイルを適用しました"
+  },
+  "look_title": {
+    "message": "$1：線 $2、ラベル $3（背景 $4）"
+  },
+  "align_to_image": {
+    "message": "画像に揃える"
+  },
+  "style_mixed": {
+    "message": "$1 個の項目を選択中"
+  },
+  "style_selected": {
+    "message": "選択中：$1"
+  },
+  "step_number": {
+    "message": "番号"
+  },
+  "fonts_unavailable": {
+    "message": "このブラウザではインストール済みのフォントを一覧表示できません。"
+  },
+  "fonts_added": {
+    "message": "インストール済みのフォントを $1 個追加しました"
+  },
+  "fonts_denied": {
+    "message": "フォントへのアクセスが許可されませんでした。"
+  },
+  "crop_size": {
+    "message": "$1 px — 内側をドラッグで移動、Enter で適用。"
+  },
+  "proportions_unlocked": {
+    "message": "縦横比を固定しない"
+  },
+  "resized_to": {
+    "message": "$1 にサイズを変更しました"
+  },
+  "format_png": {
+    "message": "劣化なし、文字がくっきり、透明を保持。"
+  },
+  "format_png8": {
+    "message": "最大 256 色の圧縮 PNG。多くの場合 60〜80% 小さくなります。"
+  },
+  "format_jpeg": {
+    "message": "小さなファイル。写真向き。透明は使えません。"
+  },
+  "format_webp": {
+    "message": "PNG や JPEG より小さく、透明を保持。"
+  },
+  "format_avif": {
+    "message": "最も小さなファイル。最新のブラウザ向け。"
+  },
+  "format_gif": {
+    "message": "最大 256 色。どこでも開けます。"
+  },
+  "format_bmp": {
+    "message": "非圧縮。古いソフトウェア向け。"
+  },
+  "format_pdf": {
+    "message": "共有や印刷向け。長いページは複数ページに分けられます。"
+  },
+  "fit_too_big": {
+    "message": "サイズの上限を下回れません。これ以上は小さくできません。"
+  },
+  "fit_quality": {
+    "message": "画質 $1%"
+  },
+  "fit_lossy": {
+    "message": "非可逆 $1"
+  },
+  "fit_colours": {
+    "message": "$1 色"
+  },
+  "fit_size": {
+    "message": "サイズ $1%"
+  },
+  "fit_note": {
+    "message": "上限に収めるため：$1。"
+  },
+  "estimate_working": {
+    "message": "ファイルサイズを計算しています…"
+  },
+  "encode_failed": {
+    "message": "エンコードできませんでした：$1"
+  },
+  "saved_file_size": {
+    "message": "$1 を保存しました · $2"
+  },
+  "export_failed": {
+    "message": "書き出しに失敗しました：$1"
+  },
+  "copied_auto": {
+    "message": "スクリーンショットをクリップボードにコピーしました"
+  },
+  "copied_image": {
+    "message": "クリップボードにコピーしました"
+  },
+  "remove": {
+    "message": "削除"
+  },
+  "remove_named": {
+    "message": "$1 を削除"
+  },
+  "removed_named": {
+    "message": "$1 を削除しました"
+  },
+  "needs_extension": {
+    "message": "拡張機能として実行しているときに利用できます。"
+  },
+  "truncated": {
+    "message": "このページはとても長いため、上部だけをキャプチャしました。"
+  },
+  "layer_empty": {
+    "message": "空"
+  },
+  "layer_callout": {
+    "message": "吹き出し「$1」"
+  },
+  "layer_text": {
+    "message": "テキスト「$1」"
+  },
+  "layer_step": {
+    "message": "ステップ $1"
+  },
+  "layer_step_note": {
+    "message": "ステップ $1：$2"
+  },
+  "layer_line": {
+    "message": "$1（$2 から $3）"
+  },
+  "layer_shape": {
+    "message": "$1、$2（位置 $3）"
+  },
+  "multi_no_frame": {
+    "message": "フレームなし"
+  },
+  "multi_best_match": {
+    "message": "最適なデバイス（$1）"
+  },
+  "multi_choose_one": {
+    "message": "1 つ以上選んでください。"
+  },
+  "multi_making": {
+    "message": "$2 件中 $1 件目を作成中：$3…"
+  },
+  "multi_saved_one": {
+    "message": "$1 を保存しました · 画像 1 枚"
+  },
+  "multi_saved_many": {
+    "message": "$1 を保存しました · 画像 $2 枚"
+  },
+  "multi_failed": {
+    "message": "うまくいきませんでした：$1"
+  },
+  "share_page": {
+    "message": "ページ"
+  },
+  "share_captured": {
+    "message": "キャプチャ日時"
+  },
+  "share_size_ratio": {
+    "message": "$1 px（ピクセル比 $2×）"
+  },
+  "share_browser": {
+    "message": "ブラウザ"
+  },
+  "saved_file": {
+    "message": "$1 を保存しました"
+  },
+  "share_failed": {
+    "message": "レビュー用ページを作成できませんでした：$1"
+  },
+  "wcag_pass": {
+    "message": "$1 合格"
+  },
+  "wcag_fail": {
+    "message": "$1 不合格"
+  },
+  "contrast_label": {
+    "message": "コントラスト"
+  },
+  "contrast_normal": {
+    "message": "通常の文字"
+  },
+  "contrast_large": {
+    "message": "大きな文字と UI"
+  },
+  "measure_box": {
+    "message": "$1 px · 長さ $2 px"
+  },
+  "measure_box_short": {
+    "message": "$1 px · $2 px"
+  },
+  "share_note_label": {
+    "message": "ステップ $1 のメモ"
+  },
+  "share_note_placeholder": {
+    "message": "ステップ $1 の内容は？"
+  },
+  "export_reading": {
+    "message": "録画を読み込んでいます…"
+  },
+  "export_frame": {
+    "message": "フレームをエンコード中（$1 / $2）"
+  },
+  "export_finishing": {
+    "message": "仕上げています…"
+  },
+  "export_colours": {
+    "message": "色を選んでいます…"
+  },
+  "res_original": {
+    "message": "原寸（$1）"
+  },
+  "export_format": {
+    "message": "$1 で書き出し"
+  },
+  "video_dims": {
+    "message": "$1 · $2 fps · $3 フレーム"
+  },
+  "preview_converting": {
+    "message": "変換中…"
+  },
+  "preview_exported": {
+    "message": "書き出し済み"
+  },
+  "trim_selected": {
+    "message": "$1 秒を選択"
+  },
+  "no_mp4": {
+    "message": "このブラウザは MP4 を書き出せません。ブラウザを更新するか、WebM で書き出してください。"
+  },
+  "no_webm": {
+    "message": "このブラウザでは WebM を作成できません。"
+  },
+  "export_realtime": {
+    "message": "変換中… $1 / $2"
+  },
+  "export_done": {
+    "message": "完了"
+  },
+  "export_stopped": {
+    "message": "書き出しが停止しました"
+  },
+  "export_starting": {
+    "message": "開始しています…"
+  },
+  "export_realtime_note": {
+    "message": "このブラウザではリアルタイムで書き出す必要があります。このタブを開いたまま前面に表示しておいてください。"
+  },
+  "result_ready": {
+    "message": "$1 の準備ができました · $2"
+  },
+  "result_dims": {
+    "message": "$1、$2 fps。"
+  },
+  "result_larger": {
+    "message": "録画の $1 倍のサイズです。解像度やフレームレートを下げると小さくなります。"
+  },
+  "result_smaller": {
+    "message": "録画より $1% 小さくなりました。"
+  },
+  "automatic_value": {
+    "message": "自動（$1）"
+  },
+  "compare_not_image": {
+    "message": "$1 を画像として開けませんでした"
+  },
+  "compare_same_width": {
+    "message": "2 つは同じ幅です"
+  },
+  "compare_scale_b": {
+    "message": "B を A の幅に合わせる（×$1）"
+  },
+  "compare_comparing": {
+    "message": "比較しています…"
+  },
+  "compare_comparing_pct": {
+    "message": "比較しています… $1%"
+  },
+  "compare_choose": {
+    "message": "キャプチャを選択…"
+  },
+  "compare_differ": {
+    "message": "ピクセルの $1 が異なります（$2）"
+  },
+  "compare_within": {
+    "message": "変化は $2 の位置、$1 px の範囲内"
+  },
+  "compare_none": {
+    "message": "この許容値では<b>差分はありません</b>"
+  },
+  "page_no_note": {
+    "message": "メモなし"
+  },
+  "page_full_size": {
+    "message": "クリックで実寸表示"
+  },
+  "page_steps": {
+    "message": "ステップ"
+  },
+  "page_labels": {
+    "message": "画像上のラベル"
+  },
+  "page_about": {
+    "message": "このキャプチャについて"
+  },
+  "page_made_with": {
+    "message": "Captode で作成"
+  },
+  "download_format": {
+    "message": "$1 をダウンロード"
+  },
+  "ratio_from_capture": {
+    "message": "ピクセル比はキャプチャから取得した $1 です。"
+  },
+  "ratio_unknown": {
+    "message": "ピクセル比は 1× です（この画像では不明）。"
+  },
+  "look_bug": {
+    "message": "バグ"
+  },
+  "look_review": {
+    "message": "レビュー"
+  },
+  "look_note": {
+    "message": "メモ"
+  },
+  "look_ok": {
+    "message": "承認"
+  },
+  "look_neutral": {
+    "message": "ニュートラル"
+  },
+  "look_brand": {
+    "message": "ブランド"
+  },
+  "popup_record_screen_instead": {
+    "message": "画面を録画する"
+  },
+  "popup_options": {
+    "message": "オプション"
+  },
+  "popup_see_all": {
+    "message": "すべて表示"
+  },
+  "popup_countdown_short": {
+    "message": "$1 秒カウントダウン"
+  },
+  "popup_no_countdown": {
+    "message": "カウントダウンなし"
+  },
+  "popup_with_audio": {
+    "message": "音声あり"
+  },
+  "popup_no_audio": {
+    "message": "音声なし"
+  },
+  "popup_last_used": {
+    "message": "前回"
+  },
+  "popup_enter_repeats": {
+    "message": "Enter キーでもう一度"
+  },
+  "badge_video": {
+    "message": "動画"
+  },
+  "badge_edited": {
+    "message": "編集済み"
+  },
+  "group_move_crop": {
+    "message": "移動と切り抜き"
+  },
+  "group_draw": {
+    "message": "描画"
+  },
+  "group_shapes": {
+    "message": "図形"
+  },
+  "group_text_steps": {
+    "message": "テキストと手順"
+  },
+  "group_focus_privacy": {
+    "message": "強調とプライバシー"
+  },
+  "group_review": {
+    "message": "確認"
+  },
+  "tool_about_select": {
+    "message": "クリックで選択、ドラッグで移動。Shift で選択に追加。"
+  },
+  "tool_about_pan": {
+    "message": "ドラッグして画像内を移動します。"
+  },
+  "tool_about_crop": {
+    "message": "ドラッグして残す範囲を選びます。"
+  },
+  "tool_about_pen": {
+    "message": "自由に描きます。"
+  },
+  "tool_about_highlighter": {
+    "message": "蛍光ペンのように文字に印を付けます。"
+  },
+  "tool_about_arrow": {
+    "message": "何かを指し示します。"
+  },
+  "tool_about_line": {
+    "message": "直線。Shift で水平・垂直に。"
+  },
+  "tool_about_rect": {
+    "message": "何かを四角で囲みます。Shift で正方形。"
+  },
+  "tool_about_ellipse": {
+    "message": "何かを楕円で囲みます。Shift で正円。"
+  },
+  "tool_about_text": {
+    "message": "クリックしてラベルを追加します。"
+  },
+  "tool_about_callout": {
+    "message": "メモ付きの吹き出し。"
+  },
+  "tool_about_step": {
+    "message": "手順を示す連番のマーカー。"
+  },
+  "tool_about_spotlight": {
+    "message": "一部分以外を暗くします。"
+  },
+  "tool_about_magnify": {
+    "message": "一部分を拡大して表示します。"
+  },
+  "tool_about_redact": {
+    "message": "個人情報を隠します。"
+  },
+  "tool_about_measure": {
+    "message": "CSS ピクセルで距離を測ります。"
+  },
+  "tool_about_pick": {
+    "message": "色を取得してコントラストを確認します。"
+  },
+  "export_will_be": {
+    "message": "ファイルのサイズ: $1"
+  },
+  "editor_first_hint": {
+    "message": "上のツールを選ぶか、<kbd>T</kbd> でテキスト、<kbd>A</kbd> で矢印、<kbd>B</kbd> でぼかしを使えます。"
+  },
+  "video_frame_to_editor": {
+    "message": "フレームを編集"
+  },
+  "video_frame_to_editor_title": {
+    "message": "表示中のフレームをエディタで開き、注釈・コピー・保存します（F）"
+  },
+  "video_drag_to_scrub": {
+    "message": "ドラッグして移動"
+  },
+  "video_trim_hint": {
+    "message": "タイムライン上をドラッグして残す範囲を選ぶか、両端をドラッグします。再生中は <kbd>I</kbd> で開始、<kbd>O</kbd> で終了を設定します。"
+  },
+  "video_size_up_to": {
+    "message": "最大 $1"
+  },
+  "compare_last_two": {
+    "message": "最新の 2 枚を比較"
+  },
+  "compare_last_two_note": {
+    "message": "「$1」を A（前）、「$2」を B（後）に"
+  },
+  "measures_cleared": {
+    "message": "測定を消去しました（$1）"
+  },
+  "preset_deleted": {
+    "message": "プリセット「$1」を削除しました"
+  },
+  "popup_delay": {
+    "message": "遅延"
+  },
+  "popup_delay_hint": {
+    "message": "スクリーンショットの前にメニューやツールチップを開くための時間"
+  },
+  "delay_hint": {
+    "message": "$1 秒後に撮影 · Esc でキャンセル"
+  },
+  "error_tab_changed": {
+    "message": "待ち時間の終了時に別のタブが表示されていたため、撮影しませんでした。撮影が終わるまで同じタブにとどまってください。"
+  },
+  "popup_element": {
+    "message": "要素"
+  },
+  "popup_element_desc": {
+    "message": "カード、ボタン、セクションをクリック"
+  },
+  "pick_element_hint": {
+    "message": "ページの一部をクリック · ↑ で外側の範囲 · Esc でキャンセル"
+  },
+  "popup_show_inputs": {
+    "message": "クリックとキーを表示"
+  },
+  "popup_show_inputs_hint": {
+    "message": "タブの録画のみ。入力した文字は表示しません"
+  },
+  "popup_with_inputs": {
+    "message": "クリック"
+  },
+  "menu_full_page": {
+    "message": "ページ全体をスクリーンショット"
+  },
+  "menu_visible": {
+    "message": "表示範囲をスクリーンショット"
+  },
+  "menu_area": {
+    "message": "選択範囲をスクリーンショット…"
+  },
+  "menu_element": {
+    "message": "要素をスクリーンショット…"
+  },
+  "editor_private_blurred_one": {
+    "message": "非公開情報を 1 件ぼかしました"
+  },
+  "editor_private_blurred_many": {
+    "message": "非公開情報を $1 件ぼかしました"
+  },
+  "settings_keyboard_shortcuts": {
+    "message": "キーボードショートカット"
+  },
+  "settings_shortcuts_work_everywhere": {
+    "message": "Captode を開かなくても、どのページでも使えます。"
+  },
+  "settings_menu_too": {
+    "message": "すべてのスクリーンショットは右クリックメニューからも使えます。"
+  },
+  "settings_change_shortcuts": {
+    "message": "ショートカットを変更"
+  },
+  "settings_copy_diagnostics": {
+    "message": "診断情報をコピー"
+  },
+  "settings_diagnostics_tip": {
+    "message": "バージョン、設定、最後のエラーを報告に貼り付けられます。何も送信されません。"
+  },
+  "settings_diagnostics_copied": {
+    "message": "診断情報をコピーしました。報告に貼り付けてください。"
+  },
+  "error_camera_mic": {
+    "message": "Captode はカメラまたはマイクを使えません。録画オプションでスイッチをオフにしてからオンにし、許可してください。"
+  },
+  "popup_mic": {
+    "message": "マイク"
+  },
+  "popup_mic_hint": {
+    "message": "録画しながら話せます"
+  },
+  "popup_camera": {
+    "message": "カメラバブル"
+  },
+  "popup_camera_hint": {
+    "message": "動画の隅にあなたを表示"
+  },
+  "popup_with_mic": {
+    "message": "マイク"
+  },
+  "popup_with_camera": {
+    "message": "カメラ"
+  },
+  "permission_title_both": {
+    "message": "Captode にカメラとマイクの使用を許可"
+  },
+  "permission_title_camera": {
+    "message": "Captode にカメラの使用を許可"
+  },
+  "permission_title_mic": {
+    "message": "Captode にマイクの使用を許可"
+  },
+  "permission_why": {
+    "message": "ブラウザが一度だけ確認します。Captode は録画中だけ使い、録画はお使いのコンピュータに残ります。"
+  },
+  "permission_allow": {
+    "message": "許可"
+  },
+  "permission_ready": {
+    "message": "準備完了"
+  },
+  "permission_ready_text": {
+    "message": "次の録画から使われます。このタブは自動的に閉じます。"
+  },
+  "permission_blocked": {
+    "message": "ブラウザがアクセスをブロックしました"
+  },
+  "permission_blocked_text": {
+    "message": "アドレスバー横の権限アイコンから Captode にカメラとマイクを許可し、もう一度お試しください。"
+  },
+  "permission_try_again": {
+    "message": "再試行"
+  },
+  "popup_new_in_captode_1_4": {
+    "message": "Captode 1.4 の新機能"
+  },
+  "popup_whats_new_1_4": {
+    "message": "録画にカメラバブルとマイク、スクリーンショットの種類ごとのショートカット、メールアドレスや番号をぼかす設定。"
+  },
+  "share_captode": {
+    "message": "Captode を共有"
+  },
+  "share_tip_popup": {
+    "message": "Captode を共有：ストアのリンクをコピー"
+  },
+  "share_text": {
+    "message": "Captode：ブラウザで使える無料のスクリーンショットと画面録画。アカウントもアップロードも不要。"
+  },
+  "share_copied": {
+    "message": "リンクをコピーしました。貼り付けて Captode を共有しましょう。"
+  },
+  "settings_blur_private": {
+    "message": "非公開情報をぼかす"
+  },
+  "settings_blur_private_hint": {
+    "message": "新しいスクリーンショットでメールアドレス、電話番号、カード番号をぼかします。ぼかしは個別に削除できます"
+  },
+  "popup_browser_protects_its_own_pages": {
+    "message": "ブラウザ自身のページと拡張機能ストアは保護されています。Web サイトを開いてキャプチャするか、画面全体を録画してください。"
+  }
+}

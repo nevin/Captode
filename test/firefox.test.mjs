@@ -8,7 +8,7 @@ import { cpSync, mkdtempSync, readFileSync, writeFileSync, rmSync, existsSync, r
 import { homedir, tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { manifestFor, targetModule } from '../tools/targets.mjs';
+import { makePackageIn } from '../tools/targets.mjs';
 import { ok, near, Skip } from './helpers.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -36,10 +36,10 @@ export const tests = {
     const dir = mkdtempSync(join(tmpdir(), 'captode-firefox-'));
     cpSync(join(here, '..', 'src'), dir, { recursive: true });
     cpSync(join(here, 'firefox'), join(dir, 'firefox-check'), { recursive: true });
-    const m = manifestFor('firefox', JSON.parse(readFileSync(join(here, '..', 'src', 'manifest.json'), 'utf8')));
+    makePackageIn('firefox', dir, join(here, '..'));
+    const m = JSON.parse(readFileSync(join(dir, 'manifest.json'), 'utf8'));
     m.host_permissions = ['<all_urls>'];
     writeFileSync(join(dir, 'manifest.json'), JSON.stringify(m));
-    writeFileSync(join(dir, 'lib', 'target.js'), targetModule('firefox'));
 
     let resolveReport;
     const reported = new Promise((r) => { resolveReport = r; });

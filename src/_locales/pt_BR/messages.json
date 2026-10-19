@@ -1987,5 +1987,8 @@
   },
   "popup_browser_protects_its_own_pages": {
     "message": "Seu navegador protege as próprias páginas e a loja de extensões. Abra um site para capturá-lo ou grave a tela inteira."
+  },
+  "screen_no_sound": {
+    "message": "Nenhum som foi compartilhado, então a gravação não terá som (exceto o microfone, se estiver ligado)."
   }
 }

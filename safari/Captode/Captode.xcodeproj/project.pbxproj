@@ -1,0 +1,629 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 110;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		20453F4D30857F5800BDD59A /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20453F4C30857F5800BDD59A /* AppDelegate.swift */; };
+		20453F5130857F5800BDD59A /* Main.html in Resources */ = {isa = PBXBuildFile; fileRef = 20453F4F30857F5800BDD59A /* Main.html */; };
+		20453F5330857F5800BDD59A /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 20453F5230857F5800BDD59A /* Icon.png */; };
+		20453F5530857F5800BDD59A /* Style.css in Resources */ = {isa = PBXBuildFile; fileRef = 20453F5430857F5800BDD59A /* Style.css */; };
+		20453F5730857F5800BDD59A /* Script.js in Resources */ = {isa = PBXBuildFile; fileRef = 20453F5630857F5800BDD59A /* Script.js */; };
+		20453F5930857F5800BDD59A /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20453F5830857F5800BDD59A /* ViewController.swift */; };
+		20453F5C30857F5800BDD59A /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 20453F5A30857F5800BDD59A /* Main.storyboard */; };
+		20453F5E30857F5900BDD59A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 20453F5D30857F5900BDD59A /* Assets.xcassets */; };
+		20453F6530857F5900BDD59A /* Captode Extension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 20453F6430857F5900BDD59A /* Captode Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		20453F6A30857F5900BDD59A /* SafariWebExtensionHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20453F6930857F5900BDD59A /* SafariWebExtensionHandler.swift */; };
+		20453F8430857F5900BDD59A /* settings in Resources */ = {isa = PBXBuildFile; fileRef = 20453F7630857F5900BDD59A /* settings */; };
+		20453F8530857F5900BDD59A /* popup in Resources */ = {isa = PBXBuildFile; fileRef = 20453F7730857F5900BDD59A /* popup */; };
+		20453F8630857F5900BDD59A /* video in Resources */ = {isa = PBXBuildFile; fileRef = 20453F7830857F5900BDD59A /* video */; };
+		20453F8730857F5900BDD59A /* LICENSE in Resources */ = {isa = PBXBuildFile; fileRef = 20453F7930857F5900BDD59A /* LICENSE */; };
+		20453F8830857F5900BDD59A /* background.js in Resources */ = {isa = PBXBuildFile; fileRef = 20453F7A30857F5900BDD59A /* background.js */; };
+		20453F8930857F5900BDD59A /* content in Resources */ = {isa = PBXBuildFile; fileRef = 20453F7B30857F5900BDD59A /* content */; };
+		20453F8A30857F5900BDD59A /* icons in Resources */ = {isa = PBXBuildFile; fileRef = 20453F7C30857F5900BDD59A /* icons */; };
+		20453F8B30857F5900BDD59A /* manifest.json in Resources */ = {isa = PBXBuildFile; fileRef = 20453F7D30857F5900BDD59A /* manifest.json */; };
+		20453F8C30857F5900BDD59A /* compare in Resources */ = {isa = PBXBuildFile; fileRef = 20453F7E30857F5900BDD59A /* compare */; };
+		20453F8D30857F5900BDD59A /* lib in Resources */ = {isa = PBXBuildFile; fileRef = 20453F7F30857F5900BDD59A /* lib */; };
+		20453F8E30857F5900BDD59A /* recorder in Resources */ = {isa = PBXBuildFile; fileRef = 20453F8030857F5900BDD59A /* recorder */; };
+		20453F8F30857F5900BDD59A /* _locales in Resources */ = {isa = PBXBuildFile; fileRef = 20453F8130857F5900BDD59A /* _locales */; };
+		20453F9030857F5900BDD59A /* editor in Resources */ = {isa = PBXBuildFile; fileRef = 20453F8230857F5900BDD59A /* editor */; };
+		20453F9130857F5900BDD59A /* vendor in Resources */ = {isa = PBXBuildFile; fileRef = 20453F8330857F5900BDD59A /* vendor */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		20453F6630857F5900BDD59A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 20453F4130857F5700BDD59A /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 20453F6330857F5900BDD59A;
+			remoteInfo = "Captode Extension";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		20453F7130857F5900BDD59A /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			dstPath = "";
+			dstSubfolder = PlugIns;
+			files = (
+				20453F6530857F5900BDD59A /* Captode Extension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		20453F4930857F5800BDD59A /* Captode.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Captode.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		20453F4C30857F5800BDD59A /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		20453F5030857F5800BDD59A /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = Base; path = Base.lproj/Main.html; sourceTree = "<group>"; };
+		20453F5230857F5800BDD59A /* Icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Icon.png; sourceTree = "<group>"; };
+		20453F5430857F5800BDD59A /* Style.css */ = {isa = PBXFileReference; lastKnownFileType = text.css; path = Style.css; sourceTree = "<group>"; };
+		20453F5630857F5800BDD59A /* Script.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = Script.js; sourceTree = "<group>"; };
+		20453F5830857F5800BDD59A /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		20453F5B30857F5800BDD59A /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		20453F5D30857F5900BDD59A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		20453F5F30857F5900BDD59A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		20453F6430857F5900BDD59A /* Captode Extension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "Captode Extension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
+		20453F6930857F5900BDD59A /* SafariWebExtensionHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafariWebExtensionHandler.swift; sourceTree = "<group>"; };
+		20453F6B30857F5900BDD59A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		20453F7630857F5900BDD59A /* settings */ = {isa = PBXFileReference; lastKnownFileType = folder; name = settings; path = Resources/settings; sourceTree = "<group>"; };
+		20453F7730857F5900BDD59A /* popup */ = {isa = PBXFileReference; lastKnownFileType = folder; name = popup; path = Resources/popup; sourceTree = "<group>"; };
+		20453F7830857F5900BDD59A /* video */ = {isa = PBXFileReference; lastKnownFileType = folder; name = video; path = Resources/video; sourceTree = "<group>"; };
+		20453F7930857F5900BDD59A /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; name = LICENSE; path = Resources/LICENSE; sourceTree = "<group>"; };
+		20453F7A30857F5900BDD59A /* background.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = background.js; path = Resources/background.js; sourceTree = "<group>"; };
+		20453F7B30857F5900BDD59A /* content */ = {isa = PBXFileReference; lastKnownFileType = folder; name = content; path = Resources/content; sourceTree = "<group>"; };
+		20453F7C30857F5900BDD59A /* icons */ = {isa = PBXFileReference; lastKnownFileType = folder; name = icons; path = Resources/icons; sourceTree = "<group>"; };
+		20453F7D30857F5900BDD59A /* manifest.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = manifest.json; path = Resources/manifest.json; sourceTree = "<group>"; };
+		20453F7E30857F5900BDD59A /* compare */ = {isa = PBXFileReference; lastKnownFileType = folder; name = compare; path = Resources/compare; sourceTree = "<group>"; };
+		20453F7F30857F5900BDD59A /* lib */ = {isa = PBXFileReference; lastKnownFileType = folder; name = lib; path = Resources/lib; sourceTree = "<group>"; };
+		20453F8030857F5900BDD59A /* recorder */ = {isa = PBXFileReference; lastKnownFileType = folder; name = recorder; path = Resources/recorder; sourceTree = "<group>"; };
+		20453F8130857F5900BDD59A /* _locales */ = {isa = PBXFileReference; lastKnownFileType = folder; name = _locales; path = Resources/_locales; sourceTree = "<group>"; };
+		20453F8230857F5900BDD59A /* editor */ = {isa = PBXFileReference; lastKnownFileType = folder; name = editor; path = Resources/editor; sourceTree = "<group>"; };
+		20453F8330857F5900BDD59A /* vendor */ = {isa = PBXFileReference; lastKnownFileType = folder; name = vendor; path = Resources/vendor; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		20453F4630857F5700BDD59A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			files = (
+			);
+		};
+		20453F6130857F5900BDD59A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			files = (
+			);
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		20453F4030857F5700BDD59A = {
+			isa = PBXGroup;
+			children = (
+				20453F4B30857F5800BDD59A /* Captode */,
+				20453F6830857F5900BDD59A /* Captode Extension */,
+				20453F4A30857F5800BDD59A /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		20453F4A30857F5800BDD59A /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				20453F4930857F5800BDD59A /* Captode.app */,
+				20453F6430857F5900BDD59A /* Captode Extension.appex */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		20453F4B30857F5800BDD59A /* Captode */ = {
+			isa = PBXGroup;
+			children = (
+				20453F4C30857F5800BDD59A /* AppDelegate.swift */,
+				20453F5830857F5800BDD59A /* ViewController.swift */,
+				20453F5A30857F5800BDD59A /* Main.storyboard */,
+				20453F5D30857F5900BDD59A /* Assets.xcassets */,
+				20453F5F30857F5900BDD59A /* Info.plist */,
+				20453F4E30857F5800BDD59A /* Resources */,
+			);
+			path = Captode;
+			sourceTree = "<group>";
+		};
+		20453F4E30857F5800BDD59A /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				20453F4F30857F5800BDD59A /* Main.html */,
+				20453F5230857F5800BDD59A /* Icon.png */,
+				20453F5430857F5800BDD59A /* Style.css */,
+				20453F5630857F5800BDD59A /* Script.js */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		20453F6830857F5900BDD59A /* Captode Extension */ = {
+			isa = PBXGroup;
+			children = (
+				20453F7530857F5900BDD59A /* Resources */,
+				20453F6930857F5900BDD59A /* SafariWebExtensionHandler.swift */,
+				20453F6B30857F5900BDD59A /* Info.plist */,
+			);
+			path = "Captode Extension";
+			sourceTree = "<group>";
+		};
+		20453F7530857F5900BDD59A /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				20453F7630857F5900BDD59A /* settings */,
+				20453F7730857F5900BDD59A /* popup */,
+				20453F7830857F5900BDD59A /* video */,
+				20453F7930857F5900BDD59A /* LICENSE */,
+				20453F7A30857F5900BDD59A /* background.js */,
+				20453F7B30857F5900BDD59A /* content */,
+				20453F7C30857F5900BDD59A /* icons */,
+				20453F7D30857F5900BDD59A /* manifest.json */,
+				20453F7E30857F5900BDD59A /* compare */,
+				20453F7F30857F5900BDD59A /* lib */,
+				20453F8030857F5900BDD59A /* recorder */,
+				20453F8130857F5900BDD59A /* _locales */,
+				20453F8230857F5900BDD59A /* editor */,
+				20453F8330857F5900BDD59A /* vendor */,
+			);
+			name = Resources;
+			path = "Captode Extension";
+			sourceTree = SOURCE_ROOT;
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		20453F4830857F5700BDD59A /* Captode */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 20453F7230857F5900BDD59A /* Build configuration list for PBXNativeTarget "Captode" */;
+			buildPhases = (
+				20453F4530857F5700BDD59A /* Sources */,
+				20453F4630857F5700BDD59A /* Frameworks */,
+				20453F4730857F5700BDD59A /* Resources */,
+				20453F7130857F5900BDD59A /* Embed Foundation Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				20453F6730857F5900BDD59A /* PBXTargetDependency */,
+			);
+			name = Captode;
+			productName = Captode;
+			productReference = 20453F4930857F5800BDD59A /* Captode.app */;
+			productType = "com.apple.product-type.application";
+		};
+		20453F6330857F5900BDD59A /* Captode Extension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 20453F6E30857F5900BDD59A /* Build configuration list for PBXNativeTarget "Captode Extension" */;
+			buildPhases = (
+				20453F6030857F5900BDD59A /* Sources */,
+				20453F6130857F5900BDD59A /* Frameworks */,
+				20453F6230857F5900BDD59A /* Resources */,
+			);
+			buildRules = (
+			);
+			name = "Captode Extension";
+			productName = "Captode Extension";
+			productReference = 20453F6430857F5900BDD59A /* Captode Extension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		20453F4130857F5700BDD59A /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2700;
+				LastUpgradeCheck = 2700;
+				TargetAttributes = {
+					20453F4830857F5700BDD59A = {
+						CreatedOnToolsVersion = 27.0;
+					};
+					20453F6330857F5900BDD59A = {
+						CreatedOnToolsVersion = 27.0;
+					};
+				};
+			};
+			buildConfigurationList = 20453F4430857F5700BDD59A /* Build configuration list for PBXProject "Captode" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 20453F4030857F5700BDD59A;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 20453F4A30857F5800BDD59A /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				20453F4830857F5700BDD59A /* Captode */,
+				20453F6330857F5900BDD59A /* Captode Extension */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		20453F4730857F5700BDD59A /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			files = (
+				20453F5330857F5800BDD59A /* Icon.png in Resources */,
+				20453F5C30857F5800BDD59A /* Main.storyboard in Resources */,
+				20453F5730857F5800BDD59A /* Script.js in Resources */,
+				20453F5130857F5800BDD59A /* Main.html in Resources */,
+				20453F5E30857F5900BDD59A /* Assets.xcassets in Resources */,
+				20453F5530857F5800BDD59A /* Style.css in Resources */,
+			);
+		};
+		20453F6230857F5900BDD59A /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			files = (
+				20453F9030857F5900BDD59A /* editor in Resources */,
+				20453F8C30857F5900BDD59A /* compare in Resources */,
+				20453F8930857F5900BDD59A /* content in Resources */,
+				20453F8E30857F5900BDD59A /* recorder in Resources */,
+				20453F8630857F5900BDD59A /* video in Resources */,
+				20453F8430857F5900BDD59A /* settings in Resources */,
+				20453F8730857F5900BDD59A /* LICENSE in Resources */,
+				20453F8F30857F5900BDD59A /* _locales in Resources */,
+				20453F9130857F5900BDD59A /* vendor in Resources */,
+				20453F8B30857F5900BDD59A /* manifest.json in Resources */,
+				20453F8D30857F5900BDD59A /* lib in Resources */,
+				20453F8530857F5900BDD59A /* popup in Resources */,
+				20453F8A30857F5900BDD59A /* icons in Resources */,
+				20453F8830857F5900BDD59A /* background.js in Resources */,
+			);
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		20453F4530857F5700BDD59A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			files = (
+				20453F5930857F5800BDD59A /* ViewController.swift in Sources */,
+				20453F4D30857F5800BDD59A /* AppDelegate.swift in Sources */,
+			);
+		};
+		20453F6030857F5900BDD59A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			files = (
+				20453F6A30857F5900BDD59A /* SafariWebExtensionHandler.swift in Sources */,
+			);
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		20453F6730857F5900BDD59A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 20453F6330857F5900BDD59A /* Captode Extension */;
+			targetProxy = 20453F6630857F5900BDD59A /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		20453F4F30857F5800BDD59A /* Main.html */ = {
+			isa = PBXVariantGroup;
+			children = (
+				20453F5030857F5800BDD59A /* Base */,
+			);
+			name = Main.html;
+			sourceTree = "<group>";
+		};
+		20453F5A30857F5800BDD59A /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				20453F5B30857F5800BDD59A /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		20453F6C30857F5900BDD59A /* Debug configuration for PBXProject "Captode" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		20453F6D30857F5900BDD59A /* Release configuration for PBXProject "Captode" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+			};
+			name = Release;
+		};
+		20453F6F30857F5900BDD59A /* Debug configuration for PBXNativeTarget "Captode Extension" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Captode Extension/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Captode Extension";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MARKETING_VERSION = 1.5.4;
+				OTHER_LDFLAGS = (
+					"-framework",
+					SafariServices,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.thecodersworld.captode.Extension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		20453F7030857F5900BDD59A /* Release configuration for PBXNativeTarget "Captode Extension" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Captode Extension/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Captode Extension";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MARKETING_VERSION = 1.5.4;
+				OTHER_LDFLAGS = (
+					"-framework",
+					SafariServices,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.thecodersworld.captode.Extension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		20453F7330857F5900BDD59A /* Debug configuration for PBXNativeTarget "Captode" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Captode/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Captode;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_NSMainStoryboardFile = Main;
+				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
+				INFOPLIST_KEY_NSViewGestureRecognizerIsExclusive = NO;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 1.5.4;
+				OTHER_LDFLAGS = (
+					"-framework",
+					SafariServices,
+					"-framework",
+					WebKit,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.thecodersworld.captode;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		20453F7430857F5900BDD59A /* Release configuration for PBXNativeTarget "Captode" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Captode/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Captode;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_NSMainStoryboardFile = Main;
+				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
+				INFOPLIST_KEY_NSViewGestureRecognizerIsExclusive = NO;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 1.5.4;
+				OTHER_LDFLAGS = (
+					"-framework",
+					SafariServices,
+					"-framework",
+					WebKit,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.thecodersworld.captode;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		20453F4430857F5700BDD59A /* Build configuration list for PBXProject "Captode" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				20453F6C30857F5900BDD59A /* Debug configuration for PBXProject "Captode" */,
+				20453F6D30857F5900BDD59A /* Release configuration for PBXProject "Captode" */,
+			);
+			defaultConfigurationName = Release;
+		};
+		20453F6E30857F5900BDD59A /* Build configuration list for PBXNativeTarget "Captode Extension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				20453F6F30857F5900BDD59A /* Debug configuration for PBXNativeTarget "Captode Extension" */,
+				20453F7030857F5900BDD59A /* Release configuration for PBXNativeTarget "Captode Extension" */,
+			);
+			defaultConfigurationName = Release;
+		};
+		20453F7230857F5900BDD59A /* Build configuration list for PBXNativeTarget "Captode" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				20453F7330857F5900BDD59A /* Debug configuration for PBXNativeTarget "Captode" */,
+				20453F7430857F5900BDD59A /* Release configuration for PBXNativeTarget "Captode" */,
+			);
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 20453F4130857F5700BDD59A /* Project object */;
+	validationLevel = 1;
+}

@@ -44,6 +44,7 @@ project's `dist` folder, download these two files. Don't unzip either of them.
       in the **Record** paragraph given in `listing-firefox.md`. Firefox can't record a
       single tab, so that paragraph leaves it out.
    5. **Categories:** Photos, Music & Videos; Productivity.
+      **Tags:** tick **privacy** and **video converter**, and no others.
    6. **Support website:** `https://github.com/nevin/Captode`
    7. **License:** GNU General Public License v3.0.
    8. **Privacy policy:** tick "This add-on has a privacy policy" and paste the text of
@@ -53,10 +54,17 @@ project's `dist` folder, download these two files. Don't unzip either of them.
 6. Click **Submit Version**.
 7. **Add screenshots**
    1. Open Captode's page in the Developer Hub and click **Edit Product Page**.
-   2. Upload `1-capture.jpg`, `2-annotate.jpg`, `3-review.jpg`, `4-devices.jpg`,
-      `6-compare.jpg` and `7-private.jpg` from the `store/screenshots` folder.
-   3. Skip `5-record.jpg`: it shows tab recording, which Firefox doesn't have.
-   4. Upload `store/icon-128.png` as the icon.
+   2. Upload, in this order: `1-capture.jpg`, `2-annotate.jpg`, `3-review.jpg` and
+      `4-devices.jpg` from the `store/screenshots` folder; then `5-record.jpg` from
+      `store/screenshots/firefox` (the Firefox version: it shows recording as Firefox
+      offers it); then `6-compare.jpg` and `7-private.jpg` from `store/screenshots`.
+   3. Give each screenshot its caption: copy them from **Screenshot captions** in
+      [`../listing-firefox.md`](../listing-firefox.md).
+   4. Don't use the `5-record.jpg` in `store/screenshots` itself: it shows tab recording
+      and the camera bubble, which Firefox doesn't have.
+   5. **Icon:** upload the three sizes from the `store/firefox` folder, `icon-32.png`,
+      `icon-64.png` and `icon-128.png`, if asked for each size. If only one is asked for,
+      use `icon-128.png`.
 
 ## After you submit
 

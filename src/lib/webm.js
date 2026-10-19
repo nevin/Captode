@@ -236,13 +236,21 @@ export function muxWebm({ video, audio = null }) {
   for (const f of all) {
     const t = ms(f.timestamp);
     if (!cur || (f.track === 1 && f.key && t > cur.time) || t - cur.time > 5000) {
-      cur = { time: t, blocks: [], key: f.track === 1 && f.key };
+      cur = { time: t, parts: [], size: 0, key: f.track === 1 && f.key };
       clusters.push(cur);
     }
-    const head = new Uint8Array([0x80 | f.track, ((t - cur.time) >> 8) & 255, (t - cur.time) & 255, f.key ? 0x80 : 0]);
-    cur.blocks.push(el(ID.SimpleBlock, concat([head, f.data])));
+    // A SimpleBlock's header, then the frame itself: the frames are never copied
+    // here (the Blob at the end copies them once), so a long video isn't held twice more.
+    const head = new Uint8Array([...idBytes(ID.SimpleBlock), ...sizeBytes(4 + f.data.length),
+      0x80 | f.track, ((t - cur.time) >> 8) & 255, (t - cur.time) & 255, f.key ? 0x80 : 0]);
+    cur.parts.push(head, f.data);
+    cur.size += head.length + f.data.length;
   }
-  const clusterBytes = clusters.map((c) => el(ID.Cluster, [el(ID.Timecode, c.time), ...c.blocks]));
+  const clusterBytes = clusters.map((c) => {
+    const time = el(ID.Timecode, c.time);
+    const parts = [new Uint8Array([...idBytes(ID.Cluster), ...sizeBytes(time.length + c.size)]), time, ...c.parts];
+    return { parts, length: parts[0].length + time.length + c.size };
+  });
   const last = all.length ? all[all.length - 1] : null;
   const durationMs = last ? ms(last.timestamp + (last.duration || 0)) : 0;
 
@@ -277,7 +285,7 @@ export function muxWebm({ video, audio = null }) {
     el(ID.EBMLVersion, 1), el(ID.EBMLReadVersion, 1), el(ID.EBMLMaxIDLength, 4), el(ID.EBMLMaxSizeLength, 8),
     el(ID.DocType, 'webm'), el(ID.DocTypeVersion, 4), el(ID.DocTypeReadVersion, 2),
   ]);
-  const body = [seekHead, info, tracksEl, cues, ...clusterBytes];
+  const body = [seekHead, info, tracksEl, cues, ...clusterBytes.flatMap((c) => c.parts)];
   const bodyLen = body.reduce((n, a) => n + a.length, 0);
   const segHead = concat([new Uint8Array(idBytes(ID.Segment)), new Uint8Array(sizeBytes(bodyLen, 8))]);
   return new Blob([header, segHead, ...body], { type: audio ? 'video/webm' : 'video/webm' });

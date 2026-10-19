@@ -37,7 +37,7 @@ You need the folder `captode-1.5.0-safari`, from either place:
       press Return.
    3. Paste this, then press Return:
       ```
-      xcrun safari-web-extension-converter dist/captode-1.5.0-safari --app-name Captode --bundle-identifier com.nevinpaul.captode --macos-only
+      xcrun safari-web-extension-converter dist/captode-1.5.0-safari --app-name Captode --bundle-identifier com.thecodersworld.captode --macos-only
       ```
    4. Xcode opens with a new project called **Captode**.
    5. Keep the bundle identifier the same in every future version.
@@ -62,7 +62,7 @@ You need the folder `captode-1.5.0-safari`, from either place:
    1. Go to https://appstoreconnect.apple.com, open **Apps**, click **+**, then **New App**.
    2. Platform: **macOS**.
    3. Name: **Captode**.
-   4. Bundle ID: `com.nevinpaul.captode`.
+   4. Bundle ID: `com.thecodersworld.captode`.
    5. SKU: `captode`.
 6. **Upload**
    1. In Xcode choose **Product → Archive**.

@@ -1,0 +1,447 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Captode — Editor</title>
+<link rel="icon" href="../icons/icon32.png">
+<script src="../lib/theme.js"></script>
+<link rel="stylesheet" href="../lib/ui.css">
+<link rel="stylesheet" href="editor.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand"><img src="../icons/icon48.png" alt="">Captode</div>
+  <div class="sep"></div>
+  <div class="doc"><b id="doc-name" data-i18n="editor_untitled">Untitled</b><span id="doc-dims">—</span></div>
+  <div class="spacer"></div>
+  <button class="btn ghost icon" id="help" data-tip="Keyboard shortcuts  ?" data-i18n-tip="editor_keyboard_shortcuts"><svg class="i" viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="13" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 15h10"/></svg></button>
+  <button class="btn ghost" id="compare" title="Compare this image with another capture or a design" data-i18n-title="editor_compare_this_image_with_another" data-i18n="editor_compare">
+    <svg class="i" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M12 2v20"/></svg>Compare
+  </button>
+  <label class="btn ghost" title="Open an image from your computer" data-i18n-title="editor_open_an_image_from_your" data-i18n="editor_open">
+    <svg class="i" viewBox="0 0 24 24"><path d="M4 20h16M12 4v12M7 9l5-5 5 5"/></svg>Open<input type="file" id="open" accept="image/*" hidden>
+  </label>
+  <button class="btn" id="copy" title="Copy the image to the clipboard (⌘⇧C)" data-i18n-title="editor_copy_the_image_to_the" data-i18n="editor_copy">
+    <svg class="i" viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg>Copy
+  </button>
+  <button class="btn primary" id="download" title="Download (⌘S)" data-i18n-title="editor_download_s" data-i18n="editor_download">
+    <svg class="i" viewBox="0 0 24 24"><path d="M12 4v12M7 11l5 5 5-5M4 20h16"/></svg>Download
+  </button>
+</header>
+
+<div class="layout">
+  <div class="workspace">
+    <div class="toolbar" role="toolbar" aria-label="Tools" data-i18n-aria-label="editor_tools">
+      <div class="tools" id="tools"></div>
+      <div class="sep"></div>
+      <button class="btn ghost icon" id="undo-all" data-tip="Undo all changes" data-i18n-tip="editor_undo_all_changes"><svg class="i" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 2.6-6.4L3 8"/><path d="M3 3v5h5"/><path d="M9.5 9.5 14.5 14.5M14.5 9.5 9.5 14.5"/></svg></button>
+      <button class="btn ghost icon" id="undo" data-tip="Undo  ⌘Z" data-i18n-tip="editor_undo_z"><svg class="i" viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/></svg></button>
+      <button class="btn ghost icon" id="redo" data-tip="Redo  ⇧⌘Z" data-i18n-tip="editor_redo_z"><svg class="i" viewBox="0 0 24 24"><path d="m15 14 5-5-5-5"/><path d="M20 9H9a5 5 0 0 0 0 10h3"/></svg></button>
+      <button class="btn ghost icon" id="delete" data-tip="Delete  ⌫" data-i18n-tip="editor_delete"><svg class="i" viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg></button>
+    </div>
+
+    <main id="stage" class="stage">
+      <div id="empty" class="empty hidden">
+        <div class="empty-inner">
+        <div class="empty-card">
+          <div class="empty-ico"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></svg></div>
+          <h2 data-i18n="editor_start_with_an_image">Start with an image</h2>
+          <p data-i18n-html="editor_capture_one_with_the_captode">Capture one with the Captode button in the toolbar, paste one with <kbd>⌘</kbd> <kbd>V</kbd>, or drop a file here.</p>
+          <label class="btn primary" data-i18n="editor_choose_an_image">Choose an image<input type="file" id="open2" accept="image/*" hidden></label>
+        </div>
+        <section class="recent hidden" id="recent" aria-labelledby="recent-title">
+          <h3 id="recent-title" data-i18n="editor_recent_captures">Recent captures <small data-i18n="editor_kept_on_this_device_for">Kept on this device for 24 hours</small></h3>
+          <div class="recent-list" id="recent-list"></div>
+        </section>
+        </div>
+      </div>
+      <div id="wrap" class="wrap">
+        <canvas id="bg"></canvas>
+        <canvas id="fg" role="img" aria-label="The image being edited" data-i18n-aria-label="editor_the_image_being_edited"></canvas>
+        <textarea id="text-edit" class="text-edit hidden" spellcheck="false"></textarea>
+      </div>
+    </main>
+
+    <div id="export-preview" class="export-preview hidden">
+      <div class="preview-head">
+        <span class="pill" data-i18n="editor_export_preview">Export preview</span>
+        <button class="btn" id="preview-edit" data-i18n="editor_back_to_editing">
+          <svg class="i" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>Back to editing
+        </button>
+      </div>
+      <canvas id="device-preview"></canvas>
+    </div>
+
+    <div class="canvas-hint hidden" id="canvas-hint" role="note">
+      <span data-i18n-html="editor_first_hint">Pick a tool above, or press <kbd>T</kbd> for text, <kbd>A</kbd> for an arrow, <kbd>B</kbd> to blur.</span>
+      <button class="btn ghost icon" id="canvas-hint-close" data-tip="Dismiss" data-i18n-tip="popup_dismiss" aria-label="Dismiss" data-i18n-aria-label="popup_dismiss"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+    </div>
+
+    <div class="zoombar">
+      <button class="btn ghost icon" id="zoom-out" data-tip="Zoom out  −" data-i18n-tip="editor_zoom_out"><svg class="i" viewBox="0 0 24 24"><path d="M5 12h14"/></svg></button>
+      <button class="btn ghost" id="zoom-label" data-tip="Fit or actual size  0" data-i18n-tip="editor_fit_or_actual_size_0">100%</button>
+      <button class="btn ghost icon" id="zoom-in" data-tip="Zoom in  +" data-i18n-tip="editor_zoom_in"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+    </div>
+  </div>
+
+  <aside class="inspector">
+    <nav class="tabs" role="tablist" aria-label="Inspector" data-i18n-aria-label="editor_inspector">
+      <button role="tab" id="tab-annotate" aria-controls="pane-annotate" data-pane="annotate" class="on" data-i18n="editor_annotate">Annotate</button>
+      <button role="tab" id="tab-adjust" aria-controls="pane-adjust" data-pane="adjust" data-i18n="editor_adjust">Adjust</button>
+      <button role="tab" id="tab-review" aria-controls="pane-review" data-pane="review" data-i18n="editor_review">Review</button>
+      <button role="tab" id="tab-export" aria-controls="pane-export" data-pane="export" data-i18n="editor_export">Export</button>
+    </nav>
+
+    <!-- Annotate -->
+    <div class="pane" role="tabpanel" id="pane-annotate" aria-labelledby="tab-annotate" data-pane="annotate">
+      <section class="section looks-section">
+        <h3 class="section-title" id="looks-title" data-i18n="editor_quick_styles">Quick styles</h3>
+        <div class="looks" id="looks" role="group" aria-labelledby="looks-title"></div>
+        <p class="muted small" id="looks-note" data-i18n="editor_colours_for_every_tool_at">Colours for every tool at once, and for what's selected.</p>
+      </section>
+      <section class="section" id="style-panel">
+        <h3 class="section-title" id="style-title" data-i18n="editor_style">Style</h3>
+        <div id="style-hint" class="tips">
+          <p class="muted" data-i18n="editor_pick_a_tool_from_the">Pick a tool from the toolbar, or click something you've added to change it.</p>
+          <ul>
+            <li><span data-i18n="editor_draw_a_straight_line_or">Draw a straight line or a square</span><span data-i18n="editor_drag"><kbd>Shift</kbd> + drag</span></li>
+            <li><span data-i18n="editor_edit_text">Edit text</span><span data-i18n="editor_double_click">Double-click</span></li>
+            <li><span data-i18n="editor_nudge_the_selection">Nudge the selection</span><span><kbd>←</kbd><kbd>→</kbd><kbd>↑</kbd><kbd>↓</kbd></span></li>
+            <li><span data-i18n="editor_zoom">Zoom</span><span data-i18n="editor_scroll"><kbd>⌘</kbd> + scroll</span></li>
+          </ul>
+        </div>
+
+        <div data-group="stroke">
+          <div class="field"><span data-i18n="settings_colour">Colour</span>
+            <div class="row"><input type="color" id="s-color"><div class="swatches" data-for="s-color"></div></div>
+          </div>
+          <label class="field"><span data-i18n="editor_thickness">Thickness <b id="s-width-v"></b></span><input type="range" id="s-width" min="1" max="40"></label>
+          <label class="field"><span data-i18n="editor_opacity">Opacity <b id="s-opacity-v"></b></span><input type="range" id="s-opacity" min="10" max="100"></label>
+          <div class="grid2" id="s-line-opts">
+            <label class="field"><span data-i18n="editor_line">Line</span>
+              <select id="s-dash"><option value="solid" data-i18n="editor_solid">Solid</option><option value="dashed" data-i18n="editor_dashed">Dashed</option><option value="dotted" data-i18n="editor_dotted">Dotted</option></select>
+            </label>
+            <label class="field" id="s-heads-field"><span data-i18n="editor_arrow_heads">Arrow heads</span>
+              <select id="s-heads"><option value="1" data-i18n="editor_at_the_end">At the end</option><option value="2" data-i18n="editor_both_ends">Both ends</option></select>
+            </label>
+          </div>
+        </div>
+
+        <div data-group="fill">
+          <label class="toggle"><span data-i18n="editor_fill">Fill</span><input type="checkbox" id="s-fill-on"></label>
+          <div class="row fill-row"><input type="color" id="s-fill"><div class="swatches" data-for="s-fill"></div></div>
+        </div>
+
+        <div data-group="text">
+          <label class="field"><span data-i18n="editor_font">Font</span>
+            <div class="row"><select id="t-font"></select><button class="btn icon" id="t-fonts" data-tip="Add installed fonts" data-i18n-tip="editor_add_installed_fonts"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button></div>
+          </label>
+          <div class="field"><span data-i18n="editor_size">Size</span>
+            <div class="row">
+              <div class="stepper">
+                <button class="btn ghost icon" id="t-smaller" data-tip="Smaller" data-i18n-tip="editor_smaller"><svg class="i" viewBox="0 0 24 24"><path d="M5 12h14"/></svg></button>
+                <input type="number" id="t-size" min="6" max="400" aria-label="Font size" data-i18n-aria-label="editor_font_size">
+                <button class="btn ghost icon" id="t-bigger" data-tip="Bigger" data-i18n-tip="editor_bigger"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+              </div>
+              <button class="btn icon" id="t-bold" data-tip="Bold" data-i18n-tip="editor_bold"><b>B</b></button>
+              <button class="btn icon" id="t-italic" data-tip="Italic" data-i18n-tip="editor_italic"><i style="font-family:Georgia,serif">I</i></button>
+            </div>
+          </div>
+          <div class="field"><span data-i18n="editor_text_colour">Text colour</span>
+            <div class="row"><input type="color" id="t-color"><div class="swatches" data-for="t-color"></div></div>
+          </div>
+          <label class="toggle"><span data-i18n="editor_background">Background</span><input type="checkbox" id="t-bg-on"></label>
+          <div class="row fill-row"><input type="color" id="t-bg"><div class="swatches" data-for="t-bg"></div></div>
+        </div>
+
+        <div data-group="step">
+          <div class="field"><span data-i18n="settings_colour">Colour</span>
+            <div class="row"><input type="color" id="st-color"><div class="swatches" data-for="st-color"></div></div>
+          </div>
+          <label class="field"><span data-i18n="editor_size">Size <b id="st-size-v"></b></span><input type="range" id="st-size" min="20" max="160"></label>
+          <label class="field"><span id="st-n-label" data-i18n="editor_next_number">Next number</span><input type="number" id="st-n" min="0" max="999" inputmode="numeric"></label>
+          <p class="muted small" data-i18n="editor_click_to_add_a_step">Click to add a step: each one counts up from the last. Drag to move one.</p>
+        </div>
+
+        <div data-group="spotlight">
+          <label class="field"><span data-i18n="editor_dim_the_rest">Dim the rest <b id="sp-dim-v"></b></span><input type="range" id="sp-dim" min="20" max="90" step="5"></label>
+          <label class="field"><span data-i18n="editor_rounded_corners">Rounded corners <b id="sp-radius-v"></b></span><input type="range" id="sp-radius" min="0" max="60"></label>
+          <p class="muted small" data-i18n="editor_everything_outside_the_spotlights_is">Everything outside the spotlights is dimmed. Draw several to light up more than one area.</p>
+        </div>
+
+        <div data-group="magnify">
+          <label class="field"><span data-i18n="editor_magnification">Magnification <b id="mg-zoom-v"></b></span><input type="range" id="mg-zoom" min="1.5" max="4" step="0.5"></label>
+          <div class="field"><span data-i18n="editor_border">Border</span>
+            <div class="row"><input type="color" id="mg-color"><div class="swatches" data-for="mg-color"></div></div>
+          </div>
+        </div>
+
+        <div data-group="redact">
+          <div class="field"><span data-i18n="editor_effect">Effect</span>
+            <select id="r-mode"><option value="pixelate" data-i18n="editor_pixelate">Pixelate</option><option value="blur" data-i18n="editor_blur">Blur</option><option value="solid" data-i18n="editor_solid_box">Solid box</option></select>
+          </div>
+          <label class="field"><span data-i18n="editor_strength">Strength</span><input type="range" id="r-strength" min="4" max="40"></label>
+        </div>
+
+        <div id="arrange" class="arrange hidden">
+          <span class="label" data-i18n="editor_arrange">Arrange</span>
+          <div class="row">
+            <button class="btn icon" id="a-front" data-tip="Bring to front  ⌘]" data-i18n-tip="editor_bring_to_front"><svg class="i" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2" fill="currentColor" fill-opacity=".25"/><path d="M4 16V5a1 1 0 0 1 1-1h11"/></svg></button>
+            <button class="btn icon" id="a-back" data-tip="Send to back  ⌘[" data-i18n-tip="editor_send_to_back"><svg class="i" viewBox="0 0 24 24"><rect x="4" y="4" width="12" height="12" rx="2"/><path d="M20 8v11a1 1 0 0 1-1 1H8"/></svg></button>
+            <button class="btn icon" id="a-dup" data-tip="Duplicate  ⌘D" data-i18n-tip="editor_duplicate_d"><svg class="i" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M4 16V5a1 1 0 0 1 1-1h11M14 11v6M11 14h6"/></svg></button>
+            <button class="btn icon" id="a-del" data-tip="Delete  ⌫" data-i18n-tip="editor_delete"><svg class="i" viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg></button>
+          </div>
+          <span class="label" id="align-label" data-i18n="editor_align">Align</span>
+          <div class="row align-row">
+            <button class="btn icon" data-align="left" data-tip="Align left" data-i18n-tip="editor_align_left"><svg class="i" viewBox="0 0 24 24"><path d="M4 3v18"/><rect x="8" y="6" width="12" height="4" rx="1"/><rect x="8" y="14" width="7" height="4" rx="1"/></svg></button>
+            <button class="btn icon" data-align="centre" data-tip="Align centres" data-i18n-tip="editor_align_centres"><svg class="i" viewBox="0 0 24 24"><path d="M12 3v18"/><rect x="5" y="6" width="14" height="4" rx="1"/><rect x="8" y="14" width="8" height="4" rx="1"/></svg></button>
+            <button class="btn icon" data-align="right" data-tip="Align right" data-i18n-tip="editor_align_right"><svg class="i" viewBox="0 0 24 24"><path d="M20 3v18"/><rect x="4" y="6" width="12" height="4" rx="1"/><rect x="9" y="14" width="7" height="4" rx="1"/></svg></button>
+            <button class="btn icon" data-align="top" data-tip="Align top" data-i18n-tip="editor_align_top"><svg class="i" viewBox="0 0 24 24"><path d="M3 4h18"/><rect x="6" y="8" width="4" height="12" rx="1"/><rect x="14" y="8" width="4" height="7" rx="1"/></svg></button>
+            <button class="btn icon" data-align="middle" data-tip="Align middles" data-i18n-tip="editor_align_middles"><svg class="i" viewBox="0 0 24 24"><path d="M3 12h18"/><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="8" width="4" height="8" rx="1"/></svg></button>
+            <button class="btn icon" data-align="bottom" data-tip="Align bottom" data-i18n-tip="editor_align_bottom"><svg class="i" viewBox="0 0 24 24"><path d="M3 20h18"/><rect x="6" y="4" width="4" height="12" rx="1"/><rect x="14" y="9" width="4" height="7" rx="1"/></svg></button>
+            <button class="btn icon" data-align="dist-h" data-tip="Space evenly across" data-i18n-tip="editor_space_evenly_across"><svg class="i" viewBox="0 0 24 24"><path d="M3 4v16M21 4v16"/><rect x="9" y="7" width="6" height="10" rx="1"/></svg></button>
+            <button class="btn icon" data-align="dist-v" data-tip="Space evenly down" data-i18n-tip="editor_space_evenly_down"><svg class="i" viewBox="0 0 24 24"><path d="M4 3h16M4 21h16"/><rect x="7" y="9" width="10" height="6" rx="1"/></svg></button>
+          </div>
+        </div>
+
+        <div data-group="crop">
+          <div class="field"><span data-i18n="editor_aspect_ratio">Aspect ratio</span>
+            <select id="c-ratio">
+              <option value="0" data-i18n="editor_freeform">Freeform</option><option value="1" data-i18n="editor_square_1_1">Square (1:1)</option><option value="1.7778" data-i18n="editor_widescreen_16_9">Widescreen (16:9)</option>
+              <option value="1.3333" data-i18n="editor_standard_4_3">Standard (4:3)</option><option value="0.5625" data-i18n="editor_portrait_9_16">Portrait (9:16)</option><option value="0.75" data-i18n="editor_portrait_3_4">Portrait (3:4)</option>
+            </select>
+          </div>
+          <p class="callout" id="c-size" data-i18n="editor_drag_on_the_image_to">Drag on the image to choose the area to keep.</p>
+          <div class="row" style="margin-top:12px"><button class="btn" id="c-cancel" data-i18n="settings_cancel">Cancel</button><button class="btn primary" id="c-apply" disabled data-i18n="editor_apply_crop">Apply crop</button></div>
+        </div>
+      </section>
+
+      <section class="section layers-section">
+        <h3 class="section-title" id="layers-title" data-i18n="editor_annotations">Annotations <span class="muted" id="layers-count"></span></h3>
+        <ul class="layers" id="layers" role="listbox" tabindex="0" aria-labelledby="layers-title" aria-multiselectable="true" aria-describedby="layers-help"></ul>
+        <p class="muted small" id="layers-help" data-i18n="editor_front_to_back_arrow_keys">Front to back. Arrow keys choose one (Shift: several); Alt with the arrows moves it (Shift: 10 px); Enter edits text; Delete removes.</p>
+      </section>
+    </div>
+
+    <!-- Adjust -->
+    <div class="pane hidden" role="tabpanel" id="pane-adjust" aria-labelledby="tab-adjust" data-pane="adjust">
+      <section class="section">
+        <h3 class="section-title" data-i18n="editor_image_size">Image size</h3>
+        <div class="row resize">
+          <label class="field"><span data-i18n="editor_width">Width</span><input type="number" id="rs-w" min="1"></label>
+          <button class="btn ghost icon link on" id="rs-lock-btn" data-tip="Keep proportions" data-i18n-tip="editor_keep_proportions"><svg class="i" viewBox="0 0 24 24"><path d="M9 17H7A5 5 0 0 1 7 7h2M15 7h2a5 5 0 0 1 0 10h-2M8 12h8"/></svg></button>
+          <label class="field"><span data-i18n="editor_height">Height</span><input type="number" id="rs-h" min="1"></label>
+        </div>
+        <input type="checkbox" id="rs-lock" checked hidden>
+        <div class="row presets">
+          <button class="btn" data-pct="0.25">25%</button><button class="btn" data-pct="0.5">50%</button>
+          <button class="btn" data-pct="0.75">75%</button><button class="btn primary" id="rs-apply" data-i18n="editor_resize">Resize</button>
+        </div>
+      </section>
+      <section class="section">
+        <h3 class="section-title" data-i18n="editor_rotate_and_flip">Rotate and flip</h3>
+        <div class="row presets">
+          <button class="btn icon" id="rot-ccw" data-tip="Rotate left" data-i18n-tip="editor_rotate_left"><svg class="i" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg></button>
+          <button class="btn icon" id="rot-cw" data-tip="Rotate right" data-i18n-tip="editor_rotate_right"><svg class="i" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg></button>
+          <button class="btn icon" id="flip-h" data-tip="Flip horizontally" data-i18n-tip="editor_flip_horizontally"><svg class="i" viewBox="0 0 24 24"><path d="M12 3v18"/><path d="M8 7 3 12l5 5V7zM16 7l5 5-5 5V7z"/></svg></button>
+          <button class="btn icon" id="flip-v" data-tip="Flip vertically" data-i18n-tip="editor_flip_vertically"><svg class="i" viewBox="0 0 24 24"><path d="M3 12h18"/><path d="M7 8l5-5 5 5H7zM7 16l5 5 5-5H7z"/></svg></button>
+        </div>
+      </section>
+      <section class="section">
+        <h3 class="section-title" data-i18n="editor_frame">Frame</h3>
+        <label class="field"><span data-i18n="editor_padding">Padding <b id="f-pad-v"></b></span><input type="range" id="f-pad" min="0" max="200" value="0"></label>
+        <div class="field"><span data-i18n="editor_backdrop">Backdrop</span>
+          <div class="row"><input type="color" id="f-bg" value="#ffffff"><div class="swatches" data-for="f-bg" data-set="backdrop"></div></div>
+        </div>
+        <label class="field"><span data-i18n="editor_rounded_corners">Rounded corners <b id="f-radius-v"></b></span><input type="range" id="f-radius" min="0" max="60" value="0"></label>
+        <label class="toggle"><span data-i18n="editor_drop_shadow">Drop shadow<small data-i18n="editor_shown_when_there_is_padding">Shown when there is padding</small></span><input type="checkbox" id="f-shadow"></label>
+      </section>
+    </div>
+
+    <!-- Review: measuring, colours and spacing, for checking a design. Nothing here is exported. -->
+    <div class="pane hidden" role="tabpanel" id="pane-review" aria-labelledby="tab-review" data-pane="review">
+      <section class="section">
+        <h3 class="section-title" data-i18n="editor_measure">Measure</h3>
+        <p class="muted small" data-i18n="editor_drag_across_the_image_with">Drag across the image with the Measure tool (U). Lines straighten and their ends snap to edges; hold Alt for neither.</p>
+        <div class="readout" id="m-readout" aria-live="polite" data-i18n="editor_no_measurements_yet">No measurements yet</div>
+        <div class="grid2">
+          <label class="field"><span data-i18n="editor_pixel_ratio">Pixel ratio</span>
+            <select id="m-ratio"><option value="auto" data-i18n="editor_automatic">Automatic</option><option value="1">1×</option><option value="2">2×</option><option value="3">3×</option></select>
+          </label>
+          <div class="field"><span>&nbsp;</span><button class="btn" id="m-clear" disabled data-i18n="editor_clear_all">Clear all</button></div>
+        </div>
+        <p class="muted small" id="m-ratio-note"></p>
+      </section>
+
+      <section class="section">
+        <h3 class="section-title" data-i18n="editor_colours_and_contrast">Colours and contrast</h3>
+        <p class="muted small" data-i18n="editor_click_the_image_with_the">Click the image with the Colour picker (I). Choose which colour to set next.</p>
+        <div class="pick-pair" role="radiogroup" aria-label="Colour to set next" data-i18n-aria-label="editor_colour_to_set_next">
+          <button class="pick-slot on" data-slot="0" role="radio" aria-checked="true"><span class="pick-swatch"></span><span><b data-i18n="editor_text">Text</b><small class="pick-hex" data-i18n="editor_not_picked">Not picked</small></span></button>
+          <button class="pick-slot" data-slot="1" role="radio" aria-checked="false"><span class="pick-swatch"></span><span><b data-i18n="editor_background">Background</b><small class="pick-hex" data-i18n="editor_not_picked">Not picked</small></span></button>
+        </div>
+        <div class="readout contrast" id="c-readout" aria-live="polite" data-i18n="editor_pick_two_colours_to_check">Pick two colours to check their contrast</div>
+        <div class="row gap">
+          <button class="btn" id="c-copy" disabled data-i18n="editor_copy_colours">Copy colours</button>
+          <button class="btn ghost" id="c-swap" disabled data-i18n="editor_swap">Swap</button>
+        </div>
+      </section>
+
+      <section class="section">
+        <h3 class="section-title" data-i18n="editor_spacing_grid">Spacing grid</h3>
+        <label class="toggle"><span data-i18n="editor_show_a_grid">Show a grid<small data-i18n="editor_over_the_image_only_not">Over the image only; not exported</small></span><input type="checkbox" id="g-on"></label>
+        <label class="field"><span data-i18n="editor_every">Every</span>
+          <select id="g-step"><option value="4">4 px</option><option value="8" selected>8 px</option><option value="16">16 px</option><option value="24">24 px</option></select>
+        </label>
+      </section>
+    </div>
+
+    <!-- Export -->
+    <div class="pane hidden" role="tabpanel" id="pane-export" aria-labelledby="tab-export" data-pane="export">
+      <section class="section">
+        <div id="presets"></div>
+        <h3 class="section-title" data-i18n="editor_format">Format</h3>
+        <div class="formats" id="formats"></div>
+        <select id="x-format" hidden>
+          <option value="png">PNG</option><option value="png8" data-i18n="editor_png_compressed">PNG — compressed</option><option value="jpeg">JPEG</option>
+          <option value="webp">WebP</option><option value="avif" hidden>AVIF</option><option value="gif">GIF</option>
+          <option value="bmp">BMP</option><option value="pdf">PDF</option>
+        </select>
+        <p class="muted small format-note" id="x-note"></p>
+
+        <label class="field" data-x="quality"><span data-i18n="editor_quality">Quality <b id="x-quality-v"></b></span><input type="range" id="x-quality" min="10" max="100" value="85"></label>
+        <div class="grid2" data-x="colors">
+          <label class="field"><span data-i18n="editor_colours">Colours</span>
+            <select id="x-colors"><option value="auto" data-i18n="editor_auto">Auto</option><option>256</option><option>128</option><option>64</option><option>32</option><option>16</option></select>
+          </label>
+          <label class="toggle dither"><span data-i18n="editor_dither">Dither</span><input type="checkbox" id="x-dither" checked></label>
+        </div>
+        <label class="field" data-x="lossy"><span data-i18n="editor_lossy_compression">Lossy compression <b id="x-lossy-v"></b></span><input type="range" id="x-lossy" min="0" max="100" step="5" value="0"></label>
+        <div data-x="pdf">
+          <label class="field"><span data-i18n="popup_page_size">Page size</span>
+            <select id="x-page"><option value="fit" data-i18n="editor_same_as_the_image">Same as the image</option><option value="a4">A4</option><option value="letter" data-i18n="editor_us_letter">US Letter</option></select>
+          </label>
+          <label class="toggle"><span data-i18n="editor_split_long_images">Split long images<small data-i18n="editor_continue_tall_images_onto_more">Continue tall images onto more pages</small></span><input type="checkbox" id="x-split" checked></label>
+        </div>
+        <label class="field"><span data-i18n="popup_scale">Scale</span>
+          <select id="x-scale">
+            <option value="1" data-i18n="editor_100_original_size">100% — original size</option><option value="0.75">75%</option><option value="0.5">50%</option>
+            <option value="0.25">25%</option><option value="2">200%</option>
+          </select>
+        </label>
+        <label class="field"><span data-i18n="editor_size_limit">Size limit</span>
+          <select id="x-limit">
+            <option value="0" data-i18n="editor_no_limit">No limit</option><option value="100">100 KB</option><option value="250">250 KB</option>
+            <option value="500">500 KB</option><option value="1024">1 MB</option><option value="2048">2 MB</option>
+            <option value="5120">5 MB</option><option value="10240">10 MB</option><option value="25600">25 MB</option>
+          </select>
+        </label>
+        <label class="field"><span data-i18n="editor_file_name">File name</span><input type="text" id="x-name"></label>
+      </section>
+
+      <section class="section">
+        <h3 class="section-title" data-i18n="popup_device_frame">Device frame</h3>
+        <div id="device-panel"></div>
+        <button class="btn block" id="multi-open" title="One image for each of several devices, in a zip" data-i18n-title="editor_one_image_for_each_of" data-i18n="editor_several_devices">
+          <svg class="i" viewBox="0 0 24 24"><rect x="2" y="4" width="9" height="16" rx="2"/><rect x="13" y="7" width="9" height="13" rx="2"/></svg>Several devices…
+        </button>
+      </section>
+
+      <section class="section">
+        <h3 class="section-title" data-i18n="editor_share_for_review">Share for review</h3>
+        <p class="muted small" data-i18n="editor_a_single_web_page_with">A single web page with the image, a note for each step, and where it came from. Attach it to a ticket or send it in chat: it opens in any browser.</p>
+        <button class="btn block" id="share-open" data-i18n="editor_share_for_review_2">
+          <svg class="i" viewBox="0 0 24 24"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7M12 3v12M7 8l5-5 5 5"/></svg>Share for review…
+        </button>
+      </section>
+
+      <div class="export-bar">
+        <p class="fitted hidden" id="x-fitted"></p>
+        <p class="x-dims" id="x-dims"></p>
+        <button class="btn primary block download-big" id="download2">
+          <svg class="i" viewBox="0 0 24 24"><path d="M12 4v12M7 11l5 5 5-5M4 20h16"/></svg><span class="dl-label" data-i18n="editor_download">Download</span><span class="estimate" id="x-estimate" aria-live="polite">—</span>
+        </button>
+      </div>
+    </div>
+  </aside>
+</div>
+<div class="sr-only" id="announce" aria-live="polite"></div>
+<dialog class="modal multi" id="multi" aria-labelledby="multi-title">
+  <div class="modal-body">
+    <h2 id="multi-title" data-i18n="editor_export_for_several_devices">Export for several devices</h2>
+    <p class="muted" data-i18n="editor_one_image_for_each_in">One image for each, in a zip, in the format and with the options set in Export. Each keeps the capture's exact pixels.</p>
+    <div class="multi-list" id="multi-list" role="group" aria-labelledby="multi-title"></div>
+    <p class="muted small" id="multi-status" aria-live="polite"></p>
+    <div class="row actions">
+      <button class="btn" data-close data-i18n="settings_cancel">Cancel</button>
+      <button class="btn primary" id="multi-go" data-i18n="editor_download_zip">Download zip</button>
+    </div>
+  </div>
+</dialog>
+<dialog class="modal share" id="share" aria-labelledby="share-title">
+  <form class="modal-body" id="share-form" method="dialog">
+    <h2 id="share-title" data-i18n="editor_share_for_review">Share for review</h2>
+    <label class="field"><span data-i18n="editor_title">Title</span><input type="text" id="sh-title" maxlength="120" required></label>
+    <label class="field"><span data-i18n="editor_summary">Summary <small class="muted" data-i18n="editor_optional">optional</small></span><textarea id="sh-summary" rows="3" placeholder="What should reviewers look at?" data-i18n-placeholder="editor_what_should_reviewers_look_at"></textarea></label>
+    <div id="sh-steps"></div>
+    <p class="muted small" id="sh-none" data-i18n="editor_add_numbered_steps_n_to">Add numbered steps (N) to the image to write a note for each.</p>
+    <div class="row actions">
+      <button type="button" class="btn" data-close data-i18n="settings_cancel">Cancel</button>
+      <button type="submit" class="btn primary" id="sh-go" data-i18n="editor_download_review_page">Download review page</button>
+    </div>
+  </form>
+</dialog>
+<dialog class="modal" id="shortcuts" aria-labelledby="shortcuts-title">
+  <div class="modal-head">
+    <h2 id="shortcuts-title" data-i18n="editor_keyboard_shortcuts_2">Keyboard shortcuts</h2>
+    <button class="btn ghost icon" data-close data-tip="Close" data-i18n-tip="editor_close"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+  </div>
+  <div class="modal-body keys">
+    <h3 data-i18n="editor_tools">Tools</h3>
+    <div><span data-i18n="editor_select_and_move">Select and move</span><span><kbd>V</kbd></span></div>
+    <div><span data-i18n="editor_pan">Pan</span><span data-i18n="editor_or_hold"><kbd>M</kbd>, or hold <kbd>Space</kbd></span></div>
+    <div><span data-i18n="editor_crop">Crop</span><span><kbd>C</kbd></span></div>
+    <div><span data-i18n="editor_pen">Pen</span><span><kbd>P</kbd></span></div>
+    <div><span data-i18n="editor_highlighter">Highlighter</span><span><kbd>H</kbd></span></div>
+    <div><span data-i18n="editor_arrow">Arrow</span><span><kbd>A</kbd></span></div>
+    <div><span data-i18n="editor_line">Line</span><span><kbd>L</kbd></span></div>
+    <div><span data-i18n="editor_rectangle">Rectangle</span><span><kbd>R</kbd></span></div>
+    <div><span data-i18n="editor_ellipse">Ellipse</span><span><kbd>E</kbd></span></div>
+    <div><span data-i18n="editor_text">Text</span><span><kbd>T</kbd></span></div>
+    <div><span data-i18n="editor_callout_speech_bubble">Callout (speech bubble)</span><span><kbd>K</kbd></span></div>
+    <div><span data-i18n="editor_step_number">Step number</span><span><kbd>N</kbd></span></div>
+    <div><span data-i18n="editor_spotlight">Spotlight</span><span><kbd>F</kbd></span></div>
+    <div><span data-i18n="editor_magnifier">Magnifier</span><span><kbd>Z</kbd></span></div>
+    <div><span data-i18n="editor_measure">Measure</span><span><kbd>U</kbd></span></div>
+    <div><span data-i18n="editor_colour_picker">Colour picker</span><span><kbd>I</kbd></span></div>
+    <div><span data-i18n="editor_spacing_grid_on_or_off">Spacing grid on or off</span><span><kbd>G</kbd></span></div>
+    <div><span data-i18n="editor_blur_or_pixelate">Blur or pixelate</span><span><kbd>B</kbd></span></div>
+    <h3 data-i18n="editor_editing">Editing</h3>
+    <div><span data-i18n="editor_undo">Undo</span><span><kbd>⌘</kbd> <kbd>Z</kbd></span></div>
+    <div><span data-i18n="editor_redo">Redo</span><span><kbd>⇧</kbd> <kbd>⌘</kbd> <kbd>Z</kbd></span></div>
+    <div><span data-i18n="editor_undo_all_changes">Undo all changes</span><span data-i18n="editor_toolbar_button">Toolbar button</span></div>
+    <div><span data-i18n="editor_delete_selection">Delete selection</span><span><kbd>⌫</kbd></span></div>
+    <div><span data-i18n="editor_select_several">Select several</span><span data-i18n="editor_click_or_drag_a_box"><kbd>⇧</kbd> + click, or drag a box</span></div>
+    <div><span data-i18n="editor_select_all">Select all</span><span><kbd>⌘</kbd> <kbd>A</kbd></span></div>
+    <div><span data-i18n="editor_duplicate">Duplicate</span><span><kbd>⌘</kbd> <kbd>D</kbd></span></div>
+    <div><span data-i18n="editor_copy_paste_annotations">Copy / paste annotations</span><span><kbd>⌘</kbd> <kbd>C</kbd> / <kbd>⌘</kbd> <kbd>V</kbd></span></div>
+    <div><span data-i18n="editor_bring_to_front_send_to">Bring to front / send to back</span><span><kbd>⌘</kbd> <kbd>]</kbd> / <kbd>⌘</kbd> <kbd>[</kbd></span></div>
+    <div><span data-i18n="editor_deselect">Deselect</span><span><kbd>Esc</kbd></span></div>
+    <div><span data-i18n="editor_nudge_10_px_with">Nudge (10 px with ⇧)</span><span><kbd>←</kbd><kbd>↑</kbd><kbd>→</kbd><kbd>↓</kbd></span></div>
+    <div><span data-i18n="editor_straight_line_or_square">Straight line or square</span><span data-i18n="editor_drag"><kbd>⇧</kbd> + drag</span></div>
+    <div><span data-i18n="editor_move_or_resize_without_snapping">Move or resize without snapping</span><span data-i18n="editor_drag"><kbd>Alt</kbd> + drag</span></div>
+    <div><span data-i18n="editor_edit_text">Edit text</span><span data-i18n="editor_double_click">Double-click</span></div>
+    <div><span data-i18n="editor_apply_crop">Apply crop</span><span><kbd>Enter</kbd></span></div>
+    <h3 data-i18n="editor_view_and_file">View and file</h3>
+    <div><span data-i18n="editor_zoom_in_out">Zoom in / out</span><span data-i18n-html="editor_zoom_keys"><kbd>+</kbd> <kbd>−</kbd>, or <kbd>⌘</kbd> + scroll at the pointer</span></div>
+    <div><span data-i18n="editor_fit_to_window">Fit to window</span><span><kbd>0</kbd></span></div>
+    <div><span data-i18n="editor_download">Download</span><span><kbd>⌘</kbd> <kbd>S</kbd></span></div>
+    <div><span data-i18n="editor_copy_image">Copy image</span><span><kbd>⇧</kbd> <kbd>⌘</kbd> <kbd>C</kbd></span></div>
+    <div><span data-i18n="editor_paste_an_image">Paste an image</span><span><kbd>⌘</kbd> <kbd>V</kbd></span></div>
+    <div><span data-i18n="editor_this_list">This list</span><span><kbd>?</kbd></span></div>
+  </div>
+</dialog>
+<script type="module" src="editor.js"></script>
+</body>
+</html>

@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Captode — Camera and microphone</title>
+<link rel="icon" href="../icons/icon32.png">
+<script src="../lib/theme.js"></script>
+<link rel="stylesheet" href="../lib/ui.css">
+<style>
+  body { min-height: 100vh; display: grid; place-items: center; padding: 16px;
+    background-color: var(--stage); background-image: radial-gradient(circle, var(--stage-dot) 1px, transparent 1px); background-size: 20px 20px; }
+  .card { width: min(440px, 100%); padding: 32px 28px; text-align: center; background: var(--panel);
+    border: 1px solid var(--line); border-radius: 16px; box-shadow: var(--shadow-lg); }
+  .card .brand { justify-content: center; margin-bottom: 22px; }
+  .icon { width: 56px; height: 56px; margin: 0 auto 14px; border-radius: 16px; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent); }
+  .icon .i { width: 28px; height: 28px; }
+  h1 { font-size: 19px; margin: 0 0 6px; letter-spacing: -0.01em; }
+  p { margin: 0 0 18px; color: var(--muted); }
+  .btn.primary { height: 40px; padding: 0 18px; font-weight: 600; }
+  .bubble { width: 132px; height: 132px; margin: 4px auto 18px; border-radius: 50%; overflow: hidden; border: 3px solid #fff; box-shadow: var(--shadow); background: #000; }
+  .bubble video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
+  .meter { width: 160px; height: 6px; margin: 0 auto 18px; border-radius: 3px; background: var(--line); overflow: hidden; }
+  .meter span { display: block; height: 100%; width: 0; background: var(--accent); transition: width .1s; }
+  .err { color: var(--rec); }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="brand"><img src="../icons/icon48.png" alt="">Captode</div>
+    <div id="ask">
+      <div class="icon"><svg class="i" viewBox="0 0 24 24"><path d="m22 8-6 4 6 4V8z"/><rect x="2" y="6" width="14" height="12" rx="2"/></svg></div>
+      <h1 id="ask-title"></h1>
+      <p data-i18n="permission_why">Your browser asks once. Captode uses them only while you record, and the recording stays on your computer.</p>
+      <button class="btn primary" id="allow" data-i18n="permission_allow">Allow</button>
+    </div>
+    <div id="done" class="hidden">
+      <div class="bubble hidden" id="bubble"><video id="preview" autoplay muted playsinline></video></div>
+      <div class="meter hidden" id="meter"><span></span></div>
+      <h1 data-i18n="permission_ready">Ready</h1>
+      <p data-i18n="permission_ready_text">Your next recordings will include them. This tab closes by itself.</p>
+    </div>
+    <div id="denied" class="hidden">
+      <h1 class="err" data-i18n="permission_blocked">Your browser blocked access</h1>
+      <p data-i18n="permission_blocked_text">Allow the camera and microphone for Captode with the permissions icon beside the address bar, then try again.</p>
+      <button class="btn" id="retry" data-i18n="permission_try_again">Try again</button>
+    </div>
+  </div>
+  <script type="module" src="permission.js"></script>
+</body>
+</html>

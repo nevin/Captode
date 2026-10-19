@@ -1225,8 +1225,18 @@ export const tests = {
     await p.click('#choose');
     await sleep(2600);
     ok(await visible('live') && !(await visible('counting')), 'recording did not start after the countdown');
+    ok(!(await visible('no-sound')), 'no sound note when sound was not asked for');
     await Promise.all([p.waitForNavigation({ timeout: 30000 }), p.click('#stop')]);
     ok(p.url().includes('video/video.html?id='), `after stopping: ${p.url()}`);
+
+    // Sound asked for, but the shared screen has none (as when a browser shares no audio):
+    // the page says the recording will be silent.
+    await p.goto(url('recorder/screen.html?fps=30&audio=1&countdown=0'));
+    await fakeShare();
+    await p.click('#choose');
+    await p.waitForFunction(() => !document.getElementById('live').classList.contains('hidden'), { polling: 100, timeout: 5000 });
+    ok(await visible('no-sound'), 'no note that no sound was shared');
+    await Promise.all([p.waitForNavigation({ timeout: 30000 }), p.click('#stop')]);
     await p.close();
   },
 

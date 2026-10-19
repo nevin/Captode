@@ -99,7 +99,9 @@ or install the zip from `npm run package`.
 19. **Firefox** (from about:debugging → This Firefox → Load Temporary Add-on, choosing
    `manifest.json` in an unpacked `captode-<version>-firefox.zip`): every screenshot mode,
    the right-click menu, shortcuts, **Record → Full screen** with the microphone, an MP4
-   and a GIF export, and Copy in the editor.
+   and a GIF export, and Copy in the editor. Record with **Record audio** on while a video
+   plays: if Firefox shares no sound, the recording page must say so ("No sound was
+   shared…") rather than record silence without a word.
 
 ### Windows
 

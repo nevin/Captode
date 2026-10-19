@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Captode — Compare</title>
+<link rel="icon" href="../icons/icon32.png">
+<script src="../lib/theme.js"></script>
+<link rel="stylesheet" href="../lib/ui.css">
+<link rel="stylesheet" href="compare.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand"><img src="../icons/icon48.png" alt="">Captode</div>
+  <div class="sep"></div>
+  <div class="doc"><b data-i18n="editor_compare">Compare</b><span id="info" data-i18n="compare_choose_two_images">Choose two images</span></div>
+  <div class="spacer"></div>
+  <button class="btn ghost" id="dl-diff" disabled title="Download the difference image as PNG" data-i18n-title="compare_download_the_difference_image_as" data-i18n="compare_difference_image">
+    <svg class="i" viewBox="0 0 24 24"><path d="M12 4v12M7 11l5 5 5-5M4 20h16"/></svg>Difference image
+  </button>
+</header>
+
+<div class="layout">
+  <main class="stage" id="stage">
+    <div class="view hidden" id="view" data-mode="slider">
+      <div class="pane-a"><canvas id="can-a"></canvas><span class="tag">A</span></div>
+      <div class="pane-b"><canvas id="can-b"></canvas><span class="tag">B</span></div>
+      <canvas id="can-d" class="hidden"></canvas>
+      <div class="divider" id="divider" role="slider" tabindex="0" aria-label="Divide between A and B" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" data-i18n-aria-label="compare_divide_between_a_and_b">
+        <span class="grip"></span>
+      </div>
+    </div>
+    <div class="empty-card" id="empty">
+      <h2 data-i18n="compare_compare_two_images">Compare two images</h2>
+      <p class="muted" data-i18n="compare_pick_two_captures_on_the">Pick two captures on the right, or open image files: a design export against a screenshot of the build, or a page before and after a change.</p>
+      <button class="btn primary hidden" id="last-two" data-i18n="compare_last_two">Compare the last two captures</button>
+      <small class="muted hidden" id="last-two-note"></small>
+    </div>
+  </main>
+
+  <aside class="inspector">
+    <section class="section">
+      <h3 class="section-title" data-i18n="compare_images">Images</h3>
+      <div class="pick" data-side="a">
+        <label class="field"><span>A</span><select id="sel-a"></select></label>
+        <label class="btn ghost icon" data-tip="Open an image file for A" aria-label="Open an image file for A" data-i18n-aria-label="compare_open_an_image_file_for" data-i18n-tip="compare_open_an_image_file_for">
+          <svg class="i" viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5M4 20h16"/></svg><input type="file" accept="image/*" id="file-a" hidden>
+        </label>
+      </div>
+      <div class="pick" data-side="b">
+        <label class="field"><span>B</span><select id="sel-b"></select></label>
+        <label class="btn ghost icon" data-tip="Open an image file for B" aria-label="Open an image file for B" data-i18n-aria-label="compare_open_an_image_file_for_2" data-i18n-tip="compare_open_an_image_file_for_2">
+          <svg class="i" viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5M4 20h16"/></svg><input type="file" accept="image/*" id="file-b" hidden>
+        </label>
+      </div>
+      <button class="btn" id="swap" data-i18n="compare_swap_a_and_b">Swap A and B</button>
+    </section>
+
+    <section class="section">
+      <h3 class="section-title" data-i18n="compare_view">View</h3>
+      <div class="seg" id="modes" role="radiogroup" aria-label="View" data-i18n-aria-label="compare_view">
+        <button data-mode="slider" class="on" role="radio" aria-checked="true" data-i18n="compare_slider">Slider</button>
+        <button data-mode="side" role="radio" aria-checked="false" data-i18n="compare_side_by_side">Side by side</button>
+        <button data-mode="overlay" role="radio" aria-checked="false" data-i18n="compare_overlay">Overlay</button>
+        <button data-mode="diff" role="radio" aria-checked="false" data-i18n="compare_difference">Difference</button>
+      </div>
+      <label class="field mode-opt" data-for="overlay"><span data-i18n="compare_b_s_opacity">B's opacity <b id="opacity-v">50%</b></span><input type="range" id="opacity" min="0" max="100" value="50"></label>
+      <div class="mode-opt" data-for="diff">
+        <label class="field"><span data-i18n="compare_tolerance">Tolerance <b id="tol-v">8</b></span><input type="range" id="tol" min="0" max="64" value="8"></label>
+        <div class="readout" id="stats" aria-live="polite">—</div>
+      </div>
+      <label class="field"><span data-i18n="editor_zoom">Zoom</span>
+        <select id="zoom"><option value="fit" data-i18n="compare_fit">Fit</option><option value="1">100%</option><option value="0.5">50%</option><option value="2">200%</option></select>
+      </label>
+    </section>
+
+    <section class="section">
+      <h3 class="section-title" data-i18n="compare_line_up">Line up</h3>
+      <label class="toggle"><span data-i18n="compare_match_widths">Match widths<small id="match-note" data-i18n="compare_scale_b_to_a_s">Scale B to A's width</small></span><input type="checkbox" id="match" checked></label>
+      <div class="grid2">
+        <label class="field"><span data-i18n="compare_move_b_across">Move B across</span><input type="number" id="dx" value="0" step="1"></label>
+        <label class="field"><span data-i18n="compare_move_b_down">Move B down</span><input type="number" id="dy" value="0" step="1"></label>
+      </div>
+      <p class="muted small" data-i18n="compare_in_a_s_pixels_with">In A's pixels. With the view focused, Alt and the arrow keys move B a pixel at a time (Shift: 10).</p>
+    </section>
+  </aside>
+</div>
+<script type="module" src="compare.js"></script>
+</body>
+</html>

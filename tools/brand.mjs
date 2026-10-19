@@ -7,6 +7,7 @@
 //   src/icons/icon{16,32,48,128}.png   extension icons (16 and 32: the small mark)
 //   store/icon-128.png        Chrome Web Store icon: 96 × 96 artwork in 16 px of padding
 //   store/icon-300.png        Microsoft Edge Add-ons icon
+//   store/firefox/icon-{32,64,128}.png  addons.mozilla.org icons (the artwork fills the square)
 //   docs/logo.png             the logo shown at the top of the README
 // Image work happens in Chrome (via Puppeteer), which resamples well.
 import puppeteer from 'puppeteer';
@@ -164,6 +165,9 @@ const out = await page.evaluate(async (logo, isSvg, small) => {
     'src/icons/icon128.png': await b64(icon(128, 96)),
     'store/icon-128.png': await b64(icon(128, 96)),
     'store/icon-300.png': await b64(icon(300, 284)),
+    'store/firefox/icon-32.png': await b64(icon(32, 32, windowOnly)),
+    'store/firefox/icon-64.png': await b64(icon(64, 62)),
+    'store/firefox/icon-128.png': await b64(icon(128, 124)),
     'docs/logo.png': await b64(resize(square, 256)),
   };
 }, readFileSync(source).toString('base64'), isSvg, small);

@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Captode — Screen recorder</title>
+<link rel="icon" href="../icons/icon32.png">
+<script src="../lib/theme.js"></script>
+<link rel="stylesheet" href="../lib/ui.css">
+<style>
+  body { min-height: 100vh; display: grid; place-items: center; padding: 16px;
+    background-color: var(--stage); background-image: radial-gradient(circle, var(--stage-dot) 1px, transparent 1px); background-size: 20px 20px; }
+  .card { width: min(420px, 100%); padding: 32px 28px; text-align: center; background: var(--panel);
+    border: 1px solid var(--line); border-radius: 16px; box-shadow: var(--shadow-lg); }
+  .card .brand { justify-content: center; margin-bottom: 22px; }
+  .icon { width: 56px; height: 56px; margin: 0 auto 14px; border-radius: 16px; display: grid; place-items: center; background: rgba(229,72,77,.1); color: var(--rec); }
+  .icon .i { width: 28px; height: 28px; }
+  h1 { font-size: 19px; margin: 0 0 6px; letter-spacing: -0.01em; }
+  p { margin: 0 0 22px; color: var(--muted); }
+  .btn.rec { background: var(--rec); border-color: var(--rec); color: #fff; height: 40px; padding: 0 18px; font-weight: 600; }
+  .btn.rec:hover { filter: brightness(1.05); background: var(--rec); }
+  .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--rec); display: inline-block; animation: pulse 1.2s infinite; margin-right: 6px; vertical-align: middle; }
+  @keyframes pulse { 50% { opacity: .25; } }
+  .time { font: 600 40px/1 ui-monospace, "SF Mono", Menlo, monospace; margin: 14px 0 22px; font-variant-numeric: tabular-nums; }
+  .err { color: var(--rec); margin: 16px 0 0; font-size: 12px; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="brand"><img src="../icons/icon48.png" alt="">Captode</div>
+    <div id="pick">
+      <div class="icon"><svg class="i" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></div>
+      <h1 data-i18n="screen_record_your_screen">Record your screen</h1>
+      <p data-i18n="screen_choose_your_whole_screen_a">Choose your whole screen, a window or a tab. To stop, click the Captode icon or come back here.</p>
+      <button class="btn rec" id="choose" data-i18n="popup_choose_what_to_record">Choose what to record</button>
+      <p id="err" class="err hidden"></p>
+    </div>
+    <div id="counting" class="hidden">
+      <h1 data-i18n="screen_recording_starts_in">Recording starts in</h1>
+      <div class="time" id="count" role="timer" aria-live="polite">3</div>
+      <button class="btn" id="cancel" data-i18n="settings_cancel">Cancel</button>
+    </div>
+    <div id="live" class="hidden">
+      <h1 data-i18n="video_recording"><span class="dot"></span>Recording</h1>
+      <div class="time" id="time">0:00</div>
+      <button class="btn rec" id="stop" data-i18n="screen_stop_recording">Stop recording</button>
+    </div>
+    <div id="saving" class="hidden"><h1 data-i18n="screen_saving_your_recording">Saving your recording…</h1></div>
+  </div>
+  <script type="module" src="screen.js"></script>
+</body>
+</html>

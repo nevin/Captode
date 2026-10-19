@@ -23,6 +23,7 @@
   @keyframes pulse { 50% { opacity: .25; } }
   .time { font: 600 40px/1 ui-monospace, "SF Mono", Menlo, monospace; margin: 14px 0 22px; font-variant-numeric: tabular-nums; }
   .err { color: var(--rec); margin: 16px 0 0; font-size: 12px; }
+  .note { margin: -8px 0 18px; font-size: 12px; }
 </style>
 </head>
 <body>
@@ -43,6 +44,7 @@
     <div id="live" class="hidden">
       <h1 data-i18n="video_recording"><span class="dot"></span>Recording</h1>
       <div class="time" id="time">0:00</div>
+      <p class="note hidden" id="no-sound" data-i18n="screen_no_sound">No sound was shared, so the recording has none (except your microphone, if it's on).</p>
       <button class="btn rec" id="stop" data-i18n="screen_stop_recording">Stop recording</button>
     </div>
     <div id="saving" class="hidden"><h1 data-i18n="screen_saving_your_recording">Saving your recording…</h1></div>

@@ -100,7 +100,10 @@ for (const [id, target] of Object.entries(TARGETS)) {
     'manifest.json': Buffer.from(`${JSON.stringify(manifestFor(id, manifest), null, 2)}\n`),
     'lib/target.js': Buffer.from(targetModule(id)),
   };
-  const pkg = files.map(([name, data]) => [name, own[name] || data]);
+  // Files this browser's package replaces or leaves out (see tools/targets.mjs).
+  for (const [name, from] of Object.entries(target.files?.replace || {})) own[name] = readFileSync(join(root, from));
+  const drop = new Set(target.files?.drop || []);
+  const pkg = files.filter(([name]) => !drop.has(name)).map(([name, data]) => [name, own[name] || data]);
   const found = leaks(id, pkg);
   if (found.length) {
     failed = true;
@@ -124,7 +127,8 @@ if (failed) {
   process.exit(1);
 }
 
-if (!only) {
+// The source zip comes from the repository; a copy made from that zip has no git to ask.
+if (!only && existsSync(join(root, '.git'))) {
   // The source: the files git tracks, as committed or changed, nothing downloaded or built.
   const tracked = execFileSync('git', ['ls-files', '-z'], { cwd: root, encoding: 'utf8' }).split('\0').filter((f) => f && existsSync(join(root, f)));
   writeZip(`captode-${version}-source.zip`, tracked.sort().map((f) => [f, readFileSync(join(root, f))]));

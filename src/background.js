@@ -6,8 +6,8 @@ import {
   countdown, captureDelay, showOutline, hideOutline, showInputs, findPrivate,
 } from './content/page.js';
 import { t } from './lib/i18n.js';
+import { canRecordTabs, startTabCapture, endTabCapture } from './lib/tab-capture.js';
 
-const OFFSCREEN = 'recorder/offscreen.html';
 
 // ---------- helpers ----------
 
@@ -86,11 +86,13 @@ async function captureImage(mode, tab, delay = 0) {
 
   if (mode === 'visible') {
     const bmp = await captureVisible(tab.windowId);
+    const width = bmp.width;
     blob = await toPng(bmp, 0, 0, bmp.width, bmp.height);
+    bmp.close();
     // Image pixels per CSS pixel, for measuring in the editor.
     const view = await run(tab.id, () => [innerWidth, innerHeight]).catch(() => null);
     if (view) {
-      meta.dpr = bmp.width / view[0];
+      meta.dpr = width / view[0];
       await notePrivate(tab, meta, { x: 0, y: 0, w: view[0], h: view[1] }, 'viewport', meta.dpr);
     }
   } else if (mode === 'area') {
@@ -102,6 +104,7 @@ async function captureImage(mode, tab, delay = 0) {
     meta.dpr = s;
     await notePrivate(tab, meta, rect, 'viewport', s);
     blob = await toPng(bmp, rect.x * s, rect.y * s, rect.w * s, rect.h * s);
+    bmp.close();
   } else if (mode === 'element') {
     const rect = await run(tab.id, pickElement, t('pick_element_hint'));
     if (!rect) return;
@@ -113,6 +116,18 @@ async function captureImage(mode, tab, delay = 0) {
 
   const id = await putCapture(blob, meta);
   await openPage(`editor/editor.html?id=${id}`, tab);
+}
+
+/**
+ * The stitched image as a PNG, cut down to what was painted. A long page's canvas can
+ * hold up to a gigabyte, so it's given back as soon as it isn't needed, before encoding.
+ */
+async function finish(canvas, w, h) {
+  if (w >= canvas.width && h >= canvas.height) return canvas.convertToBlob({ type: 'image/png' });
+  const trimmed = new OffscreenCanvas(Math.max(1, Math.min(canvas.width, w)), Math.max(1, Math.min(canvas.height, h)));
+  trimmed.getContext('2d').drawImage(canvas, 0, 0);
+  canvas.width = canvas.height = 0;
+  return trimmed.convertToBlob({ type: 'image/png' });
 }
 
 async function toPng(bmp, x, y, w, h) {
@@ -186,7 +201,10 @@ async function capturePanel(tab, info, meta) {
   await notePrivate(tab, meta, { x: 0, y: 0, w: sw / scale, h: height }, 'panel', scale);
   const canvas = new OffscreenCanvas(sw, Math.max(sh, Math.round(height * scale)));
   const ctx = canvas.getContext('2d');
-  ctx.drawImage(await cut(first), 0, 0);
+  const top = await cut(first);
+  first.close();
+  ctx.drawImage(top, 0, 0);
+  top.close();
   let paintedH = sh;
 
   const viewH = Math.max(1, Math.floor(sh / scale) - OVERLAP);
@@ -204,12 +222,7 @@ async function capturePanel(tab, info, meta) {
     tile.close();
     await badge(`${Math.round((++done / ys.length) * 100)}%`, '#5b4bff');
   }
-  if (paintedH < canvas.height) {
-    const trimmed = new OffscreenCanvas(canvas.width, paintedH);
-    trimmed.getContext('2d').drawImage(canvas, 0, 0);
-    return trimmed.convertToBlob({ type: 'image/png' });
-  }
-  return canvas.convertToBlob({ type: 'image/png' });
+  return finish(canvas, canvas.width, paintedH);
 }
 
 /**
@@ -224,7 +237,7 @@ async function captureElement(tab, r, meta) {
     meta.dpr = s;
     const x = Math.max(0, r.x * s), y = Math.max(0, r.y * s);
     await notePrivate(tab, meta, { x: x / s, y: y / s, w: r.w, h: r.h }, 'viewport', s);
-    return toPng(bmp, x, y, Math.min(r.w * s, bmp.width - x), Math.min(r.h * s, bmp.height - y));
+    try { return await toPng(bmp, x, y, Math.min(r.w * s, bmp.width - x), Math.min(r.h * s, bmp.height - y)); } finally { bmp.close(); }
   }
   await run(tab.id, () => {
     window.__captodeState = { x: scrollX, y: scrollY, behavior: document.documentElement.style.scrollBehavior };
@@ -263,12 +276,7 @@ async function captureElement(tab, r, meta) {
       tile.close();
       await badge(`${Math.round(((i + 1) / ys.length) * 100)}%`, '#5b4bff');
     }
-    if (paintedH && paintedH < canvas.height) {
-      const trimmed = new OffscreenCanvas(canvas.width, paintedH);
-      trimmed.getContext('2d').drawImage(canvas, 0, 0);
-      return await trimmed.convertToBlob({ type: 'image/png' });
-    }
-    return await canvas.convertToBlob({ type: 'image/png' });
+    return await finish(canvas, canvas.width, paintedH || canvas.height);
   } finally {
     await run(tab.id, fullPageRestore).catch(() => {});
     await badge('');
@@ -305,6 +313,7 @@ async function captureFullPage(tab, meta) {
     // scroll position the page actually reached.
     const viewW = Math.max(1, Math.floor(first.width / scale) - 1);
     const viewH = Math.max(1, Math.floor(first.height / scale) - OVERLAP);
+    first.close();
     const xs = steps(info.width, viewW);
     const ys = steps(height, viewH);
     const total = xs.length * ys.length;
@@ -328,12 +337,7 @@ async function captureFullPage(tab, meta) {
       }
     }
     // Trim any unpainted strip at the right or bottom edge.
-    if (paintedW < canvas.width || paintedH < canvas.height) {
-      const trimmed = new OffscreenCanvas(Math.min(canvas.width, paintedW), Math.min(canvas.height, paintedH));
-      trimmed.getContext('2d').drawImage(canvas, 0, 0);
-      return await trimmed.convertToBlob({ type: 'image/png' });
-    }
-    return await canvas.convertToBlob({ type: 'image/png' });
+    return await finish(canvas, paintedW, paintedH);
   } finally {
     await run(tab.id, fullPageRestore).catch(() => {});
     await badge('');
@@ -345,15 +349,6 @@ async function captureFullPage(tab, meta) {
 const getRec = async () => (await chrome.storage.session.get('rec')).rec || null;
 const setRec = (rec) => chrome.storage.session.set({ rec });
 
-async function ensureOffscreen() {
-  const exists = await chrome.offscreen.hasDocument?.();
-  if (exists) return;
-  await chrome.offscreen.createDocument({
-    url: OFFSCREEN,
-    reasons: ['USER_MEDIA', 'AUDIO_PLAYBACK'],
-    justification: 'Record the current tab after the user starts a recording.',
-  });
-}
 
 /** Seconds of countdown asked for (older popups sent true for a fixed 3 seconds). */
 const countdownSeconds = (v) => (v === true ? 3 : Math.max(0, Math.min(30, Number(v) || 0)));
@@ -368,7 +363,7 @@ async function startRecording({ mode, fps, audio, size = 'page', countdown: want
   }
 
   // Without tab capture the popup only offers full-screen recording; never get here.
-  if (!chrome.tabCapture || !chrome.offscreen) throw new Error(t('error_recording_start'));
+  if (!canRecordTabs) throw new Error(t('error_recording_start'));
 
   let crop = null;
   let aspect = null;
@@ -391,8 +386,7 @@ async function startRecording({ mode, fps, audio, size = 'page', countdown: want
     return;
   }
 
-  const streamId = await chrome.tabCapture.getMediaStreamId({ targetTabId: tab.id });
-  await ensureOffscreen();
+  const streamId = await startTabCapture(tab.id);
   const res = await chrome.runtime.sendMessage({
     target: 'recorder', to: 'offscreen', type: 'rec-start', streamId, fps, audio, aspect, crop, size, pageWidth, title: tab.title, camera: !!camera, mic: !!mic,
   });
@@ -431,7 +425,7 @@ async function finishRecording(id, kind) {
   if (rec?.outline) await run(rec.tabId, hideOutline).catch(() => {});
   if (rec?.inputs) await run(rec.tabId, showInputs, false).catch(() => {});
   if (kind === 'offscreen') {
-    await chrome.offscreen.closeDocument().catch(() => {});
+    await endTabCapture();
     const tab = rec ? await chrome.tabs.get(rec.tabId).catch(() => null) : null;
     await openPage(`video/video.html?id=${id}`, tab);
   }
