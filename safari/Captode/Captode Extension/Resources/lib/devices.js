@@ -150,6 +150,26 @@ export const DEVICES = Object.fromEntries(Object.entries(LIST).map(([id, [name, 
   return [id, { id, name, brand, family, ...f, ...extra, px, viewport, screen, dpr, ppi, mm, bezel }];
 }));
 
+/**
+ * The safe area: how far in from each edge of the screen (in points, as the viewer
+ * sees it) apps keep their content, clear of the status bar, cut-out, rounded corners
+ * and home indicator. iPhones' values are Apple's safeAreaInsets; Android's are the
+ * status bar and the gesture bar, with the camera cut-out on the left in landscape.
+ */
+export function safeInsets(d, landscape) {
+  const none = { top: 0, right: 0, bottom: 0, left: 0 };
+  if (d.os === 'ios') {
+    if (d.home === 'button') return landscape ? none : { ...none, top: 20 };
+    const top = d.cutout?.kind === 'island' ? d.cutout.top + d.cutout.h + 11 : d.status;
+    return landscape ? { ...none, left: top, right: top, bottom: 21 } : { ...none, top, bottom: 34 };
+  }
+  if (d.os === 'ipados') return { ...none, top: d.status, bottom: d.home === 'indicator' ? 20 : 0 };
+  const bottom = d.home === 'gesture' ? 24 : 48;
+  return landscape
+    ? { ...none, top: d.status, left: d.cutout ? d.status : 0, bottom }
+    : { ...none, top: d.status, bottom };
+}
+
 /** Menu groups, in order. */
 export const GROUPS = [
   ['iPhone', (d) => d.os === 'ios'],

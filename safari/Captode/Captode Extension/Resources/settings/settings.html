@@ -36,6 +36,72 @@
     </div>
   </section>
 
+  <section class="card" id="screenshots">
+    <h2 data-i18n="settings_screenshots">Screenshots</h2>
+    <div class="grid2">
+      <label class="field"><span data-i18n="settings_icon_action">Clicking Captode's icon</span>
+        <select id="iconAction" aria-describedby="icon-hint">
+          <option value="popup" data-i18n="settings_icon_popup">Opens Captode's menu</option>
+          <option value="visible" data-i18n="settings_icon_visible">Screenshots the visible area</option>
+          <option value="full" data-i18n="settings_icon_full">Screenshots the full page</option>
+          <option value="area" data-i18n="settings_icon_area">Screenshots a selected area</option>
+          <option value="element" data-i18n="settings_icon_element">Screenshots an element</option>
+          <option value="last" data-i18n="settings_icon_last">Repeats the last kind of screenshot</option>
+        </select>
+      </label>
+      <label class="field"><span data-i18n="settings_after_capture">After a screenshot</span>
+        <select id="afterCapture" aria-describedby="after-hint">
+          <option value="editor" data-i18n="settings_after_editor">Open it in the editor</option>
+          <option value="download" data-i18n="settings_after_download">Download it straight away</option>
+          <option value="copy" data-i18n="settings_after_copy">Copy it to the clipboard</option>
+        </select>
+      </label>
+    </div>
+    <p class="muted hint" id="icon-hint" data-i18n="settings_icon_hint">Captode's menu is then in the icon's right-click menu.</p>
+    <p class="muted hint" id="after-hint" data-i18n="settings_after_hint">Downloaded or copied as the editor would, in your default format, with a device frame and blurs if they're on. Every screenshot is also kept in Recent captures for a day.</p>
+    <label class="field"><span data-i18n="settings_long_pages">Pages too long for one image</span>
+      <select id="longPages" aria-describedby="long-hint">
+        <option value="cut" data-i18n="settings_long_cut">Cut off at the limit</option>
+        <option value="scale" data-i18n="settings_long_scale">Scale down to fit</option>
+        <option value="split" data-i18n="settings_long_split">Split into several images</option>
+      </select>
+    </label>
+    <p class="muted hint" id="long-hint" data-i18n="settings_long_hint">An image can be at most about 32,000 pixels tall. This is for full-page screenshots.</p>
+    <label class="field"><span data-i18n="settings_file_names">File names</span>
+      <div class="row">
+        <input type="text" id="fileName" spellcheck="false" autocomplete="off" maxlength="120" aria-describedby="name-hint name-example">
+        <button class="btn" id="fileName-default" data-i18n="settings_use_default">Use the default</button>
+      </div>
+    </label>
+    <div class="tokens" id="name-tokens"></div>
+    <p class="muted hint" id="name-hint" data-i18n="settings_file_names_hint">Add the page's title or site, and the date and time, with the buttons above.</p>
+    <p class="muted hint name-example" id="name-example" aria-live="polite"></p>
+  </section>
+
+  <section class="card" id="recording">
+    <h2 data-i18n="settings_recording">Recording</h2>
+    <p class="muted" data-i18n="settings_recording_hint">For every new recording. The same options are under Options in Captode's menu.</p>
+    <div class="grid2">
+      <label class="field"><span data-i18n="popup_frame_rate">Frame rate</span>
+        <select id="rec-fps"><option value="15">15 fps</option><option value="24">24 fps</option><option value="30">30 fps</option><option value="60">60 fps</option></select>
+      </label>
+      <label class="field" id="rec-size-field"><span data-i18n="popup_video_size">Video size</span>
+        <select id="rec-size">
+          <option value="page" data-i18n="popup_page_size">Page size</option>
+          <optgroup label="Scale" data-i18n-label="popup_scale"><option value="0.5x">50%</option><option value="0.75x">75%</option><option value="1.5x">150%</option><option value="2x">200%</option></optgroup>
+          <optgroup label="Resolution" data-i18n-label="popup_resolution"><option value="480p">480p</option><option value="720p">720p (HD)</option><option value="1080p">1080p (Full HD)</option><option value="1440p">1440p (2K)</option><option value="2160p">2160p (4K)</option></optgroup>
+        </select>
+      </label>
+      <label class="field"><span data-i18n="popup_countdown">Countdown</span><select id="rec-countdown"></select></label>
+      <label class="field"><span data-i18n="settings_stop_after">Stop recording after</span><select id="rec-autoStop"></select></label>
+    </div>
+    <label class="toggle"><span data-i18n="popup_record_audio">Record audio<small data-i18n="popup_sound_from_the_tab_or">Sound from the tab or screen</small></span><input type="checkbox" id="rec-audio"></label>
+    <label class="toggle"><span data-i18n="popup_mic">Microphone<small data-i18n="popup_mic_hint">Talk over the recording</small></span><input type="checkbox" id="rec-mic"></label>
+    <label class="toggle"><span data-i18n="popup_camera">Camera bubble<small data-i18n="popup_camera_hint">You, in a corner of the video</small></span><input type="checkbox" id="rec-camera"></label>
+    <label class="toggle"><span data-i18n="popup_show_inputs">Show clicks and keys<small data-i18n="popup_show_inputs_hint">In tab recordings; never what you type</small></span><input type="checkbox" id="rec-inputs"></label>
+    <label class="toggle"><span data-i18n="popup_cursor">Highlight the cursor<small data-i18n="popup_cursor_hint">In tab recordings, a soft circle follows the mouse</small></span><input type="checkbox" id="rec-cursor"></label>
+  </section>
+
   <section class="card">
     <h2 data-i18n="settings_export_background">Export background</h2>
     <p class="muted" data-i18n="settings_the_background_behind_device_frames">The background behind device frames and around padded screenshots in the files you download. You can still change it for a single export.</p>

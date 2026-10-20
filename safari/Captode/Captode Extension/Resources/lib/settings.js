@@ -8,6 +8,10 @@ export const DEFAULT_SETTINGS = {
   videoFormat: 'last',
   autoCopy: false,           // copy new screenshots to the clipboard when the editor opens them
   autoBlur: false,           // blur email addresses and phone and card numbers in new screenshots
+  iconAction: 'popup',       // clicking the toolbar icon: 'popup', or a screenshot: 'visible' | 'full' | 'area' | 'last'
+  afterCapture: 'editor',    // after a screenshot: 'editor' | 'download' | 'copy'
+  longPages: 'cut',          // full pages past the browser's image limit: 'cut' | 'scale' | 'split'
+  fileName: '',              // a pattern for file names (see lib/filename.js); empty for the default
 };
 
 export async function getSettings() {

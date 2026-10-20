@@ -6,11 +6,12 @@ import { putCapture } from '../lib/db.js';
 
 let session = null;
 let ticker = 0;
+let stopTimer = 0; // Settings → Stop recording after
 let audioContext = null;
 let title = '';
 let cssWidth = 0; // the recorded part of the page, in CSS pixels
 
-async function start({ streamId, fps, audio, aspect, crop, size, pageWidth, title: tabTitle, camera: wantCamera, mic: wantMic }) {
+async function start({ streamId, fps, audio, aspect, crop, size, pageWidth, title: tabTitle, camera: wantCamera, mic: wantMic, autoStop = 0 }) {
   title = tabTitle || '';
   cssWidth = pageWidth ? pageWidth * (crop ? crop.w : 1) : 0;
   // The camera and microphone first: this document can't ask for them, so they must
@@ -37,6 +38,7 @@ async function start({ streamId, fps, audio, aspect, crop, size, pageWidth, titl
   ticker = setInterval(() => {
     chrome.runtime.sendMessage({ type: 'rec-tick', elapsed: (performance.now() - session.started) / 1000 });
   }, 1000);
+  if (autoStop > 0) stopTimer = setTimeout(stop, autoStop * 1000);
 }
 
 async function stop() {
@@ -44,6 +46,7 @@ async function stop() {
   const current = session;
   session = null;
   clearInterval(ticker);
+  clearTimeout(stopTimer);
   const { blob, meta } = await current.stop();
   audioContext?.close();
   audioContext = null;

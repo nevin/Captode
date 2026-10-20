@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Very long page</title>
+<style>
+  html, body { margin: 0; }
+  body { width: 100%; }
+  .block { height: 1000px; }
+</style>
+</head>
+<body>
+<script>
+  // 40 blocks of 1,000 CSS pixels, each its own colour: past the 32,000-pixel image limit.
+  for (let i = 0; i < 40; i++) {
+    const b = document.createElement('div');
+    b.className = 'block';
+    b.style.background = `hsl(${(i * 47) % 360} 70% 50%)`;
+    document.body.append(b);
+  }
+</script>
+</body>
+</html>

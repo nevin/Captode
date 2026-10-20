@@ -5,6 +5,8 @@ import { listCaptures } from '../lib/db.js';
 import { PROTECTED, STORE_URL, canRecordTabs, canProcessVideo } from '../lib/platform.js';
 
 localize();
+// The service worker sees the popup close, to put back what a click on the icon does.
+chrome.runtime.connect({ name: 'popup' });
 
 const $ = (s) => document.querySelector(s);
 const selectTab = tablist($('.kind'), (t) => { setKind(t.dataset.kind); chrome.storage.local.set({ kind: t.dataset.kind }); });
@@ -13,10 +15,11 @@ let tabPixels = null; // this tab's page area in pixels, once known
 let fps = '30';
 let delay = 0; // seconds before a screenshot
 
-const settings = await chrome.storage.local.get({ kind: 'image', fps: '30', audio: false, countdown: true, countdownSeconds: null, device: false, videoSize: 'page', lastMode: {}, recOptsOpen: false, delay: 0, inputs: false, camera: false, mic: false });
+const settings = await chrome.storage.local.get({ kind: 'image', fps: '30', audio: false, countdown: true, countdownSeconds: null, device: false, videoSize: 'page', lastMode: {}, recOptsOpen: false, delay: 0, inputs: false, cursor: false, camera: false, mic: false, autoStop: 0 });
 fps = String(settings.fps);
 $('#audio').checked = settings.audio;
 $('#inputs').checked = settings.inputs;
+$('#cursor').checked = settings.cursor;
 $('#camera').checked = settings.camera;
 $('#mic').checked = settings.mic;
 // Seconds of countdown before a recording starts (0 = none): a second at a time up
@@ -46,6 +49,7 @@ const SIZE_HINTS = {
 if (!canRecordTabs) {
   for (const el of document.querySelectorAll('#modes-video .mode:not([data-mode="screen"])')) el.classList.add('hidden');
   $('#inputs').closest('.toggle').classList.add('hidden');
+  $('#cursor').closest('.toggle').classList.add('hidden');
 }
 if (!canProcessVideo) {
   $('#camera').closest('.toggle').classList.add('hidden');
@@ -168,7 +172,7 @@ $('#countdown').addEventListener('keydown', (e) => {
   setCountdown(next);
 });
 $('#size').addEventListener('change', (e) => { setSize(e.target.value); chrome.storage.local.set({ videoSize: e.target.value }); });
-for (const id of ['audio', 'device', 'inputs']) {
+for (const id of ['audio', 'device', 'inputs', 'cursor']) {
   $('#' + id).addEventListener('change', (e) => { chrome.storage.local.set({ [id]: e.target.checked }); summarise(); });
 }
 // The browser asks once whether Captode may use the camera or microphone. The popup can't
@@ -215,7 +219,7 @@ for (const b of document.querySelectorAll('.mode')) {
       : {
           type: 'record-start', mode: b.dataset.mode, tabId: tab.id,
           fps: Number(fps), audio: $('#audio').checked, countdown, size: $('#size').value, inputs: $('#inputs').checked,
-          camera: $('#camera').checked, mic: $('#mic').checked,
+          cursor: $('#cursor').checked, camera: $('#camera').checked, mic: $('#mic').checked, autoStop: settings.autoStop,
         };
     await chrome.runtime.sendMessage(msg);
     window.close();
@@ -260,9 +264,16 @@ function summarise() {
     countdown ? t('popup_countdown_short', countdown) : t('popup_no_countdown'),
     ...($('#audio').checked ? [t('popup_with_audio')] : []),
     ...($('#inputs').checked && canRecordTabs ? [t('popup_with_inputs')] : []),
+    ...($('#cursor').checked && canRecordTabs ? [t('popup_with_cursor')] : []),
     ...($('#mic').checked ? [t('popup_with_mic')] : []),
     ...($('#camera').checked && canProcessVideo ? [t('popup_with_camera')] : []),
+    ...(settings.autoStop ? [t('popup_stops_after', autoStopText(settings.autoStop))] : []),
   ].join(' · ');
+}
+
+/** "30 s" or "2 min", for Settings → Stop recording after. */
+function autoStopText(s) {
+  return s < 60 ? t('popup_seconds_short', s) : t('popup_minutes_short', Math.round(s / 60));
 }
 
 /** Marks the mode used last for each kind; Enter repeats it. */

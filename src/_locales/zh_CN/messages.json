@@ -1961,12 +1961,6 @@
   "permission_try_again": {
     "message": "重试"
   },
-  "popup_new_in_captode_1_4": {
-    "message": "Captode 1.4 新功能"
-  },
-  "popup_whats_new_1_4": {
-    "message": "录制支持摄像头气泡和麦克风，每种截图都有快捷键，设置中还可选择模糊邮箱地址和号码。"
-  },
   "share_captode": {
     "message": "分享 Captode"
   },
@@ -1990,5 +1984,152 @@
   },
   "screen_no_sound": {
     "message": "未共享声音，因此录制内容没有声音（如已开启麦克风，则包含麦克风声音）。"
+  },
+  "menu_open_popup": {
+    "message": "打开 Captode 菜单"
+  },
+  "settings_screenshots": {
+    "message": "截图"
+  },
+  "settings_icon_action": {
+    "message": "点击 Captode 图标时"
+  },
+  "settings_icon_popup": {
+    "message": "打开 Captode 菜单"
+  },
+  "settings_icon_visible": {
+    "message": "截取可见区域"
+  },
+  "settings_icon_full": {
+    "message": "截取整个页面"
+  },
+  "settings_icon_area": {
+    "message": "截取选定区域"
+  },
+  "settings_icon_element": {
+    "message": "截取一个元素"
+  },
+  "settings_icon_last": {
+    "message": "重复上一种截图方式"
+  },
+  "settings_icon_hint": {
+    "message": "此时可在图标的右键菜单中打开 Captode 菜单。"
+  },
+  "settings_after_capture": {
+    "message": "截图之后"
+  },
+  "settings_after_editor": {
+    "message": "在编辑器中打开"
+  },
+  "settings_after_download": {
+    "message": "立即下载"
+  },
+  "settings_after_copy": {
+    "message": "复制到剪贴板"
+  },
+  "settings_after_hint": {
+    "message": "与编辑器的做法相同：使用默认格式，若已开启则带设备外框和模糊。每张截图也会在“最近的截图”中保留一天。"
+  },
+  "settings_long_pages": {
+    "message": "过长、无法放进一张图的页面"
+  },
+  "settings_long_cut": {
+    "message": "在上限处截断"
+  },
+  "settings_long_scale": {
+    "message": "缩小以完整放下"
+  },
+  "settings_long_split": {
+    "message": "分成多张图片"
+  },
+  "settings_long_hint": {
+    "message": "一张图片最高约 32,000 像素。适用于整页截图。"
+  },
+  "settings_file_names": {
+    "message": "文件名"
+  },
+  "settings_file_names_hint": {
+    "message": "用上方的按钮加入页面标题或网站，以及日期和时间。"
+  },
+  "settings_file_name_example": {
+    "message": "例如：$1"
+  },
+  "settings_example_title": {
+    "message": "示例页面"
+  },
+  "settings_use_default": {
+    "message": "恢复默认"
+  },
+  "settings_recording": {
+    "message": "录制"
+  },
+  "settings_recording_hint": {
+    "message": "用于每次新的录制。同样的选项也在 Captode 菜单的“选项”中。"
+  },
+  "settings_stop_after": {
+    "message": "录制自动停止于"
+  },
+  "settings_stop_never": {
+    "message": "不自动停止"
+  },
+  "settings_one_minute": {
+    "message": "1 分钟"
+  },
+  "settings_n_minutes": {
+    "message": "$1 分钟"
+  },
+  "settings_not_allowed": {
+    "message": "浏览器未允许。可在 Captode 的网站设置中允许，然后重试。"
+  },
+  "popup_minutes_short": {
+    "message": "$1 分钟"
+  },
+  "popup_cursor": {
+    "message": "突出显示光标"
+  },
+  "popup_cursor_hint": {
+    "message": "录制标签页时，一个柔和的圆圈跟随鼠标"
+  },
+  "popup_with_cursor": {
+    "message": "光标"
+  },
+  "popup_stops_after": {
+    "message": "$1 后停止"
+  },
+  "dev_safe_area": {
+    "message": "安全区域"
+  },
+  "dev_safe_none": {
+    "message": "不显示"
+  },
+  "dev_safe_show": {
+    "message": "显示边界"
+  },
+  "dev_safe_inside": {
+    "message": "让页面保持在其中"
+  },
+  "dev_info_safe": {
+    "message": "安全区域 $1（上、右、下、左）"
+  },
+  "dev_rotate": {
+    "message": "旋转"
+  },
+  "dev_rotate_tip": {
+    "message": "在竖屏和横屏之间切换"
+  },
+  "scaled_to_fit": {
+    "message": "此页面过长，无法放进一张图片，因此已缩小到 $1%。可在设置中更改。"
+  },
+  "split_into_parts": {
+    "message": "此页面过长，无法放进一张图片，因此分成 $1 部分，各在一个标签页中。"
+  },
+  "part_of": {
+    "message": "第 $1 部分，共 $2 部分"
+  },
+  "popup_new_in_captode_1_6": {
+    "message": "Captode 1.6 新功能"
+  },
+  "popup_whats_new_1_6": {
+    "message": "设备外框新增安全区域和一键旋转。设置中新增：图标的作用、截图之后的操作、超长页面、文件名，以及带自动停止和光标突出显示的录制选项。"
   }
 }

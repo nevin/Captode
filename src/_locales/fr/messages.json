@@ -1961,12 +1961,6 @@
   "permission_try_again": {
     "message": "Réessayer"
   },
-  "popup_new_in_captode_1_4": {
-    "message": "Nouveau dans Captode 1.4"
-  },
-  "popup_whats_new_1_4": {
-    "message": "Bulle caméra et micro pour les enregistrements, un raccourci par type de capture, et une option dans les réglages pour flouter e-mails et numéros."
-  },
   "share_captode": {
     "message": "Partager Captode"
   },
@@ -1990,5 +1984,152 @@
   },
   "screen_no_sound": {
     "message": "Aucun son n'a été partagé : l'enregistrement n'en aura pas (sauf votre micro, s'il est activé)."
+  },
+  "menu_open_popup": {
+    "message": "Ouvrir le menu de Captode"
+  },
+  "settings_screenshots": {
+    "message": "Captures d'écran"
+  },
+  "settings_icon_action": {
+    "message": "Un clic sur l'icône de Captode"
+  },
+  "settings_icon_popup": {
+    "message": "Ouvre le menu de Captode"
+  },
+  "settings_icon_visible": {
+    "message": "Capture la zone visible"
+  },
+  "settings_icon_full": {
+    "message": "Capture la page entière"
+  },
+  "settings_icon_area": {
+    "message": "Capture une zone choisie"
+  },
+  "settings_icon_element": {
+    "message": "Capture un élément"
+  },
+  "settings_icon_last": {
+    "message": "Refait le dernier type de capture"
+  },
+  "settings_icon_hint": {
+    "message": "Le menu de Captode est alors dans le menu du clic droit sur l'icône."
+  },
+  "settings_after_capture": {
+    "message": "Après une capture"
+  },
+  "settings_after_editor": {
+    "message": "L'ouvrir dans l'éditeur"
+  },
+  "settings_after_download": {
+    "message": "La télécharger aussitôt"
+  },
+  "settings_after_copy": {
+    "message": "La copier dans le presse-papiers"
+  },
+  "settings_after_hint": {
+    "message": "Téléchargée ou copiée comme le ferait l'éditeur : dans votre format par défaut, avec cadre d'appareil et flous s'ils sont activés. Chaque capture reste aussi un jour dans les captures récentes."
+  },
+  "settings_long_pages": {
+    "message": "Pages trop longues pour une image"
+  },
+  "settings_long_cut": {
+    "message": "Couper à la limite"
+  },
+  "settings_long_scale": {
+    "message": "Réduire pour tout faire tenir"
+  },
+  "settings_long_split": {
+    "message": "Diviser en plusieurs images"
+  },
+  "settings_long_hint": {
+    "message": "Une image peut mesurer au plus environ 32 000 pixels de haut. Ceci concerne les captures de page entière."
+  },
+  "settings_file_names": {
+    "message": "Noms de fichier"
+  },
+  "settings_file_names_hint": {
+    "message": "Ajoutez le titre ou le site de la page, et la date et l'heure, avec les boutons ci-dessus."
+  },
+  "settings_file_name_example": {
+    "message": "Par exemple : $1"
+  },
+  "settings_example_title": {
+    "message": "Page d'exemple"
+  },
+  "settings_use_default": {
+    "message": "Valeur par défaut"
+  },
+  "settings_recording": {
+    "message": "Enregistrement"
+  },
+  "settings_recording_hint": {
+    "message": "Pour chaque nouvel enregistrement. Les mêmes options sont dans Options, dans le menu de Captode."
+  },
+  "settings_stop_after": {
+    "message": "Arrêter l'enregistrement après"
+  },
+  "settings_stop_never": {
+    "message": "Ne pas arrêter tout seul"
+  },
+  "settings_one_minute": {
+    "message": "1 minute"
+  },
+  "settings_n_minutes": {
+    "message": "$1 minutes"
+  },
+  "settings_not_allowed": {
+    "message": "Le navigateur ne l'a pas autorisé. Vous pouvez l'autoriser dans les paramètres du site pour Captode, puis réessayer."
+  },
+  "popup_minutes_short": {
+    "message": "$1 min"
+  },
+  "popup_cursor": {
+    "message": "Mettre le curseur en évidence"
+  },
+  "popup_cursor_hint": {
+    "message": "Dans les onglets enregistrés, un cercle discret suit la souris"
+  },
+  "popup_with_cursor": {
+    "message": "Curseur"
+  },
+  "popup_stops_after": {
+    "message": "S'arrête après $1"
+  },
+  "dev_safe_area": {
+    "message": "Zone sûre"
+  },
+  "dev_safe_none": {
+    "message": "Non affichée"
+  },
+  "dev_safe_show": {
+    "message": "Afficher ses bords"
+  },
+  "dev_safe_inside": {
+    "message": "Garder la page à l'intérieur"
+  },
+  "dev_info_safe": {
+    "message": "zone sûre $1 (haut, droite, bas, gauche)"
+  },
+  "dev_rotate": {
+    "message": "Faire pivoter"
+  },
+  "dev_rotate_tip": {
+    "message": "Basculer entre portrait et paysage"
+  },
+  "scaled_to_fit": {
+    "message": "Cette page était trop longue pour une image, elle a donc été réduite à $1 %. Vous pouvez changer cela dans les paramètres."
+  },
+  "split_into_parts": {
+    "message": "Cette page était trop longue pour une image : elle est en $1 parties, chacune dans son onglet."
+  },
+  "part_of": {
+    "message": "partie $1 sur $2"
+  },
+  "popup_new_in_captode_1_6": {
+    "message": "Nouveau dans Captode 1.6"
+  },
+  "popup_whats_new_1_6": {
+    "message": "Zones sûres et rotation en un clic pour les cadres d'appareil. Dans les paramètres : l'action de l'icône, ce qui suit une capture, les pages très longues, les noms de fichier et les options d'enregistrement avec arrêt automatique et curseur mis en évidence."
   }
 }

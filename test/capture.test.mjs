@@ -1,7 +1,8 @@
 // Screenshots of a page: full page, visible area and a dragged selection, opened in
 // the editor, then exported in every format.
 import { open, waitForTab, ok, near, sleep, launch, prepare } from './helpers.mjs';
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { mkdirSync, writeFileSync, mkdtempSync, readdirSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -571,4 +572,199 @@ export const tests = {
     near(size[1], 120, 1, 'height');
     await ed.close();
   },
+
+  async 'a click on the icon can take a screenshot straight away, if chosen in Settings'({ browser, url, page, ctl, tabId }) {
+    const sw = await (await browser.waitForTarget((t) => t.type() === 'service_worker' && t.url() === url('background.js'))).worker();
+    try {
+      await setSettings(ctl, { iconAction: 'visible' });
+      await until(async () => (await ctl.evaluate(() => chrome.action.getPopup({}))) === '', 'the popup was not switched off');
+      await page.bringToFront();
+      const before = editorsOpen(browser);
+      // The test browser has no toolbar to click: call what a click calls.
+      await sw.evaluate((tabId) => chrome.tabs.get(tabId).then((tab) => captodeIconClick(tab)), tabId);
+      const ed = await waitForTab(browser, (u) => u.includes('editor.html?id=') && !before.has(u));
+      await ed.waitForFunction(() => /px/.test(document.querySelector('#doc-dims').textContent), { timeout: 45000 });
+      const [size, view] = await Promise.all([ed.evaluate(() => captodeEditor.size()), page.evaluate(() => [innerWidth * devicePixelRatio, innerHeight * devicePixelRatio])]);
+      near(size[0], view[0], 2, 'visible area width');
+      near(size[1], view[1], 2, 'visible area height');
+      await ed.close();
+    } finally {
+      await setSettings(ctl, { iconAction: 'popup' });
+      await until(async () => (await ctl.evaluate(() => chrome.action.getPopup({}))).endsWith('popup/popup.html'), 'the popup was not put back');
+      await page.bringToFront();
+    }
+  },
+
+  async 'file names follow the pattern chosen in Settings'({ ctl, capture }) {
+    try {
+      await setSettings(ctl, { fileName: '{site}_{title}' });
+      const { ed } = await capture('visible');
+      const name = await ed.$eval('#x-name', (e) => e.value);
+      await ed.close();
+      ok(/^127-0-0-1_[\p{L}\p{N}-]+$/u.test(name), `file name ${name}`);
+    } finally {
+      await setSettings(ctl, { fileName: '' });
+    }
+  },
+
+  async 'pages too long for one image can be scaled down to fit, or split into parts'({ browser, ctl, site }) {
+    const long = await browser.newPage();
+    await long.goto(`${site}/very-long.html`);
+    const longId = await ctl.evaluate(async (site) => (await chrome.tabs.query({ url: `${site}/very-long.html` }))[0].id, site);
+    // The colour of each 1,000-pixel block, and how wide the page is.
+    const page = await long.evaluate(() => ({
+      colours: [...document.querySelectorAll('.block')].map((b) => getComputedStyle(b).backgroundColor.match(/\d+/g).map(Number)),
+      width: innerWidth, dpr: devicePixelRatio, height: document.documentElement.scrollHeight,
+    }));
+    const shoot = async (count) => {
+      const before = editorsOpen(browser);
+      await long.bringToFront();
+      await ctl.evaluate((tabId) => chrome.runtime.sendMessage({ type: 'capture-image', mode: 'full', tabId }), longId);
+      const eds = [];
+      for (let i = 0; i < count; i++) {
+        const ed = await waitForTab(browser, (u) => u.includes('editor.html?id=') && !before.has(u) && !eds.some((e) => e.url() === u), 120000);
+        await ed.waitForFunction(() => /px/.test(document.querySelector('#doc-dims').textContent), { timeout: 120000 });
+        eds.push(ed);
+      }
+      return eds;
+    };
+    // Colours at these heights (image pixels) in an editor's image.
+    const colours = (ed, ys) => ed.evaluate((ys) => {
+      const [w] = captodeEditor.size();
+      const d = captodeEditor.pixels();
+      return ys.map((y) => { const i = (Math.round(y) * w + Math.round(w / 2)) * 4; return [d.data[i], d.data[i + 1], d.data[i + 2]]; });
+    }, ys);
+    const close = (a, b) => a.every((v, i) => Math.abs(v - b[i]) <= 8);
+    try {
+      // Scaled: the whole page in one image of at most 32,000 pixels.
+      await setSettings(ctl, { longPages: 'scale' });
+      const [ed] = await shoot(1);
+      const [w, h] = await ed.evaluate(() => captodeEditor.size());
+      const s = h / page.height;
+      ok(h <= 32000 && h > 31800, `scaled height ${h}`);
+      near(w / h, page.width / page.height, 0.002, 'shape kept');
+      const blocks = [0, 13, 26, 39];
+      const got = await colours(ed, blocks.map((i) => (i * 1000 + 500) * s));
+      blocks.forEach((b, j) => ok(close(got[j], page.colours[b]), `scaled: block ${b} is ${got[j]}, not ${page.colours[b]}`));
+      await ed.close();
+
+      // Split: the top 32,000 pixels, then the rest, each in its own editor.
+      await setSettings(ctl, { longPages: 'split' });
+      const parts = await shoot(2);
+      const sizes = await Promise.all(parts.map((p) => p.evaluate(() => captodeEditor.size())));
+      const order = sizes[0][1] >= sizes[1][1] ? [0, 1] : [1, 0];
+      const [a, b] = order.map((i) => parts[i]);
+      const [ha, hb] = order.map((i) => sizes[i][1]);
+      near(ha, 32000 * page.dpr, 2, 'first part height');
+      near(ha + hb, page.height * page.dpr, 4, 'both parts together');
+      ok(close((await colours(a, [500 * page.dpr]))[0], page.colours[0]), 'first part starts at the top');
+      ok(close((await colours(b, [500 * page.dpr]))[0], page.colours[32]), 'second part starts where the first ends');
+      ok(close((await colours(b, [hb - 500 * page.dpr]))[0], page.colours[39]), 'second part reaches the bottom');
+      ok(/2/.test(await b.$eval('#doc-name', (e) => e.textContent)), 'the part is not named');
+      ok(/-2$/.test(await b.$eval('#x-name', (e) => e.value)), 'the second part\'s file name has no number');
+      for (const p of parts) await p.close();
+      return `scaled ${w} × ${h}; parts ${ha} + ${hb}`;
+    } finally {
+      await setSettings(ctl, { longPages: 'cut' });
+      await long.close();
+    }
+  },
+
+  async 'after a screenshot, it can be downloaded or copied straight away'({ browser, page, ctl, tabId, site }) {
+    const dir = mkdtempSync(join(tmpdir(), 'captode-downloads-'));
+    const cdp = await browser.target().createCDPSession();
+    await cdp.send('Browser.setDownloadBehavior', { behavior: 'allow', downloadPath: dir });
+    const context = browser.defaultBrowserContext();
+    await context.overridePermissions(site, ['clipboard-read', 'clipboard-write', 'clipboard-sanitized-write']);
+    await prepare(page); // focused, as a page the user is looking at
+    const view = await page.evaluate(() => [Math.round(innerWidth * devicePixelRatio), Math.round(innerHeight * devicePixelRatio)]);
+    const shoot = async () => {
+      await page.bringToFront();
+      await ctl.evaluate(() => chrome.storage.session.remove('lastError'));
+      await ctl.evaluate((tabId) => chrome.runtime.sendMessage({ type: 'capture-image', mode: 'visible', tabId }), tabId);
+    };
+    const editorGone = (before) => until(async () => {
+      const now = editorsOpen(browser);
+      return [...now].every((u) => before.has(u));
+    }, 'the editor did not close itself', 30000);
+    try {
+      // Download: an editor works in the background, saves the file and closes.
+      await setSettings(ctl, { afterCapture: 'download' });
+      let before = editorsOpen(browser);
+      await shoot();
+      await until(() => readdirSync(dir).some((f) => /\.png$/.test(f)), 'nothing was downloaded', 30000);
+      const file = readdirSync(dir).find((f) => /\.png$/.test(f));
+      ok(/^captode-.*\d{8}-\d{6}\.png$/.test(file), `file ${file}`);
+      await editorGone(before);
+      ok(await page.evaluate(() => document.visibilityState === 'visible'), 'the page did not stay in front');
+
+      // Copy: the image lands on the clipboard, and the editor closes.
+      await page.evaluate(() => navigator.clipboard.writeText('nothing yet'));
+      await setSettings(ctl, { afterCapture: 'copy' });
+      before = editorsOpen(browser);
+      await shoot();
+      const size = await until(() => page.evaluate(async () => {
+        const [item] = await navigator.clipboard.read();
+        if (!item.types.includes('image/png')) return null;
+        const bmp = await createImageBitmap(await item.getType('image/png'));
+        return [bmp.width, bmp.height];
+      }).catch(() => null), 'nothing was copied', 30000);
+      ok(size[0] === view[0] && size[1] === view[1], `copied ${size}, page ${view}`);
+      await editorGone(before);
+      const error = await ctl.evaluate(async () => (await chrome.storage.session.get('lastError')).lastError);
+      ok(!error, `capture reported an error: ${error}`);
+    } finally {
+      await setSettings(ctl, { afterCapture: 'editor' });
+      await cdp.send('Browser.setDownloadBehavior', { behavior: 'default' }).catch(() => {});
+      await context.clearPermissionOverrides();
+      rmSync(dir, { recursive: true, force: true });
+    }
+  },
+
+  async 'recordings can highlight the cursor'({ page, ctl, tabId }) {
+    const inject = (on, opts) => ctl.evaluate(async (tabId, on, opts) => {
+      const { showInputs } = await import('/content/page.js');
+      await chrome.scripting.executeScript({ target: { tabId }, func: showInputs, args: opts ? [on, opts] : [on] });
+    }, tabId, on, opts);
+    await page.bringToFront();
+    await inject(true, { clicks: false, cursor: true });
+    const state = () => page.evaluate(() => {
+      const root = document.querySelector('#__captode_inputs')?.shadowRoot;
+      const dot = root?.querySelector('.cursor');
+      return { layer: !!root, on: !!dot?.classList.contains('on'), at: dot?.style.transform || '', ripples: root?.querySelectorAll('.ripple').length || 0 };
+    });
+    try {
+      await page.mouse.move(300, 200);
+      await page.mouse.move(320, 240, { steps: 3 });
+      const s = await state();
+      ok(s.layer && s.on && /320px, 240px/.test(s.at), `cursor ${JSON.stringify(s)}`);
+      await page.mouse.click(320, 240);
+      ok((await state()).ripples === 0, 'clicks shown though only the cursor was asked for');
+    } finally {
+      await inject(false);
+    }
+    ok(!(await state()).layer, 'the layer was not removed');
+  },
 };
+
+/** Changes Settings as the Settings page does. */
+async function setSettings(ctl, patch) {
+  await ctl.evaluate(async (patch) => {
+    const { settings = {} } = await chrome.storage.local.get('settings');
+    await chrome.storage.local.set({ settings: { ...settings, ...patch } });
+  }, patch);
+}
+
+/** The editors open now. */
+const editorsOpen = (browser) => new Set(browser.targets().filter((t) => t.type() === 'page' && t.url().includes('editor.html?id=')).map((t) => t.url()));
+
+/** Waits until `fn` gives something truthy, checking from here (see helpers' waitFor). */
+async function until(fn, message, ms = 10000) {
+  const end = Date.now() + ms;
+  for (;;) {
+    const v = await fn();
+    if (v) return v;
+    if (Date.now() > end) throw new Error(message);
+    await sleep(150);
+  }
+}

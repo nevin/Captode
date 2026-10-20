@@ -8,6 +8,8 @@ import { mountMultiExport } from './multi-export.js';
 import { mountShare } from './share.js';
 import { luminance, contrast, contrastHtml, hexOf, measureLabel, measureText as measureWords, edgeNear as edgeIn, measureFrom, drawMeasures } from '../lib/review.js';
 import { getSettings, backgroundColour } from '../lib/settings.js';
+import { fileStem } from '../lib/filename.js';
+import { copyImageHere } from '../content/page.js';
 import { toast, enhance, tablist, openDialog, fmtBytes, ago } from '../lib/ui.js';
 import { t, localize } from '../lib/i18n.js';
 
@@ -2261,7 +2263,7 @@ function fileName() {
 }
 
 async function download() {
-  if (!base) return;
+  if (!base) return false;
   if (editing) finishText();
   const btns = [$('#download'), $('#download2')];
   btns.forEach((b) => { b.disabled = true; });
@@ -2274,8 +2276,10 @@ async function download() {
     setTimeout(() => URL.revokeObjectURL(a.href), 30000);
     dirty = false;
     toast(t('saved_file_size', [a.download, fmtBytes(blob.size)]), { kind: 'success' });
+    return true;
   } catch (e) {
     toast(t('export_failed', e.message), { kind: 'error', ms: 5000 });
+    return false;
   } finally {
     btns.forEach((b) => { b.disabled = false; });
   }
@@ -2316,11 +2320,43 @@ async function autoCopy() {
   for (const ev of events) addEventListener(ev, once, true);
 }
 $('#copy').addEventListener('click', () => copyImage());
+
+/**
+ * Settings → After a screenshot: this editor was opened in a background tab to download
+ * the screenshot, or copy it, as it would from its Export panel, and then closes. If it
+ * can't, it comes to the front to say why (or to copy once it has focus).
+ */
+async function finishInBackground(then, tabId) {
+  const me = await chrome.tabs.getCurrent();
+  const close = () => setTimeout(() => chrome.tabs.remove(me.id), 1500); // once the download has started
+  const show = () => chrome.tabs.update(me.id, { active: true });
+  if (then === 'download') {
+    if (await download()) close(); else show();
+    return;
+  }
+  let copied = false;
+  try {
+    const png = await (await finalCanvas()).convertToBlob({ type: 'image/png' });
+    // The page is given the image as text; very large ones are left to the editor.
+    if (png.size < 32 * 2 ** 20) {
+      const bytes = new Uint8Array(await png.arrayBuffer());
+      let bin = '';
+      for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+      const [res] = await chrome.scripting.executeScript({ target: { tabId }, func: copyImageHere, args: [btoa(bin), t('copied_auto')] });
+      copied = res?.result === true;
+    }
+  } catch { /* the page can't be scripted now: the editor copies it */ }
+  if (copied) { dirty = false; close(); return; }
+  await show();
+  autoCopy();
+}
 for (const id of ['x-format', 'x-scale', 'x-limit', 'x-quality', 'x-colors', 'x-dither', 'x-lossy', 'x-page', 'x-split']) {
   $('#' + id).addEventListener('input', () => { syncExportUi(); refreshExport(); });
 }
 
 // ---------- loading ----------
+
+let namePattern = ''; // Settings → File names; empty for the default
 
 async function loadBlob(blob, info = {}) {
   const bmp = await createImageBitmap(blob);
@@ -2338,9 +2374,8 @@ async function loadBlob(blob, info = {}) {
   document.body.classList.remove('no-image');
   $('#empty').classList.add('hidden');
   wrap.classList.remove('hidden');
-  const stamp = new Date().toISOString().slice(0, 19).replace(/[-:]/g, '').replace('T', '-');
-  const slug = (info.title || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40);
-  $('#x-name').value = ['captode', slug, stamp].filter(Boolean).join('-');
+  // A page split into parts: each part's file has its number.
+  $('#x-name').value = fileStem(namePattern, { title: info.title, url: info.url, when: new Date(info.created || Date.now()) }) + (info.part ? `-${info.part[0]}` : '');
   if (info.title) document.title = `${info.title} — Captode`;
   $('#doc-name').textContent = info.title || t('popup_screenshot');
   $('#doc-name').title = info.url || info.title || '';
@@ -2443,6 +2478,7 @@ document.addEventListener('keydown', (e) => {
     if (editorDefaults) Object.assign(defaults, editorDefaults);
     showLooks();
     settings = await getSettings();
+    namePattern = settings.fileName;
     frame.bg = backgroundColour(settings) || 'transparent';
     // The default format from Settings, or the one used last; and the options used last.
     const last = await recall('image');
@@ -2492,12 +2528,18 @@ document.addEventListener('keydown', (e) => {
     await loadBlob(rec.blob, { ...rec.meta, created: rec.created });
     captureId = id;
     if (rec.edits) await restoreEdits(rec.edits);
+    const params = new URLSearchParams(location.search);
+    const fresh = !params.has('reopen'); // just taken, not reopened from Recent captures
     if (rec.meta?.truncated) toast(t('truncated'), { ms: 6000 });
-    if (rec.meta?.private?.length && !rec.edits && settings.autoBlur && !new URLSearchParams(location.search).has('reopen')) blurPrivate(rec.meta.private);
-    // Only a capture that has just been taken, not one reopened from Recent captures.
-    if (settings.autoCopy && !new URLSearchParams(location.search).has('reopen')) {
+    if (rec.meta?.scaledTo && fresh) toast(t('scaled_to_fit', Math.round(rec.meta.scaledTo * 100)), { ms: 7000 });
+    if (rec.meta?.part && fresh && rec.meta.part[0] === 1) toast(t('split_into_parts', rec.meta.part[1]), { ms: 7000 });
+    if (rec.meta?.part) $('#doc-name').textContent += ` · ${t('part_of', rec.meta.part)}`;
+    if (rec.meta?.private?.length && !rec.edits && settings.autoBlur && fresh) blurPrivate(rec.meta.private);
+    const then = fresh && params.get('then');
+    if (fresh && (then || settings.autoCopy)) {
       window.history.replaceState(null, '', `?id=${id}&reopen=1`); // not again on reload (`history` here is the undo stack)
-      autoCopy();
+      if (then) finishInBackground(then, Number(params.get('tab')));
+      else autoCopy();
     }
   } else {
     showEmpty();

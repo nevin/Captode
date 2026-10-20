@@ -12,11 +12,13 @@ const audio = params.get('audio') === '1';
 const size = params.get('size') || 'page';
 const camera = params.get('camera') === '1';
 const mic = params.get('mic') === '1';
+const autoStop = Math.max(0, Number(params.get('stop')) || 0); // Settings → Stop recording after
 const countdownFrom = Math.max(0, Math.min(30, Number(params.get('countdown') ?? 3) || 0));
 const $ = (id) => document.getElementById(id);
 
 let session = null;
 let ticker = 0;
+let stopTimer = 0;
 let cancelCountdown = null;
 
 const fmt = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
@@ -66,11 +68,15 @@ async function choose() {
   $('live').classList.remove('hidden');
   document.title = t('screen_title_recording');
   chrome.runtime.sendMessage({ type: 'rec-started', kind: 'page' });
+  // With a time limit, the clock shows it too: 0:12 / 0:30.
+  const limit = autoStop ? ` / ${fmt(autoStop)}` : '';
+  $('time').textContent = fmt(0) + limit;
   ticker = setInterval(() => {
     const elapsed = (performance.now() - session.started) / 1000;
-    $('time').textContent = fmt(elapsed);
+    $('time').textContent = fmt(elapsed) + limit;
     chrome.runtime.sendMessage({ type: 'rec-tick', elapsed });
   }, 1000);
+  if (autoStop) stopTimer = setTimeout(stop, autoStop * 1000);
 }
 
 /**
@@ -114,6 +120,7 @@ async function stop() {
   const current = session;
   session = null;
   clearInterval(ticker);
+  clearTimeout(stopTimer);
   $('live').classList.add('hidden');
   $('saving').classList.remove('hidden');
   const { blob, meta } = await current.stop();

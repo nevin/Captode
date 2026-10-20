@@ -102,6 +102,16 @@ or install the zip from `npm run package`.
    and a GIF export, and Copy in the editor. Record with **Record audio** on while a video
    plays: if Firefox shares no sound, the recording page must say so ("No sound was
    shared…") rather than record silence without a word.
+20. **Settings → Screenshots** (in real Chrome, with its toolbar): set **Clicking Captode's
+   icon** to the full page and click the icon on a web page; right-click the icon and choose
+   **Open Captode's menu**; click the icon on `chrome://settings` (the menu opens and explains).
+   Set **After a screenshot** to Download, take one with Alt+Shift+V, and check the file is in
+   Downloads with no editor tab left open; then Copy, and paste into another app. Downloading
+   several in a row must not stop at Chrome's "download multiple files" question.
+21. **Device frames:** with an iPhone, choose **Safe area → Show its edges** and **Keep the
+   page inside it**, press **Rotate** in both, and check the export in the video page too.
+22. **Recording settings:** set **Stop recording after** 15 seconds and **Highlight the
+   cursor**; record a tab: it stops by itself and the circle follows the mouse.
 
 ### Windows
 

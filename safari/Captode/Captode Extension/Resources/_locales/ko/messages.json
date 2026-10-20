@@ -1961,12 +1961,6 @@
   "permission_try_again": {
     "message": "다시 시도"
   },
-  "popup_new_in_captode_1_4": {
-    "message": "Captode 1.4의 새로운 기능"
-  },
-  "popup_whats_new_1_4": {
-    "message": "녹화용 카메라 버블과 마이크, 스크린샷 종류별 단축키, 이메일 주소와 번호를 흐리게 하는 설정."
-  },
   "share_captode": {
     "message": "Captode 공유"
   },
@@ -1990,5 +1984,152 @@
   },
   "screen_no_sound": {
     "message": "공유된 소리가 없어 녹화에 소리가 없습니다(마이크를 켰다면 마이크 소리는 들어갑니다)."
+  },
+  "menu_open_popup": {
+    "message": "Captode 메뉴 열기"
+  },
+  "settings_screenshots": {
+    "message": "스크린샷"
+  },
+  "settings_icon_action": {
+    "message": "Captode 아이콘을 클릭하면"
+  },
+  "settings_icon_popup": {
+    "message": "Captode 메뉴 열기"
+  },
+  "settings_icon_visible": {
+    "message": "보이는 영역 스크린샷"
+  },
+  "settings_icon_full": {
+    "message": "전체 페이지 스크린샷"
+  },
+  "settings_icon_area": {
+    "message": "선택한 영역 스크린샷"
+  },
+  "settings_icon_element": {
+    "message": "요소 스크린샷"
+  },
+  "settings_icon_last": {
+    "message": "마지막 스크린샷 방식 반복"
+  },
+  "settings_icon_hint": {
+    "message": "이때 Captode 메뉴는 아이콘의 오른쪽 클릭 메뉴에 있습니다."
+  },
+  "settings_after_capture": {
+    "message": "스크린샷 후"
+  },
+  "settings_after_editor": {
+    "message": "편집기에서 열기"
+  },
+  "settings_after_download": {
+    "message": "바로 다운로드"
+  },
+  "settings_after_copy": {
+    "message": "클립보드에 복사"
+  },
+  "settings_after_hint": {
+    "message": "편집기와 같은 방식으로, 기본 형식에 켜져 있다면 기기 프레임과 흐림까지 적용해 다운로드하거나 복사합니다. 모든 스크린샷은 최근 캡처에도 하루 동안 남습니다."
+  },
+  "settings_long_pages": {
+    "message": "이미지 하나에 담기엔 너무 긴 페이지"
+  },
+  "settings_long_cut": {
+    "message": "한도에서 자르기"
+  },
+  "settings_long_scale": {
+    "message": "축소해서 맞추기"
+  },
+  "settings_long_split": {
+    "message": "여러 이미지로 나누기"
+  },
+  "settings_long_hint": {
+    "message": "이미지 높이는 최대 약 32,000픽셀입니다. 전체 페이지 스크린샷에 적용됩니다."
+  },
+  "settings_file_names": {
+    "message": "파일 이름"
+  },
+  "settings_file_names_hint": {
+    "message": "위의 버튼으로 페이지 제목이나 사이트, 날짜와 시간을 넣을 수 있습니다."
+  },
+  "settings_file_name_example": {
+    "message": "예: $1"
+  },
+  "settings_example_title": {
+    "message": "예시 페이지"
+  },
+  "settings_use_default": {
+    "message": "기본값 사용"
+  },
+  "settings_recording": {
+    "message": "녹화"
+  },
+  "settings_recording_hint": {
+    "message": "새 녹화마다 적용됩니다. 같은 옵션이 Captode 메뉴의 옵션에도 있습니다."
+  },
+  "settings_stop_after": {
+    "message": "녹화 자동 중지"
+  },
+  "settings_stop_never": {
+    "message": "자동으로 멈추지 않음"
+  },
+  "settings_one_minute": {
+    "message": "1분"
+  },
+  "settings_n_minutes": {
+    "message": "$1분"
+  },
+  "settings_not_allowed": {
+    "message": "브라우저에서 허용하지 않았습니다. Captode의 사이트 설정에서 허용한 뒤 다시 시도하세요."
+  },
+  "popup_minutes_short": {
+    "message": "$1분"
+  },
+  "popup_cursor": {
+    "message": "커서 강조"
+  },
+  "popup_cursor_hint": {
+    "message": "탭 녹화에서 부드러운 원이 마우스를 따라갑니다"
+  },
+  "popup_with_cursor": {
+    "message": "커서"
+  },
+  "popup_stops_after": {
+    "message": "$1 후 중지"
+  },
+  "dev_safe_area": {
+    "message": "안전 영역"
+  },
+  "dev_safe_none": {
+    "message": "표시 안 함"
+  },
+  "dev_safe_show": {
+    "message": "경계 표시"
+  },
+  "dev_safe_inside": {
+    "message": "페이지를 안에 맞추기"
+  },
+  "dev_info_safe": {
+    "message": "안전 영역 $1 (위, 오른쪽, 아래, 왼쪽)"
+  },
+  "dev_rotate": {
+    "message": "회전"
+  },
+  "dev_rotate_tip": {
+    "message": "세로와 가로 전환"
+  },
+  "scaled_to_fit": {
+    "message": "이 페이지는 이미지 하나에 담기엔 너무 길어서 $1%로 축소했습니다. 설정에서 바꿀 수 있습니다."
+  },
+  "split_into_parts": {
+    "message": "이 페이지는 이미지 하나에 담기엔 너무 길어서 $1개로 나눠 각각 다른 탭에 열었습니다."
+  },
+  "part_of": {
+    "message": "$2개 중 $1번째"
+  },
+  "popup_new_in_captode_1_6": {
+    "message": "Captode 1.6의 새 기능"
+  },
+  "popup_whats_new_1_6": {
+    "message": "기기 프레임에 안전 영역과 한 번 클릭 회전이 추가되었습니다. 설정에서 아이콘 동작, 스크린샷 후 동작, 아주 긴 페이지, 파일 이름, 자동 중지와 커서 강조가 있는 녹화 옵션을 고를 수 있습니다."
   }
 }

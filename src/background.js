@@ -1,6 +1,7 @@
 // Captode service worker: runs captures, coordinates recordings and switches the
 // toolbar icon between "open the popup" and "stop recording".
 import { putCapture } from './lib/db.js';
+import { getSettings } from './lib/settings.js';
 import {
   pickArea, pickElement, fullPagePrepare, fullPageScroll, fullPageRestore,
   countdown, captureDelay, showOutline, hideOutline, showInputs, findPrivate,
@@ -26,11 +27,12 @@ async function captureVisible(windowId) {
   return createImageBitmap(await (await fetch(url)).blob());
 }
 
-async function openPage(path, tab) {
+async function openPage(path, tab, { active = true, offset = 0 } = {}) {
   await chrome.tabs.create({
     url: chrome.runtime.getURL(path),
-    index: tab ? tab.index + 1 : undefined,
+    index: tab ? tab.index + 1 + offset : undefined,
     windowId: tab?.windowId,
+    active,
   });
 }
 
@@ -79,6 +81,7 @@ async function notePrivate(tab, meta, region, space, scale) {
 
 async function captureImage(mode, tab, delay = 0) {
   let blob;
+  const settings = await getSettings();
   const meta = { title: tab.title, url: tab.url, mode };
   delay = DELAYS.includes(Number(delay)) ? Number(delay) : 0;
   // A selected area or element is chosen first, then the wait, so a menu can be opened in it.
@@ -111,11 +114,20 @@ async function captureImage(mode, tab, delay = 0) {
     if (!(await waitBeforeCapture(tab, delay))) return;
     blob = await captureElement(tab, rect, meta);
   } else {
-    blob = await captureFullPage(tab, meta);
+    blob = await captureFullPage(tab, meta, settings.longPages);
   }
 
-  const id = await putCapture(blob, meta);
-  await openPage(`editor/editor.html?id=${id}`, tab);
+  // A page split into parts gives several images, each with the private details in it.
+  const parts = Array.isArray(blob) ? blob : [{ blob }];
+  for (const [i, part] of parts.entries()) {
+    const m = parts.length > 1 ? { ...meta, part: [i + 1, parts.length], private: part.private } : meta;
+    if (!m.private?.length) delete m.private;
+    const id = await putCapture(part.blob, m);
+    // Downloaded or copied the way the editor would (format, device frame, blurs), by an
+    // editor working in a background tab, which closes itself when done.
+    const then = settings.afterCapture === 'download' || settings.afterCapture === 'copy' ? settings.afterCapture : null;
+    await openPage(`editor/editor.html?id=${id}${then ? `&then=${then}&tab=${tab.id}` : ''}`, tab, { active: !then && i === 0, offset: i });
+  }
 }
 
 /**
@@ -283,7 +295,18 @@ async function captureElement(tab, r, meta) {
   }
 }
 
-async function captureFullPage(tab, meta) {
+/**
+ * How much to scale a page down so all of it fits in one image: at most 32,000 pixels
+ * tall and 250 million in all, as for any capture.
+ */
+const fitScale = (width, height, scale) => Math.min(1, Math.min(32000 / height, Math.sqrt(250e6 / (width * height))) / scale);
+
+/**
+ * The whole page, scrolled through and stitched. A page longer than an image can be is
+ * cut off, scaled down to fit (`longPages` 'scale') or captured in parts ('split'): then
+ * the result is a list of `{ blob, private }`, one for each part.
+ */
+async function captureFullPage(tab, meta, longPages = 'cut') {
   const info = await run(tab.id, fullPagePrepare);
   try {
     if (info.panel) return await capturePanel(tab, info, meta);
@@ -292,20 +315,19 @@ async function captureFullPage(tab, meta) {
       return captureVisible(tab.windowId);
     })();
     const scale = first.width / info.vw;
-    meta.dpr = scale; // image pixels per CSS pixel, for measuring
 
-    // Stay inside the browser's canvas limits; very long pages are cut off.
-    const height = Math.min(info.height, maxHeight(info.width, scale));
-    if (height < info.height) meta.truncated = true;
-    await notePrivate(tab, meta, { x: 0, y: 0, w: info.width, h: height }, 'document', scale);
-
-    const canvas = new OffscreenCanvas(Math.round(info.width * scale), Math.round(height * scale));
-    const ctx = canvas.getContext('2d');
-    ctx.drawImage(first, 0, 0);
-    // How far the tiles reach: the page's reported size, scaled and rounded, can be
-    // a pixel or two more than was actually painted.
-    let paintedW = first.width;
-    let paintedH = first.height;
+    // Stay inside the browser's canvas limits.
+    let height = info.height, f = 1, partH = info.height;
+    const limit = maxHeight(info.width, scale);
+    if (height > limit) {
+      if (longPages === 'scale') f = fitScale(info.width, height, scale);
+      else if (longPages === 'split') partH = limit;
+      else { height = limit; meta.truncated = true; }
+    }
+    const s = scale * f; // image pixels per CSS pixel
+    meta.dpr = s; // for measuring
+    if (f < 1) meta.scaledTo = f;
+    await notePrivate(tab, meta, { x: 0, y: 0, w: info.width, h: height }, 'document', s);
 
     // Step by what a capture really holds. At fractional scales (125%, 150%) the
     // reported viewport is rounded up, and stepping by it would leave a blank row
@@ -313,31 +335,56 @@ async function captureFullPage(tab, meta) {
     // scroll position the page actually reached.
     const viewW = Math.max(1, Math.floor(first.width / scale) - 1);
     const viewH = Math.max(1, Math.floor(first.height / scale) - OVERLAP);
-    first.close();
     const xs = steps(info.width, viewW);
-    const ys = steps(height, viewH);
-    const total = xs.length * ys.length;
-    let done = 1;
+    const parts = [];
+    for (let top = 0; top < height; top += partH) parts.push({ top, h: Math.min(partH, height - top) });
+    for (const p of parts) p.ys = steps(p.h, viewH).map((y) => p.top + y);
+    const total = parts.reduce((n, p) => n + p.ys.length, 0) * xs.length;
+    let done = 0;
+    let firstTile = first;
 
-    for (const y of ys) {
-      for (const x of xs) {
-        if (x === 0 && y === 0) continue;
-        const at = await run(tab.id, fullPageScroll, x, y, true);
-        const bmp = await captureVisible(tab.windowId);
-        const dx = Math.round(at.x * scale);
-        // Where Chrome put the pixels can differ by one from the rounded scroll
-        // position at fractional scales, and differently on each OS; line the tile up
-        // with what's already drawn where they overlap.
-        const dy = y > 0 ? alignTile(ctx, bmp, dx, Math.round(at.y * scale), Math.round(OVERLAP * scale)) : Math.round(at.y * scale);
-        ctx.drawImage(bmp, dx, dy);
-        paintedW = Math.max(paintedW, dx + bmp.width);
-        paintedH = Math.max(paintedH, dy + bmp.height);
-        bmp.close();
-        await badge(`${Math.round((++done / total) * 100)}%`, '#5b4bff');
+    const out = [];
+    for (const { top, h, ys } of parts) {
+      const canvas = new OffscreenCanvas(Math.round(info.width * s), Math.max(1, Math.round(h * s)));
+      const ctx = canvas.getContext('2d');
+      // How far the tiles reach: the page's reported size, scaled and rounded, can be
+      // a pixel or two more than was actually painted.
+      let paintedW = 0, paintedH = 0;
+      for (const [i, y] of ys.entries()) {
+        for (const x of xs) {
+          let bmp, at;
+          if (firstTile && x === 0 && y === 0) {
+            [bmp, at, firstTile] = [firstTile, { x: 0, y: 0 }, null];
+          } else {
+            at = await run(tab.id, fullPageScroll, x, y, true);
+            bmp = await captureVisible(tab.windowId);
+          }
+          if (f < 1) {
+            const small = await createImageBitmap(bmp, { resizeWidth: Math.max(1, Math.round(bmp.width * f)), resizeHeight: Math.max(1, Math.round(bmp.height * f)), resizeQuality: 'high' });
+            bmp.close();
+            bmp = small;
+          }
+          const dx = Math.round(at.x * s);
+          const guess = Math.round((at.y - top) * s);
+          // Where the browser put the pixels can differ by one from the rounded scroll
+          // position at fractional scales, and differently on each OS; line the tile up
+          // with what's already drawn where they overlap.
+          const dy = i > 0 ? alignTile(ctx, bmp, dx, guess, Math.round(OVERLAP * s)) : guess;
+          ctx.drawImage(bmp, dx, dy);
+          paintedW = Math.max(paintedW, dx + bmp.width);
+          paintedH = Math.max(paintedH, dy + bmp.height);
+          bmp.close();
+          await badge(`${Math.round((++done / total) * 100)}%`, '#5b4bff');
+        }
       }
+      // Trim any unpainted strip at the right or bottom edge.
+      const blob = await finish(canvas, paintedW, paintedH);
+      if (parts.length === 1) return blob;
+      // The private details in this part, moved to its own top.
+      const y0 = top * s, y1 = (top + h) * s;
+      out.push({ blob, private: meta.private?.filter((b) => b.y + b.h > y0 && b.y < y1).map((b) => ({ ...b, y: Math.round(b.y - y0) })) });
     }
-    // Trim any unpainted strip at the right or bottom edge.
-    return await finish(canvas, paintedW, paintedH);
+    return out;
   } finally {
     await run(tab.id, fullPageRestore).catch(() => {});
     await badge('');
@@ -353,12 +400,16 @@ const setRec = (rec) => chrome.storage.session.set({ rec });
 /** Seconds of countdown asked for (older popups sent true for a fixed 3 seconds). */
 const countdownSeconds = (v) => (v === true ? 3 : Math.max(0, Math.min(30, Number(v) || 0)));
 
-async function startRecording({ mode, fps, audio, size = 'page', countdown: wantCountdown, inputs = false, camera = false, mic = false }, tab) {
+/** Seconds after which a recording stops on its own (0: it doesn't). */
+const autoStopSeconds = (v) => Math.max(0, Math.min(3600, Math.round(Number(v) || 0)));
+
+async function startRecording({ mode, fps, audio, size = 'page', countdown: wantCountdown, inputs = false, cursor = false, camera = false, mic = false, autoStop = 0 }, tab) {
+  const stopAfter = autoStopSeconds(autoStop);
   if (mode === 'screen') {
     // Picking a screen or window needs a visible page for the browser's picker.
     await setRec({ state: 'starting', kind: 'page', tabId: tab.id });
     const seconds = countdownSeconds(wantCountdown);
-    await openPage(`recorder/screen.html?fps=${fps}&audio=${audio ? 1 : 0}&countdown=${seconds}&size=${encodeURIComponent(size)}&camera=${camera ? 1 : 0}&mic=${mic ? 1 : 0}`, tab);
+    await openPage(`recorder/screen.html?fps=${fps}&audio=${audio ? 1 : 0}&countdown=${seconds}&size=${encodeURIComponent(size)}&camera=${camera ? 1 : 0}&mic=${mic ? 1 : 0}&stop=${stopAfter}`, tab);
     return;
   }
 
@@ -388,22 +439,24 @@ async function startRecording({ mode, fps, audio, size = 'page', countdown: want
 
   const streamId = await startTabCapture(tab.id);
   const res = await chrome.runtime.sendMessage({
-    target: 'recorder', to: 'offscreen', type: 'rec-start', streamId, fps, audio, aspect, crop, size, pageWidth, title: tab.title, camera: !!camera, mic: !!mic,
+    target: 'recorder', to: 'offscreen', type: 'rec-start', streamId, fps, audio, aspect, crop, size, pageWidth, title: tab.title, camera: !!camera, mic: !!mic, autoStop: stopAfter,
   });
   if (!res?.ok) {
     await run(tab.id, hideOutline).catch(() => {});
     throw new Error(res?.error || t('error_recording_start'));
   }
-  await setRec({ state: 'recording', kind: 'offscreen', tabId: tab.id, outline: !!crop, inputs: !!inputs });
-  if (inputs) await run(tab.id, showInputs, true).catch(() => {});
+  await setRec({ state: 'recording', kind: 'offscreen', tabId: tab.id, outline: !!crop, inputs: !!inputs, cursor: !!cursor });
+  if (inputs || cursor) await run(tab.id, showInputs, true, { clicks: !!inputs, cursor: !!cursor }).catch(() => {});
   await enterRecordingUi();
 }
 
-// Clicks and keys stay shown when the recorded tab loads another page.
+// Clicks, keys and the cursor stay shown when the recorded tab loads another page.
 chrome.tabs.onUpdated.addListener(async (tabId, change) => {
   if (change.status !== 'complete') return;
   const rec = await getRec();
-  if (rec?.state === 'recording' && rec.inputs && rec.tabId === tabId) await run(tabId, showInputs, true).catch(() => {});
+  if (rec?.state === 'recording' && (rec.inputs || rec.cursor) && rec.tabId === tabId) {
+    await run(tabId, showInputs, true, { clicks: !!rec.inputs, cursor: !!rec.cursor }).catch(() => {});
+  }
 });
 
 async function enterRecordingUi() {
@@ -413,17 +466,45 @@ async function enterRecordingUi() {
 }
 
 async function leaveRecordingUi() {
-  await chrome.action.setPopup({ popup: 'popup/popup.html' });
+  await applyIconAction();
   await chrome.action.setTitle({ title: 'Captode' });
   await badge('');
 }
+
+// ---------- the toolbar icon ----------
+
+// A click on the icon opens the popup or, if chosen in Settings, takes a screenshot
+// straight away; the popup is then in the icon's right-click menu (see openMenu).
+const POPUP = 'popup/popup.html';
+async function applyIconAction() {
+  const { iconAction } = await getSettings();
+  await chrome.action.setPopup({ popup: iconAction === 'popup' ? POPUP : '' });
+}
+
+/** Opens the popup once, when a click on the icon takes a screenshot instead. */
+async function openMenu() {
+  await chrome.action.setPopup({ popup: POPUP }); // put back when the popup closes
+  await chrome.action.openPopup?.().catch(() => {}); // if not, the next click opens it
+}
+chrome.runtime.onConnect.addListener((port) => {
+  if (port.name !== 'popup') return;
+  port.onDisconnect.addListener(async () => { if ((await getRec())?.state !== 'recording') await applyIconAction(); });
+});
+
+chrome.storage.onChanged.addListener(async (changes, area) => {
+  if (area !== 'local' || !changes.settings) return;
+  const [was, now] = [changes.settings.oldValue?.iconAction, changes.settings.newValue?.iconAction];
+  if (was === now) return;
+  createMenu();
+  if ((await getRec())?.state !== 'recording') await applyIconAction();
+});
 
 async function finishRecording(id, kind) {
   const rec = await getRec();
   await setRec(null);
   await leaveRecordingUi();
   if (rec?.outline) await run(rec.tabId, hideOutline).catch(() => {});
-  if (rec?.inputs) await run(rec.tabId, showInputs, false).catch(() => {});
+  if (rec?.inputs || rec?.cursor) await run(rec.tabId, showInputs, false).catch(() => {});
   if (kind === 'offscreen') {
     await endTabCapture();
     const tab = rec ? await chrome.tabs.get(rec.tabId).catch(() => null) : null;
@@ -431,8 +512,9 @@ async function finishRecording(id, kind) {
   }
 }
 
-chrome.action.onClicked.addListener(async () => {
-  // Only fires while recording, when the popup is switched off.
+// Fires while recording (the popup is switched off), and when a click on the icon is set
+// to take a screenshot.
+async function iconClicked(tab) {
   const rec = await getRec();
   if (rec?.state === 'recording') {
     chrome.runtime.sendMessage({ target: 'recorder', type: 'rec-stop' }).catch(async () => {
@@ -440,12 +522,24 @@ chrome.action.onClicked.addListener(async () => {
       await setRec(null);
       await leaveRecordingUi();
     });
-  } else {
-    await setRec(null);
+    return;
+  }
+  if (rec) await setRec(null);
+  const { iconAction } = await getSettings();
+  const mode = iconAction === 'last'
+    ? (await chrome.storage.local.get({ lastMode: {} })).lastMode.image || 'visible'
+    : iconAction;
+  if (!['full', 'visible', 'area', 'element'].includes(mode) || !tab?.id || tab.id < 0) {
     await leaveRecordingUi();
     chrome.action.openPopup?.().catch(() => {});
+    return;
   }
-});
+  // A page that can't be captured (the browser's own, say): the popup explains why,
+  // and offers recording the screen instead.
+  await captureImage(mode, tab).catch(async (e) => { await reportError(e); await openMenu(); });
+}
+chrome.action.onClicked.addListener(iconClicked);
+globalThis.captodeIconClick = iconClicked; // for the automated tests: their browser has no toolbar to click
 
 chrome.tabs.onRemoved.addListener(async (tabId) => {
   const rec = await getRec();
@@ -476,9 +570,14 @@ const MENU_CONTEXTS = ['page', 'frame', 'selection', 'link', 'editable', 'image'
 async function createMenu() {
   await chrome.contextMenus.removeAll();
   for (const [id, key] of MENU) chrome.contextMenus.create({ id, title: t(key), contexts: MENU_CONTEXTS }, () => void chrome.runtime.lastError);
+  // When a click on the icon takes a screenshot, the popup is a right-click away.
+  if ((await getSettings()).iconAction !== 'popup') {
+    chrome.contextMenus.create({ id: 'open-popup', title: t('menu_open_popup'), contexts: ['action'] }, () => void chrome.runtime.lastError);
+  }
 }
 
 chrome.contextMenus.onClicked.addListener((info, tab) => {
+  if (info.menuItemId === 'open-popup') { openMenu(); return; }
   if (!tab?.id || tab.id < 0 || !MENU.some(([id]) => id === info.menuItemId)) return;
   captureImage(info.menuItemId, tab).catch(reportError);
 });
@@ -527,9 +626,10 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 });
 
 // After an update that adds features, the popup says what's new, once.
-const WHATS_NEW = '1.4.0';
+const WHATS_NEW = '1.6.0';
 chrome.runtime.onInstalled.addListener(({ reason, previousVersion }) => {
   createMenu();
+  applyIconAction();
   const older = (a, b) => {
     const x = a.split('.').map(Number), y = b.split('.').map(Number);
     for (let i = 0; i < 3; i++) if ((x[i] || 0) !== (y[i] || 0)) return (x[i] || 0) < (y[i] || 0);

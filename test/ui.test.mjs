@@ -1167,7 +1167,7 @@ export const tests = {
   async 'after an update, the popup says what is new, once'({ browser, url }) {
     const pop = await open(browser, url('popup/popup.html'), { width: 340, height: 700 });
     ok(await pop.$eval('#whats-new', (e) => e.classList.contains('hidden')), 'nothing new on a fresh install');
-    await pop.evaluate(() => chrome.storage.local.set({ whatsNew: '1.4.0' }));
+    await pop.evaluate(() => chrome.storage.local.set({ whatsNew: '1.6.0' }));
     await pop.reload();
     await pop.waitForFunction(() => !document.querySelector('#whats-new').classList.contains('hidden'), { polling: 100 });
     await pop.click('#whats-new-close');
@@ -1742,5 +1742,151 @@ export const tests = {
     ok(Math.abs(gaps[0] - gaps[1]) < 0.5, `gaps after spacing: ${gaps}`);
     await ed.evaluate(() => { window.onbeforeunload = null; });
     await ed.close();
+  },
+
+  async 'device frames: the safe area can be shown or kept clear, and one click rotates'({ browser, url, editor }) {
+    const lab = await open(browser, url('lab/lab.html'));
+    const r = await lab.evaluate(async () => {
+      const { renderInDevice, describe, DEVICES, safeInsets } = await import('/lib/device.js');
+      const d = DEVICES['iphone-17-pro'];
+      // A plain green capture of the device's whole screen: 3 pixels a point.
+      const src = new OffscreenCanvas(d.px[0], d.px[1]);
+      const g = src.getContext('2d');
+      g.fillStyle = '#00ff00';
+      g.fillRect(0, 0, src.width, src.height);
+      const opts = { enabled: true, device: d.id, orientation: 'portrait', padding: 0, bg: 'none', statusBar: 'none' };
+      const k = 3, sx = d.bezel.x * k, sy = d.bezel.y * k, sh = d.screen[1] * k;
+      // Points from the screen's top-left and bottom-left corners.
+      const at = (out, x, y) => [...out.getContext('2d', { willReadFrequently: true }).getImageData(Math.round(sx + x * k), Math.round(y < 0 ? sy + sh + y * k : sy + y * k), 1, 1).data].slice(0, 3);
+      const run = (safeArea) => {
+        const out = renderInDevice({ ...opts, safeArea }, src);
+        return { size: [out.width, out.height], top: at(out, 60, 52), bottom: at(out, 40, -15), middle: at(out, 200, 400) };
+      };
+      return {
+        insets: [safeInsets(d, false), safeInsets(d, true), safeInsets(DEVICES['pixel-10'], true), safeInsets(DEVICES['iphone-se-3'] || Object.values(DEVICES).find((x) => x.home === 'button'), false)],
+        none: run('none'), show: run('show'), inside: run('inside'),
+        info: describe({ ...opts, safeArea: 'show' }, src.width, src.height),
+      };
+    });
+    await lab.close();
+    const green = (c) => c[0] < 10 && c[1] > 245 && c[2] < 10;
+    ok(JSON.stringify(r.insets[0]) === JSON.stringify({ top: 59, right: 0, bottom: 34, left: 0 }), `iPhone 17 Pro portrait insets ${JSON.stringify(r.insets[0])}`);
+    ok(r.insets[1].left === 59 && r.insets[1].right === 59 && r.insets[1].bottom === 21 && r.insets[1].top === 0, `landscape insets ${JSON.stringify(r.insets[1])}`);
+    ok(r.insets[2].left > 0 && r.insets[2].right === 0, `Android landscape: the cut-out side only, ${JSON.stringify(r.insets[2])}`);
+    ok(r.insets[3].top === 20 && r.insets[3].bottom === 0, `home-button iPhone ${JSON.stringify(r.insets[3])}`);
+    ok(green(r.none.top) && green(r.none.bottom), `not shown: the page fills the screen (${r.none.top}, ${r.none.bottom})`);
+    ok(!green(r.show.top) && r.show.top[0] > 30 && r.show.top[1] > 150, `shown: tinted outside the safe area (${r.show.top})`);
+    ok(!green(r.show.bottom) && green(r.show.middle), `shown: bottom tinted (${r.show.bottom}), middle untouched (${r.show.middle})`);
+    ok(r.inside.top.every((v) => v > 245) && r.inside.bottom.every((v) => v > 245) && green(r.inside.middle), `kept inside: clear above and below, page between (${r.inside.top}, ${r.inside.bottom}, ${r.inside.middle})`);
+    ok(r.inside.size[0] === r.none.size[0], 'kept inside: the capture keeps its own pixels (same frame width)');
+    ok(/59 0 34 0 pt/.test(r.info), `describes the safe area: ${r.info}`);
+
+    // In the editor: Rotate turns the frame between portrait and landscape.
+    const ed = await editor();
+    try {
+      await ed.click('#tab-export');
+      await ed.click('#device-panel input[data-k="enabled"]');
+      const orientation = () => ed.$eval('#device-panel [data-k="orientation"]', (e) => e.value);
+      const shape = async () => { await sleep(400); return ed.evaluate(async () => { const c = await captodeEditor.render(); return c.width > c.height ? 'landscape' : 'portrait'; }); };
+      const first = await shape();
+      await ed.click('#device-panel .dev-rotate');
+      ok(await orientation() === (first === 'landscape' ? 'portrait' : 'landscape'), `rotate set ${await orientation()} from ${first}`);
+      ok(await shape() !== first, 'the frame did not turn');
+      await ed.click('#device-panel .dev-rotate');
+      ok(await shape() === first, 'rotating again did not turn it back');
+      await ed.select('#device-panel [data-k="safeArea"]', 'show');
+      ok(/safe area|0 pt|dp/.test(await ed.$eval('#device-panel .dev-info', (e) => e.textContent)), 'the safe area is not described');
+      await ed.select('#device-panel [data-k="safeArea"]', 'none');
+      await ed.click('#device-panel input[data-k="enabled"]');
+    } finally {
+      await ed.evaluate(() => { window.onbeforeunload = null; });
+      await ed.close();
+    }
+  },
+
+  async 'settings: what the icon does, after a screenshot, long pages and file names'({ browser, url }) {
+    const s = await open(browser, url('settings/settings.html'), { width: 900, height: 900 });
+    const stored = () => s.evaluate(async () => (await chrome.storage.local.get('settings')).settings || {});
+    const popupNow = () => s.evaluate(() => chrome.action.getPopup({}));
+    try {
+      await s.select('#iconAction', 'full');
+      await s.select('#afterCapture', 'download');
+      await s.select('#longPages', 'split');
+      await sleep(300);
+      const st = await stored();
+      ok(st.iconAction === 'full' && st.afterCapture === 'download' && st.longPages === 'split', `stored ${JSON.stringify(st)}`);
+      ok(await s.$eval('#icon-hint', (e) => !e.classList.contains('hidden')), 'no hint where the menu went');
+      // A click on the icon now takes a screenshot: the popup is switched off.
+      await s.waitForFunction(async () => (await chrome.action.getPopup({})) === '', { timeout: 5000 });
+      // File names: tokens go in at the cursor, with a dash, and the example follows.
+      await s.click('#fileName', { clickCount: 3 });
+      await s.keyboard.type('shot');
+      await s.click('#name-tokens button:nth-child(2)'); // {site}
+      const name = await s.$eval('#fileName', (e) => e.value);
+      ok(name === 'shot-{site}', `file name ${name}`);
+      await s.waitForFunction(() => /shot-example-com\.png/.test(document.querySelector('#name-example').textContent), { timeout: 3000 });
+      await sleep(800);
+      ok((await stored()).fileName === 'shot-{site}', 'file name not saved');
+      await s.click('#fileName-default');
+      await sleep(300);
+      ok((await stored()).fileName === '' && await s.$eval('#fileName', (e) => e.value) === 'captode-{title}-{date}-{time}', 'default not put back');
+    } finally {
+      await s.select('#iconAction', 'popup');
+      await s.select('#afterCapture', 'editor');
+      await s.select('#longPages', 'cut');
+      await s.waitForFunction(async () => (await chrome.action.getPopup({})).endsWith('popup/popup.html'), { timeout: 5000 });
+      ok((await popupNow()).endsWith('popup/popup.html'), 'popup not back');
+      await s.close();
+    }
+  },
+
+  async 'settings: recording options are the popup\'s, with auto-stop and the cursor'({ browser, url }) {
+    const s = await open(browser, url('settings/settings.html'), { width: 900, height: 900 });
+    const keys = ['fps', 'videoSize', 'countdownSeconds', 'autoStop', 'cursor', 'inputs'];
+    const before = await s.evaluate((keys) => chrome.storage.local.get(keys), keys);
+    try {
+      await s.select('#rec-fps', '60');
+      await s.select('#rec-size', '1080p');
+      await s.select('#rec-countdown', '5');
+      await s.select('#rec-autoStop', '30');
+      await s.click('#rec-cursor');
+      await sleep(300);
+      const r = await s.evaluate((keys) => chrome.storage.local.get(keys), keys);
+      ok(r.fps === '60' && r.videoSize === '1080p' && r.countdownSeconds === 5 && r.autoStop === 30 && r.cursor === true, `stored ${JSON.stringify(r)}`);
+      // The popup shows the same choices, and the time limit in its summary.
+      const pop = await open(browser, url('popup/popup.html'), { width: 340, height: 700 });
+      const p = await pop.evaluate(() => ({ cursor: document.querySelector('#cursor').checked, size: document.querySelector('#size').value, summary: document.querySelector('#opts-summary').textContent }));
+      await pop.close();
+      ok(p.cursor && p.size === '1080p', `popup ${JSON.stringify(p)}`);
+      ok(/60 fps/.test(p.summary) && /30 s/.test(p.summary), `summary: ${p.summary}`);
+      // And back: a change in the popup shows in Settings on coming back.
+      await s.evaluate(() => chrome.storage.local.set({ fps: '24' }));
+      await s.evaluate(() => document.dispatchEvent(new Event('visibilitychange')));
+      await s.waitForFunction(() => document.querySelector('#rec-fps').value === '24', { timeout: 3000 });
+    } finally {
+      await s.evaluate(async (before, keys) => { await chrome.storage.local.remove(keys); await chrome.storage.local.set(before); }, before, keys);
+      await s.close();
+    }
+  },
+
+  async 'a recording stops on its own after the time chosen in Settings'({ browser, url }) {
+    const p = await open(browser, url('recorder/screen.html?fps=30&audio=0&countdown=0&stop=2'), { width: 800, height: 600 });
+    await p.evaluate(() => {
+      navigator.mediaDevices.getDisplayMedia = async () => {
+        const c = document.createElement('canvas'); c.width = 320; c.height = 240;
+        const x = c.getContext('2d');
+        setInterval(() => { x.fillStyle = `hsl(${Date.now() / 10 % 360} 60% 50%)`; x.fillRect(0, 0, 320, 240); }, 33);
+        return c.captureStream(30);
+      };
+    });
+    const t0 = Date.now();
+    await p.click('#choose');
+    await p.waitForFunction(() => !document.getElementById('live').classList.contains('hidden'), { polling: 100, timeout: 5000 });
+    ok(/\/ 0:02/.test(await p.$eval('#time', (e) => e.textContent)), 'the clock does not show the limit');
+    await p.waitForNavigation({ timeout: 15000 });
+    const took = (Date.now() - t0) / 1000;
+    ok(p.url().includes('video/video.html?id='), `after the limit: ${p.url()}`);
+    ok(took >= 1.9 && took < 10, `stopped after ${took.toFixed(1)} s`);
+    await p.close();
   },
 };

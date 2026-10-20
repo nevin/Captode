@@ -1961,12 +1961,6 @@
   "permission_try_again": {
     "message": "Erneut versuchen"
   },
-  "popup_new_in_captode_1_4": {
-    "message": "Neu in Captode 1.4"
-  },
-  "popup_whats_new_1_4": {
-    "message": "Kamerablase und Mikrofon für Aufnahmen, eine Tastenkombination für jede Screenshot-Art und eine Einstellung, um E-Mails und Nummern zu verwischen."
-  },
   "share_captode": {
     "message": "Captode teilen"
   },
@@ -1990,5 +1984,152 @@
   },
   "screen_no_sound": {
     "message": "Es wurde kein Ton geteilt, daher hat die Aufnahme keinen (außer Ihrem Mikrofon, falls eingeschaltet)."
+  },
+  "menu_open_popup": {
+    "message": "Captode-Menü öffnen"
+  },
+  "settings_screenshots": {
+    "message": "Screenshots"
+  },
+  "settings_icon_action": {
+    "message": "Klick auf das Captode-Symbol"
+  },
+  "settings_icon_popup": {
+    "message": "Öffnet das Captode-Menü"
+  },
+  "settings_icon_visible": {
+    "message": "Nimmt den sichtbaren Bereich auf"
+  },
+  "settings_icon_full": {
+    "message": "Nimmt die ganze Seite auf"
+  },
+  "settings_icon_area": {
+    "message": "Nimmt eine Auswahl auf"
+  },
+  "settings_icon_element": {
+    "message": "Nimmt ein Element auf"
+  },
+  "settings_icon_last": {
+    "message": "Wiederholt die letzte Art von Screenshot"
+  },
+  "settings_icon_hint": {
+    "message": "Das Captode-Menü ist dann im Rechtsklickmenü des Symbols."
+  },
+  "settings_after_capture": {
+    "message": "Nach einem Screenshot"
+  },
+  "settings_after_editor": {
+    "message": "Im Editor öffnen"
+  },
+  "settings_after_download": {
+    "message": "Sofort herunterladen"
+  },
+  "settings_after_copy": {
+    "message": "In die Zwischenablage kopieren"
+  },
+  "settings_after_hint": {
+    "message": "Heruntergeladen oder kopiert wie im Editor: im Standardformat, mit Geräterahmen und Unschärfe, falls aktiviert. Jeder Screenshot bleibt außerdem einen Tag in den letzten Aufnahmen."
+  },
+  "settings_long_pages": {
+    "message": "Seiten, die für ein Bild zu lang sind"
+  },
+  "settings_long_cut": {
+    "message": "An der Grenze abschneiden"
+  },
+  "settings_long_scale": {
+    "message": "Passend verkleinern"
+  },
+  "settings_long_split": {
+    "message": "In mehrere Bilder aufteilen"
+  },
+  "settings_long_hint": {
+    "message": "Ein Bild kann höchstens etwa 32.000 Pixel hoch sein. Das gilt für Screenshots ganzer Seiten."
+  },
+  "settings_file_names": {
+    "message": "Dateinamen"
+  },
+  "settings_file_names_hint": {
+    "message": "Fügen Sie mit den Schaltflächen oben den Titel oder die Website der Seite sowie Datum und Uhrzeit ein."
+  },
+  "settings_file_name_example": {
+    "message": "Zum Beispiel: $1"
+  },
+  "settings_example_title": {
+    "message": "Beispielseite"
+  },
+  "settings_use_default": {
+    "message": "Standard verwenden"
+  },
+  "settings_recording": {
+    "message": "Bildschirmaufnahme"
+  },
+  "settings_recording_hint": {
+    "message": "Für jede neue Aufnahme. Dieselben Optionen finden Sie unter Optionen im Captode-Menü."
+  },
+  "settings_stop_after": {
+    "message": "Aufnahme beenden nach"
+  },
+  "settings_stop_never": {
+    "message": "Nicht von selbst beenden"
+  },
+  "settings_one_minute": {
+    "message": "1 Minute"
+  },
+  "settings_n_minutes": {
+    "message": "$1 Minuten"
+  },
+  "settings_not_allowed": {
+    "message": "Der Browser hat es nicht erlaubt. Sie können es in den Website-Einstellungen für Captode erlauben und es dann erneut versuchen."
+  },
+  "popup_minutes_short": {
+    "message": "$1 Min."
+  },
+  "popup_cursor": {
+    "message": "Mauszeiger hervorheben"
+  },
+  "popup_cursor_hint": {
+    "message": "Bei Tab-Aufnahmen folgt ein heller Kreis der Maus"
+  },
+  "popup_with_cursor": {
+    "message": "Zeiger"
+  },
+  "popup_stops_after": {
+    "message": "Endet nach $1"
+  },
+  "dev_safe_area": {
+    "message": "Sicherer Bereich"
+  },
+  "dev_safe_none": {
+    "message": "Nicht anzeigen"
+  },
+  "dev_safe_show": {
+    "message": "Ränder anzeigen"
+  },
+  "dev_safe_inside": {
+    "message": "Seite darin halten"
+  },
+  "dev_info_safe": {
+    "message": "sicherer Bereich $1 (oben, rechts, unten, links)"
+  },
+  "dev_rotate": {
+    "message": "Drehen"
+  },
+  "dev_rotate_tip": {
+    "message": "Zwischen Hoch- und Querformat wechseln"
+  },
+  "scaled_to_fit": {
+    "message": "Diese Seite war für ein Bild zu lang und wurde daher auf $1 % verkleinert. Das können Sie in den Einstellungen ändern."
+  },
+  "split_into_parts": {
+    "message": "Diese Seite war für ein Bild zu lang und liegt daher in $1 Teilen vor, jeder in einem eigenen Tab."
+  },
+  "part_of": {
+    "message": "Teil $1 von $2"
+  },
+  "popup_new_in_captode_1_6": {
+    "message": "Neu in Captode 1.6"
+  },
+  "popup_whats_new_1_6": {
+    "message": "Sichere Bereiche und Drehen mit einem Klick für Geräterahmen. In den Einstellungen: was das Symbol tut, was nach einem Screenshot passiert, sehr lange Seiten, Dateinamen und Aufnahmeoptionen mit automatischem Stopp und hervorgehobenem Zeiger."
   }
 }

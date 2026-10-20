@@ -447,12 +447,13 @@ export function captureDelay(seconds, text) {
 /**
  * While a tab is recorded: a ripple where each click lands, and a label for keyboard
  * shortcuts (⌘K, Ctrl+Shift+P) and named keys (Enter, Tab, Esc, arrows). Plain typing
- * is never shown, and nothing at all while a password field has focus. Drawn in the
- * page, so the recording shows it; `on` false removes it.
+ * is never shown, and nothing at all while a password field has focus. With `cursor`,
+ * a soft circle also follows the mouse. Drawn in the page, so the recording shows it;
+ * `on` false removes it.
  */
-export function showInputs(on) {
+export function showInputs(on, { clicks = true, cursor = false } = {}) {
   window.__captodeInputs?.();
-  if (!on) return;
+  if (!on || (!clicks && !cursor)) return;
   const host = document.createElement('div');
   host.id = '__captode_inputs';
   host.style.cssText = 'position:fixed;inset:0;z-index:2147483646;pointer-events:none;';
@@ -462,6 +463,8 @@ export function showInputs(on) {
     @keyframes r{from{transform:scale(.35);opacity:1}to{transform:scale(1.5);opacity:0}}
     .keys{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);padding:8px 16px;border-radius:10px;background:rgba(23,23,28,.88);color:#fff;font:600 20px system-ui,sans-serif;letter-spacing:.02em;box-shadow:0 6px 20px rgba(0,0,0,.25);transition:opacity .25s}
     .keys.out{opacity:0}
+    .cursor{position:fixed;left:0;top:0;width:40px;height:40px;margin:-20px 0 0 -20px;border-radius:50%;background:rgba(255,214,10,.35);border:2px solid rgba(255,190,0,.75);box-sizing:border-box;opacity:0;transition:opacity .2s;will-change:transform}
+    .cursor.on{opacity:1}
   </style>`;
   document.documentElement.appendChild(host);
 
@@ -498,9 +501,27 @@ export function showInputs(on) {
     clearTimeout(fade);
     fade = setTimeout(() => pill.classList.add('out'), 1200);
   };
-  addEventListener('pointerdown', onDown, true);
-  addEventListener('keydown', onKey, true);
+  let dot = null;
+  const onMove = (e) => {
+    if (e.pointerType !== 'mouse') return;
+    dot.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
+    dot.classList.add('on');
+  };
+  const onLeave = (e) => { if (!e.relatedTarget) dot.classList.remove('on'); };
+  if (cursor) {
+    dot = document.createElement('div');
+    dot.className = 'cursor';
+    root.append(dot);
+    addEventListener('pointermove', onMove, true);
+    document.addEventListener('pointerout', onLeave, true);
+  }
+  if (clicks) {
+    addEventListener('pointerdown', onDown, true);
+    addEventListener('keydown', onKey, true);
+  }
   window.__captodeInputs = () => {
+    removeEventListener('pointermove', onMove, true);
+    document.removeEventListener('pointerout', onLeave, true);
     removeEventListener('pointerdown', onDown, true);
     removeEventListener('keydown', onKey, true);
     clearTimeout(fade);
@@ -523,4 +544,27 @@ export function showOutline(rect) {
 
 export function hideOutline() {
   document.getElementById('__captode_outline')?.remove();
+}
+
+/**
+ * Puts a screenshot (PNG, as base64) on the clipboard from the page it was taken of,
+ * which has the focus the clipboard needs, and says so for a moment. Resolves false if
+ * the page can't (an insecure page, say): the editor then copies it instead.
+ */
+export async function copyImageHere(base64, label) {
+  try {
+    const bin = atob(base64);
+    const bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    await navigator.clipboard.write([new ClipboardItem({ 'image/png': new Blob([bytes], { type: 'image/png' }) })]);
+  } catch {
+    return false;
+  }
+  const note = document.createElement('div');
+  note.textContent = label;
+  note.setAttribute('role', 'status');
+  note.style.cssText = 'position:fixed;left:50%;bottom:28px;transform:translateX(-50%);z-index:2147483647;padding:10px 16px;border-radius:10px;background:rgba(23,23,28,.92);color:#fff;font:500 14px system-ui,sans-serif;box-shadow:0 6px 20px rgba(0,0,0,.25);pointer-events:none;';
+  document.documentElement.appendChild(note);
+  setTimeout(() => note.remove(), 1800);
+  return true;
 }

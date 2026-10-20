@@ -21,6 +21,17 @@ const manifest = JSON.parse(readFileSync(join(src, 'manifest.json'), 'utf8'));
 const { version } = manifest;
 const SKIP = new Set(['.DS_Store', 'Thumbs.db', 'desktop.ini']);
 
+// A released version keeps its packages: built again from files changed since (between
+// releases), the packages go to dist/dev/ instead, so the released zips are never replaced.
+let outDir = join(root, 'dist');
+if (existsSync(join(root, '.git'))) {
+  const git = (...args) => execFileSync('git', args, { cwd: root, encoding: 'utf8' }).trim();
+  if (git('tag', '-l', `v${version}`) && git('status', '--porcelain')) {
+    outDir = join(root, 'dist', 'dev');
+    console.log(`v${version} is released and files have changed since, so these packages go in dist/dev/.`);
+  }
+}
+
 /** Every file under `dir`, sorted so zips come out the same each time. */
 function walk(dir, files = []) {
   for (const name of readdirSync(dir).sort()) {
@@ -82,7 +93,7 @@ function writeZip(file, entries) {
   end.writeUInt32LE(centralSize, 12);
   end.writeUInt32LE(offset, 16);
 
-  const out = join(root, 'dist', file);
+  const out = join(outDir, file);
   mkdirSync(dirname(out), { recursive: true });
   writeFileSync(out, Buffer.concat([...local, ...central, end]));
   console.log(`wrote ${out} (${entries.length} files)`);
@@ -113,7 +124,7 @@ for (const [id, target] of Object.entries(TARGETS)) {
   if (target.file) {
     writeZip(target.file(version), pkg);
   } else {
-    const out = join(root, 'dist', target.folder(version));
+    const out = join(outDir, target.folder(version));
     rmSync(out, { recursive: true, force: true });
     for (const [name, data] of pkg) {
       mkdirSync(dirname(join(out, name)), { recursive: true });

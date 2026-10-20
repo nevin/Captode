@@ -1961,12 +1961,6 @@
   "permission_try_again": {
     "message": "Tentar de novo"
   },
-  "popup_new_in_captode_1_4": {
-    "message": "Novidades do Captode 1.4"
-  },
-  "popup_whats_new_1_4": {
-    "message": "Bolha da câmera e microfone nas gravações, um atalho para cada tipo de captura e uma opção nas Configurações para desfocar e-mails e números."
-  },
   "share_captode": {
     "message": "Compartilhar o Captode"
   },
@@ -1990,5 +1984,152 @@
   },
   "screen_no_sound": {
     "message": "Nenhum som foi compartilhado, então a gravação não terá som (exceto o microfone, se estiver ligado)."
+  },
+  "menu_open_popup": {
+    "message": "Abrir o menu do Captode"
+  },
+  "settings_screenshots": {
+    "message": "Capturas de tela"
+  },
+  "settings_icon_action": {
+    "message": "Ao clicar no ícone do Captode"
+  },
+  "settings_icon_popup": {
+    "message": "Abre o menu do Captode"
+  },
+  "settings_icon_visible": {
+    "message": "Captura a área visível"
+  },
+  "settings_icon_full": {
+    "message": "Captura a página inteira"
+  },
+  "settings_icon_area": {
+    "message": "Captura uma área selecionada"
+  },
+  "settings_icon_element": {
+    "message": "Captura um elemento"
+  },
+  "settings_icon_last": {
+    "message": "Repete o último tipo de captura"
+  },
+  "settings_icon_hint": {
+    "message": "O menu do Captode fica então no menu do botão direito do ícone."
+  },
+  "settings_after_capture": {
+    "message": "Depois de uma captura"
+  },
+  "settings_after_editor": {
+    "message": "Abrir no editor"
+  },
+  "settings_after_download": {
+    "message": "Baixar na hora"
+  },
+  "settings_after_copy": {
+    "message": "Copiar para a área de transferência"
+  },
+  "settings_after_hint": {
+    "message": "Baixada ou copiada como o editor faria: no seu formato padrão, com moldura de dispositivo e desfoques se estiverem ativados. Cada captura também fica um dia em Capturas recentes."
+  },
+  "settings_long_pages": {
+    "message": "Páginas longas demais para uma imagem"
+  },
+  "settings_long_cut": {
+    "message": "Cortar no limite"
+  },
+  "settings_long_scale": {
+    "message": "Reduzir para caber"
+  },
+  "settings_long_split": {
+    "message": "Dividir em várias imagens"
+  },
+  "settings_long_hint": {
+    "message": "Uma imagem pode ter no máximo cerca de 32.000 pixels de altura. Vale para capturas da página inteira."
+  },
+  "settings_file_names": {
+    "message": "Nomes de arquivo"
+  },
+  "settings_file_names_hint": {
+    "message": "Adicione o título ou o site da página, e a data e a hora, com os botões acima."
+  },
+  "settings_file_name_example": {
+    "message": "Por exemplo: $1"
+  },
+  "settings_example_title": {
+    "message": "Página de exemplo"
+  },
+  "settings_use_default": {
+    "message": "Usar o padrão"
+  },
+  "settings_recording": {
+    "message": "Gravação"
+  },
+  "settings_recording_hint": {
+    "message": "Para cada nova gravação. As mesmas opções estão em Opções, no menu do Captode."
+  },
+  "settings_stop_after": {
+    "message": "Parar a gravação após"
+  },
+  "settings_stop_never": {
+    "message": "Não parar sozinha"
+  },
+  "settings_one_minute": {
+    "message": "1 minuto"
+  },
+  "settings_n_minutes": {
+    "message": "$1 minutos"
+  },
+  "settings_not_allowed": {
+    "message": "O navegador não permitiu. Você pode permitir nas configurações do site para o Captode e tentar de novo."
+  },
+  "popup_minutes_short": {
+    "message": "$1 min"
+  },
+  "popup_cursor": {
+    "message": "Destacar o cursor"
+  },
+  "popup_cursor_hint": {
+    "message": "Em gravações de guia, um círculo suave segue o mouse"
+  },
+  "popup_with_cursor": {
+    "message": "Cursor"
+  },
+  "popup_stops_after": {
+    "message": "Para após $1"
+  },
+  "dev_safe_area": {
+    "message": "Área segura"
+  },
+  "dev_safe_none": {
+    "message": "Não mostrar"
+  },
+  "dev_safe_show": {
+    "message": "Mostrar as bordas"
+  },
+  "dev_safe_inside": {
+    "message": "Manter a página dentro"
+  },
+  "dev_info_safe": {
+    "message": "área segura $1 (topo, direita, base, esquerda)"
+  },
+  "dev_rotate": {
+    "message": "Girar"
+  },
+  "dev_rotate_tip": {
+    "message": "Alternar entre retrato e paisagem"
+  },
+  "scaled_to_fit": {
+    "message": "Esta página era longa demais para uma imagem, então foi reduzida a $1%. Você pode mudar isso nas Configurações."
+  },
+  "split_into_parts": {
+    "message": "Esta página era longa demais para uma imagem, então está em $1 partes, cada uma na sua guia."
+  },
+  "part_of": {
+    "message": "parte $1 de $2"
+  },
+  "popup_new_in_captode_1_6": {
+    "message": "Novidades do Captode 1.6"
+  },
+  "popup_whats_new_1_6": {
+    "message": "Áreas seguras e giro com um clique para molduras de dispositivo. Nas Configurações: o que o ícone faz, o que acontece após uma captura, páginas muito longas, nomes de arquivo e opções de gravação com parada automática e cursor destacado."
   }
 }

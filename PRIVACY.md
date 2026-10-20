@@ -28,6 +28,10 @@ them. It does not collect, transmit, sell or share any personal or sensitive dat
   turn on Blur private details in Settings, on the page you capture, at the moment you
   capture it, to blur them. Their positions
   are kept with the capture; the text itself isn't kept or sent.
+- **Copy it to the clipboard** (Settings → After a screenshot) puts the screenshot on your
+  clipboard through the tab you captured, which has the focus the clipboard needs. The image
+  is handed over in Captode's own isolated script, which the page's scripts can't read, and
+  nothing is sent anywhere.
 - **Copy diagnostics** in Settings puts versions, settings and the last error on your
   clipboard for you to paste into a report yourself. Captode doesn't send it.
 - **Compression** (including the oxipng and MozJPEG encoders bundled with the extension)

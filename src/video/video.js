@@ -2,6 +2,7 @@ import { getCapture, putCapture } from '../lib/db.js';
 import { GifEncoder } from '../lib/gif.js';
 import { buildPalette } from '../lib/quantize.js';
 import { getSettings } from '../lib/settings.js';
+import { fileStem } from '../lib/filename.js';
 import { recall, remember, rememberControls } from '../lib/remember.js';
 import { mountPresets } from '../lib/presets.js';
 import { WebpAnimEncoder } from '../lib/webp.js';
@@ -19,6 +20,7 @@ const player = $('#player');
 
 let source = null;   // the recorded Blob
 let meta = {};
+let created = 0; // when the recording was made, for file names
 let srcUrl = '';
 let duration = 0;
 let format = 'mp4';
@@ -561,9 +563,8 @@ async function convert() {
         blob = await convertRealtime(p, range);
       }
     }
-    const base = (meta.title ? 'captode-' + meta.title : 'captode-recording').toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 50);
-    const stamp = new Date().toISOString().slice(0, 19).replace(/[-:]/g, '').replace('T', '-');
-    result = { blob, name: `${base}-${stamp}.${EXT[format]}` };
+    const name = fileStem((await getSettings()).fileName, { title: meta.title || 'recording', url: meta.url, when: new Date(created || Date.now()) });
+    result = { blob, name: `${name}.${EXT[format]}` };
 
     const url = URL.createObjectURL(blob);
     if (format === 'gif' || format === 'webp') {
@@ -788,6 +789,7 @@ addEventListener('resize', () => { if (rv.tool !== 'off') placeOverlay(); });
   }
   source = rec.blob;
   meta = rec.meta || {};
+  created = rec.created;
   showReview();
   srcUrl = URL.createObjectURL(source);
   player.src = srcUrl;

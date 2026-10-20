@@ -157,7 +157,12 @@ pixel for pixel. You can choose:
 
 - the device, or **Best match for the capture**, which picks the device whose screen the
   capture fits (the panel says which, and whether the pixels are kept exactly)
-- portrait or landscape (the hardware turns; the status bar and home indicator stay upright)
+- portrait or landscape (the hardware turns; the status bar and home indicator stay upright),
+  or the **Rotate** button to switch between them in one click
+- the **safe area**: show its edges (the parts outside it are tinted, in the export too), or
+  keep the page inside it, clear of the status bar, cut-out and home indicator, as apps and
+  web pages are laid out by default. Insets are Apple's for iPhones and iPads, and the status
+  and gesture bars for Android, with the camera cut-out on the left in landscape
 - the size: the capture's own pixels (exact), or the device's screen resolution
 - how the capture fits the screen
 - the finish, padding, and a transparent, white or custom-colour background (the default is set in Settings)
@@ -180,6 +185,20 @@ Open **Settings** from the gear in the popup (or right-click the icon → Option
   device frames are on.
 - **Blur private details:** blur email addresses and phone and card numbers in new
   screenshots (off at first).
+- **Clicking Captode's icon:** opens the menu (at first), or takes a screenshot straight
+  away: the visible area, the full page, a selected area, an element, or the last kind used.
+  The menu is then in the icon's right-click menu.
+- **After a screenshot:** open it in the editor (at first), download it straight away, or
+  copy it to the clipboard. Downloads and copies are made as the editor would (default
+  format, device frame, blurs) by an editor working in a background tab, which closes
+  itself; if a page can't take the copy, the editor comes forward and copies it.
+- **Pages too long for one image** (full pages past about 32,000 pixels): cut off at the
+  limit (at first), scaled down to fit, or split into several images, each in its own tab.
+- **File names:** a pattern with `{title}`, `{site}`, `{date}` and `{time}`, with an example;
+  the default is `captode-{title}-{date}-{time}`.
+- **Recording:** frame rate, video size, countdown, sound, microphone, camera bubble, clicks
+  and keys, and the same options as the popup's; plus **Stop recording after** a set time and
+  **Highlight the cursor** (a soft circle that follows the mouse in tab recordings).
 
 Settings also lists every keyboard shortcut (with a button to change them), has links to
 help, problem reports and the privacy policy, a **Share Captode** button (the system's

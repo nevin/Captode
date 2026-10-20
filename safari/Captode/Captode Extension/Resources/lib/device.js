@@ -4,11 +4,11 @@
 // exact pixels: nothing is resampled, only cropped or framed. The frame is drawn from
 // shapes, so it is sharp at any size.
 import { getSettings } from './settings.js';
-import { DEVICES, LEGACY, DEFAULT_DEVICE, matchDevice } from './devices.js';
+import { DEVICES, LEGACY, DEFAULT_DEVICE, matchDevice, safeInsets } from './devices.js';
 import { createDevicePicker } from './device-picker.js';
 import { t } from './i18n.js';
 
-export { DEVICES, matchDevice };
+export { DEVICES, matchDevice, safeInsets };
 
 export const FRAMES = {
   midnight: { label: t('finish_midnight'), body: ['#2a2b33', '#111217'], rim: '#4a4b55' },
@@ -31,6 +31,9 @@ export const DEFAULTS = {
   // 'auto': over a capture of the whole screen (it already has room for one), else above
   statusBar: 'auto',  // 'auto' | 'above' (the page starts below it) | 'over' (on top of the page) | 'none'
   statusStyle: 'light',
+  // The device's safe area: 'none', 'show' (guides over the screen, in the export too)
+  // or 'inside' (the page is laid out within it, as apps and web pages are by default)
+  safeArea: 'none',
 };
 
 // Canvases larger than this fail in some browsers, or use too much memory.
@@ -45,6 +48,7 @@ export function normalise(opts) {
   if (o.statusBar === true) o.statusBar = 'auto';
   if (o.statusBar === false) o.statusBar = 'none';
   if (!FRAMES[o.frame]) o.frame = DEFAULTS.frame;
+  if (!['none', 'show', 'inside'].includes(o.safeArea)) o.safeArea = 'none';
   return o;
 }
 
@@ -75,9 +79,14 @@ function layout(opts, srcW, srcH) {
   const showStatus = o.statusBar !== 'none' && !(landscape && d.os === 'ios');
   const statusPt = showStatus ? d.status : 0;
   const pushPt = o.statusBar === 'above' ? statusPt : 0;
-  // The screen and the page's area on it, as the viewer sees them.
+  // The screen and the page's area on it, as the viewer sees them. Kept inside the
+  // safe area, the page is inset from each edge (and starts below the status bar).
   const [sw, sh] = landscape ? [vh, vw] : [vw, vh];
-  const cw = sw, ch = sh - pushPt;
+  const safe = safeInsets(d, landscape);
+  const inset = o.safeArea === 'inside'
+    ? { top: Math.max(safe.top, pushPt), right: safe.right, bottom: safe.bottom, left: safe.left }
+    : { top: pushPt, right: 0, bottom: 0, left: 0 };
+  const cw = sw - inset.left - inset.right, ch = sh - inset.top - inset.bottom;
 
   let k;
   if (o.size === 'device') k = d.dpr; // the device's own screen resolution
@@ -108,14 +117,14 @@ function layout(opts, srcW, srcH) {
   const screen = landscape
     ? { x: P.screen.y, y: H - P.screen.x - P.screen.w, w: P.screen.h, h: P.screen.w, r: P.screen.r }
     : { ...P.screen };
-  const content = { x: screen.x, y: screen.y + pushPt * k, w: cw * k, h: ch * k };
+  const content = { x: screen.x + inset.left * k, y: screen.y + inset.top * k, w: cw * k, h: ch * k };
   // The capture's scale on screen: 1 when its pixels are kept exactly.
   let scale;
   if (o.size !== 'device' && o.fit !== 'contain' && o.fit !== 'cover') scale = limit;
   else if (o.fit === 'contain') scale = Math.min(content.w / srcW, content.h / srcH);
   else if (o.fit === 'cover') scale = Math.max(content.w / srcW, content.h / srcH);
   else scale = content.w / srcW;
-  return { d, o, landscape, exact, k, W, H, P, screen, content, statusH: statusPt * k, scale };
+  return { d, o, landscape, exact, k, W, H, P, screen, content, safe, statusH: statusPt * k, scale };
 }
 
 /** Runs `draw` in portrait coordinates: rotated a quarter turn for landscape. */
@@ -231,15 +240,21 @@ function statusIcons(ctx, right, cy, u, color) {
 }
 
 function drawOver(ctx, g) {
-  const { o, d, P, W, H, screen, statusH, landscape } = g;
+  const { o, d, P, W, H, screen, content, statusH, landscape } = g;
   const k = P.k;
   ctx.clearRect(0, 0, W, H);
 
   ctx.save();
   roundRect(ctx, screen.x, screen.y, screen.w, screen.h, screen.r);
   ctx.clip();
+  const dark = o.statusStyle === 'dark';
+  if (o.safeArea === 'inside') {
+    // Around a page kept inside the safe area: the system's background, as on the device.
+    ctx.fillStyle = dark ? '#000' : '#fff';
+    ctx.fillRect(screen.x, screen.y, screen.w, screen.h);
+    ctx.clearRect(content.x, content.y, content.w, content.h);
+  }
   if (statusH) {
-    const dark = o.statusStyle === 'dark';
     const color = dark ? '#fff' : '#000';
     if (o.statusBar === 'above') {
       ctx.fillStyle = dark ? '#000' : '#fff';
@@ -275,6 +290,7 @@ function drawOver(ctx, g) {
     ctx.fillStyle = o.statusStyle === 'dark' ? 'rgba(255,255,255,0.75)' : 'rgba(0,0,0,0.75)';
     ctx.fill();
   }
+  if (o.safeArea === 'show') drawSafeArea(ctx, g);
   ctx.restore();
 
   // The cut-out is part of the hardware, so it turns with the device.
@@ -311,6 +327,27 @@ function drawOver(ctx, g) {
 }
 
 /**
+ * The safe area's guides: what lies outside it tinted, and a dashed line along its
+ * edge, so a design can be checked against the status bar, cut-out and home indicator.
+ */
+function drawSafeArea(ctx, g) {
+  const { screen, safe, P: { k } } = g;
+  const x = screen.x + safe.left * k, y = screen.y + safe.top * k;
+  const w = screen.w - (safe.left + safe.right) * k, h = screen.h - (safe.top + safe.bottom) * k;
+  ctx.save();
+  ctx.fillStyle = 'rgba(229, 72, 77, 0.22)';
+  ctx.beginPath();
+  ctx.rect(screen.x, screen.y, screen.w, screen.h);
+  ctx.rect(x, y, w, h);
+  ctx.fill('evenodd');
+  ctx.strokeStyle = '#e5484d';
+  ctx.lineWidth = Math.max(1, 1.5 * k);
+  ctx.setLineDash([6 * k, 4 * k]);
+  ctx.strokeRect(x, y, w, h);
+  ctx.restore();
+}
+
+/**
  * Prepares a renderer for content of size srcW × srcH. `render(ctx, source)` draws
  * the whole device picture (renderer.width × renderer.height) with `source` on
  * screen. `info` says which device, and at what scale the capture is drawn
@@ -338,7 +375,7 @@ export function deviceRenderer(opts, srcW, srcH) {
     height: g.H,
     info: {
       device: g.d, landscape: g.landscape, matched: g.o.device === 'auto', matchExact: g.exact,
-      scale: g.scale, exact,
+      scale: g.scale, exact, safe: g.safe,
       screen: [Math.round(g.screen.w), Math.round(g.screen.h)],
     },
     render(ctx, source) {
@@ -383,6 +420,10 @@ export function describe(opts, srcW, srcH) {
   const parts = [t('dev_info_device', [d.name, `${pw} × ${ph}`, `${vw} × ${vh} ${d.os === 'android' ? 'dp' : 'pt'}`, dpr])];
   if (info.matched) parts.push(info.matchExact ? t('dev_info_matches') : t('dev_info_closest'));
   parts.push(info.exact ? t('dev_info_exact', `${srcW} × ${srcH}`) : t('dev_info_scaled', Math.round(info.scale * 100)));
+  if (opts.safeArea && opts.safeArea !== 'none') {
+    const s = info.safe;
+    parts.push(t('dev_info_safe', `${[s.top, s.right, s.bottom, s.left].map(Math.round).join(' ')} ${d.os === 'android' ? 'dp' : 'pt'}`));
+  }
   return parts.join(' · ');
 }
 
@@ -414,9 +455,14 @@ export async function mountDevicePanel(el, onChange, { source, picture } = {}) {
       <div class="field"><span class="dev-pick-label">${t('dev_device')}</span><div class="dev-pick-slot"></div></div>
       <canvas class="dev-thumb hidden" role="img" aria-label="${t('dev_preview')}"></canvas>
       <p class="dev-info" aria-live="polite"></p>
+      <div class="field"><label class="label" for="dev-orientation">${t('dev_orientation')}</label>
+          <div class="row">${sel('orientation', [['auto', t('editor_automatic')], ['portrait', t('dev_portrait')], ['landscape', t('dev_landscape')]], o.orientation).replace('<select', '<select id="dev-orientation"')}
+            <button type="button" class="btn icon dev-rotate" aria-label="${t('dev_rotate')}" data-tip="${t('dev_rotate_tip')}"><svg class="i" viewBox="0 0 24 24"><path d="M4 12a8 8 0 0 1 14-5.3M20 4v4h-4M20 12a8 8 0 0 1-14 5.3M4 20v-4h4"/></svg></button>
+          </div>
+        </div>
       <div class="grid2">
-        <label class="field"><span>${t('dev_orientation')}</span>${sel('orientation', [['auto', t('editor_automatic')], ['portrait', t('dev_portrait')], ['landscape', t('dev_landscape')]], o.orientation)}</label>
         <label class="field"><span>${t('dev_finish')}</span>${sel('frame', map(FRAMES), o.frame)}</label>
+        <label class="field"><span>${t('dev_safe_area')}</span>${sel('safeArea', [['none', t('dev_safe_none')], ['show', t('dev_safe_show')], ['inside', t('dev_safe_inside')]], o.safeArea)}</label>
       </div>
       <label class="field"><span>${t('editor_size')}</span>${sel('size', [['exact', t('dev_size_exact')], ['device', t('dev_size_device')]], o.size)}</label>
       <label class="field"><span>${t('dev_fit')}</span>${sel('fit', [['width', t('dev_fit_width')], ['cover', t('dev_fit_cover')], ['contain', t('dev_fit_contain')]], o.fit)}</label>
@@ -478,6 +524,13 @@ export async function mountDevicePanel(el, onChange, { source, picture } = {}) {
     el.querySelector('.dev-info').textContent = o.enabled ? describe(o, w, h) : '';
   };
   sync();
+  // One click between portrait and landscape, from whichever is shown now.
+  el.querySelector('.dev-rotate').addEventListener('click', () => {
+    const [w, h] = source?.() || [1, 2];
+    const next = resolveDevice(o, w, h).landscape ? 'portrait' : 'landscape';
+    el.querySelector('[data-k="orientation"]').value = next;
+    apply('orientation', next);
+  });
   el.querySelector('.settings-link').addEventListener('click', (e) => {
     e.preventDefault();
     chrome.runtime.openOptionsPage();

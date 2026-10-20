@@ -46,3 +46,9 @@
 .confirm .actions { justify-content: flex-end; }
 .confirm .actions .btn { flex: none; }
 @media (max-width: 560px) { .choices.three { grid-template-columns: 1fr; } }
+.card .hint { margin: -6px 0 14px; font-size: 12px; }
+.tokens { display: flex; flex-wrap: wrap; gap: 6px; margin: -6px 0 8px; }
+.tokens .btn { height: 26px; padding: 0 10px; font-family: ui-monospace, Menlo, monospace; font-size: 12px; }
+.card .name-example { font-family: ui-monospace, Menlo, monospace; overflow-wrap: anywhere; }
+#fileName { font-family: ui-monospace, Menlo, monospace; }
+@media (max-width: 560px) { .card .grid2 { grid-template-columns: 1fr; } .choices.three { grid-template-columns: 1fr; } }

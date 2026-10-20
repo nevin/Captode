@@ -1961,12 +1961,6 @@
   "permission_try_again": {
     "message": "再試行"
   },
-  "popup_new_in_captode_1_4": {
-    "message": "Captode 1.4 の新機能"
-  },
-  "popup_whats_new_1_4": {
-    "message": "録画にカメラバブルとマイク、スクリーンショットの種類ごとのショートカット、メールアドレスや番号をぼかす設定。"
-  },
   "share_captode": {
     "message": "Captode を共有"
   },
@@ -1990,5 +1984,152 @@
   },
   "screen_no_sound": {
     "message": "音声が共有されなかったため、録画に音は入りません（マイクがオンならマイクの音は入ります）。"
+  },
+  "menu_open_popup": {
+    "message": "Captode のメニューを開く"
+  },
+  "settings_screenshots": {
+    "message": "スクリーンショット"
+  },
+  "settings_icon_action": {
+    "message": "Captode のアイコンをクリックすると"
+  },
+  "settings_icon_popup": {
+    "message": "Captode のメニューを開く"
+  },
+  "settings_icon_visible": {
+    "message": "表示範囲をスクリーンショット"
+  },
+  "settings_icon_full": {
+    "message": "ページ全体をスクリーンショット"
+  },
+  "settings_icon_area": {
+    "message": "選択範囲をスクリーンショット"
+  },
+  "settings_icon_element": {
+    "message": "要素をスクリーンショット"
+  },
+  "settings_icon_last": {
+    "message": "前回と同じ種類のスクリーンショット"
+  },
+  "settings_icon_hint": {
+    "message": "Captode のメニューは、アイコンの右クリックメニューから開けます。"
+  },
+  "settings_after_capture": {
+    "message": "スクリーンショットの後"
+  },
+  "settings_after_editor": {
+    "message": "エディタで開く"
+  },
+  "settings_after_download": {
+    "message": "すぐにダウンロード"
+  },
+  "settings_after_copy": {
+    "message": "クリップボードにコピー"
+  },
+  "settings_after_hint": {
+    "message": "エディタと同じように、既定の形式で、オンになっていればデバイスフレームとぼかしも付けてダウンロードまたはコピーします。スクリーンショットは最近のキャプチャにも 1 日残ります。"
+  },
+  "settings_long_pages": {
+    "message": "1 枚の画像に収まらない長いページ"
+  },
+  "settings_long_cut": {
+    "message": "上限で切り取る"
+  },
+  "settings_long_scale": {
+    "message": "縮小して収める"
+  },
+  "settings_long_split": {
+    "message": "複数の画像に分割"
+  },
+  "settings_long_hint": {
+    "message": "画像の高さは最大で約 32,000 ピクセルです。ページ全体のスクリーンショットに適用されます。"
+  },
+  "settings_file_names": {
+    "message": "ファイル名"
+  },
+  "settings_file_names_hint": {
+    "message": "上のボタンで、ページのタイトルやサイト、日付と時刻を追加できます。"
+  },
+  "settings_file_name_example": {
+    "message": "例: $1"
+  },
+  "settings_example_title": {
+    "message": "サンプルページ"
+  },
+  "settings_use_default": {
+    "message": "既定に戻す"
+  },
+  "settings_recording": {
+    "message": "録画"
+  },
+  "settings_recording_hint": {
+    "message": "新しい録画すべてに使われます。同じ項目は Captode のメニューの「オプション」にもあります。"
+  },
+  "settings_stop_after": {
+    "message": "録画を自動で止めるまで"
+  },
+  "settings_stop_never": {
+    "message": "自動で止めない"
+  },
+  "settings_one_minute": {
+    "message": "1 分"
+  },
+  "settings_n_minutes": {
+    "message": "$1 分"
+  },
+  "settings_not_allowed": {
+    "message": "ブラウザで許可されませんでした。Captode のサイト設定で許可してから、もう一度お試しください。"
+  },
+  "popup_minutes_short": {
+    "message": "$1 分"
+  },
+  "popup_cursor": {
+    "message": "カーソルを強調"
+  },
+  "popup_cursor_hint": {
+    "message": "タブの録画で、マウスに柔らかな円が付いていきます"
+  },
+  "popup_with_cursor": {
+    "message": "カーソル"
+  },
+  "popup_stops_after": {
+    "message": "$1 で停止"
+  },
+  "dev_safe_area": {
+    "message": "セーフエリア"
+  },
+  "dev_safe_none": {
+    "message": "表示しない"
+  },
+  "dev_safe_show": {
+    "message": "境界を表示"
+  },
+  "dev_safe_inside": {
+    "message": "ページを内側に収める"
+  },
+  "dev_info_safe": {
+    "message": "セーフエリア $1 (上、右、下、左)"
+  },
+  "dev_rotate": {
+    "message": "回転"
+  },
+  "dev_rotate_tip": {
+    "message": "縦向きと横向きを切り替え"
+  },
+  "scaled_to_fit": {
+    "message": "このページは 1 枚の画像には長すぎるため、$1% に縮小しました。設定で変更できます。"
+  },
+  "split_into_parts": {
+    "message": "このページは 1 枚の画像には長すぎるため、$1 つに分け、それぞれ別のタブで開きました。"
+  },
+  "part_of": {
+    "message": "$2 のうち $1"
+  },
+  "popup_new_in_captode_1_6": {
+    "message": "Captode 1.6 の新機能"
+  },
+  "popup_whats_new_1_6": {
+    "message": "デバイスフレームにセーフエリアとワンクリック回転。設定では、アイコンの動作、スクリーンショット後の動作、とても長いページ、ファイル名、自動停止とカーソル強調付きの録画オプションを選べます。"
   }
 }
