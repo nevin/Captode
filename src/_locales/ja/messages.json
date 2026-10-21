@@ -2131,5 +2131,323 @@
   },
   "popup_whats_new_1_6": {
     "message": "デバイスフレームにセーフエリアとワンクリック回転。設定では、アイコンの動作、スクリーンショット後の動作、とても長いページ、ファイル名、自動停止とカーソル強調付きの録画オプションを選べます。"
+  },
+  "slides_title": {
+    "message": "スライド"
+  },
+  "slides_slide": {
+    "message": "スライド"
+  },
+  "slides_hint": {
+    "message": "録画の指定した時点に表示するタイトルカードです。挿入したスライドは表示中に録画を一時停止し、オーバーレイは再生中の録画の上に重ねて表示されます。"
+  },
+  "slides_add": {
+    "message": "スライドを追加"
+  },
+  "slides_add_tip": {
+    "message": "再生位置にスライドを追加  S"
+  },
+  "slides_empty": {
+    "message": "スライドはまだありません"
+  },
+  "slides_untitled": {
+    "message": "スライド $1"
+  },
+  "slides_when": {
+    "message": "$1 · $2 秒表示"
+  },
+  "slides_outside": {
+    "message": "トリム範囲外のため書き出されません"
+  },
+  "slides_of": {
+    "message": "スライド $1 / $2"
+  },
+  "slides_style": {
+    "message": "スタイル"
+  },
+  "slides_theme_midnight": {
+    "message": "ミッドナイト"
+  },
+  "slides_theme_paper": {
+    "message": "ペーパー"
+  },
+  "slides_theme_indigo": {
+    "message": "インディゴ"
+  },
+  "slides_theme_sunset": {
+    "message": "サンセット"
+  },
+  "slides_theme_ocean": {
+    "message": "オーシャン"
+  },
+  "slides_theme_editorial": {
+    "message": "エディトリアル"
+  },
+  "slides_theme_terminal": {
+    "message": "ターミナル"
+  },
+  "slides_layout": {
+    "message": "レイアウト"
+  },
+  "slides_layout_center": {
+    "message": "中央"
+  },
+  "slides_layout_left": {
+    "message": "左寄せ"
+  },
+  "slides_layout_split": {
+    "message": "画像付き"
+  },
+  "slides_layout_lower": {
+    "message": "下部テロップ"
+  },
+  "slides_heading": {
+    "message": "タイトル"
+  },
+  "slides_heading_placeholder": {
+    "message": "この部分の内容"
+  },
+  "slides_subtitle": {
+    "message": "サブタイトル"
+  },
+  "slides_description": {
+    "message": "説明"
+  },
+  "slides_description_placeholder": {
+    "message": "1行に1項目。- で始めると箇条書き"
+  },
+  "slides_show_at": {
+    "message": "表示位置（秒）"
+  },
+  "slides_show_at_playhead": {
+    "message": "再生位置に表示"
+  },
+  "slides_duration": {
+    "message": "表示時間（秒）"
+  },
+  "slides_font": {
+    "message": "フォント"
+  },
+  "slides_font_sans": {
+    "message": "ゴシック体"
+  },
+  "slides_font_serif": {
+    "message": "明朝体"
+  },
+  "slides_font_mono": {
+    "message": "等幅"
+  },
+  "slides_title_colour": {
+    "message": "タイトルの色"
+  },
+  "slides_text_colour": {
+    "message": "テキストの色"
+  },
+  "slides_accent": {
+    "message": "アクセント"
+  },
+  "slides_accent_colour": {
+    "message": "アクセントの色"
+  },
+  "slides_bg_solid": {
+    "message": "単色"
+  },
+  "slides_bg_gradient": {
+    "message": "グラデーション"
+  },
+  "slides_bg_image": {
+    "message": "画像"
+  },
+  "slides_bg_colour": {
+    "message": "背景色"
+  },
+  "slides_bg_colour_2": {
+    "message": "グラデーションの2色目"
+  },
+  "slides_choose_image": {
+    "message": "画像を選択…"
+  },
+  "slides_remove_image": {
+    "message": "画像を削除"
+  },
+  "slides_dim": {
+    "message": "暗くする"
+  },
+  "slides_logo": {
+    "message": "ロゴ"
+  },
+  "slides_position": {
+    "message": "位置"
+  },
+  "slides_pos_tl": {
+    "message": "左上"
+  },
+  "slides_pos_top": {
+    "message": "上中央"
+  },
+  "slides_pos_tr": {
+    "message": "右上"
+  },
+  "slides_pos_bl": {
+    "message": "左下"
+  },
+  "slides_pos_br": {
+    "message": "右下"
+  },
+  "slides_size": {
+    "message": "サイズ"
+  },
+  "slides_picture": {
+    "message": "画像"
+  },
+  "slides_fade": {
+    "message": "フェードイン・フェードアウト"
+  },
+  "slides_mode": {
+    "message": "表示方法"
+  },
+  "slides_mode_insert": {
+    "message": "挿入"
+  },
+  "slides_mode_overlay": {
+    "message": "オーバーレイ"
+  },
+  "slides_mode_insert_hint": {
+    "message": "スライドの表示中は録画が止まり、その後続きから再生されます。"
+  },
+  "slides_mode_overlay_hint": {
+    "message": "背景なしで、再生中の録画の上に重ねて表示します。テロップや透かしに。"
+  },
+  "slides_band": {
+    "message": "テキストの背景に帯を表示"
+  },
+  "slides_band_colour": {
+    "message": "帯の色"
+  },
+  "slides_band_opacity": {
+    "message": "帯の不透明度"
+  },
+  "slides_whole": {
+    "message": "録画全体に表示"
+  },
+  "slides_slide_in": {
+    "message": "横からスライドイン"
+  },
+  "slides_duplicate": {
+    "message": "複製"
+  },
+  "slides_delete": {
+    "message": "スライドを削除"
+  },
+  "slides_deleted": {
+    "message": "スライドを削除しました"
+  },
+  "slides_image_failed": {
+    "message": "この画像を読み込めませんでした"
+  },
+  "slides_forget": {
+    "message": "保存したスタイルを消去"
+  },
+  "slides_forget_title": {
+    "message": "最後に使ったスライドのスタイルとロゴは、今後の録画の新しいスライドに使うため保存されます。これで消去されます。スライドのスタイルを変更すると再び保存されます。"
+  },
+  "slides_forgotten": {
+    "message": "保存したスタイルを消去しました"
+  },
+  "discard_screenshot": {
+    "message": "スクリーンショットを破棄"
+  },
+  "discard_recording": {
+    "message": "録画を破棄"
+  },
+  "discard_screenshot_title": {
+    "message": "このスクリーンショットを破棄しますか？"
+  },
+  "discard_recording_title": {
+    "message": "この録画を破棄しますか？"
+  },
+  "discard_text": {
+    "message": "加えた変更とともに Captode から削除されます。元に戻すことはできません。ダウンロード済みのファイルは残ります。"
+  },
+  "discard_confirm": {
+    "message": "破棄"
+  },
+  "discarded_screenshot": {
+    "message": "スクリーンショットを破棄しました"
+  },
+  "discarded_recording": {
+    "message": "録画を破棄しました"
+  },
+  "slides_text_size": {
+    "message": "文字サイズ"
+  },
+  "slides_text_reset": {
+    "message": "テキストを元に戻す"
+  },
+  "slides_drag_hint": {
+    "message": "スライド上の文字やロゴをドラッグして移動、角をドラッグしてサイズを変更できます。"
+  },
+  "slides_pos_custom": {
+    "message": "配置した位置"
+  },
+  "slides_font_upload": {
+    "message": "フォントファイルをアップロード…"
+  },
+  "slides_font_local": {
+    "message": "このコンピュータのフォント…"
+  },
+  "slides_font_local_group": {
+    "message": "このコンピュータ"
+  },
+  "slides_font_failed": {
+    "message": "このフォントを読み込めませんでした"
+  },
+  "slides_kit": {
+    "message": "ブランドキット"
+  },
+  "slides_kit_none": {
+    "message": "なし"
+  },
+  "slides_kit_yours": {
+    "message": "マイキット"
+  },
+  "slides_kit_save": {
+    "message": "このスタイルをキットとして保存…"
+  },
+  "slides_kit_name": {
+    "message": "キットの名前"
+  },
+  "slides_kit_delete": {
+    "message": "このキットを削除"
+  },
+  "slides_kit_deleted": {
+    "message": "キット「$1」を削除しました"
+  },
+  "slides_import": {
+    "message": "読み込み"
+  },
+  "slides_export": {
+    "message": "書き出し"
+  },
+  "slides_import_tip": {
+    "message": "ここで書き出したファイルからスライドを追加"
+  },
+  "slides_export_tip": {
+    "message": "このスライドをファイルに保存して他の録画で使う"
+  },
+  "slides_imported": {
+    "message": "$1 枚のスライドを追加しました"
+  },
+  "slides_import_failed": {
+    "message": "このファイルには Captode で使えるスライドがありません"
+  },
+  "slides_adds": {
+    "message": "+$1 秒"
+  },
+  "trim_with_slides": {
+    "message": "スライド込みで $1 秒"
+  },
+  "trim_with_slides_title": {
+    "message": "録画 $1 秒とスライド $2 秒"
   }
 }

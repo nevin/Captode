@@ -2131,5 +2131,323 @@
   },
   "popup_whats_new_1_6": {
     "message": "Zones sûres et rotation en un clic pour les cadres d'appareil. Dans les paramètres : l'action de l'icône, ce qui suit une capture, les pages très longues, les noms de fichier et les options d'enregistrement avec arrêt automatique et curseur mis en évidence."
+  },
+  "slides_title": {
+    "message": "Diapositives"
+  },
+  "slides_slide": {
+    "message": "Diapositive"
+  },
+  "slides_hint": {
+    "message": "Des cartons de titre à un moment de l’enregistrement. Une diapositive insérée met l’enregistrement en pause pendant qu’elle est à l’écran ; une superposition est dessinée sur l’enregistrement pendant sa lecture."
+  },
+  "slides_add": {
+    "message": "Ajouter une diapositive"
+  },
+  "slides_add_tip": {
+    "message": "Ajouter une diapositive à la tête de lecture  S"
+  },
+  "slides_empty": {
+    "message": "Aucune diapositive pour l’instant"
+  },
+  "slides_untitled": {
+    "message": "Diapositive $1"
+  },
+  "slides_when": {
+    "message": "À $1 · $2 s à l’écran"
+  },
+  "slides_outside": {
+    "message": "Hors de la partie conservée : non exportée"
+  },
+  "slides_of": {
+    "message": "Diapositive $1 sur $2"
+  },
+  "slides_style": {
+    "message": "Style"
+  },
+  "slides_theme_midnight": {
+    "message": "Minuit"
+  },
+  "slides_theme_paper": {
+    "message": "Papier"
+  },
+  "slides_theme_indigo": {
+    "message": "Indigo"
+  },
+  "slides_theme_sunset": {
+    "message": "Coucher de soleil"
+  },
+  "slides_theme_ocean": {
+    "message": "Océan"
+  },
+  "slides_theme_editorial": {
+    "message": "Éditorial"
+  },
+  "slides_theme_terminal": {
+    "message": "Terminal"
+  },
+  "slides_layout": {
+    "message": "Mise en page"
+  },
+  "slides_layout_center": {
+    "message": "Centrée"
+  },
+  "slides_layout_left": {
+    "message": "À gauche"
+  },
+  "slides_layout_split": {
+    "message": "Image"
+  },
+  "slides_layout_lower": {
+    "message": "Tiers inférieur"
+  },
+  "slides_heading": {
+    "message": "Titre"
+  },
+  "slides_heading_placeholder": {
+    "message": "Ce que montre cette partie"
+  },
+  "slides_subtitle": {
+    "message": "Sous-titre"
+  },
+  "slides_description": {
+    "message": "Description"
+  },
+  "slides_description_placeholder": {
+    "message": "Une ligne par point ; commencez par - pour une puce"
+  },
+  "slides_show_at": {
+    "message": "Afficher à (s)"
+  },
+  "slides_show_at_playhead": {
+    "message": "Afficher à la tête de lecture"
+  },
+  "slides_duration": {
+    "message": "À l’écran (s)"
+  },
+  "slides_font": {
+    "message": "Police"
+  },
+  "slides_font_sans": {
+    "message": "Sans empattement"
+  },
+  "slides_font_serif": {
+    "message": "Avec empattement"
+  },
+  "slides_font_mono": {
+    "message": "Chasse fixe"
+  },
+  "slides_title_colour": {
+    "message": "Couleur du titre"
+  },
+  "slides_text_colour": {
+    "message": "Couleur du texte"
+  },
+  "slides_accent": {
+    "message": "Accent"
+  },
+  "slides_accent_colour": {
+    "message": "Couleur d’accent"
+  },
+  "slides_bg_solid": {
+    "message": "Couleur"
+  },
+  "slides_bg_gradient": {
+    "message": "Dégradé"
+  },
+  "slides_bg_image": {
+    "message": "Image"
+  },
+  "slides_bg_colour": {
+    "message": "Couleur de fond"
+  },
+  "slides_bg_colour_2": {
+    "message": "Seconde couleur du dégradé"
+  },
+  "slides_choose_image": {
+    "message": "Choisir une image…"
+  },
+  "slides_remove_image": {
+    "message": "Retirer l’image"
+  },
+  "slides_dim": {
+    "message": "Assombrir"
+  },
+  "slides_logo": {
+    "message": "Logo"
+  },
+  "slides_position": {
+    "message": "Position"
+  },
+  "slides_pos_tl": {
+    "message": "En haut à gauche"
+  },
+  "slides_pos_top": {
+    "message": "En haut au centre"
+  },
+  "slides_pos_tr": {
+    "message": "En haut à droite"
+  },
+  "slides_pos_bl": {
+    "message": "En bas à gauche"
+  },
+  "slides_pos_br": {
+    "message": "En bas à droite"
+  },
+  "slides_size": {
+    "message": "Taille"
+  },
+  "slides_picture": {
+    "message": "Image"
+  },
+  "slides_fade": {
+    "message": "Fondu à l’ouverture et à la fermeture"
+  },
+  "slides_mode": {
+    "message": "Afficher comme"
+  },
+  "slides_mode_insert": {
+    "message": "Insérer"
+  },
+  "slides_mode_overlay": {
+    "message": "Superposition"
+  },
+  "slides_mode_insert_hint": {
+    "message": "L’enregistrement attend pendant que la diapositive est à l’écran, puis reprend."
+  },
+  "slides_mode_overlay_hint": {
+    "message": "Dessinée par-dessus l’enregistrement pendant sa lecture, sans arrière-plan. Pour les bandeaux et les filigranes."
+  },
+  "slides_band": {
+    "message": "Bandeau derrière le texte"
+  },
+  "slides_band_colour": {
+    "message": "Couleur du bandeau"
+  },
+  "slides_band_opacity": {
+    "message": "Opacité du bandeau"
+  },
+  "slides_whole": {
+    "message": "Sur tout l’enregistrement"
+  },
+  "slides_slide_in": {
+    "message": "Glisser depuis le côté"
+  },
+  "slides_duplicate": {
+    "message": "Dupliquer"
+  },
+  "slides_delete": {
+    "message": "Supprimer la diapositive"
+  },
+  "slides_deleted": {
+    "message": "Diapositive supprimée"
+  },
+  "slides_image_failed": {
+    "message": "Impossible de lire cette image"
+  },
+  "slides_forget": {
+    "message": "Oublier le style enregistré"
+  },
+  "slides_forget_title": {
+    "message": "Votre dernier style de diapositive et votre logo sont conservés pour les nouvelles diapositives des enregistrements suivants. Ceci les efface ; modifier le style d’une diapositive le conserve à nouveau."
+  },
+  "slides_forgotten": {
+    "message": "Style enregistré oublié"
+  },
+  "discard_screenshot": {
+    "message": "Supprimer la capture"
+  },
+  "discard_recording": {
+    "message": "Supprimer l’enregistrement"
+  },
+  "discard_screenshot_title": {
+    "message": "Supprimer cette capture ?"
+  },
+  "discard_recording_title": {
+    "message": "Supprimer cet enregistrement ?"
+  },
+  "discard_text": {
+    "message": "Elle est effacée de Captode, avec toutes vos modifications. Impossible d’annuler. Les fichiers déjà téléchargés sont conservés."
+  },
+  "discard_confirm": {
+    "message": "Supprimer"
+  },
+  "discarded_screenshot": {
+    "message": "Capture supprimée"
+  },
+  "discarded_recording": {
+    "message": "Enregistrement supprimé"
+  },
+  "slides_text_size": {
+    "message": "Taille du texte"
+  },
+  "slides_text_reset": {
+    "message": "Réinitialiser le texte"
+  },
+  "slides_drag_hint": {
+    "message": "Faites glisser le texte ou le logo sur la diapositive pour les déplacer, ou un coin pour les redimensionner."
+  },
+  "slides_pos_custom": {
+    "message": "Là où vous l’avez placé"
+  },
+  "slides_font_upload": {
+    "message": "Importer un fichier de police…"
+  },
+  "slides_font_local": {
+    "message": "Police de cet ordinateur…"
+  },
+  "slides_font_local_group": {
+    "message": "Sur cet ordinateur"
+  },
+  "slides_font_failed": {
+    "message": "Impossible de lire cette police"
+  },
+  "slides_kit": {
+    "message": "Kit de marque"
+  },
+  "slides_kit_none": {
+    "message": "Aucun"
+  },
+  "slides_kit_yours": {
+    "message": "Vos kits"
+  },
+  "slides_kit_save": {
+    "message": "Enregistrer ce style comme kit…"
+  },
+  "slides_kit_name": {
+    "message": "Nommer ce kit"
+  },
+  "slides_kit_delete": {
+    "message": "Supprimer ce kit"
+  },
+  "slides_kit_deleted": {
+    "message": "Kit « $1 » supprimé"
+  },
+  "slides_import": {
+    "message": "Importer"
+  },
+  "slides_export": {
+    "message": "Exporter"
+  },
+  "slides_import_tip": {
+    "message": "Ajouter des diapositives depuis un fichier exporté ici"
+  },
+  "slides_export_tip": {
+    "message": "Enregistrer ces diapositives dans un fichier, pour d’autres enregistrements"
+  },
+  "slides_imported": {
+    "message": "$1 diapositives ajoutées"
+  },
+  "slides_import_failed": {
+    "message": "Ce fichier ne contient aucune diapositive utilisable par Captode"
+  },
+  "slides_adds": {
+    "message": "+$1 s"
+  },
+  "trim_with_slides": {
+    "message": "$1 s avec les diapositives"
+  },
+  "trim_with_slides_title": {
+    "message": "$1 s d’enregistrement et $2 s de diapositives"
   }
 }

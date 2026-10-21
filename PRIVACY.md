@@ -1,6 +1,6 @@
 # Captode privacy policy
 
-_Last updated: 18 October 2026_
+_Last updated: 20 October 2026_
 
 Captode is a browser extension for taking screenshots and screen recordings and editing
 them. It does not collect, transmit, sell or share any personal or sensitive data.
@@ -12,10 +12,21 @@ them. It does not collect, transmit, sell or share any personal or sensitive dat
 - **Until you download them**, captures (and the edits you make to them) are kept in the
   extension's own browser storage (IndexedDB) so the editor and video pages can open them,
   and so you can reopen a recent capture where you left off. They are deleted automatically after 24 hours, and you can remove any of them
-  sooner from the editor's Recent captures list.
+  sooner from the editor's Recent captures list, or with **Discard** (the bin button) in the
+  editor or the video page, which deletes the capture with its edits and slides.
+- **Slides** you add to a recording, and any pictures you choose for them (background,
+  logo, picture), are kept with that recording in the same storage and deleted with it.
 - **Your settings** (theme, export background, default formats, device-frame and
   recording options, export presets and recently used devices) are kept in the browser's
-  extension storage on your device.
+  extension storage on your device. So are:
+  - **Slide brand kits**: slide styles you saved by name, with any logo, font file and
+    background picture in them (each up to 3 MB). Delete one from the Brand kit list.
+  - **The style of the last slide you edited** (theme, colours, font, layout, and its logo
+    and font file if each is under 1.5 MB; never a background picture), so new slides can
+    reuse it. Editing another slide's style replaces it; **Forget saved style** in the
+    Slides section, or removing Captode, deletes it.
+- **Slide files** made with Export in the Slides section are files you download; Captode
+  doesn't upload them. They hold the slides' words, settings, pictures and font file.
 - **Review pages** made with Share for review, and zips of several devices, are files you
   download: Captode doesn't upload or host them. A review page contains the image and the
   notes you wrote, and the address of the page you captured.

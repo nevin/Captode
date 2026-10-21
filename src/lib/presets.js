@@ -37,26 +37,34 @@ async function store(kind, list) {
 }
 
 /**
- * Builds the preset row in `el`. `capture()` returns the current settings as a
- * preset (without name); `apply(preset)` puts one into effect. `watch` is the
- * element whose changes mean the settings no longer match the preset.
+ * Builds the preset row in `el`. `capture()` returns (or resolves to) the current
+ * settings as a preset (without name); `apply(preset)` puts one into effect. `watch`
+ * is the element whose changes mean the settings no longer match the preset.
+ * `words` replaces any of the row's words (label, custom, yours, saveCurrent,
+ * placeholder, name, delete, deleted), for presets of other things, such as brand kits.
  */
-export async function mountPresets(el, { kind, capture, apply, watch }) {
+export async function mountPresets(el, { kind, capture, apply, watch, words = {} }) {
+  const w = {
+    label: t('preset_label'), custom: t('preset_custom'), yours: t('preset_yours'), saveCurrent: t('preset_save_current'),
+    placeholder: t('preset_name_placeholder'), name: t('preset_name'), delete: t('preset_delete'), deleted: (n) => t('preset_deleted', n),
+    ...words,
+  };
+  const builtin = BUILTIN[kind] || [];
   let mine = await saved(kind);
   let chosen = '';
   let applying = false;
 
   el.innerHTML = `
-    <label class="field preset-field"><span>${t('preset_label')}</span>
+    <label class="field preset-field"><span>${esc(w.label)}</span>
       <div class="row">
         <select class="preset-select"></select>
-        <button type="button" class="btn ghost icon preset-delete hidden" data-tip="${t('preset_delete')}" aria-label="${t('preset_delete')}">
+        <button type="button" class="btn ghost icon preset-delete hidden" data-tip="${esc(w.delete)}" aria-label="${esc(w.delete)}">
           <svg class="i" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>
         </button>
       </div>
     </label>
     <form class="preset-save hidden">
-      <input type="text" class="preset-name" placeholder="${t('preset_name_placeholder')}" aria-label="${t('preset_name')}" maxlength="60" required>
+      <input type="text" class="preset-name" placeholder="${esc(w.placeholder)}" aria-label="${esc(w.name)}" maxlength="60" required>
       <button type="submit" class="btn primary">${t('preset_save')}</button>
       <button type="button" class="btn ghost preset-cancel">${t('settings_cancel')}</button>
     </form>`;
@@ -64,12 +72,12 @@ export async function mountPresets(el, { kind, capture, apply, watch }) {
   const form = el.querySelector('.preset-save');
   const name = el.querySelector('.preset-name');
 
-  const all = () => [...BUILTIN[kind].map((p) => ({ ...p, builtin: true })), ...mine];
+  const all = () => [...builtin.map((p) => ({ ...p, builtin: true })), ...mine];
   const render = () => {
-    select.innerHTML = `<option value="">${esc(t('preset_custom'))}</option>` +
-      `<optgroup label="${esc(t('preset_builtin'))}">${BUILTIN[kind].map((p) => `<option value="${p.id}">${esc(p.name)}</option>`).join('')}</optgroup>` +
-      (mine.length ? `<optgroup label="${esc(t('preset_yours'))}">${mine.map((p) => `<option value="${p.id}">${esc(p.name)}</option>`).join('')}</optgroup>` : '') +
-      `<option value="__save">${esc(t('preset_save_current'))}</option>`;
+    select.innerHTML = `<option value="">${esc(w.custom)}</option>` +
+      (builtin.length ? `<optgroup label="${esc(t('preset_builtin'))}">${builtin.map((p) => `<option value="${p.id}">${esc(p.name)}</option>`).join('')}</optgroup>` : '') +
+      (mine.length ? `<optgroup label="${esc(w.yours)}">${mine.map((p) => `<option value="${p.id}">${esc(p.name)}</option>`).join('')}</optgroup>` : '') +
+      `<option value="__save">${esc(w.saveCurrent)}</option>`;
     select.value = chosen;
     el.querySelector('.preset-delete').classList.toggle('hidden', !mine.some((p) => p.id === chosen));
   };
@@ -97,7 +105,7 @@ export async function mountPresets(el, { kind, capture, apply, watch }) {
     e.preventDefault();
     const n = name.value.trim();
     if (!n) return;
-    const p = { id: `u${Date.now().toString(36)}`, name: n, ...capture() };
+    const p = { id: `u${Date.now().toString(36)}`, name: n, ...(await capture()) };
     mine = [...mine.filter((x) => x.name !== n), p];
     await store(kind, mine);
     chosen = p.id;
@@ -116,7 +124,7 @@ export async function mountPresets(el, { kind, capture, apply, watch }) {
     await store(kind, mine);
     chosen = '';
     render();
-    toast(t('preset_deleted', gone?.name || ''), {
+    toast(w.deleted(gone?.name || ''), {
       ms: 6000,
       action: { label: t('editor_undo'), run: async () => { mine = before; await store(kind, mine); chosen = gone?.id || ''; render(); } },
     });
@@ -130,5 +138,9 @@ export async function mountPresets(el, { kind, capture, apply, watch }) {
   };
   watch.addEventListener('input', custom);
   watch.addEventListener('change', custom);
-  return { get: () => chosen };
+  return {
+    get: () => chosen,
+    /** Back to "custom", as when what the preset applies to changes. */
+    clear() { chosen = ''; render(); },
+  };
 }

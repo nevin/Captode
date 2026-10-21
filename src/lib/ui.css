@@ -385,3 +385,12 @@ dialog.modal:focus-visible { outline: none; }
   background: repeating-conic-gradient(#ccc 0 25%, #fff 0 50%) 50% / 10px 10px; }
 .row.gap { display: flex; gap: 6px; }
 
+
+/* Asking before something that can't be undone */
+dialog.modal.confirm { width: min(420px, calc(100vw - 32px)); }
+.confirm h2 { margin: 0 0 6px; font-size: 15px; }
+.confirm p { margin: 0 0 18px; line-height: 1.5; }
+.confirm-actions { display: flex; justify-content: flex-end; gap: 8px; }
+.btn.danger-solid { background: var(--rec); border-color: var(--rec); color: #fff; }
+.btn.danger-solid:hover { background: #d13c41; border-color: #d13c41; }
+.btn.discard:hover { color: var(--rec); }

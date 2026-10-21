@@ -15,6 +15,7 @@
   <div class="sep"></div>
   <div class="doc"><b id="doc-name" data-i18n="video_recording">Recording</b><span id="info">—</span></div>
   <div class="spacer"></div>
+  <button class="btn ghost icon discard" id="discard" data-tip="Discard recording" data-i18n-tip="discard_recording"><svg class="i" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></svg></button>
   <button class="btn ghost" id="frame-to-editor" title="Open the frame on screen in the editor, to annotate, copy or save it (F)" data-i18n-title="video_frame_to_editor_title" data-i18n="video_frame_to_editor">
     <svg class="i" viewBox="0 0 24 24"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3z"/><circle cx="12" cy="13" r="3"/></svg>Frame to editor
   </button>
@@ -30,6 +31,7 @@
       <canvas id="live" class="hidden"></canvas>
       <img id="out-img" class="hidden" alt="Exported animation" data-i18n-alt="video_exported_animation">
       <video id="out-video" class="hidden" controls playsinline></video>
+      <canvas id="slide-view" class="hidden" aria-label="Slide" data-i18n-aria-label="slides_slide"></canvas>
       <div class="preview-label hidden" id="preview-label"></div>
       <canvas id="rv-overlay" class="hidden" aria-label="Measuring layer over the paused frame" data-i18n-aria-label="video_measuring_layer_over_the_paused"></canvas>
     </div>
@@ -47,6 +49,7 @@
         <div class="handle" id="h-start" role="slider" tabindex="0" aria-label="Trim start" data-i18n-aria-label="video_trim_start" aria-keyshortcuts="i"></div>
         <div class="handle" id="h-end" role="slider" tabindex="0" aria-label="Trim end" data-i18n-aria-label="video_trim_end" aria-keyshortcuts="o"></div>
         <div class="range-len" id="range-len" aria-hidden="true"></div>
+        <div class="slide-marks" id="slide-marks"></div>
         <div class="playhead" id="playhead" title="Drag to scrub" data-i18n-title="video_drag_to_scrub"></div>
       </div>
       <span class="tc muted" id="tc-len">0:00.0</span>
@@ -72,6 +75,139 @@
       </div>
       <p class="muted small" style="margin:0" data-i18n-html="video_trim_hint">Drag across the timeline to choose the part to keep, or drag its edges. While playing, <kbd>I</kbd> sets the start and <kbd>O</kbd> the end.</p>
     </section>
+
+    <!-- Slides: title cards put into the recording (it waits while one is on screen), or drawn over it as it plays. -->
+    <details class="section" id="slides-section">
+      <summary class="section-title"><span data-i18n="slides_title">Slides</span><span class="slide-count" id="slide-count"></span></summary>
+      <p class="muted small slides-hint" data-i18n="slides_hint">Title cards at a moment in the recording. An inserted slide pauses the recording while it is on screen; an overlay is drawn over the recording as it plays.</p>
+      <div class="slide-list" id="slide-list" role="listbox" aria-label="Slides" data-i18n-aria-label="slides_title"></div>
+      <button class="btn slide-add" id="slide-add" data-tip="Add a slide at the playhead  S" data-i18n-tip="slides_add_tip" aria-keyshortcuts="s">
+        <svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span data-i18n="slides_add">Add slide</span>
+      </button>
+      <button class="slide-forget hidden" id="slide-forget" title="Your last slide style and logo are kept for new slides in later recordings. This clears them; editing a slide's style keeps it again." data-i18n-title="slides_forget_title" data-i18n="slides_forget">Forget saved style</button>
+      <div class="slide-files">
+        <button class="btn ghost" id="slide-import" data-tip="Add slides from a file exported here" data-i18n-tip="slides_import_tip"><svg class="i" viewBox="0 0 24 24"><path d="M12 15V3M7 10l5 5 5-5M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/></svg><span data-i18n="slides_import">Import</span></button>
+        <button class="btn ghost" id="slide-export" data-tip="Save these slides to a file, to use with other recordings" data-tip-align="end" data-i18n-tip="slides_export_tip"><svg class="i" viewBox="0 0 24 24"><path d="M12 3v12M7 8l5-5 5 5M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/></svg><span data-i18n="slides_export">Export</span></button>
+        <input type="file" id="slide-import-file" class="hidden" accept=".json,application/json">
+      </div>
+
+      <div class="slide-editor hidden" id="slide-editor">
+        <div id="sl-kits"></div>
+        <div class="field"><span data-i18n="slides_mode">Show as</span>
+          <div class="seg" id="sl-mode" role="radiogroup" aria-label="Show as" data-i18n-aria-label="slides_mode">
+            <button data-v="insert" role="radio" aria-checked="false" data-i18n="slides_mode_insert">Insert</button>
+            <button data-v="overlay" role="radio" aria-checked="false" data-i18n="slides_mode_overlay">Overlay</button>
+          </div>
+          <p class="muted small slide-mode-hint" id="sl-mode-hint"></p>
+        </div>
+        <div class="field"><span data-i18n="slides_style">Style</span>
+          <div class="swatches theme-swatches" id="sl-themes">
+            <button data-theme="midnight" aria-pressed="false" data-tip="Midnight" data-i18n-tip="slides_theme_midnight" style="background:linear-gradient(135deg,#0f172a,#312e81)"></button>
+            <button data-theme="paper" aria-pressed="false" data-tip="Paper" data-i18n-tip="slides_theme_paper" style="background:#ffffff"></button>
+            <button data-theme="indigo" aria-pressed="false" data-tip="Indigo" data-i18n-tip="slides_theme_indigo" style="background:linear-gradient(135deg,#5b4bff,#a855f7)"></button>
+            <button data-theme="sunset" aria-pressed="false" data-tip="Sunset" data-i18n-tip="slides_theme_sunset" style="background:linear-gradient(135deg,#f97316,#db2777)"></button>
+            <button data-theme="ocean" aria-pressed="false" data-tip="Ocean" data-i18n-tip="slides_theme_ocean" style="background:linear-gradient(135deg,#0369a1,#0d9488)"></button>
+            <button data-theme="editorial" aria-pressed="false" data-tip="Editorial" data-i18n-tip="slides_theme_editorial" style="background:#f5f0e6"></button>
+            <button data-theme="terminal" aria-pressed="false" data-tip="Terminal" data-i18n-tip="slides_theme_terminal" data-tip-align="end" style="background:#0a0f0d"></button>
+          </div>
+        </div>
+        <div class="field"><span data-i18n="slides_layout">Layout</span>
+          <div class="seg seg-wrap" id="sl-layout" role="radiogroup" aria-label="Layout" data-i18n-aria-label="slides_layout">
+            <button data-v="center" role="radio" aria-checked="false" data-i18n="slides_layout_center">Centred</button>
+            <button data-v="left" role="radio" aria-checked="false" data-i18n="slides_layout_left">Left</button>
+            <button data-v="split" role="radio" aria-checked="false" data-i18n="slides_layout_split">Picture</button>
+            <button data-v="lower" role="radio" aria-checked="false" data-i18n="slides_layout_lower">Lower third</button>
+          </div>
+        </div>
+        <label class="field"><span data-i18n="slides_heading">Title</span><input type="text" id="sl-title" data-k="title" placeholder="What this part shows" data-i18n-placeholder="slides_heading_placeholder"></label>
+        <label class="field"><span data-i18n="slides_subtitle">Subtitle</span><input type="text" data-k="subtitle"></label>
+        <label class="field"><span data-i18n="slides_description">Description</span><textarea rows="3" data-k="body" placeholder="A line each; start one with - for a bullet" data-i18n-placeholder="slides_description_placeholder"></textarea></label>
+        <div class="grid2">
+          <label class="field"><span><span data-i18n="slides_text_size">Text size</span> <b id="sl-text-size-v"></b></span><input type="range" data-k="textSize" min="50" max="200" step="5"></label>
+          <div class="field"><span>&nbsp;</span><button class="btn" id="sl-text-reset" data-i18n="slides_text_reset">Reset text</button></div>
+        </div>
+        <p class="muted small slide-drag-hint" data-i18n="slides_drag_hint">Drag the words or the logo on the slide to move them, or a corner to resize.</p>
+        <div class="grid2">
+          <label class="field"><span data-i18n="slides_show_at">Show at (s)</span>
+            <div class="with-btn"><input type="number" data-k="at" min="0" step="0.1"><button class="btn ghost icon" id="sl-at-set" data-tip="Show at the playhead" data-i18n-tip="slides_show_at_playhead"><svg class="i" viewBox="0 0 24 24"><path d="M12 3v18M7 8l5-5 5 5"/></svg></button></div>
+          </label>
+          <label class="field"><span data-i18n="slides_duration">On screen (s)</span><input type="number" data-k="duration" min="0.5" max="60" step="0.5"></label>
+        </div>
+        <label class="toggle" id="sl-whole-f"><span data-i18n="slides_whole">Over the whole recording</span><input type="checkbox" data-k="whole"></label>
+        <div class="grid2">
+          <label class="field"><span data-i18n="slides_font">Font</span>
+            <select data-k="font">
+              <option value="sans" data-i18n="slides_font_sans">Sans serif</option>
+              <option value="serif" data-i18n="slides_font_serif">Serif</option>
+              <option value="mono" data-i18n="slides_font_mono">Monospace</option>
+              <option value="custom" id="sl-font-custom" hidden></option>
+              <optgroup id="sl-font-local" label="On this computer" data-i18n-label="slides_font_local_group" hidden></optgroup>
+              <option disabled>──────────</option>
+              <option value="__upload" data-i18n="slides_font_upload">Upload a font file…</option>
+              <option value="__local" id="sl-font-local-ask" data-i18n="slides_font_local">Font on this computer…</option>
+            </select>
+            <input type="file" id="sl-font-file" class="hidden" accept=".woff2,.woff,.ttf,.otf,font/woff2,font/woff,font/ttf,font/otf">
+          </label>
+          <div class="field"><span data-i18n="editor_colours">Colours</span>
+            <div class="row colours">
+              <input type="color" data-k="titleColor" title="Title" aria-label="Title colour" data-i18n-title="slides_heading" data-i18n-aria-label="slides_title_colour">
+              <input type="color" data-k="textColor" title="Text" aria-label="Text colour" data-i18n-title="editor_text" data-i18n-aria-label="slides_text_colour">
+              <input type="color" data-k="accent" title="Accent" aria-label="Accent colour" data-i18n-title="slides_accent" data-i18n-aria-label="slides_accent_colour">
+            </div>
+          </div>
+        </div>
+        <div id="sl-bg-opts">
+        <div class="field"><span data-i18n="editor_background">Background</span>
+          <div class="seg" id="sl-bg" role="radiogroup" aria-label="Background" data-i18n-aria-label="editor_background">
+            <button data-v="solid" role="radio" aria-checked="false" data-i18n="slides_bg_solid">Colour</button>
+            <button data-v="gradient" role="radio" aria-checked="false" data-i18n="slides_bg_gradient">Gradient</button>
+            <button data-v="image" role="radio" aria-checked="false" data-i18n="slides_bg_image">Image</button>
+          </div>
+        </div>
+        <div class="row colours bg-colours" data-bg="solid gradient image">
+          <input type="color" data-k="bg1" aria-label="Background colour" data-i18n-aria-label="slides_bg_colour">
+          <input type="color" data-k="bg2" data-bg="gradient" aria-label="Second gradient colour" data-i18n-aria-label="slides_bg_colour_2">
+        </div>
+        <div data-bg="image">
+          <div class="img-field" data-img="bgImage"><span class="img-thumb empty"></span><button class="btn" data-pick data-i18n="slides_choose_image">Choose image…</button><button class="btn ghost icon" data-clear data-tip="Remove image" data-i18n-tip="slides_remove_image" data-tip-align="end"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+          <label class="field"><span><span data-i18n="slides_dim">Darken</span> <b id="sl-dim-v"></b></span><input type="range" data-k="bgDim" min="0" max="90" step="5"></label>
+        </div>
+        </div>
+        <div class="field"><span data-i18n="slides_logo">Logo</span>
+          <div class="img-field" data-img="logo"><span class="img-thumb empty"></span><button class="btn" data-pick data-i18n="slides_choose_image">Choose image…</button><button class="btn ghost icon" data-clear data-tip="Remove image" data-i18n-tip="slides_remove_image" data-tip-align="end"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+        </div>
+        <div class="grid2" id="sl-logo-opts">
+          <label class="field"><span data-i18n="slides_position">Position</span>
+            <select data-k="logoPos">
+              <option value="tl" data-i18n="slides_pos_tl">Top left</option>
+              <option value="top" data-i18n="slides_pos_top">Top centre</option>
+              <option value="tr" data-i18n="slides_pos_tr">Top right</option>
+              <option value="bl" data-i18n="slides_pos_bl">Bottom left</option>
+              <option value="br" data-i18n="slides_pos_br">Bottom right</option>
+              <option value="custom" hidden data-i18n="slides_pos_custom">Where you put it</option>
+            </select>
+          </label>
+          <label class="field"><span><span data-i18n="slides_size">Size</span> <b id="sl-logo-size-v"></b></span><input type="range" data-k="logoSize" min="2" max="40" step="1"></label>
+        </div>
+        <div class="field" id="sl-picture-f"><span data-i18n="slides_picture">Picture</span>
+          <div class="img-field" data-img="picture"><span class="img-thumb empty"></span><button class="btn" data-pick data-i18n="slides_choose_image">Choose image…</button><button class="btn ghost icon" data-clear data-tip="Remove image" data-i18n-tip="slides_remove_image" data-tip-align="end"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+        </div>
+        <label class="toggle" id="sl-band-f"><span data-i18n="slides_band">Band behind the text</span><input type="checkbox" data-k="band"></label>
+        <div class="grid2" id="sl-band-opts">
+          <div class="field"><span data-i18n="slides_band_colour">Band colour</span>
+            <div class="row colours"><input type="color" data-k="bandColor" aria-label="Band colour" data-i18n-aria-label="slides_band_colour"></div>
+          </div>
+          <label class="field"><span><span data-i18n="slides_band_opacity">Band opacity</span> <b id="sl-band-opacity-v"></b></span><input type="range" data-k="bandOpacity" min="0" max="100" step="1"></label>
+        </div>
+        <label class="toggle"><span data-i18n="slides_fade">Fade in and out</span><input type="checkbox" data-k="fade"></label>
+        <label class="toggle" id="sl-slide-in-f"><span data-i18n="slides_slide_in">Slide in from the side</span><input type="checkbox" data-k="slideIn"></label>
+        <div class="row slide-actions">
+          <button class="btn" id="sl-dup" data-i18n="slides_duplicate">Duplicate</button>
+          <button class="btn danger" id="sl-del" data-i18n="slides_delete">Delete slide</button>
+        </div>
+        <input type="file" id="sl-file" class="hidden" accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml,image/avif">
+      </div>
+    </details>
 
     <section class="section">
       <div id="presets"></div>

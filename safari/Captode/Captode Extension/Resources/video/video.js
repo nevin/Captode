@@ -1,4 +1,4 @@
-import { getCapture, putCapture } from '../lib/db.js';
+import { getCapture, putCapture, saveSlides, deleteCapture } from '../lib/db.js';
 import { GifEncoder } from '../lib/gif.js';
 import { buildPalette } from '../lib/quantize.js';
 import { getSettings } from '../lib/settings.js';
@@ -7,11 +7,13 @@ import { recall, remember, rememberControls } from '../lib/remember.js';
 import { mountPresets } from '../lib/presets.js';
 import { WebpAnimEncoder } from '../lib/webp.js';
 import { mountDevicePanel, deviceRenderer, frameDrawer } from '../lib/device.js';
-import { toast, enhance, fmtBytes } from '../lib/ui.js';
+import { toast, enhance, fmtBytes, confirmDialog } from '../lib/ui.js';
 import { demuxWebm, muxWebm } from '../lib/webm.js';
 import { sourceColourSpace, outputColour } from '../lib/video-colour.js';
 import { contrastHtml, hexOf, measureLabel, measureText, edgeNear, measureFrom, drawMeasures } from '../lib/review.js';
 import { t, localize } from '../lib/i18n.js';
+import { slideSchedule, overlaySchedule, paintOverlays, slideSeconds, frameOrder, slideAlpha, renderSlides } from '../lib/slides.js';
+import { mountSlides } from './slides-panel.js';
 
 localize();
 
@@ -28,6 +30,7 @@ let device = null;
 let result = null;   // { blob, name }
 let cancelled = false;
 let busy = false;
+let slides = null; // the Slides panel, once the recording is open
 
 const RES = [2160, 1440, 1080, 720, 480, 360, 240];
 const FPS = [5, 8, 10, 12, 15, 20, 24, 25, 30, 50, 60];
@@ -117,15 +120,18 @@ function syncUi() {
   if (!player.videoWidth) return;
   const p = plan();
   const { start, end } = trim();
-  const frames = Math.max(1, Math.round((end - start) * p.fps));
-  $('#dims').innerHTML = `<span>${t('video_dims', [`${p.width} × ${p.height}`, p.fps, frames])}</span><b>${(end - start).toFixed(1)} s</b>`;
+  // Slides add their own time to the clip's.
+  const schedule = slideSchedule(slides?.all(), start, end, p.fps);
+  const frames = Math.max(1, Math.round((end - start) * p.fps)) + schedule.reduce((n, e) => n + e.frames, 0);
+  const length = end - start + slideSeconds(schedule, p.fps);
+  $('#dims').innerHTML = `<span>${t('video_dims', [`${p.width} × ${p.height}`, p.fps, frames])}</span><b>${length.toFixed(1)} s</b>`;
   // MP4 and WebM are encoded at a variable bitrate below this ceiling, so it is an
   // upper limit; screen recordings, mostly still, usually come out well under it.
   // GIF and WebP depend too much on the picture to guess.
   if (format === 'mp4' || format === 'webm') {
     const bitrate = Math.min(40e6, Math.max(300e3, p.width * p.height * p.fps * Number($('#v-quality').value)));
     const audio = $('#v-audio').checked && meta.hasAudio ? 128e3 : 0;
-    $('#convert-size').textContent = t('video_size_up_to', fmtBytes(Math.round(((bitrate + audio) * (end - start)) / 8)));
+    $('#convert-size').textContent = t('video_size_up_to', fmtBytes(Math.round(((bitrate + audio) * length) / 8)));
   } else {
     $('#convert-size').textContent = '';
   }
@@ -145,6 +151,7 @@ function stale() {
 const PREVIEW_LABELS = { live: t('preview_converting'), 'out-img': t('preview_exported'), 'out-video': t('preview_exported') };
 
 function showPreview(which) {
+  if (which !== 'player') slides?.hide();
   for (const id of ['player', 'live', 'out-img', 'out-video']) $('#' + id).classList.toggle('hidden', id !== which);
   $('#preview-label').textContent = PREVIEW_LABELS[which] || '';
   $('#preview-label').classList.toggle('hidden', !PREVIEW_LABELS[which]);
@@ -189,7 +196,10 @@ function drawTimeline() {
   $('#range').style.width = `calc(${pct(end)} - ${pct(start)})`;
   $('#shade-l').style.width = pct(start);
   $('#shade-r').style.width = `calc(100% - ${pct(end)})`;
-  $('#tc-len').textContent = t('trim_selected', (end - start).toFixed(1));
+  // Inserted slides make the export longer than the part kept: the length with them, and what it's made of.
+  const added = (slides?.all() || []).filter((s) => s.mode !== 'overlay' && s.at >= start - 1e-3 && s.at <= end + 1e-3).reduce((n, s) => n + s.duration, 0);
+  $('#tc-len').textContent = added ? t('trim_with_slides', (end - start + added).toFixed(1)) : t('trim_selected', (end - start).toFixed(1));
+  $('#tc-len').title = added ? t('trim_with_slides_title', [(end - start).toFixed(1), added.toFixed(1)]) : '';
   // The length on the kept part itself, and each end's time on its handle.
   $('#range-len').style.left = `calc((${pct(start)} + ${pct(end)}) / 2)`;
   $('#range-len').textContent = `${(end - start).toFixed(1)} s`;
@@ -202,6 +212,7 @@ function drawTimeline() {
     $(h).setAttribute('aria-valuenow', v.toFixed(1));
     $(h).setAttribute('aria-valuetext', fmtTime(v));
   }
+  slides?.refresh();
   drawPlayhead();
 }
 
@@ -265,6 +276,7 @@ for (const [id, set, get] of [['#h-start', setStart, () => trim().start], ['#h-e
 
 function togglePlay() {
   if (busy || $('#player').classList.contains('hidden')) return;
+  if (slides?.skip()) return; // a slide on screen during playback: carry on
   if (player.paused) {
     const { start, end } = trim();
     if (player.currentTime < start || player.currentTime >= end - 0.05) player.currentTime = start;
@@ -296,6 +308,7 @@ document.addEventListener('keydown', (e) => {
   else if (k === 'i') setStart(player.currentTime);
   else if (k === 'o') setEnd(player.currentTime);
   else if (k === 'f') frameToEditor();
+  else if (k === 's' && slides && !busy) { e.preventDefault(); slides.add(); }
   else if (k === 'arrowleft' && !e.target.closest('.handle')) { player.currentTime = Math.max(0, player.currentTime - (e.shiftKey ? 1 : 1 / (meta.fps || 30))); }
   else if (k === 'arrowright' && !e.target.closest('.handle')) { player.currentTime = Math.min(duration, player.currentTime + (e.shiftKey ? 1 : 1 / (meta.fps || 30))); }
 });
@@ -362,18 +375,40 @@ async function convertFrames(p, { start, end }) {
     const step = 1 / p.fps;
     const count = Math.max(1, Math.round((end - start) * p.fps));
     const at = (i) => Math.min(start + i * step, Math.max(start, end - 0.001));
+    // Output frames: the clip's (with any overlays over them), with the slides' in between.
+    const schedule = slideSchedule(slides.all(), start, end, p.fps);
+    const order = frameOrder(schedule, count);
+    const art = await renderSlides(schedule, p.width, p.height);
+    const overlays = overlaySchedule(slides.all(), start, end, p.fps);
+    const overlayArt = await renderSlides(overlays, p.width, p.height);
+    const paint = async (o) => {
+      const a = o.slide ? slideAlpha(o.slide, o.j, p.fps) : 0;
+      if (a < 1) {
+        await seek(v, at(o.k));
+        ctx.clearRect(0, 0, p.width, p.height);
+        draw(ctx, v);
+        paintOverlays(ctx, overlays, overlayArt, o.k, p.fps);
+      }
+      if (a > 0) {
+        ctx.globalAlpha = a;
+        ctx.drawImage(art.get(o.slide), 0, 0);
+        ctx.globalAlpha = 1;
+      }
+    };
 
     // GIF: one palette for the whole clip, from frames sampled across it, so colours
     // stay steady from frame to frame.
     let palette = null;
     if (format === 'gif') {
-      const samples = Math.min(count, 16);
+      const samples = Math.min(order.length, 16 + schedule.length);
       const parts = [];
-      for (let k = 0; k < samples; k++) {
+      // Frames spread across the output, each slide whole, and each overlay over its recording.
+      const picks = [...Array.from({ length: samples - schedule.length }, (_, k) => order[Math.floor(((k + 0.5) * order.length) / (samples - schedule.length))]),
+        ...schedule.map((e) => ({ k: e.k, slide: e, j: Math.floor(e.frames / 2) })),
+        ...overlays.map((e) => ({ k: Math.min(count - 1, Math.max(0, e.from + Math.floor(e.frames / 2))), slide: null, j: 0 }))];
+      for (const o of picks) {
         if (cancelled) throw new Error('cancelled');
-        await seek(v, at(Math.floor(((k + 0.5) * count) / samples)));
-        ctx.clearRect(0, 0, p.width, p.height);
-        draw(ctx, v);
+        await paint(o);
         const px = ctx.getImageData(0, 0, p.width, p.height).data;
         const part = new Uint8ClampedArray(Math.ceil(px.length / 12) * 4);
         for (let i = 0, o = 0; i < px.length; i += 12, o += 4) part.set(px.subarray(i, i + 4), o);
@@ -392,18 +427,16 @@ async function convertFrames(p, { start, end }) {
           quality: Number($('#w-quality').value) / 100, lossless: $('#w-lossless').checked, optimize, loop, alpha: transparent, tolerance,
         });
 
-    for (let i = 0; i < count; i++) {
+    for (let i = 0; i < order.length; i++) {
       if (cancelled) throw new Error('cancelled');
-      await seek(v, at(i));
-      ctx.clearRect(0, 0, p.width, p.height);
-      draw(ctx, v);
+      await paint(order[i]);
       if (format === 'gif') enc.addFrame(ctx.getImageData(0, 0, p.width, p.height).data, 1000 / p.fps);
       else await enc.addFrame(c, 1000 / p.fps);
       if (i % 3 === 0) {
         lctx.clearRect(0, 0, p.width, p.height);
         lctx.drawImage(c, 0, 0);
       }
-      progress((i + 1) / count, t('export_frame', [i + 1, count]));
+      progress((i + 1) / order.length, t('export_frame', [i + 1, order.length]));
       if (i % 4 === 0) await new Promise((r) => setTimeout(r));
     }
     progress(1, t('export_finishing'));
@@ -460,24 +493,64 @@ async function convertRealtime(p, { start, end }) {
     const chunks = [];
     rec.ondataavailable = (e) => e.data.size && chunks.push(e.data);
 
+    // Slides: the clip waits, silent, while each is drawn for its time.
+    const schedule = slideSchedule(slides.all(), start, end, p.fps);
+    const art = await renderSlides(schedule, p.width, p.height);
+    // Overlays: drawn over the clip by its time, so they wait with it.
+    const overlays = overlaySchedule(slides.all(), start, end, p.fps);
+    const overlayArt = await renderSlides(overlays, p.width, p.height);
+    const drawClip = (at) => {
+      ctx.clearRect(0, 0, p.width, p.height); // the overlays' bands would build up otherwise
+      draw(ctx, v);
+      paintOverlays(ctx, overlays, overlayArt, (at - start) * p.fps, p.fps);
+    };
+    const total = end - start + slideSeconds(schedule, p.fps);
+    let slideTime = 0; // seconds of slides recorded so far
+    let next = 0;
+    const due = (at) => next < schedule.length && start + schedule[next].k / p.fps <= at + 0.5 / p.fps;
+    const showSlide = (e) => new Promise((resolve) => {
+      const t0 = performance.now();
+      const step = () => {
+        const shown = (performance.now() - t0) / 1000;
+        drawClip(v.currentTime); // under the slide while it fades
+        ctx.globalAlpha = slideAlpha(e, Math.min(e.frames - 1, Math.floor(shown * p.fps)), p.fps);
+        ctx.drawImage(art.get(e), 0, 0);
+        ctx.globalAlpha = 1;
+        const done = slideTime + shown;
+        progress(done / total, t('export_realtime', [fmtTime(done), fmtTime(total)]));
+        if (cancelled || shown >= e.frames / p.fps) { slideTime += e.frames / p.fps; resolve(); }
+        else setTimeout(step, 1000 / p.fps);
+      };
+      step();
+    });
+
     await seek(v, start);
-    draw(ctx, v);
+    drawClip(start);
     const stopped = once(rec, 'stop');
     rec.start(1000);
+    while (!cancelled && due(start)) await showSlide(schedule[next++]);
     await v.play();
 
     await new Promise((resolve) => {
       const finish = () => { v.pause(); resolve(); };
       v.addEventListener('ended', finish, { once: true });
-      const tick = (_now, md) => {
+      const tick = async (_now, md) => {
         const at = md?.mediaTime ?? v.currentTime;
-        draw(ctx, v);
-        progress((at - start) / (end - start), t('export_realtime', [fmtTime(Math.max(0, at - start)), fmtTime(end - start)]));
-        if (cancelled || at >= end - 0.5 / p.fps) finish();
-        else v.requestVideoFrameCallback(tick);
+        drawClip(at);
+        const done = at - start + slideTime;
+        progress(done / total, t('export_realtime', [fmtTime(Math.max(0, done)), fmtTime(total)]));
+        if (cancelled || at >= end - 0.5 / p.fps) return finish();
+        if (due(at)) {
+          v.pause();
+          while (!cancelled && due(at)) await showSlide(schedule[next++]);
+          if (cancelled) return finish();
+          await v.play();
+        }
+        v.requestVideoFrameCallback(tick);
       };
       v.requestVideoFrameCallback(tick);
     });
+    while (!cancelled && next < schedule.length) await showSlide(schedule[next++]);
     rec.stop();
     await stopped;
     stream.getTracks().forEach((track) => track.stop());
@@ -510,6 +583,7 @@ function convertInWorker(p, { start, end }) {
   const job = {
     blob: source, format, width: p.width, height: p.height, fps: p.fps, start, end,
     device: d?.enabled ? { ...d } : null,
+    slides: slides.all().map((s) => ({ ...s })),
     video: { bitsPerPixel: Number($('#v-quality').value), audio: $('#v-audio').checked && !!meta.hasAudio },
     gif: { colors: Number($('#g-colors').value), dither: $('#g-dither').checked, lossy: Number($('#g-lossy').value) },
     webp: { quality: Number($('#w-quality').value) / 100, lossless: $('#w-lossless').checked },
@@ -620,6 +694,24 @@ $('#download').addEventListener('click', () => {
 });
 $('#redo-export').addEventListener('click', () => stale());
 window.addEventListener('beforeunload', (e) => { if (busy) e.preventDefault(); });
+
+/**
+ * Deletes the recording, with its slides, from Captode's storage, after asking. An
+ * export under way stops, and the page is replaced by the editor's start page, so
+ * nothing of the recording stays in memory either.
+ */
+async function discard() {
+  const id = new URLSearchParams(location.search).get('id');
+  if (!source || !id) return;
+  if (!(await confirmDialog({ title: t('discard_recording_title'), text: t('discard_text'), confirm: t('discard_confirm') }))) return;
+  cancelled = true;
+  abortWorker?.();
+  busy = false; // leaving doesn't ask
+  player.pause();
+  await deleteCapture(id);
+  location.replace('../editor/editor.html?discarded=recording');
+}
+$('#discard').addEventListener('click', discard);
 /**
  * The recording as it was captured, with its colours written into the file (Chrome
  * leaves them out, so players other than Chrome's may guess them wrong). The video
@@ -785,6 +877,7 @@ addEventListener('resize', () => { if (rv.tool !== 'off') placeOverlay(); });
     $('#timeline').classList.add('hidden');
     $('#empty').classList.remove('hidden');
     $('#convert').disabled = true;
+    $('#discard').classList.add('hidden');
     return;
   }
   source = rec.blob;
@@ -798,8 +891,19 @@ addEventListener('resize', () => { if (rv.tool !== 'off') placeOverlay(); });
   $('#t-start').max = $('#t-end').max = duration.toFixed(1);
   $('#info').textContent = `${player.videoWidth} × ${player.videoHeight} · ${fmtTime(duration)} · ${fmtBytes(source.size)}`;
   if (meta.title) { $('#doc-name').textContent = meta.title; document.title = `${meta.title} — Captode`; }
+  slides = mountSlides({
+    player,
+    slides: rec.slides,
+    duration: () => duration,
+    trim,
+    size: () => { const p = plan(); return [p.width, p.height]; },
+    fmtTime,
+    changed: syncUi,
+    save: (list) => saveSlides(id, list).catch(() => {}),
+    busy: () => busy,
+  });
   if ((await chrome.storage.local.get('device')).device) $('#device-section').open = true;
-  device = await mountDevicePanel($('#device-panel'), () => { fillResolutions(); syncUi(); }, {
+  device = await mountDevicePanel($('#device-panel'), () => { fillResolutions(); syncUi(); slides.redraw(); }, {
     source: () => (player.videoWidth ? [player.videoWidth, player.videoHeight] : null),
     // The frame showing in the player.
     picture: async (width) => {
@@ -810,6 +914,7 @@ addEventListener('resize', () => { if (rv.tool !== 'off') placeOverlay(); });
       return c;
     },
   });
+  slides.redraw(); // in the device frame's shape, if it is on
   // The default format from Settings, or the one used last; and the options used last.
   const last = await recall('video');
   const wanted = (await getSettings()).videoFormat;

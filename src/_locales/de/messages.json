@@ -2131,5 +2131,323 @@
   },
   "popup_whats_new_1_6": {
     "message": "Sichere Bereiche und Drehen mit einem Klick für Geräterahmen. In den Einstellungen: was das Symbol tut, was nach einem Screenshot passiert, sehr lange Seiten, Dateinamen und Aufnahmeoptionen mit automatischem Stopp und hervorgehobenem Zeiger."
+  },
+  "slides_title": {
+    "message": "Folien"
+  },
+  "slides_slide": {
+    "message": "Folie"
+  },
+  "slides_hint": {
+    "message": "Titelkarten an einer Stelle der Aufnahme. Eine eingefügte Folie hält die Aufnahme an, solange sie zu sehen ist; eine Überlagerung wird über die laufende Aufnahme gelegt."
+  },
+  "slides_add": {
+    "message": "Folie hinzufügen"
+  },
+  "slides_add_tip": {
+    "message": "Folie an der Abspielposition hinzufügen  S"
+  },
+  "slides_empty": {
+    "message": "Noch keine Folien"
+  },
+  "slides_untitled": {
+    "message": "Folie $1"
+  },
+  "slides_when": {
+    "message": "Bei $1 · $2 s sichtbar"
+  },
+  "slides_outside": {
+    "message": "Außerhalb des gekürzten Teils – wird nicht exportiert"
+  },
+  "slides_of": {
+    "message": "Folie $1 von $2"
+  },
+  "slides_style": {
+    "message": "Stil"
+  },
+  "slides_theme_midnight": {
+    "message": "Mitternacht"
+  },
+  "slides_theme_paper": {
+    "message": "Papier"
+  },
+  "slides_theme_indigo": {
+    "message": "Indigo"
+  },
+  "slides_theme_sunset": {
+    "message": "Sonnenuntergang"
+  },
+  "slides_theme_ocean": {
+    "message": "Ozean"
+  },
+  "slides_theme_editorial": {
+    "message": "Editorial"
+  },
+  "slides_theme_terminal": {
+    "message": "Terminal"
+  },
+  "slides_layout": {
+    "message": "Layout"
+  },
+  "slides_layout_center": {
+    "message": "Zentriert"
+  },
+  "slides_layout_left": {
+    "message": "Links"
+  },
+  "slides_layout_split": {
+    "message": "Bild"
+  },
+  "slides_layout_lower": {
+    "message": "Bauchbinde"
+  },
+  "slides_heading": {
+    "message": "Titel"
+  },
+  "slides_heading_placeholder": {
+    "message": "Was dieser Teil zeigt"
+  },
+  "slides_subtitle": {
+    "message": "Untertitel"
+  },
+  "slides_description": {
+    "message": "Beschreibung"
+  },
+  "slides_description_placeholder": {
+    "message": "Eine Zeile pro Punkt; mit - beginnen für eine Aufzählung"
+  },
+  "slides_show_at": {
+    "message": "Zeigen bei (s)"
+  },
+  "slides_show_at_playhead": {
+    "message": "An der Abspielposition zeigen"
+  },
+  "slides_duration": {
+    "message": "Sichtbar (s)"
+  },
+  "slides_font": {
+    "message": "Schrift"
+  },
+  "slides_font_sans": {
+    "message": "Serifenlos"
+  },
+  "slides_font_serif": {
+    "message": "Serif"
+  },
+  "slides_font_mono": {
+    "message": "Monospace"
+  },
+  "slides_title_colour": {
+    "message": "Titelfarbe"
+  },
+  "slides_text_colour": {
+    "message": "Textfarbe"
+  },
+  "slides_accent": {
+    "message": "Akzent"
+  },
+  "slides_accent_colour": {
+    "message": "Akzentfarbe"
+  },
+  "slides_bg_solid": {
+    "message": "Farbe"
+  },
+  "slides_bg_gradient": {
+    "message": "Verlauf"
+  },
+  "slides_bg_image": {
+    "message": "Bild"
+  },
+  "slides_bg_colour": {
+    "message": "Hintergrundfarbe"
+  },
+  "slides_bg_colour_2": {
+    "message": "Zweite Verlaufsfarbe"
+  },
+  "slides_choose_image": {
+    "message": "Bild auswählen…"
+  },
+  "slides_remove_image": {
+    "message": "Bild entfernen"
+  },
+  "slides_dim": {
+    "message": "Abdunkeln"
+  },
+  "slides_logo": {
+    "message": "Logo"
+  },
+  "slides_position": {
+    "message": "Position"
+  },
+  "slides_pos_tl": {
+    "message": "Oben links"
+  },
+  "slides_pos_top": {
+    "message": "Oben Mitte"
+  },
+  "slides_pos_tr": {
+    "message": "Oben rechts"
+  },
+  "slides_pos_bl": {
+    "message": "Unten links"
+  },
+  "slides_pos_br": {
+    "message": "Unten rechts"
+  },
+  "slides_size": {
+    "message": "Größe"
+  },
+  "slides_picture": {
+    "message": "Bild"
+  },
+  "slides_fade": {
+    "message": "Ein- und ausblenden"
+  },
+  "slides_mode": {
+    "message": "Anzeigen als"
+  },
+  "slides_mode_insert": {
+    "message": "Einfügen"
+  },
+  "slides_mode_overlay": {
+    "message": "Overlay"
+  },
+  "slides_mode_insert_hint": {
+    "message": "Die Aufnahme wartet, solange die Folie zu sehen ist, und läuft dann weiter."
+  },
+  "slides_mode_overlay_hint": {
+    "message": "Wird ohne Hintergrund über die laufende Aufnahme gelegt. Für Bauchbinden und Wasserzeichen."
+  },
+  "slides_band": {
+    "message": "Band hinter dem Text"
+  },
+  "slides_band_colour": {
+    "message": "Bandfarbe"
+  },
+  "slides_band_opacity": {
+    "message": "Deckkraft des Bands"
+  },
+  "slides_whole": {
+    "message": "Über die ganze Aufnahme"
+  },
+  "slides_slide_in": {
+    "message": "Von der Seite hereingleiten"
+  },
+  "slides_duplicate": {
+    "message": "Duplizieren"
+  },
+  "slides_delete": {
+    "message": "Folie löschen"
+  },
+  "slides_deleted": {
+    "message": "Folie gelöscht"
+  },
+  "slides_image_failed": {
+    "message": "Dieses Bild konnte nicht gelesen werden"
+  },
+  "slides_forget": {
+    "message": "Gespeicherten Stil vergessen"
+  },
+  "slides_forget_title": {
+    "message": "Dein letzter Folienstil und dein Logo werden für neue Folien in späteren Aufnahmen behalten. Das löscht sie; wenn du den Stil einer Folie änderst, wird er wieder behalten."
+  },
+  "slides_forgotten": {
+    "message": "Gespeicherter Stil vergessen"
+  },
+  "discard_screenshot": {
+    "message": "Screenshot verwerfen"
+  },
+  "discard_recording": {
+    "message": "Aufnahme verwerfen"
+  },
+  "discard_screenshot_title": {
+    "message": "Diesen Screenshot verwerfen?"
+  },
+  "discard_recording_title": {
+    "message": "Diese Aufnahme verwerfen?"
+  },
+  "discard_text": {
+    "message": "Er wird mit allen deinen Änderungen aus Captode gelöscht. Das kann nicht rückgängig gemacht werden. Bereits heruntergeladene Dateien bleiben erhalten."
+  },
+  "discard_confirm": {
+    "message": "Verwerfen"
+  },
+  "discarded_screenshot": {
+    "message": "Screenshot verworfen"
+  },
+  "discarded_recording": {
+    "message": "Aufnahme verworfen"
+  },
+  "slides_text_size": {
+    "message": "Textgröße"
+  },
+  "slides_text_reset": {
+    "message": "Text zurücksetzen"
+  },
+  "slides_drag_hint": {
+    "message": "Ziehe den Text oder das Logo auf der Folie, um sie zu verschieben, oder eine Ecke, um die Größe zu ändern."
+  },
+  "slides_pos_custom": {
+    "message": "Wo du es hingesetzt hast"
+  },
+  "slides_font_upload": {
+    "message": "Schriftdatei hochladen…"
+  },
+  "slides_font_local": {
+    "message": "Schrift auf diesem Computer…"
+  },
+  "slides_font_local_group": {
+    "message": "Auf diesem Computer"
+  },
+  "slides_font_failed": {
+    "message": "Diese Schrift konnte nicht gelesen werden"
+  },
+  "slides_kit": {
+    "message": "Markenkit"
+  },
+  "slides_kit_none": {
+    "message": "Keins"
+  },
+  "slides_kit_yours": {
+    "message": "Deine Kits"
+  },
+  "slides_kit_save": {
+    "message": "Diesen Stil als Kit speichern…"
+  },
+  "slides_kit_name": {
+    "message": "Kit benennen"
+  },
+  "slides_kit_delete": {
+    "message": "Dieses Kit löschen"
+  },
+  "slides_kit_deleted": {
+    "message": "Kit „$1“ gelöscht"
+  },
+  "slides_import": {
+    "message": "Importieren"
+  },
+  "slides_export": {
+    "message": "Exportieren"
+  },
+  "slides_import_tip": {
+    "message": "Folien aus einer hier exportierten Datei hinzufügen"
+  },
+  "slides_export_tip": {
+    "message": "Diese Folien in einer Datei speichern, für andere Aufnahmen"
+  },
+  "slides_imported": {
+    "message": "$1 Folien hinzugefügt"
+  },
+  "slides_import_failed": {
+    "message": "Diese Datei enthält keine Folien, die Captode verwenden kann"
+  },
+  "slides_adds": {
+    "message": "+$1 s"
+  },
+  "trim_with_slides": {
+    "message": "$1 s mit Folien"
+  },
+  "trim_with_slides_title": {
+    "message": "$1 s Aufnahme und $2 s Folien"
   }
 }

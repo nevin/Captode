@@ -89,6 +89,21 @@ export async function saveEdits(id, edits) {
   });
 }
 
+/** Keeps a recording's slides with it (see lib/slides.js; their pictures are Blobs). */
+export async function saveSlides(id, slides) {
+  const db = await open();
+  await new Promise((resolve, reject) => {
+    const t = db.transaction(STORE, 'readwrite');
+    const store = t.objectStore(STORE);
+    const req = store.get(id);
+    req.onsuccess = () => {
+      if (req.result) store.put({ ...req.result, slides }, id);
+    };
+    t.oncomplete = () => { db.close(); resolve(); };
+    t.onerror = () => { db.close(); reject(t.error); };
+  });
+}
+
 /** Deletes a capture. Resolves to the record, which `restoreCapture` can put back. */
 export async function deleteCapture(id) {
   const rec = await getCapture(id);

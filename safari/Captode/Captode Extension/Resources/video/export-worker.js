@@ -8,12 +8,14 @@
 //               { type: 'done', blob } | { type: 'error', message, fallback }
 import { demuxWebm, muxWebm } from '../lib/webm.js';
 import { muxMp4 } from '../lib/mp4.js';
+import { fillOpusGaps } from '../lib/opus.js';
 import { GifEncoder } from '../lib/gif.js';
 import { WebpAnimEncoder } from '../lib/webp.js';
 import { buildPalette } from '../lib/quantize.js';
 import { WorkerPool } from '../lib/pool.js';
 import { deviceRenderer, frameDrawer } from '../lib/device.js';
 import { sourceColourSpace, outputColour } from '../lib/video-colour.js';
+import { slideSchedule, overlaySchedule, paintOverlays, frameOrder, slideAlpha, renderSlides, audioShift } from '../lib/slides.js';
 
 /** An error after which the page should fall back to its slower, simpler path. */
 class Unsupported extends Error {}
@@ -161,18 +163,24 @@ function videoCandidates(format, w, h, fps, bitrate) {
 /**
  * Audio for the output: Opus packets are copied into WebM as they are, and
  * re-encoded to AAC for MP4. Returns null when there is no audio to keep.
+ * `shift(t)` is how much later (µs) the sound at source time t plays, after the
+ * slides before it; `length` (µs) is how long the output is.
  */
-async function exportAudio(src, format, start, end) {
+async function exportAudio(src, format, start, end, shift = () => 0, length = end - start) {
   const a = src.audio;
   if (!a || a.codecId !== 'A_OPUS') return null;
   const packets = a.frames.filter((f) => f.timestamp >= start && f.timestamp < end);
   if (!packets.length) return null;
+  // The packets as they are, moved to their place in the output, with silence where a
+  // slide was put in (players would otherwise close the gap and lose sync).
+  const copied = () => fillOpusGaps(packets.map((f, i) => {
+    const next = packets[i + 1];
+    const duration = next ? next.timestamp - f.timestamp : (i ? f.timestamp - packets[i - 1].timestamp : 20000);
+    return { timestamp: f.timestamp - start + shift(f.timestamp), duration, key: true, data: f.data };
+  }));
 
   if (format === 'webm') {
-    return {
-      codecId: 'A_OPUS', sampleRate: a.sampleRate, channels: a.channels, description: a.description,
-      frames: packets.map((f) => ({ ...f, timestamp: f.timestamp - start, key: true })),
-    };
+    return { codecId: 'A_OPUS', sampleRate: a.sampleRate, channels: a.channels, description: a.description, frames: copied() };
   }
 
   const encConfig = { codec: 'mp4a.40.2', sampleRate: 48000, numberOfChannels: Math.min(2, a.channels), bitrate: 128000 };
@@ -180,12 +188,7 @@ async function exportAudio(src, format, start, end) {
     // No AAC encoder (Chrome on Linux): keep the original Opus audio. MP4 can carry
     // Opus, and Chrome, Firefox and Safari all play it.
     if (!a.description) throw new Unsupported('This browser cannot encode AAC audio.');
-    const frames = packets.map((f, i) => {
-      const next = packets[i + 1];
-      const duration = next ? next.timestamp - f.timestamp : (i ? f.timestamp - packets[i - 1].timestamp : 20000);
-      return { timestamp: f.timestamp - start, duration, key: true, data: f.data };
-    });
-    return { codec: 'opus', sampleRate: 48000, channels: a.channels, opusHead: a.description, frames };
+    return { codec: 'opus', sampleRate: 48000, channels: a.channels, opusHead: a.description, frames: copied() };
   }
   const decConfig = { codec: 'opus', sampleRate: a.sampleRate, numberOfChannels: a.channels, description: a.description || undefined };
   if (!(await AudioDecoder.isConfigSupported(decConfig)).supported) throw new Unsupported('This browser cannot decode the recording\'s audio.');
@@ -206,8 +209,7 @@ async function exportAudio(src, format, start, end) {
   const channels = encConfig.numberOfChannels;
   // MP4 sample tables have no start offsets, so any gap (audio usually starts a
   // little after the video) is filled with silence to keep sound and picture in sync.
-  let expected = 0; // µs of audio written so far
-  const length = end - start; // µs: audio stops where the video does
+  let expected = 0; // µs of audio written so far; it stops where the video does
   const write = (planes, n, sampleRate) => {
     const room = Math.floor(((length - expected) * sampleRate) / 1e6);
     if (room <= 0) return;
@@ -227,7 +229,7 @@ async function exportAudio(src, format, start, end) {
     output: (ad) => {
       const n = ad.numberOfFrames;
       const rate = ad.sampleRate;
-      const at = ad.timestamp - start;
+      const at = ad.timestamp - start + shift(ad.timestamp); // a slide before it leaves silence
       const gap = Math.round(((at - expected) * rate) / 1e6);
       if (gap > rate / 100) write(new Float32Array(gap * channels), gap, rate);
       const planes = new Float32Array(n * channels);
@@ -256,6 +258,8 @@ async function exportAudio(src, format, start, end) {
  * job: {
  *   blob, format ('mp4' | 'webm' | 'gif' | 'webp'),
  *   width, height, fps, start, end (seconds), device (options or null),
+ *   slides (see lib/slides.js; shown at their moments, the clip waiting meanwhile,
+ *   or drawn over it for overlays),
  *   video: { bitsPerPixel, audio }, gif: { colors, dither, lossy }, webp: { quality, lossless },
  *   optimize, tolerance, loop
  * }
@@ -276,6 +280,22 @@ async function run(job) {
   const start = Math.round(job.start * 1e6), end = Math.round(job.end * 1e6);
   const count = Math.max(1, Math.round(((end - start) / 1e6) * fps));
   const frameUs = 1e6 / fps;
+  // Output frames: the clip's, with each slide's put in before the clip frame it
+  // goes with. `forEachFrame` still walks the clip; `outFrames` hands on the output
+  // frames that go with each clip frame, numbered in the output.
+  const schedule = slideSchedule(job.slides, job.start, job.end, fps);
+  const order = frameOrder(schedule, count);
+  const total = order.length;
+  const slideArt = await renderSlides(schedule, W, H);
+  // Overlays add no frames: they are drawn over the clip's own, by its frame number.
+  const overlays = overlaySchedule(job.slides, job.start, job.end, fps);
+  const overlayArt = await renderSlides(overlays, W, H);
+  const outFrames = (onOut) => {
+    let n = 0;
+    return async (k, frame) => {
+      while (n < total && order[n].k === k) { await onOut(n, order[n], frame); n++; }
+    };
+  };
 
   // The source size comes from the first decoded frame (MediaRecorder sometimes
   // leaves the track's pixel size out).
@@ -293,6 +313,19 @@ async function run(job) {
     ctx.clearRect(0, 0, W, H);
     draw(ctx, frame);
   };
+  /** Draws output frame `o` (from `order`): the clip's frame and its overlays, a slide, or a slide fading over them. */
+  const paintOut = (o, frame) => {
+    const a = o.slide ? slideAlpha(o.slide, o.j, fps) : 0;
+    if (a < 1) {
+      paint(frame);
+      paintOverlays(ctx, overlays, overlayArt, o.k, fps);
+    }
+    if (a > 0) {
+      ctx.globalAlpha = a;
+      ctx.drawImage(slideArt.get(o.slide), 0, 0);
+      ctx.globalAlpha = 1;
+    }
+  };
   let lastPreview = 0;
   const preview = () => {
     const now = performance.now();
@@ -306,7 +339,7 @@ async function run(job) {
     const config = await pickConfig(videoCandidates(job.format, W, H, fps, bitrate));
     if (!config) throw new Unsupported(`This browser cannot encode ${job.format.toUpperCase()} at ${W} × ${H}.`);
 
-    const audio = job.video.audio ? await exportAudio(src, job.format, start, end) : null;
+    const audio = job.video.audio ? await exportAudio(src, job.format, start, end, audioShift(schedule, start, fps), Math.round(total * frameUs)) : null;
     const chunks = [];
     let description = null;
     let encodedColour = null;
@@ -325,16 +358,16 @@ async function run(job) {
     const keyEvery = Math.max(1, Math.round(fps * 2));
     await forEachFrame(src, {
       start, fps, count,
-      onFrame: async (k, frame) => {
+      onFrame: outFrames(async (n, o, frame) => {
         if (failure) throw failure;
-        paint(frame);
-        const vf = new VideoFrame(canvas, { timestamp: Math.round(k * frameUs), duration: Math.round(frameUs), alpha: 'discard' });
-        encoder.encode(vf, { keyFrame: k % keyEvery === 0 });
+        paintOut(o, frame);
+        const vf = new VideoFrame(canvas, { timestamp: Math.round(n * frameUs), duration: Math.round(frameUs), alpha: 'discard' });
+        encoder.encode(vf, { keyFrame: n % keyEvery === 0 });
         vf.close();
         await drain(encoder);
         preview();
-        progress((k + 1) / count, ['export_frame', k + 1, count]);
-      },
+        progress((n + 1) / total, ['export_frame', n + 1, total]);
+      }),
     });
     progress(1, 'export_finishing');
     await encoder.flush();
@@ -377,25 +410,41 @@ async function run(job) {
       const want = new Set(Array.from({ length: samples }, (_, n) => Math.floor(((n + 0.5) * count) / samples)));
       await forEachFrame(src, { start, fps, count, want: (k) => want.has(k), onFrame: async (k, frame) => sample(frame) });
     }
+    // The slides' colours belong in the palette too: overlays over the last frame sampled.
+    const sampleCanvas = () => {
+      const px = ctx.getImageData(0, 0, W, H).data;
+      const part = new Uint8ClampedArray(Math.ceil(px.length / 12) * 4);
+      for (let i = 0, q = 0; i < px.length; i += 12, q += 4) part.set(px.subarray(i, i + 4), q);
+      parts.push(part);
+    };
+    for (const art of overlayArt.values()) {
+      ctx.drawImage(art, 0, 0);
+      sampleCanvas();
+    }
+    for (const art of slideArt.values()) {
+      ctx.clearRect(0, 0, W, H);
+      ctx.drawImage(art, 0, 0);
+      sampleCanvas();
+    }
     const all = new Uint8ClampedArray(parts.reduce((n, a) => n + a.length, 0));
     let o = 0;
     for (const part of parts) { all.set(part, o); o += part.length; }
     palette = buildPalette(all, Math.max(2, job.gif.colors - 1));
   }
 
-  if (job.format === 'gif') return exportGif(src, { start, fps, count, frameUs, palette, transparent, paint, preview, ctx, W, H, job });
+  if (job.format === 'gif') return exportGif(src, { start, fps, count, total, outFrames, frameUs, palette, transparent, paintOut, preview, ctx, W, H, job });
 
   const enc = new WebpAnimEncoder(W, H, {
     quality: job.webp.quality, lossless: job.webp.lossless, optimize: job.optimize, loop: job.loop, alpha: transparent, tolerance: job.tolerance,
   });
   await forEachFrame(src, {
     start, fps, count,
-    onFrame: async (k, frame) => {
-      paint(frame);
+    onFrame: outFrames(async (n, o, frame) => {
+      paintOut(o, frame);
       await enc.addFrame(canvas, frameUs / 1000);
       preview();
-      progress((k + 1) / count, ['export_frame', k + 1, count]);
-    },
+      progress((n + 1) / total, ['export_frame', n + 1, total]);
+    }),
   });
   progress(1, 'export_finishing');
   return enc.finish();
@@ -406,7 +455,7 @@ async function run(job) {
  * compressed on a pool of workers, and compared with the frame before here (the
  * one step that has to go in order).
  */
-async function exportGif(src, { start, fps, count, frameUs, palette, transparent, paint, preview, ctx, W, H, job }) {
+async function exportGif(src, { start, fps, count, total, outFrames, frameUs, palette, transparent, paintOut, preview, ctx, W, H, job }) {
   const pool = new WorkerPool(new URL('../lib/gif-worker.js', import.meta.url));
   try {
     await pool.broadcast({ op: 'palette', pal: palette });
@@ -427,14 +476,14 @@ async function exportGif(src, { start, fps, count, frameUs, palette, transparent
     };
     await forEachFrame(src, {
       start, fps, count,
-      onFrame: async (k, frame) => {
-        paint(frame);
+      onFrame: outFrames(async (n, o, frame) => {
+        paintOut(o, frame);
         const rgba = ctx.getImageData(0, 0, W, H).data;
         preview();
         mapped.push(pool.run({ op: 'map', rgba, width: W, height: H, dither, transparentIndex }, [rgba.buffer]));
         while (mapped.length > limit) await takeOne();
-        progress((k + 1) / count, ['export_frame', k + 1, count]);
-      },
+        progress((n + 1) / total, ['export_frame', n + 1, total]);
+      }),
     });
     while (mapped.length) await takeOne();
     progress(1, 'export_finishing');

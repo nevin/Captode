@@ -2133,5 +2133,323 @@
   },
   "popup_whats_new_1_6": {
     "message": "Safe areas and one-click rotate for device frames. In Settings: what the icon does, what happens after a screenshot, very long pages, file names, and recording options with auto-stop and a highlighted cursor."
+  },
+  "slides_title": {
+    "message": "Slides"
+  },
+  "slides_slide": {
+    "message": "Slide"
+  },
+  "slides_hint": {
+    "message": "Title cards at a moment in the recording. An inserted slide pauses the recording while it is on screen; an overlay is drawn over the recording as it plays."
+  },
+  "slides_add": {
+    "message": "Add slide"
+  },
+  "slides_add_tip": {
+    "message": "Add a slide at the playhead  S"
+  },
+  "slides_empty": {
+    "message": "No slides yet"
+  },
+  "slides_untitled": {
+    "message": "Slide $1"
+  },
+  "slides_when": {
+    "message": "At $1 · $2 s on screen"
+  },
+  "slides_outside": {
+    "message": "Outside the trimmed part — not exported"
+  },
+  "slides_of": {
+    "message": "Slide $1 of $2"
+  },
+  "slides_style": {
+    "message": "Style"
+  },
+  "slides_theme_midnight": {
+    "message": "Midnight"
+  },
+  "slides_theme_paper": {
+    "message": "Paper"
+  },
+  "slides_theme_indigo": {
+    "message": "Indigo"
+  },
+  "slides_theme_sunset": {
+    "message": "Sunset"
+  },
+  "slides_theme_ocean": {
+    "message": "Ocean"
+  },
+  "slides_theme_editorial": {
+    "message": "Editorial"
+  },
+  "slides_theme_terminal": {
+    "message": "Terminal"
+  },
+  "slides_layout": {
+    "message": "Layout"
+  },
+  "slides_layout_center": {
+    "message": "Centred"
+  },
+  "slides_layout_left": {
+    "message": "Left"
+  },
+  "slides_layout_split": {
+    "message": "Picture"
+  },
+  "slides_layout_lower": {
+    "message": "Lower third"
+  },
+  "slides_heading": {
+    "message": "Title"
+  },
+  "slides_heading_placeholder": {
+    "message": "What this part shows"
+  },
+  "slides_subtitle": {
+    "message": "Subtitle"
+  },
+  "slides_description": {
+    "message": "Description"
+  },
+  "slides_description_placeholder": {
+    "message": "A line each; start one with - for a bullet"
+  },
+  "slides_show_at": {
+    "message": "Show at (s)"
+  },
+  "slides_show_at_playhead": {
+    "message": "Show at the playhead"
+  },
+  "slides_duration": {
+    "message": "On screen (s)"
+  },
+  "slides_font": {
+    "message": "Font"
+  },
+  "slides_font_sans": {
+    "message": "Sans serif"
+  },
+  "slides_font_serif": {
+    "message": "Serif"
+  },
+  "slides_font_mono": {
+    "message": "Monospace"
+  },
+  "slides_title_colour": {
+    "message": "Title colour"
+  },
+  "slides_text_colour": {
+    "message": "Text colour"
+  },
+  "slides_accent": {
+    "message": "Accent"
+  },
+  "slides_accent_colour": {
+    "message": "Accent colour"
+  },
+  "slides_bg_solid": {
+    "message": "Colour"
+  },
+  "slides_bg_gradient": {
+    "message": "Gradient"
+  },
+  "slides_bg_image": {
+    "message": "Image"
+  },
+  "slides_bg_colour": {
+    "message": "Background colour"
+  },
+  "slides_bg_colour_2": {
+    "message": "Second gradient colour"
+  },
+  "slides_choose_image": {
+    "message": "Choose image…"
+  },
+  "slides_remove_image": {
+    "message": "Remove image"
+  },
+  "slides_dim": {
+    "message": "Darken"
+  },
+  "slides_logo": {
+    "message": "Logo"
+  },
+  "slides_position": {
+    "message": "Position"
+  },
+  "slides_pos_tl": {
+    "message": "Top left"
+  },
+  "slides_pos_top": {
+    "message": "Top centre"
+  },
+  "slides_pos_tr": {
+    "message": "Top right"
+  },
+  "slides_pos_bl": {
+    "message": "Bottom left"
+  },
+  "slides_pos_br": {
+    "message": "Bottom right"
+  },
+  "slides_size": {
+    "message": "Size"
+  },
+  "slides_picture": {
+    "message": "Picture"
+  },
+  "slides_fade": {
+    "message": "Fade in and out"
+  },
+  "slides_mode": {
+    "message": "Show as"
+  },
+  "slides_mode_insert": {
+    "message": "Insert"
+  },
+  "slides_mode_overlay": {
+    "message": "Overlay"
+  },
+  "slides_mode_insert_hint": {
+    "message": "The recording waits while the slide is on screen, then carries on."
+  },
+  "slides_mode_overlay_hint": {
+    "message": "Drawn over the recording as it plays, with no background. For lower thirds and watermarks."
+  },
+  "slides_band": {
+    "message": "Band behind the text"
+  },
+  "slides_band_colour": {
+    "message": "Band colour"
+  },
+  "slides_band_opacity": {
+    "message": "Band opacity"
+  },
+  "slides_whole": {
+    "message": "Over the whole recording"
+  },
+  "slides_slide_in": {
+    "message": "Slide in from the side"
+  },
+  "slides_duplicate": {
+    "message": "Duplicate"
+  },
+  "slides_delete": {
+    "message": "Delete slide"
+  },
+  "slides_deleted": {
+    "message": "Slide deleted"
+  },
+  "slides_image_failed": {
+    "message": "Couldn't read that image"
+  },
+  "slides_forget": {
+    "message": "Forget saved style"
+  },
+  "slides_forget_title": {
+    "message": "Your last slide style and logo are kept for new slides in later recordings. This clears them; editing a slide's style keeps it again."
+  },
+  "slides_forgotten": {
+    "message": "Saved style forgotten"
+  },
+  "discard_screenshot": {
+    "message": "Discard screenshot"
+  },
+  "discard_recording": {
+    "message": "Discard recording"
+  },
+  "discard_screenshot_title": {
+    "message": "Discard this screenshot?"
+  },
+  "discard_recording_title": {
+    "message": "Discard this recording?"
+  },
+  "discard_text": {
+    "message": "It's deleted from Captode, with any changes you made to it. This can't be undone. Files you've already downloaded are kept."
+  },
+  "discard_confirm": {
+    "message": "Discard"
+  },
+  "discarded_screenshot": {
+    "message": "Screenshot discarded"
+  },
+  "discarded_recording": {
+    "message": "Recording discarded"
+  },
+  "slides_text_size": {
+    "message": "Text size"
+  },
+  "slides_text_reset": {
+    "message": "Reset text"
+  },
+  "slides_drag_hint": {
+    "message": "Drag the words or the logo on the slide to move them, or a corner to resize."
+  },
+  "slides_pos_custom": {
+    "message": "Where you put it"
+  },
+  "slides_font_upload": {
+    "message": "Upload a font file…"
+  },
+  "slides_font_local": {
+    "message": "Font on this computer…"
+  },
+  "slides_font_local_group": {
+    "message": "On this computer"
+  },
+  "slides_font_failed": {
+    "message": "Couldn't read that font"
+  },
+  "slides_kit": {
+    "message": "Brand kit"
+  },
+  "slides_kit_none": {
+    "message": "None"
+  },
+  "slides_kit_yours": {
+    "message": "Your kits"
+  },
+  "slides_kit_save": {
+    "message": "Save this style as a kit…"
+  },
+  "slides_kit_name": {
+    "message": "Name this kit"
+  },
+  "slides_kit_delete": {
+    "message": "Delete this kit"
+  },
+  "slides_kit_deleted": {
+    "message": "Deleted the kit “$1”"
+  },
+  "slides_import": {
+    "message": "Import"
+  },
+  "slides_export": {
+    "message": "Export"
+  },
+  "slides_import_tip": {
+    "message": "Add slides from a file exported here"
+  },
+  "slides_export_tip": {
+    "message": "Save these slides to a file, to use with other recordings"
+  },
+  "slides_imported": {
+    "message": "Added $1 slides"
+  },
+  "slides_import_failed": {
+    "message": "That file has no slides Captode can use"
+  },
+  "slides_adds": {
+    "message": "+$1 s"
+  },
+  "trim_with_slides": {
+    "message": "$1 s with slides"
+  },
+  "trim_with_slides_title": {
+    "message": "$1 s of the recording and $2 s of slides"
   }
 }

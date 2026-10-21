@@ -10,7 +10,7 @@ import { luminance, contrast, contrastHtml, hexOf, measureLabel, measureText as 
 import { getSettings, backgroundColour } from '../lib/settings.js';
 import { fileStem } from '../lib/filename.js';
 import { copyImageHere } from '../content/page.js';
-import { toast, enhance, tablist, openDialog, fmtBytes, ago } from '../lib/ui.js';
+import { toast, enhance, tablist, openDialog, fmtBytes, ago, confirmDialog } from '../lib/ui.js';
 import { t, localize } from '../lib/i18n.js';
 
 localize();
@@ -2380,6 +2380,7 @@ async function loadBlob(blob, info = {}) {
   $('#doc-name').textContent = info.title || t('popup_screenshot');
   $('#doc-name').title = info.url || info.title || '';
   captureId = null;
+  syncDiscard();
   layout();
   fitZoom();
   commit();
@@ -2460,6 +2461,25 @@ window.addEventListener('beforeunload', (e) => {
   if (dirty) e.preventDefault();
 });
 
+// ---------- discard ----------
+
+const syncDiscard = () => $('#discard').classList.toggle('hidden', !captureId);
+
+/**
+ * Deletes the capture, with its edits, from Captode's storage, after asking. The page
+ * is then replaced by a fresh one, so nothing of the image stays in memory either.
+ */
+async function discard() {
+  if (!captureId) return;
+  if (!(await confirmDialog({ title: t('discard_screenshot_title'), text: t('discard_text'), confirm: t('discard_confirm') }))) return;
+  const id = captureId;
+  captureId = null; // nothing is saved from here on
+  dirty = false; // and leaving doesn't ask
+  await deleteCapture(id);
+  location.replace('editor.html?discarded=screenshot');
+}
+$('#discard').addEventListener('click', discard);
+
 $('#help').addEventListener('click', () => openDialog($('#shortcuts')));
 document.addEventListener('keydown', (e) => {
   if (e.key === '?' && !/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) openDialog($('#shortcuts'));
@@ -2527,6 +2547,7 @@ document.addEventListener('keydown', (e) => {
   if (rec) {
     await loadBlob(rec.blob, { ...rec.meta, created: rec.created });
     captureId = id;
+    syncDiscard();
     if (rec.edits) await restoreEdits(rec.edits);
     const params = new URLSearchParams(location.search);
     const fresh = !params.has('reopen'); // just taken, not reopened from Recent captures
@@ -2543,6 +2564,12 @@ document.addEventListener('keydown', (e) => {
     }
   } else {
     showEmpty();
+    // Arrived here from discarding a capture.
+    const discarded = new URLSearchParams(location.search).get('discarded');
+    if (discarded) {
+      window.history.replaceState(null, '', 'editor.html');
+      toast(t(discarded === 'recording' ? 'discarded_recording' : 'discarded_screenshot'), { kind: 'success' });
+    }
   }
   if (globalThis.chrome?.storage) {
     const { editorLast = {}, editorHintDone } = await chrome.storage.local.get(['editorLast', 'editorHintDone']);

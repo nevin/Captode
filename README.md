@@ -126,6 +126,14 @@ opens in the video page, where you can:
 - Trim on a timeline with thumbnails: drag across it to choose the part to keep, drag its
   edges, or play to a point and press **I** (start) or **O** (end). A click moves the playhead
   and its knob scrubs. **Space** plays only the trimmed part; the arrow keys step frame by frame.
+- **Slides** (or **S** at the playhead): title cards put into the recording at a moment you
+  choose. The recording waits while a slide is on screen, then carries on from the same frame,
+  with the sound kept in step. Each slide has a title, subtitle and description (a line each;
+  `-` makes a bullet), a style (seven themes, or your own colours and font), a layout
+  (centred, left, with a picture, or lower third), a background colour, gradient or image,
+  and a logo in any corner. New slides take the last one's style, and your logo is
+  remembered for the next recording. Drag a slide's marker under the timeline to move it;
+  playback shows slides as the export will. Slides are kept with the recording.
 - **Frame to editor** (or **F**): the frame on screen, at full size, opens in the editor to
   annotate, copy or save.
 - For MP4 and WebM, the Export button shows the most the file can weigh; screen recordings

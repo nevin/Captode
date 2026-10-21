@@ -2131,5 +2131,323 @@
   },
   "popup_whats_new_1_6": {
     "message": "Áreas seguras y giro con un clic para los marcos de dispositivo. En Configuración: qué hace el icono, qué pasa tras una captura, páginas muy largas, nombres de archivo y opciones de grabación con parada automática y cursor resaltado."
+  },
+  "slides_title": {
+    "message": "Diapositivas"
+  },
+  "slides_slide": {
+    "message": "Diapositiva"
+  },
+  "slides_hint": {
+    "message": "Tarjetas de título en un momento de la grabación. Una diapositiva insertada pausa la grabación mientras se ve; una superposición se dibuja sobre la grabación mientras se reproduce."
+  },
+  "slides_add": {
+    "message": "Añadir diapositiva"
+  },
+  "slides_add_tip": {
+    "message": "Añadir una diapositiva en el cabezal  S"
+  },
+  "slides_empty": {
+    "message": "Aún no hay diapositivas"
+  },
+  "slides_untitled": {
+    "message": "Diapositiva $1"
+  },
+  "slides_when": {
+    "message": "En $1 · $2 s en pantalla"
+  },
+  "slides_outside": {
+    "message": "Fuera de la parte recortada: no se exporta"
+  },
+  "slides_of": {
+    "message": "Diapositiva $1 de $2"
+  },
+  "slides_style": {
+    "message": "Estilo"
+  },
+  "slides_theme_midnight": {
+    "message": "Medianoche"
+  },
+  "slides_theme_paper": {
+    "message": "Papel"
+  },
+  "slides_theme_indigo": {
+    "message": "Índigo"
+  },
+  "slides_theme_sunset": {
+    "message": "Atardecer"
+  },
+  "slides_theme_ocean": {
+    "message": "Océano"
+  },
+  "slides_theme_editorial": {
+    "message": "Editorial"
+  },
+  "slides_theme_terminal": {
+    "message": "Terminal"
+  },
+  "slides_layout": {
+    "message": "Diseño"
+  },
+  "slides_layout_center": {
+    "message": "Centrado"
+  },
+  "slides_layout_left": {
+    "message": "Izquierda"
+  },
+  "slides_layout_split": {
+    "message": "Imagen"
+  },
+  "slides_layout_lower": {
+    "message": "Tercio inferior"
+  },
+  "slides_heading": {
+    "message": "Título"
+  },
+  "slides_heading_placeholder": {
+    "message": "Qué muestra esta parte"
+  },
+  "slides_subtitle": {
+    "message": "Subtítulo"
+  },
+  "slides_description": {
+    "message": "Descripción"
+  },
+  "slides_description_placeholder": {
+    "message": "Una línea por punto; empieza con - para una viñeta"
+  },
+  "slides_show_at": {
+    "message": "Mostrar en (s)"
+  },
+  "slides_show_at_playhead": {
+    "message": "Mostrar en el cabezal"
+  },
+  "slides_duration": {
+    "message": "En pantalla (s)"
+  },
+  "slides_font": {
+    "message": "Fuente"
+  },
+  "slides_font_sans": {
+    "message": "Sans serif"
+  },
+  "slides_font_serif": {
+    "message": "Serif"
+  },
+  "slides_font_mono": {
+    "message": "Monoespaciada"
+  },
+  "slides_title_colour": {
+    "message": "Color del título"
+  },
+  "slides_text_colour": {
+    "message": "Color del texto"
+  },
+  "slides_accent": {
+    "message": "Acento"
+  },
+  "slides_accent_colour": {
+    "message": "Color de acento"
+  },
+  "slides_bg_solid": {
+    "message": "Color"
+  },
+  "slides_bg_gradient": {
+    "message": "Degradado"
+  },
+  "slides_bg_image": {
+    "message": "Imagen"
+  },
+  "slides_bg_colour": {
+    "message": "Color de fondo"
+  },
+  "slides_bg_colour_2": {
+    "message": "Segundo color del degradado"
+  },
+  "slides_choose_image": {
+    "message": "Elegir imagen…"
+  },
+  "slides_remove_image": {
+    "message": "Quitar imagen"
+  },
+  "slides_dim": {
+    "message": "Oscurecer"
+  },
+  "slides_logo": {
+    "message": "Logotipo"
+  },
+  "slides_position": {
+    "message": "Posición"
+  },
+  "slides_pos_tl": {
+    "message": "Arriba a la izquierda"
+  },
+  "slides_pos_top": {
+    "message": "Arriba al centro"
+  },
+  "slides_pos_tr": {
+    "message": "Arriba a la derecha"
+  },
+  "slides_pos_bl": {
+    "message": "Abajo a la izquierda"
+  },
+  "slides_pos_br": {
+    "message": "Abajo a la derecha"
+  },
+  "slides_size": {
+    "message": "Tamaño"
+  },
+  "slides_picture": {
+    "message": "Imagen"
+  },
+  "slides_fade": {
+    "message": "Fundido de entrada y salida"
+  },
+  "slides_mode": {
+    "message": "Mostrar como"
+  },
+  "slides_mode_insert": {
+    "message": "Insertar"
+  },
+  "slides_mode_overlay": {
+    "message": "Superposición"
+  },
+  "slides_mode_insert_hint": {
+    "message": "La grabación espera mientras la diapositiva está en pantalla y luego continúa."
+  },
+  "slides_mode_overlay_hint": {
+    "message": "Se dibuja sobre la grabación mientras se reproduce, sin fondo. Para rótulos y marcas de agua."
+  },
+  "slides_band": {
+    "message": "Franja detrás del texto"
+  },
+  "slides_band_colour": {
+    "message": "Color de la franja"
+  },
+  "slides_band_opacity": {
+    "message": "Opacidad de la franja"
+  },
+  "slides_whole": {
+    "message": "Durante toda la grabación"
+  },
+  "slides_slide_in": {
+    "message": "Entrar deslizándose desde el lado"
+  },
+  "slides_duplicate": {
+    "message": "Duplicar"
+  },
+  "slides_delete": {
+    "message": "Eliminar diapositiva"
+  },
+  "slides_deleted": {
+    "message": "Diapositiva eliminada"
+  },
+  "slides_image_failed": {
+    "message": "No se pudo leer esa imagen"
+  },
+  "slides_forget": {
+    "message": "Olvidar el estilo guardado"
+  },
+  "slides_forget_title": {
+    "message": "Tu último estilo de diapositiva y tu logotipo se guardan para las nuevas diapositivas de grabaciones posteriores. Esto los borra; si cambias el estilo de una diapositiva, se vuelve a guardar."
+  },
+  "slides_forgotten": {
+    "message": "Estilo guardado olvidado"
+  },
+  "discard_screenshot": {
+    "message": "Descartar captura"
+  },
+  "discard_recording": {
+    "message": "Descartar grabación"
+  },
+  "discard_screenshot_title": {
+    "message": "¿Descartar esta captura?"
+  },
+  "discard_recording_title": {
+    "message": "¿Descartar esta grabación?"
+  },
+  "discard_text": {
+    "message": "Se elimina de Captode, junto con los cambios que hayas hecho. No se puede deshacer. Los archivos que ya descargaste se conservan."
+  },
+  "discard_confirm": {
+    "message": "Descartar"
+  },
+  "discarded_screenshot": {
+    "message": "Captura descartada"
+  },
+  "discarded_recording": {
+    "message": "Grabación descartada"
+  },
+  "slides_text_size": {
+    "message": "Tamaño del texto"
+  },
+  "slides_text_reset": {
+    "message": "Restablecer texto"
+  },
+  "slides_drag_hint": {
+    "message": "Arrastra el texto o el logotipo en la diapositiva para moverlos, o una esquina para cambiar su tamaño."
+  },
+  "slides_pos_custom": {
+    "message": "Donde lo pusiste"
+  },
+  "slides_font_upload": {
+    "message": "Subir un archivo de fuente…"
+  },
+  "slides_font_local": {
+    "message": "Fuente de este equipo…"
+  },
+  "slides_font_local_group": {
+    "message": "En este equipo"
+  },
+  "slides_font_failed": {
+    "message": "No se pudo leer esa fuente"
+  },
+  "slides_kit": {
+    "message": "Kit de marca"
+  },
+  "slides_kit_none": {
+    "message": "Ninguno"
+  },
+  "slides_kit_yours": {
+    "message": "Tus kits"
+  },
+  "slides_kit_save": {
+    "message": "Guardar este estilo como kit…"
+  },
+  "slides_kit_name": {
+    "message": "Nombre del kit"
+  },
+  "slides_kit_delete": {
+    "message": "Eliminar este kit"
+  },
+  "slides_kit_deleted": {
+    "message": "Kit «$1» eliminado"
+  },
+  "slides_import": {
+    "message": "Importar"
+  },
+  "slides_export": {
+    "message": "Exportar"
+  },
+  "slides_import_tip": {
+    "message": "Añadir diapositivas de un archivo exportado aquí"
+  },
+  "slides_export_tip": {
+    "message": "Guardar estas diapositivas en un archivo para usarlas en otras grabaciones"
+  },
+  "slides_imported": {
+    "message": "Se añadieron $1 diapositivas"
+  },
+  "slides_import_failed": {
+    "message": "Ese archivo no tiene diapositivas que Captode pueda usar"
+  },
+  "slides_adds": {
+    "message": "+$1 s"
+  },
+  "trim_with_slides": {
+    "message": "$1 s con diapositivas"
+  },
+  "trim_with_slides_title": {
+    "message": "$1 s de grabación y $2 s de diapositivas"
   }
 }

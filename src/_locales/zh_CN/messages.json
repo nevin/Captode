@@ -2131,5 +2131,323 @@
   },
   "popup_whats_new_1_6": {
     "message": "设备外框新增安全区域和一键旋转。设置中新增：图标的作用、截图之后的操作、超长页面、文件名，以及带自动停止和光标突出显示的录制选项。"
+  },
+  "slides_title": {
+    "message": "幻灯片"
+  },
+  "slides_slide": {
+    "message": "幻灯片"
+  },
+  "slides_hint": {
+    "message": "在录制的某个时刻显示的标题卡片。插入的幻灯片显示期间录制会暂停；叠加层会在录制播放时绘制在其上方。"
+  },
+  "slides_add": {
+    "message": "添加幻灯片"
+  },
+  "slides_add_tip": {
+    "message": "在播放头处添加幻灯片  S"
+  },
+  "slides_empty": {
+    "message": "还没有幻灯片"
+  },
+  "slides_untitled": {
+    "message": "幻灯片 $1"
+  },
+  "slides_when": {
+    "message": "$1 · 显示 $2 秒"
+  },
+  "slides_outside": {
+    "message": "在修剪范围之外，不会导出"
+  },
+  "slides_of": {
+    "message": "第 $1 张，共 $2 张"
+  },
+  "slides_style": {
+    "message": "样式"
+  },
+  "slides_theme_midnight": {
+    "message": "午夜"
+  },
+  "slides_theme_paper": {
+    "message": "纸张"
+  },
+  "slides_theme_indigo": {
+    "message": "靛蓝"
+  },
+  "slides_theme_sunset": {
+    "message": "日落"
+  },
+  "slides_theme_ocean": {
+    "message": "海洋"
+  },
+  "slides_theme_editorial": {
+    "message": "杂志"
+  },
+  "slides_theme_terminal": {
+    "message": "终端"
+  },
+  "slides_layout": {
+    "message": "布局"
+  },
+  "slides_layout_center": {
+    "message": "居中"
+  },
+  "slides_layout_left": {
+    "message": "左对齐"
+  },
+  "slides_layout_split": {
+    "message": "配图"
+  },
+  "slides_layout_lower": {
+    "message": "下三分之一"
+  },
+  "slides_heading": {
+    "message": "标题"
+  },
+  "slides_heading_placeholder": {
+    "message": "这一部分展示的内容"
+  },
+  "slides_subtitle": {
+    "message": "副标题"
+  },
+  "slides_description": {
+    "message": "描述"
+  },
+  "slides_description_placeholder": {
+    "message": "每行一项；以 - 开头显示为项目符号"
+  },
+  "slides_show_at": {
+    "message": "显示于（秒）"
+  },
+  "slides_show_at_playhead": {
+    "message": "在播放头处显示"
+  },
+  "slides_duration": {
+    "message": "显示时长（秒）"
+  },
+  "slides_font": {
+    "message": "字体"
+  },
+  "slides_font_sans": {
+    "message": "无衬线"
+  },
+  "slides_font_serif": {
+    "message": "衬线"
+  },
+  "slides_font_mono": {
+    "message": "等宽"
+  },
+  "slides_title_colour": {
+    "message": "标题颜色"
+  },
+  "slides_text_colour": {
+    "message": "文字颜色"
+  },
+  "slides_accent": {
+    "message": "强调"
+  },
+  "slides_accent_colour": {
+    "message": "强调色"
+  },
+  "slides_bg_solid": {
+    "message": "纯色"
+  },
+  "slides_bg_gradient": {
+    "message": "渐变"
+  },
+  "slides_bg_image": {
+    "message": "图片"
+  },
+  "slides_bg_colour": {
+    "message": "背景颜色"
+  },
+  "slides_bg_colour_2": {
+    "message": "渐变第二种颜色"
+  },
+  "slides_choose_image": {
+    "message": "选择图片…"
+  },
+  "slides_remove_image": {
+    "message": "移除图片"
+  },
+  "slides_dim": {
+    "message": "调暗"
+  },
+  "slides_logo": {
+    "message": "标志"
+  },
+  "slides_position": {
+    "message": "位置"
+  },
+  "slides_pos_tl": {
+    "message": "左上"
+  },
+  "slides_pos_top": {
+    "message": "上方居中"
+  },
+  "slides_pos_tr": {
+    "message": "右上"
+  },
+  "slides_pos_bl": {
+    "message": "左下"
+  },
+  "slides_pos_br": {
+    "message": "右下"
+  },
+  "slides_size": {
+    "message": "大小"
+  },
+  "slides_picture": {
+    "message": "图片"
+  },
+  "slides_fade": {
+    "message": "淡入淡出"
+  },
+  "slides_mode": {
+    "message": "显示方式"
+  },
+  "slides_mode_insert": {
+    "message": "插入"
+  },
+  "slides_mode_overlay": {
+    "message": "叠加"
+  },
+  "slides_mode_insert_hint": {
+    "message": "幻灯片显示期间录像暂停，之后从原处继续。"
+  },
+  "slides_mode_overlay_hint": {
+    "message": "在播放的录像上叠加显示，没有背景。适合字幕条和水印。"
+  },
+  "slides_band": {
+    "message": "在文字后加色带"
+  },
+  "slides_band_colour": {
+    "message": "色带颜色"
+  },
+  "slides_band_opacity": {
+    "message": "色带不透明度"
+  },
+  "slides_whole": {
+    "message": "覆盖整个录像"
+  },
+  "slides_slide_in": {
+    "message": "从侧面滑入"
+  },
+  "slides_duplicate": {
+    "message": "复制"
+  },
+  "slides_delete": {
+    "message": "删除幻灯片"
+  },
+  "slides_deleted": {
+    "message": "已删除幻灯片"
+  },
+  "slides_image_failed": {
+    "message": "无法读取该图片"
+  },
+  "slides_forget": {
+    "message": "忘记已保存的样式"
+  },
+  "slides_forget_title": {
+    "message": "你上次使用的幻灯片样式和标志会保留，供之后录制中的新幻灯片使用。此操作会清除它们；修改幻灯片样式后会再次保留。"
+  },
+  "slides_forgotten": {
+    "message": "已忘记保存的样式"
+  },
+  "discard_screenshot": {
+    "message": "丢弃截图"
+  },
+  "discard_recording": {
+    "message": "丢弃录制"
+  },
+  "discard_screenshot_title": {
+    "message": "要丢弃这张截图吗？"
+  },
+  "discard_recording_title": {
+    "message": "要丢弃这段录制吗？"
+  },
+  "discard_text": {
+    "message": "它会连同你所做的修改一起从 Captode 中删除，且无法撤销。已下载的文件会保留。"
+  },
+  "discard_confirm": {
+    "message": "丢弃"
+  },
+  "discarded_screenshot": {
+    "message": "已丢弃截图"
+  },
+  "discarded_recording": {
+    "message": "已丢弃录制"
+  },
+  "slides_text_size": {
+    "message": "文字大小"
+  },
+  "slides_text_reset": {
+    "message": "重置文字"
+  },
+  "slides_drag_hint": {
+    "message": "在幻灯片上拖动文字或标志即可移动，拖动角落可调整大小。"
+  },
+  "slides_pos_custom": {
+    "message": "你放置的位置"
+  },
+  "slides_font_upload": {
+    "message": "上传字体文件…"
+  },
+  "slides_font_local": {
+    "message": "本机字体…"
+  },
+  "slides_font_local_group": {
+    "message": "本机"
+  },
+  "slides_font_failed": {
+    "message": "无法读取该字体"
+  },
+  "slides_kit": {
+    "message": "品牌套件"
+  },
+  "slides_kit_none": {
+    "message": "无"
+  },
+  "slides_kit_yours": {
+    "message": "我的套件"
+  },
+  "slides_kit_save": {
+    "message": "将此样式保存为套件…"
+  },
+  "slides_kit_name": {
+    "message": "为套件命名"
+  },
+  "slides_kit_delete": {
+    "message": "删除此套件"
+  },
+  "slides_kit_deleted": {
+    "message": "已删除套件“$1”"
+  },
+  "slides_import": {
+    "message": "导入"
+  },
+  "slides_export": {
+    "message": "导出"
+  },
+  "slides_import_tip": {
+    "message": "从此处导出的文件添加幻灯片"
+  },
+  "slides_export_tip": {
+    "message": "将这些幻灯片保存为文件，以便在其他录制中使用"
+  },
+  "slides_imported": {
+    "message": "已添加 $1 张幻灯片"
+  },
+  "slides_import_failed": {
+    "message": "该文件中没有 Captode 可用的幻灯片"
+  },
+  "slides_adds": {
+    "message": "+$1 秒"
+  },
+  "trim_with_slides": {
+    "message": "含幻灯片共 $1 秒"
+  },
+  "trim_with_slides_title": {
+    "message": "录制 $1 秒，幻灯片 $2 秒"
   }
 }

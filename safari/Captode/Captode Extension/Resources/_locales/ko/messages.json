@@ -2131,5 +2131,323 @@
   },
   "popup_whats_new_1_6": {
     "message": "기기 프레임에 안전 영역과 한 번 클릭 회전이 추가되었습니다. 설정에서 아이콘 동작, 스크린샷 후 동작, 아주 긴 페이지, 파일 이름, 자동 중지와 커서 강조가 있는 녹화 옵션을 고를 수 있습니다."
+  },
+  "slides_title": {
+    "message": "슬라이드"
+  },
+  "slides_slide": {
+    "message": "슬라이드"
+  },
+  "slides_hint": {
+    "message": "녹화의 특정 시점에 보여 주는 타이틀 카드입니다. 삽입한 슬라이드는 표시되는 동안 녹화를 멈추고, 오버레이는 재생 중인 녹화 위에 겹쳐 표시됩니다."
+  },
+  "slides_add": {
+    "message": "슬라이드 추가"
+  },
+  "slides_add_tip": {
+    "message": "재생 위치에 슬라이드 추가  S"
+  },
+  "slides_empty": {
+    "message": "아직 슬라이드가 없습니다"
+  },
+  "slides_untitled": {
+    "message": "슬라이드 $1"
+  },
+  "slides_when": {
+    "message": "$1 · $2초 표시"
+  },
+  "slides_outside": {
+    "message": "잘라낸 구간 밖이라 내보내지 않음"
+  },
+  "slides_of": {
+    "message": "슬라이드 $1/$2"
+  },
+  "slides_style": {
+    "message": "스타일"
+  },
+  "slides_theme_midnight": {
+    "message": "미드나잇"
+  },
+  "slides_theme_paper": {
+    "message": "페이퍼"
+  },
+  "slides_theme_indigo": {
+    "message": "인디고"
+  },
+  "slides_theme_sunset": {
+    "message": "선셋"
+  },
+  "slides_theme_ocean": {
+    "message": "오션"
+  },
+  "slides_theme_editorial": {
+    "message": "에디토리얼"
+  },
+  "slides_theme_terminal": {
+    "message": "터미널"
+  },
+  "slides_layout": {
+    "message": "레이아웃"
+  },
+  "slides_layout_center": {
+    "message": "가운데"
+  },
+  "slides_layout_left": {
+    "message": "왼쪽"
+  },
+  "slides_layout_split": {
+    "message": "이미지"
+  },
+  "slides_layout_lower": {
+    "message": "하단 자막"
+  },
+  "slides_heading": {
+    "message": "제목"
+  },
+  "slides_heading_placeholder": {
+    "message": "이 부분에서 보여 주는 내용"
+  },
+  "slides_subtitle": {
+    "message": "부제목"
+  },
+  "slides_description": {
+    "message": "설명"
+  },
+  "slides_description_placeholder": {
+    "message": "한 줄에 하나씩, -로 시작하면 글머리 기호"
+  },
+  "slides_show_at": {
+    "message": "표시 시점(초)"
+  },
+  "slides_show_at_playhead": {
+    "message": "재생 위치에 표시"
+  },
+  "slides_duration": {
+    "message": "표시 시간(초)"
+  },
+  "slides_font": {
+    "message": "글꼴"
+  },
+  "slides_font_sans": {
+    "message": "산세리프"
+  },
+  "slides_font_serif": {
+    "message": "세리프"
+  },
+  "slides_font_mono": {
+    "message": "고정폭"
+  },
+  "slides_title_colour": {
+    "message": "제목 색"
+  },
+  "slides_text_colour": {
+    "message": "텍스트 색"
+  },
+  "slides_accent": {
+    "message": "강조"
+  },
+  "slides_accent_colour": {
+    "message": "강조 색"
+  },
+  "slides_bg_solid": {
+    "message": "단색"
+  },
+  "slides_bg_gradient": {
+    "message": "그라디언트"
+  },
+  "slides_bg_image": {
+    "message": "이미지"
+  },
+  "slides_bg_colour": {
+    "message": "배경색"
+  },
+  "slides_bg_colour_2": {
+    "message": "그라디언트 두 번째 색"
+  },
+  "slides_choose_image": {
+    "message": "이미지 선택…"
+  },
+  "slides_remove_image": {
+    "message": "이미지 제거"
+  },
+  "slides_dim": {
+    "message": "어둡게"
+  },
+  "slides_logo": {
+    "message": "로고"
+  },
+  "slides_position": {
+    "message": "위치"
+  },
+  "slides_pos_tl": {
+    "message": "왼쪽 위"
+  },
+  "slides_pos_top": {
+    "message": "위 가운데"
+  },
+  "slides_pos_tr": {
+    "message": "오른쪽 위"
+  },
+  "slides_pos_bl": {
+    "message": "왼쪽 아래"
+  },
+  "slides_pos_br": {
+    "message": "오른쪽 아래"
+  },
+  "slides_size": {
+    "message": "크기"
+  },
+  "slides_picture": {
+    "message": "이미지"
+  },
+  "slides_fade": {
+    "message": "페이드 인/아웃"
+  },
+  "slides_mode": {
+    "message": "표시 방식"
+  },
+  "slides_mode_insert": {
+    "message": "삽입"
+  },
+  "slides_mode_overlay": {
+    "message": "오버레이"
+  },
+  "slides_mode_insert_hint": {
+    "message": "슬라이드가 표시되는 동안 녹화가 멈췄다가 이어서 재생됩니다."
+  },
+  "slides_mode_overlay_hint": {
+    "message": "배경 없이 재생 중인 녹화 위에 겹쳐 표시합니다. 하단 자막과 워터마크에 적합합니다."
+  },
+  "slides_band": {
+    "message": "텍스트 뒤에 띠 표시"
+  },
+  "slides_band_colour": {
+    "message": "띠 색상"
+  },
+  "slides_band_opacity": {
+    "message": "띠 불투명도"
+  },
+  "slides_whole": {
+    "message": "녹화 전체에 표시"
+  },
+  "slides_slide_in": {
+    "message": "옆에서 밀려 들어오기"
+  },
+  "slides_duplicate": {
+    "message": "복제"
+  },
+  "slides_delete": {
+    "message": "슬라이드 삭제"
+  },
+  "slides_deleted": {
+    "message": "슬라이드를 삭제했습니다"
+  },
+  "slides_image_failed": {
+    "message": "이미지를 읽을 수 없습니다"
+  },
+  "slides_forget": {
+    "message": "저장된 스타일 지우기"
+  },
+  "slides_forget_title": {
+    "message": "마지막 슬라이드 스타일과 로고는 이후 녹화의 새 슬라이드를 위해 보관됩니다. 이 버튼은 이를 지웁니다. 슬라이드 스타일을 바꾸면 다시 보관됩니다."
+  },
+  "slides_forgotten": {
+    "message": "저장된 스타일을 지웠습니다"
+  },
+  "discard_screenshot": {
+    "message": "스크린샷 버리기"
+  },
+  "discard_recording": {
+    "message": "녹화 버리기"
+  },
+  "discard_screenshot_title": {
+    "message": "이 스크린샷을 버릴까요?"
+  },
+  "discard_recording_title": {
+    "message": "이 녹화를 버릴까요?"
+  },
+  "discard_text": {
+    "message": "변경한 내용과 함께 Captode에서 삭제됩니다. 되돌릴 수 없습니다. 이미 다운로드한 파일은 그대로 남습니다."
+  },
+  "discard_confirm": {
+    "message": "버리기"
+  },
+  "discarded_screenshot": {
+    "message": "스크린샷을 버렸습니다"
+  },
+  "discarded_recording": {
+    "message": "녹화를 버렸습니다"
+  },
+  "slides_text_size": {
+    "message": "텍스트 크기"
+  },
+  "slides_text_reset": {
+    "message": "텍스트 초기화"
+  },
+  "slides_drag_hint": {
+    "message": "슬라이드에서 텍스트나 로고를 드래그해 옮기고, 모서리를 드래그해 크기를 바꿉니다."
+  },
+  "slides_pos_custom": {
+    "message": "직접 놓은 위치"
+  },
+  "slides_font_upload": {
+    "message": "글꼴 파일 업로드…"
+  },
+  "slides_font_local": {
+    "message": "이 컴퓨터의 글꼴…"
+  },
+  "slides_font_local_group": {
+    "message": "이 컴퓨터"
+  },
+  "slides_font_failed": {
+    "message": "글꼴을 읽을 수 없습니다"
+  },
+  "slides_kit": {
+    "message": "브랜드 키트"
+  },
+  "slides_kit_none": {
+    "message": "없음"
+  },
+  "slides_kit_yours": {
+    "message": "내 키트"
+  },
+  "slides_kit_save": {
+    "message": "이 스타일을 키트로 저장…"
+  },
+  "slides_kit_name": {
+    "message": "키트 이름"
+  },
+  "slides_kit_delete": {
+    "message": "이 키트 삭제"
+  },
+  "slides_kit_deleted": {
+    "message": "키트 “$1”을(를) 삭제했습니다"
+  },
+  "slides_import": {
+    "message": "가져오기"
+  },
+  "slides_export": {
+    "message": "내보내기"
+  },
+  "slides_import_tip": {
+    "message": "여기서 내보낸 파일에서 슬라이드 추가"
+  },
+  "slides_export_tip": {
+    "message": "이 슬라이드를 파일로 저장해 다른 녹화에서 사용"
+  },
+  "slides_imported": {
+    "message": "슬라이드 $1개를 추가했습니다"
+  },
+  "slides_import_failed": {
+    "message": "이 파일에는 Captode에서 쓸 수 있는 슬라이드가 없습니다"
+  },
+  "slides_adds": {
+    "message": "+$1초"
+  },
+  "trim_with_slides": {
+    "message": "슬라이드 포함 $1초"
+  },
+  "trim_with_slides_title": {
+    "message": "녹화 $1초와 슬라이드 $2초"
   }
 }

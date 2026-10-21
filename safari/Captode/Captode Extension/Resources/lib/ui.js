@@ -94,6 +94,31 @@ export function openDialog(dialog) {
   dialog.focus(); // focus the dialog, not its first button, so no tooltip pops up
 }
 
+/**
+ * Asks before something that can't be undone. Resolves true if `confirm` is chosen;
+ * Cancel, Esc or a click outside resolve false. Cancel has the focus, so Enter alone
+ * never confirms.
+ */
+export function confirmDialog({ title, text, confirm, danger = true }) {
+  const d = document.createElement('dialog');
+  d.className = 'modal confirm';
+  d.setAttribute('aria-labelledby', 'confirm-title');
+  d.innerHTML = `<div class="modal-body"><h2 id="confirm-title"></h2><p class="muted"></p>
+    <div class="confirm-actions"><button class="btn" value="no"></button><button class="btn ${danger ? 'danger-solid' : 'primary'}" value="yes"></button></div></div>`;
+  d.querySelector('h2').textContent = title;
+  d.querySelector('p').textContent = text;
+  const [no, yes] = d.querySelectorAll('button');
+  no.textContent = t('settings_cancel');
+  yes.textContent = confirm;
+  for (const b of [no, yes]) b.addEventListener('click', () => d.close(b.value));
+  document.body.append(d);
+  return new Promise((resolve) => {
+    d.addEventListener('close', () => { resolve(d.returnValue === 'yes'); d.remove(); });
+    openDialog(d);
+    no.focus();
+  });
+}
+
 export function fmtBytes(n) {
   if (n < 1024) return n + ' B';
   if (n < 1024 * 1024) return (n / 1024).toFixed(1) + ' KB';
