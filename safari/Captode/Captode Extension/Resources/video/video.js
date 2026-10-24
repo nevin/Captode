@@ -478,9 +478,20 @@ new ResizeObserver(() => drawWave()).observe($('#track'));
 
 // Pointing at the timeline shows the frame at that moment, above it.
 const peekEl = $('#peek');
-const peek = { v: null, want: null, running: false };
-function hidePeek() { peek.want = null; peekEl.classList.add('hidden'); }
+const peek = { v: null, want: null, running: false, idle: 0 };
+function hidePeek() {
+  peek.want = null;
+  peekEl.classList.add('hidden');
+  // Its video holds a decoder and buffered frames: let them go when not in use.
+  clearTimeout(peek.idle);
+  peek.idle = setTimeout(function release() {
+    if (peek.running) { peek.idle = setTimeout(release, 1000); return; }
+    if (peek.v) dropVideo(peek.v);
+    peek.v = null;
+  }, 10000);
+}
 async function peekAt(at) {
+  clearTimeout(peek.idle);
   peek.want = at;
   if (peek.running) return;
   peek.running = true;
@@ -535,7 +546,7 @@ async function buildFilmstrip() {
       film.append(c);
     }
   } catch { /* the timeline still works without thumbnails */ }
-  v.remove();
+  dropVideo(v);
 }
 
 // ---------- conversion ----------
@@ -556,6 +567,13 @@ function makeWorkVideo() {
   v.src = srcUrl;
   document.body.appendChild(v);
   return v;
+}
+
+/** Removes a work video and lets go of its decoder now, not when it is collected. */
+function dropVideo(v) {
+  v.remove();
+  v.removeAttribute('src');
+  v.load();
 }
 
 /** GIF and WebP: step through the clip frame by frame. */
@@ -655,7 +673,7 @@ async function convertFrames(p, { start, end }) {
     progress(1, t('export_finishing'));
     return enc.finish();
   } finally {
-    v.remove();
+    dropVideo(v);
   }
 }
 
@@ -812,7 +830,7 @@ async function convertRealtime(p, { start, end }) {
     return new Blob(chunks, { type: mimeType.split(';')[0] });
   } finally {
     audioCtx?.close();
-    v.remove();
+    dropVideo(v);
   }
 }
 
@@ -976,7 +994,7 @@ $('#discard').addEventListener('click', discard);
  */
 async function taggedOriginal() {
   try {
-    const src = demuxWebm(await source.arrayBuffer());
+    const src = demuxWebm(await source.arrayBuffer(), { views: true });
     const v = src.video;
     const colour = v && sourceColourSpace(v);
     if (!colour || !['V_VP9', 'V_VP8'].includes(v.codecId)) return source;

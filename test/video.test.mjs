@@ -32,6 +32,7 @@ export async function setup({ browser, url }) {
       const out = document.querySelector('#out-video:not(.hidden)') || document.querySelector('#out-img:not(.hidden)');
       if (!out) return { failed };
       const blob = await (await fetch(out.src)).blob();
+      window.__exported = { id: out.id, blob }; // the page lets go of its own copy on Export again
       const r = { size: blob.size, type: blob.type, fallback: window.__fallback || null };
       if (out.tagName === 'VIDEO') {
         if (out.readyState < 2) await new Promise((res) => out.addEventListener('loadeddata', res, { once: true }));
@@ -53,6 +54,11 @@ export async function setup({ browser, url }) {
       return r;
     });
     await page.click('#redo-export').catch(() => {});
+    // The later checks look at the file just made: given back to its element, for the test.
+    await page.evaluate(() => {
+      const kept = window.__exported;
+      if (kept) document.getElementById(kept.id).src = URL.createObjectURL(kept.blob);
+    });
     return { ms, ...info };
   };
 

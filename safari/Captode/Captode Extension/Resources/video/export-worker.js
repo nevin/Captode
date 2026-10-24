@@ -23,7 +23,16 @@ class Unsupported extends Error {}
 
 const post = (msg, transfer) => self.postMessage(msg, transfer || []);
 // `what`: a message key, or [key, ...values]; the page translates it (workers can't).
-const progress = (f, what) => post({ type: 'progress', f, what });
+let lastFrameNote = 0;
+const progress = (f, what) => {
+  // Frame counts at most every 100 ms: one a frame kept the page busy redrawing.
+  if (Array.isArray(what) && what[0] === 'export_frame' && what[1] < what[2]) {
+    const now = performance.now();
+    if (now - lastFrameNote < 100) return;
+    lastFrameNote = now;
+  }
+  post({ type: 'progress', f, what });
+};
 
 self.onmessage = async ({ data }) => {
   if (data.type !== 'start') return;
@@ -59,12 +68,26 @@ async function forEachFrame(src, { start, fps, count, onFrame, want = () => true
 
   const at = time || ((k) => start + (k * 1e6) / fps);
   let k = 0;
+  // Key frames, to jump over parts cut: frames before the last key frame at or before
+  // the next moment shown are never seen, so they needn't be decoded.
+  const keys = [];
+  for (let j = 0; j < frames.length; j++) if (frames[j].key) keys.push(j);
+  let kp = 0;
+  const skip = () => {
+    if (k >= count) return;
+    const need = at(k);
+    while (kp < keys.length && keys[kp] <= i) kp++;
+    let j = -1;
+    while (kp < keys.length && frames[keys[kp]].timestamp <= need) j = keys[kp++];
+    if (j > i) i = j;
+  };
   let cur = null;
   let flushed = false;
   let flushing = null;
   try {
     while (k < count) {
       while (i < frames.length && decoder.decodeQueueSize < 6 && queue.length < 6) {
+        skip();
         const f = frames[i++];
         decoder.decode(new EncodedVideoChunk({ type: f.key ? 'key' : 'delta', timestamp: f.timestamp, data: f.data }));
       }
@@ -335,7 +358,7 @@ async function run(job) {
   progress(0, 'export_reading');
   let src;
   try {
-    src = demuxWebm(await job.blob.arrayBuffer());
+    src = demuxWebm(await job.blob.arrayBuffer(), { views: true }); // frames point into the file: not held twice
   } catch (e) {
     throw new Unsupported(e.message);
   }

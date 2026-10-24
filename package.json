@@ -1,6 +1,6 @@
 {
   "name": "captode",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "private": true,
   "description": "Screenshot and screen recorder browser extension with an image editor and GIF/MP4/WebP export.",
   "license": "GPL-3.0-or-later",
