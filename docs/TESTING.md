@@ -112,6 +112,14 @@ or install the zip from `npm run package`.
    page inside it**, press **Rotate** in both, and check the export in the video page too.
 22. **Recording settings:** set **Stop recording after** 15 seconds and **Highlight the
    cursor**; record a tab: it stops by itself and the circle follows the mouse.
+23. **Video editing:** record a tab for 20 seconds, clicking a few buttons. In the video page
+   press **Zoom in on clicks** and play: it zooms in where you clicked. Add a cut, a 4×
+   speed-up, a blur over some text and an arrow; crop, turn on Background, mute a part and
+   export MP4 and GIF: each matches the preview, and the sound is silent where cut, sped up
+   or muted. Reload the page: the edits are still there. Turn on **Show clicks** and export:
+   a ring appears at each click. Record a tab with the microphone, pausing while you speak,
+   and press **Cut silent parts**: the pauses become cuts. Play at 150% volume with a fade in:
+   it is louder than at 100% and fades in.
 
 ### Windows
 

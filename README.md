@@ -123,9 +123,9 @@ countdown of up to 30 seconds (or none) to get ready; press Esc, or Cancel for f
 call it off. Click the Captode icon (or press **Alt+Shift+R**) to stop. The recording then
 opens in the video page, where you can:
 
-- Trim on a timeline with thumbnails: drag across it to choose the part to keep, drag its
-  edges, or play to a point and press **I** (start) or **O** (end). A click moves the playhead
-  and its knob scrubs. **Space** plays only the trimmed part; the arrow keys step frame by frame.
+- Trim on a timeline with thumbnails and the sound's waveform: drag across it to choose the
+  part to keep, drag its edges, or play to a point and press **I** (start) or **O** (end).
+  Pointing at it shows that moment's frame; a click moves the playhead and its knob scrubs. **Space** plays only the trimmed part; the arrow keys step frame by frame.
 - **Slides** (or **S** at the playhead): title cards put into the recording at a moment you
   choose. The recording waits while a slide is on screen, then carries on from the same frame,
   with the sound kept in step. Each slide has a title, subtitle and description (a line each;
@@ -134,6 +134,27 @@ opens in the video page, where you can:
   and a logo in any corner. New slides take the last one's style, and your logo is
   remembered for the next recording. Drag a slide's marker under the timeline to move it;
   playback shows slides as the export will. Slides are kept with the recording.
+- **Edit** the recording; playback and the preview show every change as the export will:
+  - **Cut** (**X**) leaves a part out, picture and sound; playback jumps over it. Or press
+    **⇧X** where a cut should start and again where it should end.
+  - **Speed up** (**P**) plays a part 1.5×, 2×, 4× or 8× as fast, silent (a page loading,
+    a form being filled in).
+  - **Zoom** (**Z**) moves in on part of the picture and back out, smoothly. **Zoom in on
+    clicks** adds one wherever you clicked in a tab recording (Captode notes where and when
+    you click while it records a tab). **Show clicks** draws a ring at each of those clicks.
+  - **Blur** (**B**) hides something private: blurred, pixelated or a black box, for a
+    while or for the whole recording.
+  - **Callout** (**C**): an arrow, box, label or spotlight, drawn on the picture.
+
+  Each is a bar above the timeline: drag it, or its ends; **Split** cuts the chosen one in two
+  at the playhead. **⌘Z**/**Ctrl+Z** undoes, **Delete** removes the one chosen. Edits are kept with the recording.
+- **Crop** the picture to the part that matters (free, 16:9, 4:3, 1:1 or 9:16).
+- **Background:** the video on a colour or gradient, with padding, rounded corners and a
+  shadow, at its own shape or 16:9, 4:3, 1:1 or 9:16 (a device frame, when on, takes its place).
+- **Sound:** volume (up to 200%), a fade in and out, and parts muted, all heard as you play.
+  **Cut silent parts** leaves out the pauses (each is a cut you can keep or delete).
+- **Use for new recordings** (under Background and Sound): recordings made afterwards start
+  with that background, or that volume and those fades.
 - **Frame to editor** (or **F**): the frame on screen, at full size, opens in the editor to
   annotate, copy or save.
 - For MP4 and WebM, the Export button shows the most the file can weigh; screen recordings

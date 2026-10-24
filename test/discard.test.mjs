@@ -20,6 +20,54 @@ const answer = async (page, which) => {
 };
 
 export const tests = {
+  async 'saving edits leaves the recording as it is, and captures saved before still open'({ lab }) {
+    const r = await lab.evaluate(async () => {
+      const db = await import('/lib/db.js');
+      const blob = new Blob([new Uint8Array(100e6)], { type: 'video/webm' });
+      const id = await db.putCapture(blob, { title: 'Big' });
+      const before = (await navigator.storage.estimate()).usage;
+      for (let i = 0; i < 5; i++) await db.saveVideoEdits(id, { cuts: [{ from: i, to: i + 1 }] });
+      await db.updateMeta(id, { clicks: [{ t: 1, x: 0.5, y: 0.5 }] });
+      const grew = ((await navigator.storage.estimate()).usage - before) / 1e6;
+      const got = await db.getCapture(id);
+      // A capture saved by an earlier version, with its edits in the record itself.
+      const old = db.newId();
+      await new Promise((resolve, reject) => {
+        const req = indexedDB.open('captode');
+        req.onsuccess = () => {
+          const t = req.result.transaction('captures', 'readwrite');
+          t.objectStore('captures').put({ blob: new Blob(['x'], { type: 'image/png' }), meta: { title: 'Old' }, created: Date.now(), edits: { objects: [{ type: 'rect' }] } }, old);
+          t.oncomplete = () => { req.result.close(); resolve(); };
+          t.onerror = () => reject(t.error);
+        };
+      });
+      const oldBefore = await db.getCapture(old);
+      const listed = (await db.listCaptures(50)).find((c) => c.id === old);
+      await db.saveEdits(old, null);
+      const oldAfter = await db.getCapture(old);
+      const listedAfter = (await db.listCaptures(50)).find((c) => c.id === old);
+      // Deleting takes the extras too; Undo puts everything back.
+      const rec = await db.deleteCapture(id);
+      const gone = await db.getCapture(id);
+      await db.saveVideoEdits(id, { cuts: [] }); // nothing to keep them with
+      await db.restoreCapture(id, rec);
+      const back = await db.getCapture(id);
+      await db.deleteCapture(id);
+      await db.deleteCapture(old);
+      return {
+        grew, cuts: got.videoEdits.cuts.length, from: got.videoEdits.cuts[0].from, title: got.meta.title, clicks: got.meta.clicks?.length,
+        oldEdits: oldBefore.edits.objects.length, oldListed: listed?.edited, oldCleared: oldAfter.edits, oldListedAfter: listedAfter?.edited,
+        gone, backCuts: back?.videoEdits.cuts[0].from, backSize: back?.blob.size, backClicks: back?.meta.clicks?.length,
+      };
+    });
+    ok(r.grew < 50, `saving edits wrote ${Math.round(r.grew)} MB (the recording again?)`);
+    ok(r.cuts === 1 && r.from === 4 && r.title === 'Big' && r.clicks === 1, `edits or details not kept: ${JSON.stringify(r)}`);
+    ok(r.oldEdits === 1 && r.oldListed === true, `an older capture's edits are lost: ${JSON.stringify(r)}`);
+    ok(r.oldCleared === null && r.oldListedAfter === false, `an older capture's edits can't be dropped: ${JSON.stringify(r)}`);
+    ok(r.gone === null && r.backCuts === 4 && r.backSize === 100e6 && r.backClicks === 1, `delete and undo: ${JSON.stringify(r)}`);
+    return `${Math.round(r.grew)} MB written for 5 saves of a 100 MB recording`;
+  },
+
   async 'a screenshot can be discarded, after asking: it is deleted with its edits'({ browser, url, lab }) {
     const id = await lab.evaluate(async () => {
       const { putCapture, saveEdits } = await import('/lib/db.js');

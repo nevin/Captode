@@ -23,18 +23,27 @@ async function start({ streamId, fps, audio, aspect, crop, size, pageWidth, titl
     throw new Error(t('error_camera_mic'));
   }
   const media = { chromeMediaSource: 'tab', chromeMediaSourceId: streamId };
-  const stream = await navigator.mediaDevices.getUserMedia({
-    video: { mandatory: { ...media, maxWidth: 3840, maxHeight: 2160, maxFrameRate: fps } },
-    audio: audio ? { mandatory: media } : false,
-  });
-  // Capturing a tab's audio mutes it for the user; play it back so they still hear it.
-  if (audio && stream.getAudioTracks().length) {
-    audioContext = new AudioContext();
-    audioContext.createMediaStreamSource(stream).connect(audioContext.destination);
+  let stream = null;
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({
+      video: { mandatory: { ...media, maxWidth: 3840, maxHeight: 2160, maxFrameRate: fps } },
+      audio: audio ? { mandatory: media } : false,
+    });
+    // Capturing a tab's audio mutes it for the user; play it back so they still hear it.
+    if (audio && stream.getAudioTracks().length) {
+      audioContext = new AudioContext();
+      audioContext.createMediaStreamSource(stream).connect(audioContext.destination);
+    }
+    // The page's shape lets the recorder find it within the tab's picture, and leave
+    // out the black around it when the page is shown smaller (DevTools' device mode).
+    session = await record(stream, { fps, aspect, crop, size, ...extras, onEnded: stop });
+  } catch (e) {
+    // Not started: let go of the tab, camera and microphone (the camera light goes off).
+    for (const tr of [...(stream?.getTracks() || []), extras.camera, extras.mic]) tr?.stop();
+    audioContext?.close();
+    audioContext = null;
+    throw e;
   }
-  // The page's shape lets the recorder find it within the tab's picture, and leave
-  // out the black around it when the page is shown smaller (DevTools' device mode).
-  session = await record(stream, { fps, aspect, crop, size, ...extras, onEnded: stop });
   ticker = setInterval(() => {
     chrome.runtime.sendMessage({ type: 'rec-tick', elapsed: (performance.now() - session.started) / 1000 });
   }, 1000);

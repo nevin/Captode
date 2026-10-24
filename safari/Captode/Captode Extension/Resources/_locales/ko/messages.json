@@ -2126,11 +2126,11 @@
   "part_of": {
     "message": "$2개 중 $1번째"
   },
-  "popup_new_in_captode_1_6": {
-    "message": "Captode 1.6의 새 기능"
+  "popup_new_in_captode_2_1": {
+    "message": "Captode 2.1의 새 기능"
   },
-  "popup_whats_new_1_6": {
-    "message": "기기 프레임에 안전 영역과 한 번 클릭 회전이 추가되었습니다. 설정에서 아이콘 동작, 스크린샷 후 동작, 아주 긴 페이지, 파일 이름, 자동 중지와 커서 강조가 있는 녹화 옵션을 고를 수 있습니다."
+  "popup_whats_new_2_1": {
+    "message": "녹화 편집: 일부 잘라내기와 빠르게 재생, 확대(클릭한 곳도), 개인 정보 흐리게, 화살표와 라벨 추가, 자르기, 배경 넣기, 소리 조정."
   },
   "slides_title": {
     "message": "슬라이드"
@@ -2449,5 +2449,260 @@
   },
   "trim_with_slides_title": {
     "message": "녹화 $1초와 슬라이드 $2초"
+  },
+  "edit_title": {
+    "message": "편집"
+  },
+  "edit_kind_cuts": {
+    "message": "잘라내기"
+  },
+  "edit_kind_speeds": {
+    "message": "빠르게"
+  },
+  "edit_kind_zooms": {
+    "message": "확대"
+  },
+  "edit_kind_blurs": {
+    "message": "흐리게"
+  },
+  "edit_kind_callouts": {
+    "message": "강조 표시"
+  },
+  "edit_kind_mutes": {
+    "message": "음소거"
+  },
+  "edit_add_cut_tip": {
+    "message": "일부 빼기  X"
+  },
+  "edit_add_speed_tip": {
+    "message": "일부를 빠르게 재생  P"
+  },
+  "edit_add_zoom_tip": {
+    "message": "화면 일부 확대  Z"
+  },
+  "edit_add_blur_tip": {
+    "message": "개인 정보 가리기  B"
+  },
+  "edit_add_callout_tip": {
+    "message": "화살표, 상자, 라벨, 스포트라이트  C"
+  },
+  "edit_add_mute": {
+    "message": "일부 음소거"
+  },
+  "edit_add_mute_tip": {
+    "message": "일부 무음 처리  M"
+  },
+  "edit_undo_tip": {
+    "message": "실행 취소  ⌘Z"
+  },
+  "edit_redo_tip": {
+    "message": "다시 실행  ⇧⌘Z"
+  },
+  "edit_autozoom": {
+    "message": "클릭한 곳 확대"
+  },
+  "edit_autozoom_tip": {
+    "message": "녹화 중 클릭한 곳을 확대"
+  },
+  "edit_zoomed_clicks": {
+    "message": "클릭 확대 추가됨: $1"
+  },
+  "edit_none": {
+    "message": "아직 없습니다. 재생 위치에 잘라내기, 빠르게, 확대, 흐리게, 강조 표시를 추가하세요."
+  },
+  "edit_whole": {
+    "message": "녹화 전체"
+  },
+  "edit_whole_toggle": {
+    "message": "녹화 전체에 적용"
+  },
+  "edit_removed": {
+    "message": "$1 삭제됨"
+  },
+  "edit_at_playhead": {
+    "message": "재생 위치로"
+  },
+  "edit_from": {
+    "message": "시작(초)"
+  },
+  "edit_to": {
+    "message": "끝(초)"
+  },
+  "edit_speed": {
+    "message": "속도"
+  },
+  "edit_speed_hint": {
+    "message": "빠르게 재생한 부분은 소리가 없습니다."
+  },
+  "edit_zoom": {
+    "message": "확대"
+  },
+  "edit_zoom_hint": {
+    "message": "화면의 상자를 끌어 확대할 곳을 고르세요. 부드럽게 확대되고 돌아옵니다."
+  },
+  "edit_blur_style": {
+    "message": "스타일"
+  },
+  "edit_blur_blur": {
+    "message": "흐리게"
+  },
+  "edit_blur_pixelate": {
+    "message": "모자이크"
+  },
+  "edit_blur_box": {
+    "message": "검은 상자"
+  },
+  "edit_strength": {
+    "message": "강도"
+  },
+  "edit_draw_hint": {
+    "message": "화면에서 끌어 그리거나 핸들을 끌어 조정하세요."
+  },
+  "edit_callout_kind": {
+    "message": "종류"
+  },
+  "edit_callout_arrow": {
+    "message": "화살표"
+  },
+  "edit_callout_box": {
+    "message": "상자"
+  },
+  "edit_callout_text": {
+    "message": "라벨"
+  },
+  "edit_callout_spot": {
+    "message": "스포트라이트"
+  },
+  "edit_text": {
+    "message": "글자"
+  },
+  "edit_text_placeholder": {
+    "message": "여기를 클릭"
+  },
+  "edit_colour": {
+    "message": "색"
+  },
+  "edit_size": {
+    "message": "크기"
+  },
+  "edit_mute_hint": {
+    "message": "이 구간은 소리가 없고 화면은 계속 재생됩니다."
+  },
+  "edit_cut_hint": {
+    "message": "내보낼 때 화면과 소리 모두 빠집니다. 타임라인에서 양 끝을 끌어 조정하세요."
+  },
+  "edit_delete": {
+    "message": "삭제"
+  },
+  "edit_crop": {
+    "message": "자르기"
+  },
+  "edit_crop_on": {
+    "message": "화면 자르기"
+  },
+  "edit_crop_hint": {
+    "message": "화면에서 끌어 남길 부분을 고르세요"
+  },
+  "edit_crop_reset": {
+    "message": "자르지 않기"
+  },
+  "edit_shape": {
+    "message": "비율"
+  },
+  "edit_shape_free": {
+    "message": "자유"
+  },
+  "edit_shape_fit": {
+    "message": "동영상에 맞춤"
+  },
+  "edit_background": {
+    "message": "배경"
+  },
+  "edit_background_on": {
+    "message": "동영상을 배경 위에 놓기"
+  },
+  "edit_background_hint": {
+    "message": "여백, 둥근 모서리, 그림자가 들어갑니다. 기기 프레임을 켜면 그것이 대신 쓰입니다."
+  },
+  "edit_padding": {
+    "message": "여백"
+  },
+  "edit_corners": {
+    "message": "모서리"
+  },
+  "edit_shadow": {
+    "message": "그림자"
+  },
+  "edit_sound": {
+    "message": "소리"
+  },
+  "edit_volume": {
+    "message": "음량"
+  },
+  "edit_fade_in": {
+    "message": "페이드 인"
+  },
+  "edit_fade_out": {
+    "message": "페이드 아웃"
+  },
+  "edit_preview": {
+    "message": "편집이 반영된 미리 보기"
+  },
+  "edit_layer": {
+    "message": "화면 위 그리기 레이어"
+  },
+  "edit_mark": {
+    "message": "구간 표시"
+  },
+  "edit_mark_end": {
+    "message": "끝 표시"
+  },
+  "edit_mark_tip": {
+    "message": "잘라낼 부분의 시작에서 누르고, 끝에서 다시 누르세요  ⇧X"
+  },
+  "edit_mark_started": {
+    "message": "잘라내기를 시작했습니다. 끝나는 곳으로 가서 ⇧X를 다시 누르세요."
+  },
+  "edit_split": {
+    "message": "나누기"
+  },
+  "edit_split_tip": {
+    "message": "재생 위치에서 둘로 나누기"
+  },
+  "edit_silence": {
+    "message": "조용한 부분 잘라내기"
+  },
+  "edit_silence_tip": {
+    "message": "아무 소리도 없는 부분을 뺍니다"
+  },
+  "edit_silences_cut": {
+    "message": "조용한 부분을 잘라냄: $1곳 ($2초)"
+  },
+  "edit_no_silences": {
+    "message": "조용한 부분을 찾지 못했습니다"
+  },
+  "edit_rings": {
+    "message": "클릭 표시"
+  },
+  "edit_rings_hint": {
+    "message": "클릭한 곳마다 원을 표시"
+  },
+  "edit_default": {
+    "message": "새 녹화에 사용"
+  },
+  "edit_default_bg_tip": {
+    "message": "앞으로 만드는 녹화는 이 배경으로 시작합니다"
+  },
+  "edit_default_sound_tip": {
+    "message": "앞으로 만드는 녹화는 이 볼륨과 페이드로 시작합니다"
+  },
+  "edit_default_bg_saved": {
+    "message": "새 녹화는 이 배경으로 시작합니다"
+  },
+  "edit_default_bg_none": {
+    "message": "새 녹화는 배경 없이 시작합니다"
+  },
+  "edit_default_sound_saved": {
+    "message": "새 녹화는 이 볼륨과 페이드로 시작합니다"
   }
 }

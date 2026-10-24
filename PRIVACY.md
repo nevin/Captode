@@ -39,6 +39,9 @@ them. It does not collect, transmit, sell or share any personal or sensitive dat
   turn on Blur private details in Settings, on the page you capture, at the moment you
   capture it, to blur them. Their positions
   are kept with the capture; the text itself isn't kept or sent.
+- **Where you click** while Captode records a tab (the position on the page and the time,
+  nothing else) is kept with the recording on your device, so the video page can offer
+  **Zoom in on clicks** and **Show clicks**. It is deleted with the recording.
 - **Copy it to the clipboard** (Settings → After a screenshot) puts the screenshot on your
   clipboard through the tab you captured, which has the focus the clipboard needs. The image
   is handed over in Captode's own isolated script, which the page's scripts can't read, and

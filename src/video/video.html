@@ -28,6 +28,8 @@
   <main class="stage">
     <div class="preview">
       <video id="player" playsinline></video>
+      <canvas id="fx-view" class="hidden" aria-label="Preview with your edits" data-i18n-aria-label="edit_preview"></canvas>
+      <canvas id="fx-edit" class="hidden" aria-label="Drawing layer over the picture" data-i18n-aria-label="edit_layer"></canvas>
       <canvas id="live" class="hidden"></canvas>
       <img id="out-img" class="hidden" alt="Exported animation" data-i18n-alt="video_exported_animation">
       <video id="out-video" class="hidden" controls playsinline></video>
@@ -43,14 +45,18 @@
       <span class="tc" id="tc-now">0:00.0</span>
       <div class="track" id="track">
         <div class="film" id="film"></div>
+        <canvas class="wave hidden" id="wave" aria-hidden="true"></canvas>
         <div class="shade left" id="shade-l"></div>
         <div class="shade right" id="shade-r"></div>
+        <div class="cut-zones" id="cut-zones"></div>
         <div class="range" id="range"></div>
+        <div class="edit-marks" id="edit-marks"></div>
         <div class="handle" id="h-start" role="slider" tabindex="0" aria-label="Trim start" data-i18n-aria-label="video_trim_start" aria-keyshortcuts="i"></div>
         <div class="handle" id="h-end" role="slider" tabindex="0" aria-label="Trim end" data-i18n-aria-label="video_trim_end" aria-keyshortcuts="o"></div>
         <div class="range-len" id="range-len" aria-hidden="true"></div>
         <div class="slide-marks" id="slide-marks"></div>
         <div class="playhead" id="playhead" title="Drag to scrub" data-i18n-title="video_drag_to_scrub"></div>
+        <div class="peek hidden" id="peek" aria-hidden="true"><canvas></canvas><span></span></div>
       </div>
       <span class="tc muted" id="tc-len">0:00.0</span>
     </div>
@@ -75,6 +81,99 @@
       </div>
       <p class="muted small" style="margin:0" data-i18n-html="video_trim_hint">Drag across the timeline to choose the part to keep, or drag its edges. While playing, <kbd>I</kbd> sets the start and <kbd>O</kbd> the end.</p>
     </section>
+
+    <!-- Edits: parts cut out or sped up, zooms, blurred areas, callouts and muted parts (lib/video-edits.js). -->
+    <details class="section" id="edit-section" open>
+      <summary class="section-title"><span data-i18n="edit_title">Edit</span><span class="slide-count" id="ed-count"></span>
+        <span class="ed-history">
+          <button type="button" class="btn ghost icon" id="ed-undo" disabled data-tip="Undo  ⌘Z" data-i18n-tip="edit_undo_tip"><svg class="i" viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></svg></button>
+          <button type="button" class="btn ghost icon" id="ed-redo" disabled data-tip="Redo  ⇧⌘Z" data-tip-align="end" data-i18n-tip="edit_redo_tip"><svg class="i" viewBox="0 0 24 24"><path d="m15 14 5-5-5-5"/><path d="M20 9H10a6 6 0 0 0 0 12h3"/></svg></button>
+        </span>
+      </summary>
+      <div class="ed-add" id="ed-add">
+        <button type="button" class="btn" data-add="cuts" data-tip="Leave out a part  X" data-i18n-tip="edit_add_cut_tip"><svg class="i" viewBox="0 0 24 24"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4 8.1 15.9M14.5 14.5 20 20M8.1 8.1 12 12"/></svg><span data-i18n="edit_kind_cuts">Cut</span></button>
+        <button type="button" class="btn" data-add="speeds" data-tip="Play a part faster  P" data-i18n-tip="edit_add_speed_tip"><svg class="i" viewBox="0 0 24 24"><path d="m13 19 9-7-9-7zM2 19l9-7-9-7z"/></svg><span data-i18n="edit_kind_speeds">Speed up</span></button>
+        <button type="button" class="btn" data-add="zooms" data-tip="Zoom in on a part of the picture  Z" data-i18n-tip="edit_add_zoom_tip"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3M11 8v6M8 11h6"/></svg><span data-i18n="edit_kind_zooms">Zoom</span></button>
+        <button type="button" class="btn" data-add="blurs" data-tip="Hide something private  B" data-i18n-tip="edit_add_blur_tip"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="14" y="3" width="7" height="7" opacity=".4"/><rect x="3" y="14" width="7" height="7" opacity=".4"/></svg><span data-i18n="edit_kind_blurs">Blur</span></button>
+        <button type="button" class="btn" data-add="callouts" data-tip="An arrow, box, label or spotlight  C" data-tip-align="end" data-i18n-tip="edit_add_callout_tip"><svg class="i" viewBox="0 0 24 24"><path d="M5 19 19 5M19 5h-7M19 5v7"/></svg><span data-i18n="edit_kind_callouts">Callout</span></button>
+        <button type="button" class="btn" id="ed-mark" data-tip="Press where a cut starts, then where it ends  ⇧X" data-tip-align="end" data-i18n-tip="edit_mark_tip"><svg class="i" viewBox="0 0 24 24"><path d="M8 4H5v16h3M16 4h3v16h-3M12 8v8"/></svg><span data-i18n="edit_mark">Mark cut</span></button>
+      </div>
+      <button type="button" class="btn ed-autozoom hidden" id="ed-autozoom" data-tip="Zoom in where you clicked while recording" data-i18n-tip="edit_autozoom_tip"><svg class="i" viewBox="0 0 24 24"><path d="M9 9l5 12 1.8-5.2L21 14z"/><path d="M7.2 2.2 8 5.1M5.1 8l-2.9-.8M14 4.1 12 6.2M6.2 12l-2.1 2"/></svg><span data-i18n="edit_autozoom">Zoom in on clicks</span></button>
+      <div class="ed-rings hidden" id="rings-row">
+        <label class="toggle"><span data-i18n="edit_rings">Show clicks<small data-i18n="edit_rings_hint">A ring where each click was</small></span><input type="checkbox" id="rings-on"></label>
+        <div class="swatches ed-colours hidden" id="rings-colours" aria-label="Colour" data-i18n-aria-label="edit_colour"></div>
+      </div>
+      <div class="ed-list" id="ed-list" role="listbox" aria-label="Edits" data-i18n-aria-label="edit_title"></div>
+      <div class="ed-item hidden" id="ed-item"></div>
+    </details>
+
+    <details class="section" id="crop-section">
+      <summary class="section-title"><span data-i18n="edit_crop">Crop</span><span class="muted small crop-size" id="crop-size"></span></summary>
+      <label class="toggle"><span data-i18n="edit_crop_on">Crop the picture<small data-i18n="edit_crop_hint">Drag on the picture to choose the part to keep</small></span><input type="checkbox" id="crop-on"></label>
+      <div id="crop-opts" class="hidden">
+        <div class="field"><span data-i18n="edit_shape">Shape</span>
+          <div class="seg" id="crop-aspect" role="radiogroup" aria-label="Shape" data-i18n-aria-label="edit_shape">
+            <button type="button" data-v="free" class="on" role="radio" aria-checked="true" data-i18n="edit_shape_free">Free</button>
+            <button type="button" data-v="16:9" role="radio" aria-checked="false">16:9</button>
+            <button type="button" data-v="4:3" role="radio" aria-checked="false">4:3</button>
+            <button type="button" data-v="1:1" role="radio" aria-checked="false">1:1</button>
+            <button type="button" data-v="9:16" role="radio" aria-checked="false">9:16</button>
+          </div>
+        </div>
+        <button type="button" class="btn" id="crop-reset" data-i18n="edit_crop_reset">Don't crop</button>
+      </div>
+    </details>
+
+    <details class="section" id="bg-section">
+      <summary class="section-title" data-i18n="edit_background">Background</summary>
+      <label class="toggle"><span data-i18n="edit_background_on">Put the video on a background<small data-i18n="edit_background_hint">With padding, rounded corners and a shadow. A device frame, when on, takes its place.</small></span><input type="checkbox" id="bg-on"></label>
+      <div id="bg-opts" class="hidden">
+        <div class="grid2">
+          <div class="field"><span data-i18n="editor_background">Background</span>
+            <div class="seg" id="bg-kind" role="radiogroup" aria-label="Background" data-i18n-aria-label="editor_background">
+              <button type="button" data-v="solid" role="radio" aria-checked="false" data-i18n="slides_bg_solid">Colour</button>
+              <button type="button" data-v="gradient" role="radio" aria-checked="false" data-i18n="slides_bg_gradient">Gradient</button>
+            </div>
+          </div>
+          <div class="field"><span data-i18n="editor_colours">Colours</span>
+            <div class="row colours"><input type="color" id="bg-c1" aria-label="Background colour" data-i18n-aria-label="slides_bg_colour"><input type="color" id="bg-c2" aria-label="Second gradient colour" data-i18n-aria-label="slides_bg_colour_2"></div>
+          </div>
+        </div>
+        <div class="grid2">
+          <label class="field"><span><span data-i18n="edit_padding">Padding</span> <b id="bg-padding-v"></b></span><input type="range" id="bg-padding" min="0" max="20" step="1"></label>
+          <label class="field"><span><span data-i18n="edit_corners">Corners</span> <b id="bg-radius-v"></b></span><input type="range" id="bg-radius" min="0" max="10" step="0.5"></label>
+        </div>
+        <div class="grid2">
+          <label class="field"><span data-i18n="edit_shape">Shape</span>
+            <select id="bg-aspect">
+              <option value="auto" data-i18n="edit_shape_fit">Fit the video</option>
+              <option value="16:9">16:9</option>
+              <option value="4:3">4:3</option>
+              <option value="1:1">1:1</option>
+              <option value="9:16">9:16</option>
+            </select>
+          </label>
+          <label class="toggle dither"><span data-i18n="edit_shadow">Shadow</span><input type="checkbox" id="bg-shadow"></label>
+        </div>
+      </div>
+      <button type="button" class="btn ghost ed-default" id="bg-default" data-tip="Recordings made from now on start with this background" data-i18n-tip="edit_default_bg_tip"><span data-i18n="edit_default">Use for new recordings</span></button>
+    </details>
+
+    <details class="section" id="sound-section">
+      <summary class="section-title" data-i18n="edit_sound">Sound</summary>
+      <label class="field"><span><span data-i18n="edit_volume">Volume</span> <b id="au-volume-v"></b></span><input type="range" id="au-volume" min="0" max="200" step="5"></label>
+      <div class="grid2">
+        <label class="field"><span data-i18n="edit_fade_in">Fade in</span>
+          <select id="au-fade-in"><option value="0" data-i18n="video_off">Off</option><option value="0.5">0.5 s</option><option value="1">1 s</option><option value="2">2 s</option><option value="3">3 s</option></select>
+        </label>
+        <label class="field"><span data-i18n="edit_fade_out">Fade out</span>
+          <select id="au-fade-out"><option value="0" data-i18n="video_off">Off</option><option value="0.5">0.5 s</option><option value="1">1 s</option><option value="2">2 s</option><option value="3">3 s</option></select>
+        </label>
+      </div>
+      <button type="button" class="btn" id="au-mute" data-tip="Silence a part  M" data-i18n-tip="edit_add_mute_tip"><svg class="i" viewBox="0 0 24 24"><path d="M11 5 6 9H2v6h4l5 4zM23 9l-6 6M17 9l6 6"/></svg><span data-i18n="edit_add_mute">Mute a part</span></button>
+      <button type="button" class="btn ed-silence hidden" id="ed-silence" disabled data-tip="Leave out the parts where nothing is heard" data-i18n-tip="edit_silence_tip"><svg class="i" viewBox="0 0 24 24"><path d="M2 12h3M19 12h3M8 8v8M11 5v14M14 9v6M17 12h0"/></svg><span data-i18n="edit_silence">Cut silent parts</span></button>
+      <button type="button" class="btn ghost ed-default" id="au-default" data-tip="Recordings made from now on start with this volume and these fades" data-i18n-tip="edit_default_sound_tip"><span data-i18n="edit_default">Use for new recordings</span></button>
+    </details>
 
     <!-- Slides: title cards put into the recording (it waits while one is on screen), or drawn over it as it plays. -->
     <details class="section" id="slides-section">

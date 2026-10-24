@@ -337,12 +337,14 @@ export async function renderSlides(schedule, W, H) {
  * they show: each with `k`, the frame of the clip it comes before (`count` for after
  * the last), and `frames`, how many output frames it lasts.
  */
-export function slideSchedule(slides = [], start, end, fps) {
-  const count = Math.max(1, Math.round((end - start) * fps));
+export function slideSchedule(slides = [], start, end, fps, map = null) {
+  const count = map ? Math.max(1, Math.round(map.length * fps)) : Math.max(1, Math.round((end - start) * fps));
+  // `map` (lib/video-edits.js): where each moment of the recording plays, with parts cut or sped up.
+  const frameOf = (at) => Math.round((map ? map.outOf(at) : at - start) * fps);
   return slides
     .map((s, i) => ({ s, i }))
     .filter(({ s }) => !isOverlay(s) && s.at >= start - 1e-3 && s.at <= end + 1e-3)
-    .map(({ s, i }) => ({ s, i, k: Math.min(count, Math.max(0, Math.round((s.at - start) * fps))), frames: Math.max(1, Math.round(s.duration * fps)) }))
+    .map(({ s, i }) => ({ s, i, k: Math.min(count, Math.max(0, frameOf(s.at))), frames: Math.max(1, Math.round(s.duration * fps)) }))
     .sort((a, b) => a.k - b.k || a.s.at - b.s.at || a.i - b.i);
 }
 
@@ -378,6 +380,13 @@ export const slideSeconds = (schedule, fps) => schedule.reduce((n, e) => n + e.f
  * For audio: how far (µs) the sound at source time `t` (µs) moves later in the
  * output, as every slide shown before it pushes it back.
  */
+export function slideShift(schedule, fps) {
+  const frameUs = 1e6 / fps;
+  const at = schedule.map((e) => ({ t: e.k * frameUs, by: e.frames * frameUs }));
+  /** How far (µs) the sound at output time `u` (µs, before slides) moves later. */
+  return (u) => at.reduce((n, x) => (x.t <= u ? n + x.by : n), 0);
+}
+
 export function audioShift(schedule, startUs, fps) {
   const frameUs = 1e6 / fps;
   const at = schedule.map((e) => ({ t: startUs + e.k * frameUs, by: e.frames * frameUs }));
@@ -391,10 +400,11 @@ export function audioShift(schedule, startUs, fps) {
  * starts on (below 0 if it started before `start`), and `frames`, how many it lasts.
  * They go by the clip's frames, so they stay put while an inserted slide shows.
  */
-export function overlaySchedule(slides = [], start, end, fps) {
+export function overlaySchedule(slides = [], start, end, fps, map = null) {
+  const frameOf = (at) => Math.round((map && at > start ? map.outOf(at) : at - start) * fps);
   return slides
     .filter((s) => isOverlay(s) && s.at < end - 1e-3 && s.at + s.duration > start + 1e-3)
-    .map((s) => ({ s, from: Math.round((s.at - start) * fps), frames: Math.max(1, Math.round(s.duration * fps)) }))
+    .map((s) => ({ s, from: frameOf(s.at), frames: Math.max(1, Math.round(s.duration * fps)) }))
     .sort((a, b) => a.s.at - b.s.at);
 }
 

@@ -2126,11 +2126,11 @@
   "part_of": {
     "message": "parte $1 de $2"
   },
-  "popup_new_in_captode_1_6": {
-    "message": "Novidades do Captode 1.6"
+  "popup_new_in_captode_2_1": {
+    "message": "Novidades do Captode 2.1"
   },
-  "popup_whats_new_1_6": {
-    "message": "Áreas seguras e giro com um clique para molduras de dispositivo. Nas Configurações: o que o ícone faz, o que acontece após uma captura, páginas muito longas, nomes de arquivo e opções de gravação com parada automática e cursor destacado."
+  "popup_whats_new_2_1": {
+    "message": "Edite suas gravações: corte partes, acelere partes, aproxime (também onde você clicou), desfoque dados privados, adicione setas e rótulos, recorte, coloque o vídeo sobre um fundo e ajuste o som."
   },
   "slides_title": {
     "message": "Slides"
@@ -2449,5 +2449,260 @@
   },
   "trim_with_slides_title": {
     "message": "$1 s de gravação e $2 s de slides"
+  },
+  "edit_title": {
+    "message": "Editar"
+  },
+  "edit_kind_cuts": {
+    "message": "Cortar"
+  },
+  "edit_kind_speeds": {
+    "message": "Acelerar"
+  },
+  "edit_kind_zooms": {
+    "message": "Zoom"
+  },
+  "edit_kind_blurs": {
+    "message": "Desfocar"
+  },
+  "edit_kind_callouts": {
+    "message": "Destaque"
+  },
+  "edit_kind_mutes": {
+    "message": "Mudo"
+  },
+  "edit_add_cut_tip": {
+    "message": "Remover uma parte  X"
+  },
+  "edit_add_speed_tip": {
+    "message": "Reproduzir uma parte mais rápido  P"
+  },
+  "edit_add_zoom_tip": {
+    "message": "Aproximar uma parte da imagem  Z"
+  },
+  "edit_add_blur_tip": {
+    "message": "Ocultar algo privado  B"
+  },
+  "edit_add_callout_tip": {
+    "message": "Seta, caixa, rótulo ou holofote  C"
+  },
+  "edit_add_mute": {
+    "message": "Silenciar uma parte"
+  },
+  "edit_add_mute_tip": {
+    "message": "Silenciar uma parte  M"
+  },
+  "edit_undo_tip": {
+    "message": "Desfazer  ⌘Z"
+  },
+  "edit_redo_tip": {
+    "message": "Refazer  ⇧⌘Z"
+  },
+  "edit_autozoom": {
+    "message": "Aproximar nos cliques"
+  },
+  "edit_autozoom_tip": {
+    "message": "Aproximar onde você clicou durante a gravação"
+  },
+  "edit_zoomed_clicks": {
+    "message": "Zooms adicionados para os cliques: $1"
+  },
+  "edit_none": {
+    "message": "Nada ainda. Adicione um corte, aceleração, zoom, desfoque ou destaque no cursor."
+  },
+  "edit_whole": {
+    "message": "Gravação inteira"
+  },
+  "edit_whole_toggle": {
+    "message": "Na gravação inteira"
+  },
+  "edit_removed": {
+    "message": "$1 removido"
+  },
+  "edit_at_playhead": {
+    "message": "No cursor"
+  },
+  "edit_from": {
+    "message": "De (s)"
+  },
+  "edit_to": {
+    "message": "Até (s)"
+  },
+  "edit_speed": {
+    "message": "Velocidade"
+  },
+  "edit_speed_hint": {
+    "message": "As partes aceleradas ficam sem som."
+  },
+  "edit_zoom": {
+    "message": "Zoom"
+  },
+  "edit_zoom_hint": {
+    "message": "Arraste a caixa na imagem para escolher onde aproximar. Entra e sai suavemente."
+  },
+  "edit_blur_style": {
+    "message": "Estilo"
+  },
+  "edit_blur_blur": {
+    "message": "Desfocar"
+  },
+  "edit_blur_pixelate": {
+    "message": "Pixelizar"
+  },
+  "edit_blur_box": {
+    "message": "Caixa preta"
+  },
+  "edit_strength": {
+    "message": "Intensidade"
+  },
+  "edit_draw_hint": {
+    "message": "Arraste na imagem para desenhar, ou arraste as alças."
+  },
+  "edit_callout_kind": {
+    "message": "Tipo"
+  },
+  "edit_callout_arrow": {
+    "message": "Seta"
+  },
+  "edit_callout_box": {
+    "message": "Caixa"
+  },
+  "edit_callout_text": {
+    "message": "Rótulo"
+  },
+  "edit_callout_spot": {
+    "message": "Holofote"
+  },
+  "edit_text": {
+    "message": "Texto"
+  },
+  "edit_text_placeholder": {
+    "message": "Clique aqui"
+  },
+  "edit_colour": {
+    "message": "Cor"
+  },
+  "edit_size": {
+    "message": "Tamanho"
+  },
+  "edit_mute_hint": {
+    "message": "O som fica mudo aqui; a imagem continua."
+  },
+  "edit_cut_hint": {
+    "message": "Fica fora da exportação, imagem e som. Arraste as pontas na linha do tempo."
+  },
+  "edit_delete": {
+    "message": "Excluir"
+  },
+  "edit_crop": {
+    "message": "Recortar"
+  },
+  "edit_crop_on": {
+    "message": "Recortar a imagem"
+  },
+  "edit_crop_hint": {
+    "message": "Arraste na imagem para escolher a parte que fica"
+  },
+  "edit_crop_reset": {
+    "message": "Não recortar"
+  },
+  "edit_shape": {
+    "message": "Formato"
+  },
+  "edit_shape_free": {
+    "message": "Livre"
+  },
+  "edit_shape_fit": {
+    "message": "Como o vídeo"
+  },
+  "edit_background": {
+    "message": "Fundo"
+  },
+  "edit_background_on": {
+    "message": "Colocar o vídeo sobre um fundo"
+  },
+  "edit_background_hint": {
+    "message": "Com margem, cantos arredondados e sombra. Uma moldura de dispositivo, se ativada, toma o lugar."
+  },
+  "edit_padding": {
+    "message": "Margem"
+  },
+  "edit_corners": {
+    "message": "Cantos"
+  },
+  "edit_shadow": {
+    "message": "Sombra"
+  },
+  "edit_sound": {
+    "message": "Som"
+  },
+  "edit_volume": {
+    "message": "Volume"
+  },
+  "edit_fade_in": {
+    "message": "Entrada gradual"
+  },
+  "edit_fade_out": {
+    "message": "Saída gradual"
+  },
+  "edit_preview": {
+    "message": "Prévia com suas edições"
+  },
+  "edit_layer": {
+    "message": "Camada de desenho sobre a imagem"
+  },
+  "edit_mark": {
+    "message": "Marcar"
+  },
+  "edit_mark_end": {
+    "message": "Fim"
+  },
+  "edit_mark_tip": {
+    "message": "Pressione onde o corte começa e depois onde termina  ⇧X"
+  },
+  "edit_mark_started": {
+    "message": "Corte iniciado. Vá até onde ele termina e pressione ⇧X de novo."
+  },
+  "edit_split": {
+    "message": "Dividir"
+  },
+  "edit_split_tip": {
+    "message": "Dividir em dois no cursor"
+  },
+  "edit_silence": {
+    "message": "Cortar partes em silêncio"
+  },
+  "edit_silence_tip": {
+    "message": "Remover as partes em que nada se ouve"
+  },
+  "edit_silences_cut": {
+    "message": "Partes em silêncio cortadas: $1 ($2 s)"
+  },
+  "edit_no_silences": {
+    "message": "Nenhuma parte em silêncio encontrada"
+  },
+  "edit_rings": {
+    "message": "Mostrar cliques"
+  },
+  "edit_rings_hint": {
+    "message": "Um anel onde cada clique aconteceu"
+  },
+  "edit_default": {
+    "message": "Usar em novas gravações"
+  },
+  "edit_default_bg_tip": {
+    "message": "As gravações feitas a partir de agora começam com este fundo"
+  },
+  "edit_default_sound_tip": {
+    "message": "As gravações feitas a partir de agora começam com este volume e estes fades"
+  },
+  "edit_default_bg_saved": {
+    "message": "Novas gravações começarão com este fundo"
+  },
+  "edit_default_bg_none": {
+    "message": "Novas gravações começarão sem fundo"
+  },
+  "edit_default_sound_saved": {
+    "message": "Novas gravações começarão com este volume e estes fades"
   }
 }

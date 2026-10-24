@@ -2126,11 +2126,11 @@
   "part_of": {
     "message": "parte $1 di $2"
   },
-  "popup_new_in_captode_1_6": {
-    "message": "Novità di Captode 1.6"
+  "popup_new_in_captode_2_1": {
+    "message": "Novità di Captode 2.1"
   },
-  "popup_whats_new_1_6": {
-    "message": "Aree sicure e rotazione con un clic per le cornici dei dispositivi. Nelle Impostazioni: cosa fa l'icona, cosa succede dopo uno screenshot, pagine molto lunghe, nomi dei file e opzioni di registrazione con arresto automatico e cursore evidenziato."
+  "popup_whats_new_2_1": {
+    "message": "Modifica le registrazioni: togli o accelera delle parti, ingrandisci (anche dove hai cliccato), sfoca i dati privati, aggiungi frecce ed etichette, ritaglia, metti il video su uno sfondo e regola l’audio."
   },
   "slides_title": {
     "message": "Slide"
@@ -2449,5 +2449,260 @@
   },
   "trim_with_slides_title": {
     "message": "$1 s di registrazione e $2 s di slide"
+  },
+  "edit_title": {
+    "message": "Modifica"
+  },
+  "edit_kind_cuts": {
+    "message": "Taglia"
+  },
+  "edit_kind_speeds": {
+    "message": "Accelera"
+  },
+  "edit_kind_zooms": {
+    "message": "Zoom"
+  },
+  "edit_kind_blurs": {
+    "message": "Sfoca"
+  },
+  "edit_kind_callouts": {
+    "message": "Indicatore"
+  },
+  "edit_kind_mutes": {
+    "message": "Muto"
+  },
+  "edit_add_cut_tip": {
+    "message": "Togli una parte  X"
+  },
+  "edit_add_speed_tip": {
+    "message": "Riproduci una parte più veloce  P"
+  },
+  "edit_add_zoom_tip": {
+    "message": "Ingrandisci una parte dell’immagine  Z"
+  },
+  "edit_add_blur_tip": {
+    "message": "Nascondi qualcosa di privato  B"
+  },
+  "edit_add_callout_tip": {
+    "message": "Freccia, riquadro, etichetta o riflettore  C"
+  },
+  "edit_add_mute": {
+    "message": "Silenzia una parte"
+  },
+  "edit_add_mute_tip": {
+    "message": "Silenzia una parte  M"
+  },
+  "edit_undo_tip": {
+    "message": "Annulla  ⌘Z"
+  },
+  "edit_redo_tip": {
+    "message": "Ripeti  ⇧⌘Z"
+  },
+  "edit_autozoom": {
+    "message": "Ingrandisci sui clic"
+  },
+  "edit_autozoom_tip": {
+    "message": "Ingrandisci dove hai cliccato durante la registrazione"
+  },
+  "edit_zoomed_clicks": {
+    "message": "Zoom aggiunti per i clic: $1"
+  },
+  "edit_none": {
+    "message": "Ancora niente. Aggiungi un taglio, un’accelerazione, uno zoom, una sfocatura o un indicatore alla testina."
+  },
+  "edit_whole": {
+    "message": "Tutta la registrazione"
+  },
+  "edit_whole_toggle": {
+    "message": "Per tutta la registrazione"
+  },
+  "edit_removed": {
+    "message": "$1 rimosso"
+  },
+  "edit_at_playhead": {
+    "message": "Alla testina"
+  },
+  "edit_from": {
+    "message": "Da (s)"
+  },
+  "edit_to": {
+    "message": "A (s)"
+  },
+  "edit_speed": {
+    "message": "Velocità"
+  },
+  "edit_speed_hint": {
+    "message": "Le parti accelerate sono senza audio."
+  },
+  "edit_zoom": {
+    "message": "Zoom"
+  },
+  "edit_zoom_hint": {
+    "message": "Trascina il riquadro sull’immagine per scegliere dove ingrandire. Entra ed esce gradualmente."
+  },
+  "edit_blur_style": {
+    "message": "Stile"
+  },
+  "edit_blur_blur": {
+    "message": "Sfoca"
+  },
+  "edit_blur_pixelate": {
+    "message": "Pixel"
+  },
+  "edit_blur_box": {
+    "message": "Riquadro nero"
+  },
+  "edit_strength": {
+    "message": "Intensità"
+  },
+  "edit_draw_hint": {
+    "message": "Trascina sull’immagine per disegnarlo, o trascina le maniglie."
+  },
+  "edit_callout_kind": {
+    "message": "Tipo"
+  },
+  "edit_callout_arrow": {
+    "message": "Freccia"
+  },
+  "edit_callout_box": {
+    "message": "Riquadro"
+  },
+  "edit_callout_text": {
+    "message": "Etichetta"
+  },
+  "edit_callout_spot": {
+    "message": "Riflettore"
+  },
+  "edit_text": {
+    "message": "Testo"
+  },
+  "edit_text_placeholder": {
+    "message": "Clicca qui"
+  },
+  "edit_colour": {
+    "message": "Colore"
+  },
+  "edit_size": {
+    "message": "Dimensione"
+  },
+  "edit_mute_hint": {
+    "message": "Qui l’audio è muto; l’immagine continua."
+  },
+  "edit_cut_hint": {
+    "message": "Escluso dall’esportazione, immagine e audio. Trascina le estremità sulla timeline."
+  },
+  "edit_delete": {
+    "message": "Elimina"
+  },
+  "edit_crop": {
+    "message": "Ritaglia"
+  },
+  "edit_crop_on": {
+    "message": "Ritaglia l’immagine"
+  },
+  "edit_crop_hint": {
+    "message": "Trascina sull’immagine per scegliere la parte da tenere"
+  },
+  "edit_crop_reset": {
+    "message": "Non ritagliare"
+  },
+  "edit_shape": {
+    "message": "Formato"
+  },
+  "edit_shape_free": {
+    "message": "Libero"
+  },
+  "edit_shape_fit": {
+    "message": "Come il video"
+  },
+  "edit_background": {
+    "message": "Sfondo"
+  },
+  "edit_background_on": {
+    "message": "Metti il video su uno sfondo"
+  },
+  "edit_background_hint": {
+    "message": "Con margine, angoli arrotondati e ombra. Una cornice dispositivo, se attiva, lo sostituisce."
+  },
+  "edit_padding": {
+    "message": "Margine"
+  },
+  "edit_corners": {
+    "message": "Angoli"
+  },
+  "edit_shadow": {
+    "message": "Ombra"
+  },
+  "edit_sound": {
+    "message": "Audio"
+  },
+  "edit_volume": {
+    "message": "Volume"
+  },
+  "edit_fade_in": {
+    "message": "Dissolvenza in entrata"
+  },
+  "edit_fade_out": {
+    "message": "Dissolvenza in uscita"
+  },
+  "edit_preview": {
+    "message": "Anteprima con le tue modifiche"
+  },
+  "edit_layer": {
+    "message": "Livello di disegno sull’immagine"
+  },
+  "edit_mark": {
+    "message": "Segna"
+  },
+  "edit_mark_end": {
+    "message": "Fine"
+  },
+  "edit_mark_tip": {
+    "message": "Premi dove inizia un taglio, poi dove finisce  ⇧X"
+  },
+  "edit_mark_started": {
+    "message": "Taglio iniziato. Vai dove finisce e premi di nuovo ⇧X."
+  },
+  "edit_split": {
+    "message": "Dividi"
+  },
+  "edit_split_tip": {
+    "message": "Dividi in due all'indicatore"
+  },
+  "edit_silence": {
+    "message": "Taglia i silenzi"
+  },
+  "edit_silence_tip": {
+    "message": "Togli le parti in cui non si sente nulla"
+  },
+  "edit_silences_cut": {
+    "message": "Silenzi tagliati: $1 ($2 s)"
+  },
+  "edit_no_silences": {
+    "message": "Nessun silenzio trovato"
+  },
+  "edit_rings": {
+    "message": "Mostra i clic"
+  },
+  "edit_rings_hint": {
+    "message": "Un cerchio dove c'è stato ogni clic"
+  },
+  "edit_default": {
+    "message": "Usa per le nuove registrazioni"
+  },
+  "edit_default_bg_tip": {
+    "message": "Le registrazioni fatte d'ora in poi iniziano con questo sfondo"
+  },
+  "edit_default_sound_tip": {
+    "message": "Le registrazioni fatte d'ora in poi iniziano con questo volume e queste dissolvenze"
+  },
+  "edit_default_bg_saved": {
+    "message": "Le nuove registrazioni inizieranno con questo sfondo"
+  },
+  "edit_default_bg_none": {
+    "message": "Le nuove registrazioni inizieranno senza sfondo"
+  },
+  "edit_default_sound_saved": {
+    "message": "Le nuove registrazioni inizieranno con questo volume e queste dissolvenze"
   }
 }

@@ -2126,11 +2126,11 @@
   "part_of": {
     "message": "第 $1 部分，共 $2 部分"
   },
-  "popup_new_in_captode_1_6": {
-    "message": "Captode 1.6 新功能"
+  "popup_new_in_captode_2_1": {
+    "message": "Captode 2.1 新功能"
   },
-  "popup_whats_new_1_6": {
-    "message": "设备外框新增安全区域和一键旋转。设置中新增：图标的作用、截图之后的操作、超长页面、文件名，以及带自动停止和光标突出显示的录制选项。"
+  "popup_whats_new_2_1": {
+    "message": "编辑录制：剪掉或加速某些片段、放大（也可放大点击的位置）、模糊隐私信息、添加箭头和标签、裁剪、给视频加背景，以及调整声音。"
   },
   "slides_title": {
     "message": "幻灯片"
@@ -2449,5 +2449,260 @@
   },
   "trim_with_slides_title": {
     "message": "录制 $1 秒，幻灯片 $2 秒"
+  },
+  "edit_title": {
+    "message": "编辑"
+  },
+  "edit_kind_cuts": {
+    "message": "剪掉"
+  },
+  "edit_kind_speeds": {
+    "message": "加速"
+  },
+  "edit_kind_zooms": {
+    "message": "缩放"
+  },
+  "edit_kind_blurs": {
+    "message": "模糊"
+  },
+  "edit_kind_callouts": {
+    "message": "标注"
+  },
+  "edit_kind_mutes": {
+    "message": "静音"
+  },
+  "edit_add_cut_tip": {
+    "message": "去掉一段  X"
+  },
+  "edit_add_speed_tip": {
+    "message": "快速播放一段  P"
+  },
+  "edit_add_zoom_tip": {
+    "message": "放大画面的一部分  Z"
+  },
+  "edit_add_blur_tip": {
+    "message": "隐藏隐私内容  B"
+  },
+  "edit_add_callout_tip": {
+    "message": "箭头、方框、标签或聚光  C"
+  },
+  "edit_add_mute": {
+    "message": "静音一段"
+  },
+  "edit_add_mute_tip": {
+    "message": "让一段无声  M"
+  },
+  "edit_undo_tip": {
+    "message": "撤销  ⌘Z"
+  },
+  "edit_redo_tip": {
+    "message": "重做  ⇧⌘Z"
+  },
+  "edit_autozoom": {
+    "message": "放大点击处"
+  },
+  "edit_autozoom_tip": {
+    "message": "放大录制时点击的位置"
+  },
+  "edit_zoomed_clicks": {
+    "message": "已为点击添加缩放：$1"
+  },
+  "edit_none": {
+    "message": "还没有。在播放位置添加剪掉、加速、缩放、模糊或标注。"
+  },
+  "edit_whole": {
+    "message": "整段录制"
+  },
+  "edit_whole_toggle": {
+    "message": "用于整段录制"
+  },
+  "edit_removed": {
+    "message": "已删除$1"
+  },
+  "edit_at_playhead": {
+    "message": "设为播放位置"
+  },
+  "edit_from": {
+    "message": "从（秒）"
+  },
+  "edit_to": {
+    "message": "到（秒）"
+  },
+  "edit_speed": {
+    "message": "速度"
+  },
+  "edit_speed_hint": {
+    "message": "加速的部分没有声音。"
+  },
+  "edit_zoom": {
+    "message": "缩放"
+  },
+  "edit_zoom_hint": {
+    "message": "在画面上拖动方框选择放大位置。缩放会平滑进出。"
+  },
+  "edit_blur_style": {
+    "message": "样式"
+  },
+  "edit_blur_blur": {
+    "message": "模糊"
+  },
+  "edit_blur_pixelate": {
+    "message": "马赛克"
+  },
+  "edit_blur_box": {
+    "message": "黑框"
+  },
+  "edit_strength": {
+    "message": "强度"
+  },
+  "edit_draw_hint": {
+    "message": "在画面上拖动来绘制，或拖动控制点。"
+  },
+  "edit_callout_kind": {
+    "message": "类型"
+  },
+  "edit_callout_arrow": {
+    "message": "箭头"
+  },
+  "edit_callout_box": {
+    "message": "方框"
+  },
+  "edit_callout_text": {
+    "message": "标签"
+  },
+  "edit_callout_spot": {
+    "message": "聚光"
+  },
+  "edit_text": {
+    "message": "文字"
+  },
+  "edit_text_placeholder": {
+    "message": "点击这里"
+  },
+  "edit_colour": {
+    "message": "颜色"
+  },
+  "edit_size": {
+    "message": "大小"
+  },
+  "edit_mute_hint": {
+    "message": "这段没有声音，画面照常播放。"
+  },
+  "edit_cut_hint": {
+    "message": "导出时画面和声音都会去掉。可在时间轴上拖动两端。"
+  },
+  "edit_delete": {
+    "message": "删除"
+  },
+  "edit_crop": {
+    "message": "裁剪"
+  },
+  "edit_crop_on": {
+    "message": "裁剪画面"
+  },
+  "edit_crop_hint": {
+    "message": "在画面上拖动选择保留的部分"
+  },
+  "edit_crop_reset": {
+    "message": "不裁剪"
+  },
+  "edit_shape": {
+    "message": "比例"
+  },
+  "edit_shape_free": {
+    "message": "自由"
+  },
+  "edit_shape_fit": {
+    "message": "跟随视频"
+  },
+  "edit_background": {
+    "message": "背景"
+  },
+  "edit_background_on": {
+    "message": "把视频放在背景上"
+  },
+  "edit_background_hint": {
+    "message": "带边距、圆角和阴影。开启设备边框时由它代替。"
+  },
+  "edit_padding": {
+    "message": "边距"
+  },
+  "edit_corners": {
+    "message": "圆角"
+  },
+  "edit_shadow": {
+    "message": "阴影"
+  },
+  "edit_sound": {
+    "message": "声音"
+  },
+  "edit_volume": {
+    "message": "音量"
+  },
+  "edit_fade_in": {
+    "message": "淡入"
+  },
+  "edit_fade_out": {
+    "message": "淡出"
+  },
+  "edit_preview": {
+    "message": "包含编辑的预览"
+  },
+  "edit_layer": {
+    "message": "画面上的绘制层"
+  },
+  "edit_mark": {
+    "message": "标记剪切"
+  },
+  "edit_mark_end": {
+    "message": "结束剪切"
+  },
+  "edit_mark_tip": {
+    "message": "在剪切开始处按一次，再在结束处按一次  ⇧X"
+  },
+  "edit_mark_started": {
+    "message": "已开始剪切。转到结束处，再按一次 ⇧X。"
+  },
+  "edit_split": {
+    "message": "拆分"
+  },
+  "edit_split_tip": {
+    "message": "在播放头处一分为二"
+  },
+  "edit_silence": {
+    "message": "剪掉静音部分"
+  },
+  "edit_silence_tip": {
+    "message": "去掉听不到声音的部分"
+  },
+  "edit_silences_cut": {
+    "message": "已剪掉静音部分：$1 处（$2 秒）"
+  },
+  "edit_no_silences": {
+    "message": "没有找到静音部分"
+  },
+  "edit_rings": {
+    "message": "显示点击"
+  },
+  "edit_rings_hint": {
+    "message": "在每次点击处显示圆环"
+  },
+  "edit_default": {
+    "message": "用于新录制"
+  },
+  "edit_default_bg_tip": {
+    "message": "今后的录制将使用此背景"
+  },
+  "edit_default_sound_tip": {
+    "message": "今后的录制将使用此音量和淡入淡出"
+  },
+  "edit_default_bg_saved": {
+    "message": "新录制将使用此背景"
+  },
+  "edit_default_bg_none": {
+    "message": "新录制将不使用背景"
+  },
+  "edit_default_sound_saved": {
+    "message": "新录制将使用此音量和淡入淡出"
   }
 }

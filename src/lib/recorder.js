@@ -33,29 +33,38 @@ export function outputSize(w, h, size = 'page') {
 // than that (DevTools' device mode, a phone-sized emulated screen), the rest is black.
 const isBar = (d, i) => d[i] < 12 && d[i + 1] < 12 && d[i + 2] < 12;
 
-/** Canvases one pixel high and one pixel wide, for reading lines of a frame. */
+const LINES = 15; // lines looked at each way
+
+/** Canvases for the lines read from a frame: rows stacked, and columns side by side. */
 function lineCanvases(fw, fh) {
   const opts = { willReadFrequently: true };
-  return { fw, fh, row: new OffscreenCanvas(fw, 1).getContext('2d', opts), col: new OffscreenCanvas(1, fh).getContext('2d', opts) };
+  return { fw, fh, row: new OffscreenCanvas(fw, LINES).getContext('2d', opts), col: new OffscreenCanvas(LINES, fh).getContext('2d', opts) };
 }
 
-/** Bounds of what isn't black, from a few lines through the frame (full resolution). */
+/**
+ * Bounds of what isn't black, from a few lines through the frame (full resolution).
+ * The lines are copied first and read back once each way: every read waits for the
+ * GPU, and 30 of them a second could cost the recording a frame.
+ */
 function contentBounds(frame, lines) {
   const fw = frame.displayWidth;
   const fh = frame.displayHeight;
   let left = fw, right = -1, top = fh, bottom = -1;
-  for (let k = 1; k < 16; k++) {
+  for (let k = 1; k <= LINES; k++) {
+    const y = Math.floor((fh * k) / (LINES + 1));
+    lines.row.drawImage(frame, 0, y, fw, 1, 0, k - 1, fw, 1);
+    const x = Math.floor((fw * k) / (LINES + 1));
+    lines.col.drawImage(frame, x, 0, 1, fh, k - 1, 0, 1, fh);
+  }
+  const rows = lines.row.getImageData(0, 0, fw, LINES).data;
+  const cols = lines.col.getImageData(0, 0, LINES, fh).data;
+  for (let k = 0; k < LINES; k++) {
     // A horizontal line, then a vertical one.
-    const y = Math.floor((fh * k) / 16);
-    lines.row.drawImage(frame, 0, y, fw, 1, 0, 0, fw, 1);
-    const row = lines.row.getImageData(0, 0, fw, 1).data;
-    for (let x = 0; x < fw; x++) if (!isBar(row, x * 4)) { left = Math.min(left, x); break; }
-    for (let x = fw - 1; x >= 0; x--) if (!isBar(row, x * 4)) { right = Math.max(right, x); break; }
-    const x = Math.floor((fw * k) / 16);
-    lines.col.drawImage(frame, x, 0, 1, fh, 0, 0, 1, fh);
-    const col = lines.col.getImageData(0, 0, 1, fh).data;
-    for (let yy = 0; yy < fh; yy++) if (!isBar(col, yy * 4)) { top = Math.min(top, yy); break; }
-    for (let yy = fh - 1; yy >= 0; yy--) if (!isBar(col, yy * 4)) { bottom = Math.max(bottom, yy); break; }
+    const r = k * fw * 4;
+    for (let x = 0; x < fw; x++) if (!isBar(rows, r + x * 4)) { left = Math.min(left, x); break; }
+    for (let x = fw - 1; x >= 0; x--) if (!isBar(rows, r + x * 4)) { right = Math.max(right, x); break; }
+    for (let y = 0; y < fh; y++) if (!isBar(cols, (y * LINES + k) * 4)) { top = Math.min(top, y); break; }
+    for (let y = fh - 1; y >= 0; y--) if (!isBar(cols, (y * LINES + k) * 4)) { bottom = Math.max(bottom, y); break; }
   }
   if (right < left || bottom < top) return null; // all black
   return { x: left, y: top, w: right - left + 1, h: bottom - top + 1 };

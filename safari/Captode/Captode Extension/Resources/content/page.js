@@ -530,6 +530,22 @@ export function showInputs(on, { clicks = true, cursor = false } = {}) {
   };
 }
 
+/**
+ * While the tab is recorded: tells the background where each click lands (as
+ * fractions of the view, with the time), so the video page can zoom in on clicks.
+ * Nothing else about the page is sent. `on` false stops it.
+ */
+export function trackClicks(on) {
+  window.__captodeClicks?.();
+  if (!on) return;
+  const down = (e) => {
+    if (e.button !== 0 && e.pointerType === 'mouse') return;
+    chrome.runtime.sendMessage({ type: 'rec-click', x: e.clientX / innerWidth, y: e.clientY / innerHeight, at: Date.now() }).catch(() => {});
+  };
+  addEventListener('pointerdown', down, true);
+  window.__captodeClicks = () => { removeEventListener('pointerdown', down, true); window.__captodeClicks = null; };
+}
+
 /** Draws a dashed outline just outside the recorded area, so it is never recorded. */
 export function showOutline(rect) {
   document.getElementById('__captode_outline')?.remove();

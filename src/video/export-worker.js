@@ -15,7 +15,8 @@ import { buildPalette } from '../lib/quantize.js';
 import { WorkerPool } from '../lib/pool.js';
 import { deviceRenderer, frameDrawer } from '../lib/device.js';
 import { sourceColourSpace, outputColour } from '../lib/video-colour.js';
-import { slideSchedule, overlaySchedule, paintOverlays, frameOrder, slideAlpha, renderSlides, audioShift } from '../lib/slides.js';
+import { slideSchedule, overlaySchedule, paintOverlays, frameOrder, slideAlpha, renderSlides, slideShift } from '../lib/slides.js';
+import { normaliseEdits, clipMap, clipFrames, composer, backgroundRenderer, hasSpatial, touchesAudio, audioGain } from '../lib/video-edits.js';
 
 /** An error after which the page should fall back to its slower, simpler path. */
 class Unsupported extends Error {}
@@ -38,10 +39,11 @@ self.onmessage = async ({ data }) => {
 
 /**
  * Decodes the video and calls `onFrame(k, frame)` for output frames k = 0 … count-1,
- * at `fps` from `start` (µs). Each output frame is the source frame on screen at
- * that moment. `want(k)` can skip frames that aren't needed (to save drawing).
+ * at `fps` from `start` (µs), or at the recording's time `time(k)` (µs, never going
+ * back) where parts are cut or sped up. Each output frame is the source frame on
+ * screen at that moment. `want(k)` can skip frames that aren't needed (to save drawing).
  */
-async function forEachFrame(src, { start, fps, count, onFrame, want = () => true }) {
+async function forEachFrame(src, { start, fps, count, onFrame, want = () => true, time = null }) {
   const frames = src.video.frames;
   let i = 0;
   for (let j = 0; j < frames.length; j++) if (frames[j].key && frames[j].timestamp <= start) i = j;
@@ -55,7 +57,7 @@ async function forEachFrame(src, { start, fps, count, onFrame, want = () => true
   });
   decoder.configure(src.decoderConfig);
 
-  const at = (k) => start + (k * 1e6) / fps;
+  const at = time || ((k) => start + (k * 1e6) / fps);
   let k = 0;
   let cur = null;
   let flushed = false;
@@ -160,45 +162,74 @@ function videoCandidates(format, w, h, fps, bitrate) {
   ];
 }
 
+/** An OpusHead (RFC 7845) for encoded Opus that came without one. */
+function opusHead(channels, sampleRate, preSkip = 312) {
+  const h = new Uint8Array(19);
+  h.set([0x4f, 0x70, 0x75, 0x73, 0x48, 0x65, 0x61, 0x64, 1, channels]);
+  const v = new DataView(h.buffer);
+  v.setUint16(10, preSkip, true);
+  v.setUint32(12, sampleRate, true);
+  return h;
+}
+
+async function supported(Codec, config) {
+  try { return (await Codec.isConfigSupported(config)).supported; } catch { return false; }
+}
+
 /**
- * Audio for the output: Opus packets are copied into WebM as they are, and
- * re-encoded to AAC for MP4. Returns null when there is no audio to keep.
- * `shift(t)` is how much later (µs) the sound at source time t plays, after the
- * slides before it; `length` (µs) is how long the output is.
+ * Audio for the output. Returns null when there is no audio to keep.
+ * With no edits to the sound, Opus packets are copied into WebM as they are, and
+ * re-encoded to AAC for MP4. With parts cut or the volume changed, the sound is
+ * decoded, put together and encoded again (Opus for WebM, AAC for MP4).
+ * `map` (lib/video-edits.js) is where each moment plays (sped-up parts are silent);
+ * `shift(u)` how much later (µs) the sound at output time u plays, after the slides
+ * before it; `length` (µs) how long the output is; `gain(t, u, part)` its loudness.
  */
-async function exportAudio(src, format, start, end, shift = () => 0, length = end - start) {
+async function exportAudio(src, format, { map, shift = () => 0, length, gain = null }) {
   const a = src.audio;
   if (!a || a.codecId !== 'A_OPUS') return null;
-  const packets = a.frames.filter((f) => f.timestamp >= start && f.timestamp < end);
+  const startUs = map.start * 1e6, endUs = map.end * 1e6;
+  const packets = a.frames.filter((f) => f.timestamp >= startUs && f.timestamp < endUs);
   if (!packets.length) return null;
-  // The packets as they are, moved to their place in the output, with silence where a
-  // slide was put in (players would otherwise close the gap and lose sync).
-  const copied = () => fillOpusGaps(packets.map((f, i) => {
+  const outUs = (t) => { const u = map.outOf(t / 1e6) * 1e6; return u + shift(u); };
+  // The packets as they are, moved to their place in the output (those in parts cut
+  // or sped up left out), with silence where a slide was put in (players would
+  // otherwise close the gap and lose sync).
+  const copied = () => fillOpusGaps(packets.flatMap((f, i) => {
+    const part = map.partAt(f.timestamp / 1e6);
+    if (!part || part.rate !== 1) return [];
     const next = packets[i + 1];
     const duration = next ? next.timestamp - f.timestamp : (i ? f.timestamp - packets[i - 1].timestamp : 20000);
-    return { timestamp: f.timestamp - start + shift(f.timestamp), duration, key: true, data: f.data };
+    return [{ timestamp: Math.round(outUs(f.timestamp)), duration, key: true, data: f.data }];
   }));
 
-  if (format === 'webm') {
+  if (format === 'webm' && !gain) {
     return { codecId: 'A_OPUS', sampleRate: a.sampleRate, channels: a.channels, description: a.description, frames: copied() };
   }
-
-  const encConfig = { codec: 'mp4a.40.2', sampleRate: 48000, numberOfChannels: Math.min(2, a.channels), bitrate: 128000 };
-  if (!(await AudioEncoder.isConfigSupported(encConfig)).supported) {
-    // No AAC encoder (Chrome on Linux): keep the original Opus audio. MP4 can carry
-    // Opus, and Chrome, Firefox and Safari all play it.
+  const channels = Math.min(2, a.channels);
+  const aac = { codec: 'mp4a.40.2', sampleRate: 48000, numberOfChannels: channels, bitrate: 128000 };
+  const opus = { codec: 'opus', sampleRate: 48000, numberOfChannels: channels, bitrate: 128000 };
+  const decConfig = { codec: 'opus', sampleRate: a.sampleRate, numberOfChannels: a.channels, description: a.description || undefined };
+  const canDecode = typeof AudioDecoder !== 'undefined' && await supported(AudioDecoder, decConfig);
+  let encConfig = null;
+  if (canDecode && typeof AudioEncoder !== 'undefined') {
+    if (format === 'mp4' && await supported(AudioEncoder, aac)) encConfig = aac;
+    else if (await supported(AudioEncoder, opus)) encConfig = opus;
+  }
+  if (!encConfig) {
+    // Nothing here to encode with: the packets as they are (cuts kept; no volume changes).
+    if (format === 'webm') return { codecId: 'A_OPUS', sampleRate: a.sampleRate, channels: a.channels, description: a.description, frames: copied() };
+    // MP4 can carry Opus, and Chrome, Firefox and Safari all play it.
     if (!a.description) throw new Unsupported('This browser cannot encode AAC audio.');
     return { codec: 'opus', sampleRate: 48000, channels: a.channels, opusHead: a.description, frames: copied() };
   }
-  const decConfig = { codec: 'opus', sampleRate: a.sampleRate, numberOfChannels: a.channels, description: a.description || undefined };
-  if (!(await AudioDecoder.isConfigSupported(decConfig)).supported) throw new Unsupported('This browser cannot decode the recording\'s audio.');
 
   const out = [];
-  let asc = null;
+  let description = null;
   let failure = null;
   const encoder = new AudioEncoder({
     output: (chunk, md) => {
-      if (md?.decoderConfig?.description) asc = new Uint8Array(md.decoderConfig.description);
+      if (md?.decoderConfig?.description) description = new Uint8Array(md.decoderConfig.description);
       const data = new Uint8Array(chunk.byteLength);
       chunk.copyTo(data);
       out.push({ timestamp: chunk.timestamp, duration: chunk.duration, key: true, data });
@@ -206,13 +237,13 @@ async function exportAudio(src, format, start, end, shift = () => 0, length = en
     error: (e) => { failure = e; },
   });
   encoder.configure(encConfig);
-  const channels = encConfig.numberOfChannels;
-  // MP4 sample tables have no start offsets, so any gap (audio usually starts a
-  // little after the video) is filled with silence to keep sound and picture in sync.
+  // Sample tables have no start offsets, so any gap (audio usually starts a little
+  // after the video, and slides leave gaps) is filled with silence to keep sound and
+  // picture in sync.
   let expected = 0; // µs of audio written so far; it stops where the video does
   const write = (planes, n, sampleRate) => {
     const room = Math.floor(((length - expected) * sampleRate) / 1e6);
-    if (room <= 0) return;
+    if (room <= 0 || n <= 0) return;
     if (n > room) {
       // Keep the first `room` samples of each channel.
       const cut = new Float32Array(room * channels);
@@ -225,19 +256,47 @@ async function exportAudio(src, format, start, end, shift = () => 0, length = en
     re.close();
     expected += (n * 1e6) / sampleRate;
   };
+  /** `n` samples a channel that play from output time `at` (µs). */
+  const place = (planes, n, at, rate) => {
+    const gap = Math.round(((at - expected) * rate) / 1e6);
+    if (gap > rate / 100) write(new Float32Array(gap * channels), gap, rate);
+    else if (gap < -1) {
+      // Overlaps what is written (rounding at a join): drop the overlap.
+      const drop = Math.min(n, -gap);
+      const rest = new Float32Array((n - drop) * channels);
+      for (let c = 0; c < channels; c++) rest.set(planes.subarray(c * n + drop, (c + 1) * n), c * (n - drop));
+      planes = rest;
+      n -= drop;
+    }
+    write(planes, n, rate);
+  };
   const decoder = new AudioDecoder({
     output: (ad) => {
       const n = ad.numberOfFrames;
       const rate = ad.sampleRate;
-      const at = ad.timestamp - start + shift(ad.timestamp); // a slide before it leaves silence
-      const gap = Math.round(((at - expected) * rate) / 1e6);
-      if (gap > rate / 100) write(new Float32Array(gap * channels), gap, rate);
+      const t0 = ad.timestamp / 1e6;
       const planes = new Float32Array(n * channels);
       for (let c = 0; c < channels; c++) {
         ad.copyTo(planes.subarray(c * n, (c + 1) * n), { planeIndex: Math.min(c, ad.numberOfChannels - 1), format: 'f32-planar' });
       }
       ad.close();
-      write(planes, n, rate);
+      // The samples in each part played at normal speed, in their place.
+      for (const part of map.parts) {
+        if (part.rate !== 1) continue;
+        const i0 = Math.max(0, Math.ceil((part.from - t0) * rate - 1e-6)), i1 = Math.min(n, Math.ceil((part.to - t0) * rate - 1e-6));
+        if (i1 <= i0) continue;
+        const len = i1 - i0;
+        const at = outUs((t0 + i0 / rate) * 1e6);
+        const seg = new Float32Array(len * channels);
+        for (let i = 0; i < len; i++) {
+          const g = gain ? gain(t0 + (i0 + i) / rate, at / 1e6 + i / rate, part) : 1;
+          for (let c = 0; c < channels; c++) {
+            const v = planes[c * n + i0 + i] * g;
+            seg[c * len + i] = v > 1 ? 1 : v < -1 ? -1 : v;
+          }
+        }
+        place(seg, len, at, rate);
+      }
     },
     error: (e) => { failure = e; },
   });
@@ -248,8 +307,13 @@ async function exportAudio(src, format, start, end, shift = () => 0, length = en
   decoder.close();
   encoder.close();
   if (failure) throw failure;
-  if (!asc) throw new Unsupported('The AAC encoder gave no configuration.');
-  return { sampleRate: encConfig.sampleRate, channels: encConfig.numberOfChannels, asc, bitrate: encConfig.bitrate, frames: out };
+  if (encConfig === aac) {
+    if (!description) throw new Unsupported('The AAC encoder gave no configuration.');
+    return { sampleRate: aac.sampleRate, channels, asc: description, bitrate: aac.bitrate, frames: out };
+  }
+  const head = description?.length >= 19 ? description : opusHead(channels, 48000);
+  if (format === 'webm') return { codecId: 'A_OPUS', sampleRate: 48000, channels, description: head, frames: out };
+  return { codec: 'opus', sampleRate: 48000, channels, opusHead: head, frames: out };
 }
 
 // ---------- the job ----------
@@ -258,6 +322,8 @@ async function exportAudio(src, format, start, end, shift = () => 0, length = en
  * job: {
  *   blob, format ('mp4' | 'webm' | 'gif' | 'webp'),
  *   width, height, fps, start, end (seconds), device (options or null),
+ *   edits (lib/video-edits.js: parts cut or sped up, blurs, crop, zooms, callouts,
+ *   background, sound),
  *   slides (see lib/slides.js; shown at their moments, the clip waiting meanwhile,
  *   or drawn over it for overlays),
  *   video: { bitsPerPixel, audio }, gif: { colors, dither, lossy }, webp: { quality, lossless },
@@ -278,17 +344,21 @@ async function run(job) {
 
   const W = job.width, H = job.height, fps = job.fps;
   const start = Math.round(job.start * 1e6), end = Math.round(job.end * 1e6);
-  const count = Math.max(1, Math.round(((end - start) / 1e6) * fps));
+  const edits = normaliseEdits(job.edits);
+  const map = clipMap(edits, job.start, job.end);
+  const count = clipFrames(map, fps);
   const frameUs = 1e6 / fps;
+  // The recording's time (µs) shown on clip frame k.
+  const time = (k) => Math.round(map.sourceAt(k / fps) * 1e6);
   // Output frames: the clip's, with each slide's put in before the clip frame it
   // goes with. `forEachFrame` still walks the clip; `outFrames` hands on the output
   // frames that go with each clip frame, numbered in the output.
-  const schedule = slideSchedule(job.slides, job.start, job.end, fps);
+  const schedule = slideSchedule(job.slides, job.start, job.end, fps, map);
   const order = frameOrder(schedule, count);
   const total = order.length;
   const slideArt = await renderSlides(schedule, W, H);
   // Overlays add no frames: they are drawn over the clip's own, by its frame number.
-  const overlays = overlaySchedule(job.slides, job.start, job.end, fps);
+  const overlays = overlaySchedule(job.slides, job.start, job.end, fps, map);
   const overlayArt = await renderSlides(overlays, W, H);
   const outFrames = (onOut) => {
     let n = 0;
@@ -305,19 +375,32 @@ async function run(job) {
   // took about 7 ms a frame, against well under 1 ms here plus a quicker read-back.
   const ctx = canvas.getContext('2d', { alpha: true });
   let draw = null;
-  const paint = (frame) => {
+  let comp = null, content = null, cctx = null;
+  /** Draws `frame`, the recording at time t (s), shown at output time o (s, before slides). */
+  const paint = (frame, t, o) => {
     if (!draw) {
-      const renderer = job.device ? deviceRenderer(job.device, frame.displayWidth, frame.displayHeight) : null;
+      const sw = frame.displayWidth, sh = frame.displayHeight;
+      if (hasSpatial(edits)) {
+        comp = composer(edits, map, sw, sh, job.clicks);
+        content = new OffscreenCanvas(comp.width, comp.height);
+        cctx = content.getContext('2d');
+      }
+      const cw = comp ? comp.width : sw, ch = comp ? comp.height : sh;
+      const renderer = job.device ? deviceRenderer(job.device, cw, ch) : edits.background.on ? backgroundRenderer(edits.background, cw, ch) : null;
       draw = frameDrawer({ width: W, height: H }, renderer, job.format === 'mp4' || job.format === 'webm');
     }
     ctx.clearRect(0, 0, W, H);
-    draw(ctx, frame);
+    if (comp) {
+      cctx.clearRect(0, 0, content.width, content.height);
+      comp.draw(cctx, frame, t, o);
+      draw(ctx, content);
+    } else draw(ctx, frame);
   };
   /** Draws output frame `o` (from `order`): the clip's frame and its overlays, a slide, or a slide fading over them. */
   const paintOut = (o, frame) => {
     const a = o.slide ? slideAlpha(o.slide, o.j, fps) : 0;
     if (a < 1) {
-      paint(frame);
+      paint(frame, map.sourceAt(o.k / fps), o.k / fps);
       paintOverlays(ctx, overlays, overlayArt, o.k, fps);
     }
     if (a > 0) {
@@ -339,7 +422,9 @@ async function run(job) {
     const config = await pickConfig(videoCandidates(job.format, W, H, fps, bitrate));
     if (!config) throw new Unsupported(`This browser cannot encode ${job.format.toUpperCase()} at ${W} × ${H}.`);
 
-    const audio = job.video.audio ? await exportAudio(src, job.format, start, end, audioShift(schedule, start, fps), Math.round(total * frameUs)) : null;
+    const audio = job.video.audio
+      ? await exportAudio(src, job.format, { map, shift: slideShift(schedule, fps), length: Math.round(total * frameUs), gain: touchesAudio(edits) || !map.plain ? audioGain(edits, map, total / fps) : null })
+      : null;
     const chunks = [];
     let description = null;
     let encodedColour = null;
@@ -357,7 +442,7 @@ async function run(job) {
     encoder.configure(config);
     const keyEvery = Math.max(1, Math.round(fps * 2));
     await forEachFrame(src, {
-      start, fps, count,
+      start, fps, count, time,
       onFrame: outFrames(async (n, o, frame) => {
         if (failure) throw failure;
         paintOut(o, frame);
@@ -389,8 +474,9 @@ async function run(job) {
   if (job.format === 'gif') {
     // One palette for the whole clip, from frames spread across it.
     const parts = [];
-    const sample = (frame) => {
-      paint(frame);
+    const sample = (frame, k = null) => {
+      const t = k === null ? frame.timestamp / 1e6 : map.sourceAt(k / fps);
+      paint(frame, t, map.outOf(t));
       const px = ctx.getImageData(0, 0, W, H).data;
       const part = new Uint8ClampedArray(Math.ceil(px.length / 12) * 4);
       for (let i = 0, o = 0; i < px.length; i += 12, o += 4) part.set(px.subarray(i, i + 4), o);
@@ -399,7 +485,7 @@ async function run(job) {
     };
     // Key frames decode on their own, so when there are enough of them in range,
     // sample those instead of decoding the whole clip an extra time.
-    const keys = src.video.frames.filter((f) => f.key && f.timestamp >= start && f.timestamp < end);
+    const keys = src.video.frames.filter((f) => f.key && f.timestamp >= start && f.timestamp < end && map.partAt(f.timestamp / 1e6));
     if (keys.length >= 4) {
       const step = Math.max(1, keys.length / 16);
       const picks = [];
@@ -408,7 +494,7 @@ async function run(job) {
     } else {
       const samples = Math.min(count, 16);
       const want = new Set(Array.from({ length: samples }, (_, n) => Math.floor(((n + 0.5) * count) / samples)));
-      await forEachFrame(src, { start, fps, count, want: (k) => want.has(k), onFrame: async (k, frame) => sample(frame) });
+      await forEachFrame(src, { start, fps, count, time, want: (k) => want.has(k), onFrame: async (k, frame) => sample(frame, k) });
     }
     // The slides' colours belong in the palette too: overlays over the last frame sampled.
     const sampleCanvas = () => {
@@ -432,13 +518,13 @@ async function run(job) {
     palette = buildPalette(all, Math.max(2, job.gif.colors - 1));
   }
 
-  if (job.format === 'gif') return exportGif(src, { start, fps, count, total, outFrames, frameUs, palette, transparent, paintOut, preview, ctx, W, H, job });
+  if (job.format === 'gif') return exportGif(src, { start, fps, count, time, total, outFrames, frameUs, palette, transparent, paintOut, preview, ctx, W, H, job });
 
   const enc = new WebpAnimEncoder(W, H, {
     quality: job.webp.quality, lossless: job.webp.lossless, optimize: job.optimize, loop: job.loop, alpha: transparent, tolerance: job.tolerance,
   });
   await forEachFrame(src, {
-    start, fps, count,
+    start, fps, count, time,
     onFrame: outFrames(async (n, o, frame) => {
       paintOut(o, frame);
       await enc.addFrame(canvas, frameUs / 1000);
@@ -455,7 +541,7 @@ async function run(job) {
  * compressed on a pool of workers, and compared with the frame before here (the
  * one step that has to go in order).
  */
-async function exportGif(src, { start, fps, count, total, outFrames, frameUs, palette, transparent, paintOut, preview, ctx, W, H, job }) {
+async function exportGif(src, { start, fps, count, time, total, outFrames, frameUs, palette, transparent, paintOut, preview, ctx, W, H, job }) {
   const pool = new WorkerPool(new URL('../lib/gif-worker.js', import.meta.url));
   try {
     await pool.broadcast({ op: 'palette', pal: palette });
@@ -475,7 +561,7 @@ async function exportGif(src, { start, fps, count, total, outFrames, frameUs, pa
       if (pool.load > limit * 2) await enc.frames[enc.frames.length - 1].result;
     };
     await forEachFrame(src, {
-      start, fps, count,
+      start, fps, count, time,
       onFrame: outFrames(async (n, o, frame) => {
         paintOut(o, frame);
         const rgba = ctx.getImageData(0, 0, W, H).data;

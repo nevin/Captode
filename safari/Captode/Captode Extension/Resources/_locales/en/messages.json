@@ -2128,11 +2128,11 @@
   "part_of": {
     "message": "part $1 of $2"
   },
-  "popup_new_in_captode_1_6": {
-    "message": "New in Captode 1.6"
+  "popup_new_in_captode_2_1": {
+    "message": "New in Captode 2.1"
   },
-  "popup_whats_new_1_6": {
-    "message": "Safe areas and one-click rotate for device frames. In Settings: what the icon does, what happens after a screenshot, very long pages, file names, and recording options with auto-stop and a highlighted cursor."
+  "popup_whats_new_2_1": {
+    "message": "Edit your recordings: cut parts out, speed parts up, zoom in (also where you clicked), blur private details, add arrows and labels, crop, put the video on a background, and change the sound."
   },
   "slides_title": {
     "message": "Slides"
@@ -2451,5 +2451,260 @@
   },
   "trim_with_slides_title": {
     "message": "$1 s of the recording and $2 s of slides"
+  },
+  "edit_title": {
+    "message": "Edit"
+  },
+  "edit_kind_cuts": {
+    "message": "Cut"
+  },
+  "edit_kind_speeds": {
+    "message": "Speed up"
+  },
+  "edit_kind_zooms": {
+    "message": "Zoom"
+  },
+  "edit_kind_blurs": {
+    "message": "Blur"
+  },
+  "edit_kind_callouts": {
+    "message": "Callout"
+  },
+  "edit_kind_mutes": {
+    "message": "Mute"
+  },
+  "edit_add_cut_tip": {
+    "message": "Leave out a part  X"
+  },
+  "edit_add_speed_tip": {
+    "message": "Play a part faster  P"
+  },
+  "edit_add_zoom_tip": {
+    "message": "Zoom in on a part of the picture  Z"
+  },
+  "edit_add_blur_tip": {
+    "message": "Hide something private  B"
+  },
+  "edit_add_callout_tip": {
+    "message": "An arrow, box, label or spotlight  C"
+  },
+  "edit_add_mute": {
+    "message": "Mute a part"
+  },
+  "edit_add_mute_tip": {
+    "message": "Silence a part  M"
+  },
+  "edit_undo_tip": {
+    "message": "Undo  ⌘Z"
+  },
+  "edit_redo_tip": {
+    "message": "Redo  ⇧⌘Z"
+  },
+  "edit_autozoom": {
+    "message": "Zoom in on clicks"
+  },
+  "edit_autozoom_tip": {
+    "message": "Zoom in where you clicked while recording"
+  },
+  "edit_zoomed_clicks": {
+    "message": "Zooms added for clicks: $1"
+  },
+  "edit_none": {
+    "message": "Nothing yet. Add a cut, speed-up, zoom, blur or callout at the playhead."
+  },
+  "edit_whole": {
+    "message": "Whole recording"
+  },
+  "edit_whole_toggle": {
+    "message": "For the whole recording"
+  },
+  "edit_removed": {
+    "message": "$1 removed"
+  },
+  "edit_at_playhead": {
+    "message": "At the playhead"
+  },
+  "edit_from": {
+    "message": "From (s)"
+  },
+  "edit_to": {
+    "message": "To (s)"
+  },
+  "edit_speed": {
+    "message": "Speed"
+  },
+  "edit_speed_hint": {
+    "message": "Sped-up parts are silent."
+  },
+  "edit_zoom": {
+    "message": "Zoom"
+  },
+  "edit_zoom_hint": {
+    "message": "Drag the box on the picture to choose where to zoom in. It eases in and out."
+  },
+  "edit_blur_style": {
+    "message": "Style"
+  },
+  "edit_blur_blur": {
+    "message": "Blur"
+  },
+  "edit_blur_pixelate": {
+    "message": "Pixelate"
+  },
+  "edit_blur_box": {
+    "message": "Black box"
+  },
+  "edit_strength": {
+    "message": "Strength"
+  },
+  "edit_draw_hint": {
+    "message": "Drag on the picture to draw it, or drag its handles."
+  },
+  "edit_callout_kind": {
+    "message": "Kind"
+  },
+  "edit_callout_arrow": {
+    "message": "Arrow"
+  },
+  "edit_callout_box": {
+    "message": "Box"
+  },
+  "edit_callout_text": {
+    "message": "Label"
+  },
+  "edit_callout_spot": {
+    "message": "Spotlight"
+  },
+  "edit_text": {
+    "message": "Words"
+  },
+  "edit_text_placeholder": {
+    "message": "Click here"
+  },
+  "edit_colour": {
+    "message": "Colour"
+  },
+  "edit_size": {
+    "message": "Size"
+  },
+  "edit_mute_hint": {
+    "message": "The sound is silent here; the picture plays on."
+  },
+  "edit_cut_hint": {
+    "message": "Left out of the export, picture and sound. Drag its ends on the timeline."
+  },
+  "edit_delete": {
+    "message": "Delete"
+  },
+  "edit_crop": {
+    "message": "Crop"
+  },
+  "edit_crop_on": {
+    "message": "Crop the picture"
+  },
+  "edit_crop_hint": {
+    "message": "Drag on the picture to choose the part to keep"
+  },
+  "edit_crop_reset": {
+    "message": "Don’t crop"
+  },
+  "edit_shape": {
+    "message": "Shape"
+  },
+  "edit_shape_free": {
+    "message": "Free"
+  },
+  "edit_shape_fit": {
+    "message": "Fit the video"
+  },
+  "edit_background": {
+    "message": "Background"
+  },
+  "edit_background_on": {
+    "message": "Put the video on a background"
+  },
+  "edit_background_hint": {
+    "message": "With padding, rounded corners and a shadow. A device frame, when on, takes its place."
+  },
+  "edit_padding": {
+    "message": "Padding"
+  },
+  "edit_corners": {
+    "message": "Corners"
+  },
+  "edit_shadow": {
+    "message": "Shadow"
+  },
+  "edit_sound": {
+    "message": "Sound"
+  },
+  "edit_volume": {
+    "message": "Volume"
+  },
+  "edit_fade_in": {
+    "message": "Fade in"
+  },
+  "edit_fade_out": {
+    "message": "Fade out"
+  },
+  "edit_preview": {
+    "message": "Preview with your edits"
+  },
+  "edit_layer": {
+    "message": "Drawing layer over the picture"
+  },
+  "edit_mark": {
+    "message": "Mark cut"
+  },
+  "edit_mark_end": {
+    "message": "End cut"
+  },
+  "edit_mark_tip": {
+    "message": "Press where a cut starts, then where it ends  ⇧X"
+  },
+  "edit_mark_started": {
+    "message": "Cut started. Go to where it ends and press ⇧X again."
+  },
+  "edit_split": {
+    "message": "Split"
+  },
+  "edit_split_tip": {
+    "message": "Split in two at the playhead"
+  },
+  "edit_silence": {
+    "message": "Cut silent parts"
+  },
+  "edit_silence_tip": {
+    "message": "Leave out the parts where nothing is heard"
+  },
+  "edit_silences_cut": {
+    "message": "Silent parts cut: $1 ($2 s)"
+  },
+  "edit_no_silences": {
+    "message": "No silent parts found"
+  },
+  "edit_rings": {
+    "message": "Show clicks"
+  },
+  "edit_rings_hint": {
+    "message": "A ring where each click was"
+  },
+  "edit_default": {
+    "message": "Use for new recordings"
+  },
+  "edit_default_bg_tip": {
+    "message": "Recordings made from now on start with this background"
+  },
+  "edit_default_sound_tip": {
+    "message": "Recordings made from now on start with this volume and these fades"
+  },
+  "edit_default_bg_saved": {
+    "message": "New recordings will start with this background"
+  },
+  "edit_default_bg_none": {
+    "message": "New recordings will start without a background"
+  },
+  "edit_default_sound_saved": {
+    "message": "New recordings will start with this volume and these fades"
   }
 }

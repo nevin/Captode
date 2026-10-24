@@ -50,9 +50,10 @@ const readStr = (b, p, n) => String.fromCharCode(...b.subarray(p, p + n)).replac
 /**
  * Splits a WebM file into its tracks and their frames.
  * Returns `{ video, audio, duration }`: each track has `codec`, its settings and
- * `frames: [{ timestamp (µs), key, data }]` in file order.
+ * `frames: [{ timestamp (µs), key, data }]` in file order. With `views`, each
+ * frame's data is a view into `buffer` rather than a copy (to read it once, quickly).
  */
-export function demuxWebm(buffer) {
+export function demuxWebm(buffer, { views = false } = {}) {
   const b = new Uint8Array(buffer);
   let scale = 1e6; // nanoseconds per timecode tick
   let durationTicks = 0;
@@ -70,7 +71,7 @@ export function demuxWebm(buffer) {
     q += 3;
     if (flags & 0x06) throw new Error('Laced WebM blocks are not supported');
     if (!t) return null;
-    const frame = { timestamp: Math.round(((cluster + rel) * scale) / 1000), key: simple ? !!(flags & 0x80) : true, data: b.slice(q, end) };
+    const frame = { timestamp: Math.round(((cluster + rel) * scale) / 1000), key: simple ? !!(flags & 0x80) : true, data: views ? b.subarray(q, end) : b.slice(q, end) };
     t.frames.push(frame);
     return frame;
   };

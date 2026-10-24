@@ -2126,11 +2126,11 @@
   "part_of": {
     "message": "parte $1 de $2"
   },
-  "popup_new_in_captode_1_6": {
-    "message": "Novedades de Captode 1.6"
+  "popup_new_in_captode_2_1": {
+    "message": "Novedades de Captode 2.1"
   },
-  "popup_whats_new_1_6": {
-    "message": "Áreas seguras y giro con un clic para los marcos de dispositivo. En Configuración: qué hace el icono, qué pasa tras una captura, páginas muy largas, nombres de archivo y opciones de grabación con parada automática y cursor resaltado."
+  "popup_whats_new_2_1": {
+    "message": "Edita tus grabaciones: quita partes, acelera partes, acerca la imagen (también donde hiciste clic), difumina datos privados, añade flechas y etiquetas, recorta, pon el vídeo sobre un fondo y ajusta el sonido."
   },
   "slides_title": {
     "message": "Diapositivas"
@@ -2449,5 +2449,260 @@
   },
   "trim_with_slides_title": {
     "message": "$1 s de grabación y $2 s de diapositivas"
+  },
+  "edit_title": {
+    "message": "Editar"
+  },
+  "edit_kind_cuts": {
+    "message": "Cortar"
+  },
+  "edit_kind_speeds": {
+    "message": "Acelerar"
+  },
+  "edit_kind_zooms": {
+    "message": "Zoom"
+  },
+  "edit_kind_blurs": {
+    "message": "Difuminar"
+  },
+  "edit_kind_callouts": {
+    "message": "Indicador"
+  },
+  "edit_kind_mutes": {
+    "message": "Silencio"
+  },
+  "edit_add_cut_tip": {
+    "message": "Quitar una parte  X"
+  },
+  "edit_add_speed_tip": {
+    "message": "Reproducir una parte más rápido  P"
+  },
+  "edit_add_zoom_tip": {
+    "message": "Acercar una parte de la imagen  Z"
+  },
+  "edit_add_blur_tip": {
+    "message": "Ocultar algo privado  B"
+  },
+  "edit_add_callout_tip": {
+    "message": "Flecha, recuadro, etiqueta o foco  C"
+  },
+  "edit_add_mute": {
+    "message": "Silenciar una parte"
+  },
+  "edit_add_mute_tip": {
+    "message": "Silenciar una parte  M"
+  },
+  "edit_undo_tip": {
+    "message": "Deshacer  ⌘Z"
+  },
+  "edit_redo_tip": {
+    "message": "Rehacer  ⇧⌘Z"
+  },
+  "edit_autozoom": {
+    "message": "Acercar en los clics"
+  },
+  "edit_autozoom_tip": {
+    "message": "Acercar donde hiciste clic al grabar"
+  },
+  "edit_zoomed_clicks": {
+    "message": "Zooms añadidos para los clics: $1"
+  },
+  "edit_none": {
+    "message": "Nada todavía. Añade un corte, aceleración, zoom, difuminado o indicador en el cabezal."
+  },
+  "edit_whole": {
+    "message": "Toda la grabación"
+  },
+  "edit_whole_toggle": {
+    "message": "En toda la grabación"
+  },
+  "edit_removed": {
+    "message": "$1 eliminado"
+  },
+  "edit_at_playhead": {
+    "message": "En el cabezal"
+  },
+  "edit_from": {
+    "message": "Desde (s)"
+  },
+  "edit_to": {
+    "message": "Hasta (s)"
+  },
+  "edit_speed": {
+    "message": "Velocidad"
+  },
+  "edit_speed_hint": {
+    "message": "Las partes aceleradas no tienen sonido."
+  },
+  "edit_zoom": {
+    "message": "Zoom"
+  },
+  "edit_zoom_hint": {
+    "message": "Arrastra el recuadro sobre la imagen para elegir dónde acercar. Entra y sale suavemente."
+  },
+  "edit_blur_style": {
+    "message": "Estilo"
+  },
+  "edit_blur_blur": {
+    "message": "Difuminar"
+  },
+  "edit_blur_pixelate": {
+    "message": "Pixelar"
+  },
+  "edit_blur_box": {
+    "message": "Recuadro negro"
+  },
+  "edit_strength": {
+    "message": "Intensidad"
+  },
+  "edit_draw_hint": {
+    "message": "Arrastra sobre la imagen para dibujarlo, o arrastra sus tiradores."
+  },
+  "edit_callout_kind": {
+    "message": "Tipo"
+  },
+  "edit_callout_arrow": {
+    "message": "Flecha"
+  },
+  "edit_callout_box": {
+    "message": "Recuadro"
+  },
+  "edit_callout_text": {
+    "message": "Etiqueta"
+  },
+  "edit_callout_spot": {
+    "message": "Foco"
+  },
+  "edit_text": {
+    "message": "Texto"
+  },
+  "edit_text_placeholder": {
+    "message": "Haz clic aquí"
+  },
+  "edit_colour": {
+    "message": "Color"
+  },
+  "edit_size": {
+    "message": "Tamaño"
+  },
+  "edit_mute_hint": {
+    "message": "Aquí no hay sonido; la imagen sigue."
+  },
+  "edit_cut_hint": {
+    "message": "Se quita de la exportación, imagen y sonido. Arrastra sus extremos en la línea de tiempo."
+  },
+  "edit_delete": {
+    "message": "Eliminar"
+  },
+  "edit_crop": {
+    "message": "Recortar"
+  },
+  "edit_crop_on": {
+    "message": "Recortar la imagen"
+  },
+  "edit_crop_hint": {
+    "message": "Arrastra sobre la imagen para elegir la parte que se queda"
+  },
+  "edit_crop_reset": {
+    "message": "No recortar"
+  },
+  "edit_shape": {
+    "message": "Formato"
+  },
+  "edit_shape_free": {
+    "message": "Libre"
+  },
+  "edit_shape_fit": {
+    "message": "Como el vídeo"
+  },
+  "edit_background": {
+    "message": "Fondo"
+  },
+  "edit_background_on": {
+    "message": "Poner el vídeo sobre un fondo"
+  },
+  "edit_background_hint": {
+    "message": "Con margen, esquinas redondeadas y sombra. Si el marco de dispositivo está activado, lo sustituye."
+  },
+  "edit_padding": {
+    "message": "Margen"
+  },
+  "edit_corners": {
+    "message": "Esquinas"
+  },
+  "edit_shadow": {
+    "message": "Sombra"
+  },
+  "edit_sound": {
+    "message": "Sonido"
+  },
+  "edit_volume": {
+    "message": "Volumen"
+  },
+  "edit_fade_in": {
+    "message": "Entrada gradual"
+  },
+  "edit_fade_out": {
+    "message": "Salida gradual"
+  },
+  "edit_preview": {
+    "message": "Vista previa con tus cambios"
+  },
+  "edit_layer": {
+    "message": "Capa de dibujo sobre la imagen"
+  },
+  "edit_mark": {
+    "message": "Marcar"
+  },
+  "edit_mark_end": {
+    "message": "Fin"
+  },
+  "edit_mark_tip": {
+    "message": "Pulsa donde empieza un corte y luego donde termina  ⇧X"
+  },
+  "edit_mark_started": {
+    "message": "Corte iniciado. Ve a donde termina y pulsa ⇧X otra vez."
+  },
+  "edit_split": {
+    "message": "Dividir"
+  },
+  "edit_split_tip": {
+    "message": "Dividir en dos en el cabezal"
+  },
+  "edit_silence": {
+    "message": "Cortar partes en silencio"
+  },
+  "edit_silence_tip": {
+    "message": "Quitar las partes en las que no se oye nada"
+  },
+  "edit_silences_cut": {
+    "message": "Partes en silencio cortadas: $1 ($2 s)"
+  },
+  "edit_no_silences": {
+    "message": "No se encontraron partes en silencio"
+  },
+  "edit_rings": {
+    "message": "Mostrar clics"
+  },
+  "edit_rings_hint": {
+    "message": "Un anillo en cada clic"
+  },
+  "edit_default": {
+    "message": "Usar en grabaciones nuevas"
+  },
+  "edit_default_bg_tip": {
+    "message": "Las grabaciones que hagas a partir de ahora empiezan con este fondo"
+  },
+  "edit_default_sound_tip": {
+    "message": "Las grabaciones que hagas a partir de ahora empiezan con este volumen y estos fundidos"
+  },
+  "edit_default_bg_saved": {
+    "message": "Las grabaciones nuevas empezarán con este fondo"
+  },
+  "edit_default_bg_none": {
+    "message": "Las grabaciones nuevas empezarán sin fondo"
+  },
+  "edit_default_sound_saved": {
+    "message": "Las grabaciones nuevas empezarán con este volumen y estos fundidos"
   }
 }

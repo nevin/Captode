@@ -1,10 +1,10 @@
 // Captode service worker: runs captures, coordinates recordings and switches the
 // toolbar icon between "open the popup" and "stop recording".
-import { putCapture } from './lib/db.js';
+import { putCapture, updateMeta } from './lib/db.js';
 import { getSettings } from './lib/settings.js';
 import {
   pickArea, pickElement, fullPagePrepare, fullPageScroll, fullPageRestore,
-  countdown, captureDelay, showOutline, hideOutline, showInputs, findPrivate,
+  countdown, captureDelay, showOutline, hideOutline, showInputs, trackClicks, findPrivate,
 } from './content/page.js';
 import { t } from './lib/i18n.js';
 import { canRecordTabs, startTabCapture, endTabCapture } from './lib/tab-capture.js';
@@ -442,11 +442,14 @@ async function startRecording({ mode, fps, audio, size = 'page', countdown: want
     target: 'recorder', to: 'offscreen', type: 'rec-start', streamId, fps, audio, aspect, crop, size, pageWidth, title: tab.title, camera: !!camera, mic: !!mic, autoStop: stopAfter,
   });
   if (!res?.ok) {
+    await endTabCapture();
     await run(tab.id, hideOutline).catch(() => {});
     throw new Error(res?.error || t('error_recording_start'));
   }
-  await setRec({ state: 'recording', kind: 'offscreen', tabId: tab.id, outline: !!crop, inputs: !!inputs, cursor: !!cursor });
+  await chrome.storage.session.set({ recClicks: [] });
+  await setRec({ state: 'recording', kind: 'offscreen', tabId: tab.id, outline: !!crop, inputs: !!inputs, cursor: !!cursor, startedAt: Date.now(), crop });
   if (inputs || cursor) await run(tab.id, showInputs, true, { clicks: !!inputs, cursor: !!cursor }).catch(() => {});
+  await run(tab.id, trackClicks, true).catch(() => {});
   await enterRecordingUi();
 }
 
@@ -454,10 +457,28 @@ async function startRecording({ mode, fps, audio, size = 'page', countdown: want
 chrome.tabs.onUpdated.addListener(async (tabId, change) => {
   if (change.status !== 'complete') return;
   const rec = await getRec();
-  if (rec?.state === 'recording' && (rec.inputs || rec.cursor) && rec.tabId === tabId) {
-    await run(tabId, showInputs, true, { clicks: !!rec.inputs, cursor: !!rec.cursor }).catch(() => {});
+  if (rec?.state === 'recording' && rec.kind === 'offscreen' && rec.tabId === tabId) {
+    if (rec.inputs || rec.cursor) await run(tabId, showInputs, true, { clicks: !!rec.inputs, cursor: !!rec.cursor }).catch(() => {});
+    await run(tabId, trackClicks, true).catch(() => {});
   }
 });
+
+// Clicks in the recorded tab, kept with the recording for zooms (one at a time, so none is lost).
+let clickQueue = Promise.resolve();
+function keepClick(msg, tabId) {
+  clickQueue = clickQueue.then(async () => {
+    const rec = await getRec();
+    if (rec?.state !== 'recording' || rec.kind !== 'offscreen' || rec.tabId !== tabId || !rec.startedAt) return;
+    let { x, y } = msg;
+    if (rec.crop) { x = (x - rec.crop.x) / rec.crop.w; y = (y - rec.crop.y) / rec.crop.h; } // in the area recorded
+    if (!(x >= 0 && x <= 1 && y >= 0 && y <= 1)) return;
+    const { recClicks = [] } = await chrome.storage.session.get('recClicks');
+    if (recClicks.length >= 2000) return;
+    recClicks.push({ t: Math.round(Math.max(0, msg.at - rec.startedAt)) / 1000, x: Math.round(x * 1e4) / 1e4, y: Math.round(y * 1e4) / 1e4 });
+    await chrome.storage.session.set({ recClicks });
+  }).catch(() => {});
+  return clickQueue;
+}
 
 async function enterRecordingUi() {
   await chrome.action.setPopup({ popup: '' });
@@ -500,12 +521,18 @@ chrome.storage.onChanged.addListener(async (changes, area) => {
 });
 
 async function finishRecording(id, kind) {
+  await clickQueue; // the last clicks first
   const rec = await getRec();
   await setRec(null);
   await leaveRecordingUi();
   if (rec?.outline) await run(rec.tabId, hideOutline).catch(() => {});
   if (rec?.inputs || rec?.cursor) await run(rec.tabId, showInputs, false).catch(() => {});
   if (kind === 'offscreen') {
+    if (rec) await run(rec.tabId, trackClicks, false).catch(() => {});
+    await clickQueue;
+    const { recClicks = [] } = await chrome.storage.session.get('recClicks');
+    await chrome.storage.session.remove('recClicks');
+    if (recClicks.length && id) await updateMeta(id, { clicks: recClicks }).catch(() => {});
     await endTabCapture();
     const tab = rec ? await chrome.tabs.get(rec.tabId).catch(() => null) : null;
     await openPage(`video/video.html?id=${id}`, tab);
@@ -613,6 +640,11 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     return;
   }
 
+  if (msg.type === 'rec-click') {
+    if (sender.tab?.id) keepClick(msg, sender.tab.id);
+    return;
+  }
+
   if (msg.type === 'rec-tick') {
     const s = Math.floor(msg.elapsed);
     badge(s < 60 ? `${s}s` : `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`);
@@ -626,7 +658,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 });
 
 // After an update that adds features, the popup says what's new, once.
-const WHATS_NEW = '1.6.0';
+const WHATS_NEW = '2.1.0';
 chrome.runtime.onInstalled.addListener(({ reason, previousVersion }) => {
   createMenu();
   applyIconAction();

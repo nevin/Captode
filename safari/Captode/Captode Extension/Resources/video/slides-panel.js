@@ -14,7 +14,7 @@ const EDGE_PX = 7; // how near an overlay bar's right edge a press resizes it (.
 
 /**
  * opts: {
- *   player, slides (as saved, or none), duration(), trim() → { start, end },
+ *   player, slides (as saved, or none), duration(), trim() → { start, end }, clip() (lib/video-edits.js clipMap),
  *   size() → [width, height] of the exported picture, fmtTime(s),
  *   changed() after any change (estimates, a stale export), save(slides), busy()
  * }
@@ -234,7 +234,8 @@ export function mountSlides(opts) {
     const { start, end } = opts.trim();
     const fps = 60; // steps of the fades
     if (now > end + 1e-3) return [];
-    return overlaysAt(overlaySchedule(slides, start, end, fps), (now - start) * fps, fps)
+    const map = opts.clip?.(); // with parts cut or sped up, an overlay goes by where it plays
+    return overlaysAt(overlaySchedule(slides, start, end, fps, map), (map ? map.outOf(now) : now - start) * fps, fps)
       .map(({ e, a, dx }) => ({ id: e.s.id, canvas: liveCanvas(e.s), a, dx }))
       .filter((x) => x.canvas);
   }

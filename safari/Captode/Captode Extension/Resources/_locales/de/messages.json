@@ -2126,11 +2126,11 @@
   "part_of": {
     "message": "Teil $1 von $2"
   },
-  "popup_new_in_captode_1_6": {
-    "message": "Neu in Captode 1.6"
+  "popup_new_in_captode_2_1": {
+    "message": "Neu in Captode 2.1"
   },
-  "popup_whats_new_1_6": {
-    "message": "Sichere Bereiche und Drehen mit einem Klick für Geräterahmen. In den Einstellungen: was das Symbol tut, was nach einem Screenshot passiert, sehr lange Seiten, Dateinamen und Aufnahmeoptionen mit automatischem Stopp und hervorgehobenem Zeiger."
+  "popup_whats_new_2_1": {
+    "message": "Aufnahmen bearbeiten: Teile herausschneiden oder beschleunigen, heranzoomen (auch dort, wo Sie geklickt haben), Privates unkenntlich machen, Pfeile und Beschriftungen hinzufügen, zuschneiden, das Video auf einen Hintergrund setzen und den Ton anpassen."
   },
   "slides_title": {
     "message": "Folien"
@@ -2449,5 +2449,260 @@
   },
   "trim_with_slides_title": {
     "message": "$1 s Aufnahme und $2 s Folien"
+  },
+  "edit_title": {
+    "message": "Bearbeiten"
+  },
+  "edit_kind_cuts": {
+    "message": "Schnitt"
+  },
+  "edit_kind_speeds": {
+    "message": "Schneller"
+  },
+  "edit_kind_zooms": {
+    "message": "Zoom"
+  },
+  "edit_kind_blurs": {
+    "message": "Unkenntlich"
+  },
+  "edit_kind_callouts": {
+    "message": "Hinweis"
+  },
+  "edit_kind_mutes": {
+    "message": "Stumm"
+  },
+  "edit_add_cut_tip": {
+    "message": "Einen Teil weglassen  X"
+  },
+  "edit_add_speed_tip": {
+    "message": "Einen Teil schneller abspielen  P"
+  },
+  "edit_add_zoom_tip": {
+    "message": "Einen Bildausschnitt vergrößern  Z"
+  },
+  "edit_add_blur_tip": {
+    "message": "Etwas Privates verbergen  B"
+  },
+  "edit_add_callout_tip": {
+    "message": "Pfeil, Rahmen, Beschriftung oder Spotlight  C"
+  },
+  "edit_add_mute": {
+    "message": "Einen Teil stummschalten"
+  },
+  "edit_add_mute_tip": {
+    "message": "Einen Teil stumm schalten  M"
+  },
+  "edit_undo_tip": {
+    "message": "Rückgängig  ⌘Z"
+  },
+  "edit_redo_tip": {
+    "message": "Wiederholen  ⇧⌘Z"
+  },
+  "edit_autozoom": {
+    "message": "Bei Klicks heranzoomen"
+  },
+  "edit_autozoom_tip": {
+    "message": "Dort heranzoomen, wo Sie beim Aufnehmen geklickt haben"
+  },
+  "edit_zoomed_clicks": {
+    "message": "Zooms für Klicks hinzugefügt: $1"
+  },
+  "edit_none": {
+    "message": "Noch nichts. Fügen Sie an der Abspielposition einen Schnitt, eine Beschleunigung, einen Zoom, eine Unkenntlichmachung oder einen Hinweis ein."
+  },
+  "edit_whole": {
+    "message": "Ganze Aufnahme"
+  },
+  "edit_whole_toggle": {
+    "message": "Für die ganze Aufnahme"
+  },
+  "edit_removed": {
+    "message": "$1 entfernt"
+  },
+  "edit_at_playhead": {
+    "message": "An der Abspielposition"
+  },
+  "edit_from": {
+    "message": "Von (s)"
+  },
+  "edit_to": {
+    "message": "Bis (s)"
+  },
+  "edit_speed": {
+    "message": "Tempo"
+  },
+  "edit_speed_hint": {
+    "message": "Beschleunigte Teile sind stumm."
+  },
+  "edit_zoom": {
+    "message": "Zoom"
+  },
+  "edit_zoom_hint": {
+    "message": "Ziehen Sie den Rahmen im Bild dorthin, wo herangezoomt werden soll. Der Zoom setzt sanft ein und aus."
+  },
+  "edit_blur_style": {
+    "message": "Art"
+  },
+  "edit_blur_blur": {
+    "message": "Weichzeichnen"
+  },
+  "edit_blur_pixelate": {
+    "message": "Verpixeln"
+  },
+  "edit_blur_box": {
+    "message": "Schwarzer Balken"
+  },
+  "edit_strength": {
+    "message": "Stärke"
+  },
+  "edit_draw_hint": {
+    "message": "Ziehen Sie im Bild, um es zu zeichnen, oder ziehen Sie an den Griffen."
+  },
+  "edit_callout_kind": {
+    "message": "Art"
+  },
+  "edit_callout_arrow": {
+    "message": "Pfeil"
+  },
+  "edit_callout_box": {
+    "message": "Rahmen"
+  },
+  "edit_callout_text": {
+    "message": "Beschriftung"
+  },
+  "edit_callout_spot": {
+    "message": "Spotlight"
+  },
+  "edit_text": {
+    "message": "Text"
+  },
+  "edit_text_placeholder": {
+    "message": "Hier klicken"
+  },
+  "edit_colour": {
+    "message": "Farbe"
+  },
+  "edit_size": {
+    "message": "Größe"
+  },
+  "edit_mute_hint": {
+    "message": "Hier ist der Ton stumm; das Bild läuft weiter."
+  },
+  "edit_cut_hint": {
+    "message": "Wird beim Export mit Bild und Ton weggelassen. Ziehen Sie die Enden in der Zeitleiste."
+  },
+  "edit_delete": {
+    "message": "Löschen"
+  },
+  "edit_crop": {
+    "message": "Zuschneiden"
+  },
+  "edit_crop_on": {
+    "message": "Bild zuschneiden"
+  },
+  "edit_crop_hint": {
+    "message": "Ziehen Sie im Bild, um den Ausschnitt zu wählen"
+  },
+  "edit_crop_reset": {
+    "message": "Nicht zuschneiden"
+  },
+  "edit_shape": {
+    "message": "Format"
+  },
+  "edit_shape_free": {
+    "message": "Frei"
+  },
+  "edit_shape_fit": {
+    "message": "Wie das Video"
+  },
+  "edit_background": {
+    "message": "Hintergrund"
+  },
+  "edit_background_on": {
+    "message": "Video auf einen Hintergrund setzen"
+  },
+  "edit_background_hint": {
+    "message": "Mit Rand, abgerundeten Ecken und Schatten. Ein eingeschalteter Geräterahmen tritt an seine Stelle."
+  },
+  "edit_padding": {
+    "message": "Rand"
+  },
+  "edit_corners": {
+    "message": "Ecken"
+  },
+  "edit_shadow": {
+    "message": "Schatten"
+  },
+  "edit_sound": {
+    "message": "Ton"
+  },
+  "edit_volume": {
+    "message": "Lautstärke"
+  },
+  "edit_fade_in": {
+    "message": "Einblenden"
+  },
+  "edit_fade_out": {
+    "message": "Ausblenden"
+  },
+  "edit_preview": {
+    "message": "Vorschau mit Ihren Änderungen"
+  },
+  "edit_layer": {
+    "message": "Zeichenebene über dem Bild"
+  },
+  "edit_mark": {
+    "message": "Markieren"
+  },
+  "edit_mark_end": {
+    "message": "Ende"
+  },
+  "edit_mark_tip": {
+    "message": "Am Anfang eines Schnitts drücken, dann an seinem Ende  ⇧X"
+  },
+  "edit_mark_started": {
+    "message": "Schnitt begonnen. Zum Ende gehen und erneut ⇧X drücken."
+  },
+  "edit_split": {
+    "message": "Teilen"
+  },
+  "edit_split_tip": {
+    "message": "Am Abspielkopf in zwei teilen"
+  },
+  "edit_silence": {
+    "message": "Stille Stellen schneiden"
+  },
+  "edit_silence_tip": {
+    "message": "Stellen weglassen, an denen nichts zu hören ist"
+  },
+  "edit_silences_cut": {
+    "message": "Stille Stellen geschnitten: $1 ($2 s)"
+  },
+  "edit_no_silences": {
+    "message": "Keine stillen Stellen gefunden"
+  },
+  "edit_rings": {
+    "message": "Klicks zeigen"
+  },
+  "edit_rings_hint": {
+    "message": "Ein Ring an jeder Klickstelle"
+  },
+  "edit_default": {
+    "message": "Für neue Aufnahmen verwenden"
+  },
+  "edit_default_bg_tip": {
+    "message": "Ab jetzt beginnen Aufnahmen mit diesem Hintergrund"
+  },
+  "edit_default_sound_tip": {
+    "message": "Ab jetzt beginnen Aufnahmen mit dieser Lautstärke und diesen Blenden"
+  },
+  "edit_default_bg_saved": {
+    "message": "Neue Aufnahmen beginnen mit diesem Hintergrund"
+  },
+  "edit_default_bg_none": {
+    "message": "Neue Aufnahmen beginnen ohne Hintergrund"
+  },
+  "edit_default_sound_saved": {
+    "message": "Neue Aufnahmen beginnen mit dieser Lautstärke und diesen Blenden"
   }
 }

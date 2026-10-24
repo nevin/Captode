@@ -2126,11 +2126,11 @@
   "part_of": {
     "message": "$2 のうち $1"
   },
-  "popup_new_in_captode_1_6": {
-    "message": "Captode 1.6 の新機能"
+  "popup_new_in_captode_2_1": {
+    "message": "Captode 2.1 の新機能"
   },
-  "popup_whats_new_1_6": {
-    "message": "デバイスフレームにセーフエリアとワンクリック回転。設定では、アイコンの動作、スクリーンショット後の動作、とても長いページ、ファイル名、自動停止とカーソル強調付きの録画オプションを選べます。"
+  "popup_whats_new_2_1": {
+    "message": "録画を編集：一部をカット・早送り、ズーム（クリックした場所にも）、個人情報のぼかし、矢印やラベルの追加、切り抜き、背景の追加、音声の調整。"
   },
   "slides_title": {
     "message": "スライド"
@@ -2449,5 +2449,260 @@
   },
   "trim_with_slides_title": {
     "message": "録画 $1 秒とスライド $2 秒"
+  },
+  "edit_title": {
+    "message": "編集"
+  },
+  "edit_kind_cuts": {
+    "message": "カット"
+  },
+  "edit_kind_speeds": {
+    "message": "早送り"
+  },
+  "edit_kind_zooms": {
+    "message": "ズーム"
+  },
+  "edit_kind_blurs": {
+    "message": "ぼかし"
+  },
+  "edit_kind_callouts": {
+    "message": "注釈"
+  },
+  "edit_kind_mutes": {
+    "message": "ミュート"
+  },
+  "edit_add_cut_tip": {
+    "message": "一部を取り除く  X"
+  },
+  "edit_add_speed_tip": {
+    "message": "一部を速く再生  P"
+  },
+  "edit_add_zoom_tip": {
+    "message": "画面の一部を拡大  Z"
+  },
+  "edit_add_blur_tip": {
+    "message": "見せたくない部分を隠す  B"
+  },
+  "edit_add_callout_tip": {
+    "message": "矢印・枠・ラベル・スポットライト  C"
+  },
+  "edit_add_mute": {
+    "message": "一部をミュート"
+  },
+  "edit_add_mute_tip": {
+    "message": "一部を無音にする  M"
+  },
+  "edit_undo_tip": {
+    "message": "取り消す  ⌘Z"
+  },
+  "edit_redo_tip": {
+    "message": "やり直す  ⇧⌘Z"
+  },
+  "edit_autozoom": {
+    "message": "クリック位置を拡大"
+  },
+  "edit_autozoom_tip": {
+    "message": "録画中にクリックした場所を拡大"
+  },
+  "edit_zoomed_clicks": {
+    "message": "クリックのズームを追加しました: $1"
+  },
+  "edit_none": {
+    "message": "まだありません。再生位置にカット・早送り・ズーム・ぼかし・注釈を追加できます。"
+  },
+  "edit_whole": {
+    "message": "録画全体"
+  },
+  "edit_whole_toggle": {
+    "message": "録画全体に適用"
+  },
+  "edit_removed": {
+    "message": "$1を削除しました"
+  },
+  "edit_at_playhead": {
+    "message": "再生位置に"
+  },
+  "edit_from": {
+    "message": "開始（秒）"
+  },
+  "edit_to": {
+    "message": "終了（秒）"
+  },
+  "edit_speed": {
+    "message": "速度"
+  },
+  "edit_speed_hint": {
+    "message": "早送りした部分は無音になります。"
+  },
+  "edit_zoom": {
+    "message": "ズーム"
+  },
+  "edit_zoom_hint": {
+    "message": "画面上の枠をドラッグして拡大する場所を選びます。なめらかに拡大・縮小します。"
+  },
+  "edit_blur_style": {
+    "message": "スタイル"
+  },
+  "edit_blur_blur": {
+    "message": "ぼかし"
+  },
+  "edit_blur_pixelate": {
+    "message": "モザイク"
+  },
+  "edit_blur_box": {
+    "message": "黒塗り"
+  },
+  "edit_strength": {
+    "message": "強さ"
+  },
+  "edit_draw_hint": {
+    "message": "画面上をドラッグして描くか、ハンドルをドラッグします。"
+  },
+  "edit_callout_kind": {
+    "message": "種類"
+  },
+  "edit_callout_arrow": {
+    "message": "矢印"
+  },
+  "edit_callout_box": {
+    "message": "枠"
+  },
+  "edit_callout_text": {
+    "message": "ラベル"
+  },
+  "edit_callout_spot": {
+    "message": "スポットライト"
+  },
+  "edit_text": {
+    "message": "テキスト"
+  },
+  "edit_text_placeholder": {
+    "message": "ここをクリック"
+  },
+  "edit_colour": {
+    "message": "色"
+  },
+  "edit_size": {
+    "message": "サイズ"
+  },
+  "edit_mute_hint": {
+    "message": "この間は無音になり、映像はそのまま流れます。"
+  },
+  "edit_cut_hint": {
+    "message": "書き出しから映像と音声ごと取り除きます。タイムラインで両端をドラッグできます。"
+  },
+  "edit_delete": {
+    "message": "削除"
+  },
+  "edit_crop": {
+    "message": "切り抜き"
+  },
+  "edit_crop_on": {
+    "message": "画面を切り抜く"
+  },
+  "edit_crop_hint": {
+    "message": "画面上をドラッグして残す部分を選びます"
+  },
+  "edit_crop_reset": {
+    "message": "切り抜かない"
+  },
+  "edit_shape": {
+    "message": "形"
+  },
+  "edit_shape_free": {
+    "message": "自由"
+  },
+  "edit_shape_fit": {
+    "message": "動画に合わせる"
+  },
+  "edit_background": {
+    "message": "背景"
+  },
+  "edit_background_on": {
+    "message": "動画を背景の上に置く"
+  },
+  "edit_background_hint": {
+    "message": "余白・角丸・影付き。デバイスフレームがオンのときはそちらを使います。"
+  },
+  "edit_padding": {
+    "message": "余白"
+  },
+  "edit_corners": {
+    "message": "角丸"
+  },
+  "edit_shadow": {
+    "message": "影"
+  },
+  "edit_sound": {
+    "message": "音声"
+  },
+  "edit_volume": {
+    "message": "音量"
+  },
+  "edit_fade_in": {
+    "message": "フェードイン"
+  },
+  "edit_fade_out": {
+    "message": "フェードアウト"
+  },
+  "edit_preview": {
+    "message": "編集を反映したプレビュー"
+  },
+  "edit_layer": {
+    "message": "画面上の描画レイヤー"
+  },
+  "edit_mark": {
+    "message": "範囲指定"
+  },
+  "edit_mark_end": {
+    "message": "終わり"
+  },
+  "edit_mark_tip": {
+    "message": "カットの始めで押し、次に終わりで押します  ⇧X"
+  },
+  "edit_mark_started": {
+    "message": "カットを開始しました。終わりの位置でもう一度 ⇧X を押してください。"
+  },
+  "edit_split": {
+    "message": "分割"
+  },
+  "edit_split_tip": {
+    "message": "再生位置で 2 つに分割"
+  },
+  "edit_silence": {
+    "message": "無音部分をカット"
+  },
+  "edit_silence_tip": {
+    "message": "何も聞こえない部分を取り除きます"
+  },
+  "edit_silences_cut": {
+    "message": "無音部分をカット: $1 か所（$2 秒）"
+  },
+  "edit_no_silences": {
+    "message": "無音部分は見つかりませんでした"
+  },
+  "edit_rings": {
+    "message": "クリックを表示"
+  },
+  "edit_rings_hint": {
+    "message": "クリックした場所に輪を表示"
+  },
+  "edit_default": {
+    "message": "新しい録画にも使う"
+  },
+  "edit_default_bg_tip": {
+    "message": "これからの録画はこの背景で始まります"
+  },
+  "edit_default_sound_tip": {
+    "message": "これからの録画はこの音量とフェードで始まります"
+  },
+  "edit_default_bg_saved": {
+    "message": "新しい録画はこの背景で始まります"
+  },
+  "edit_default_bg_none": {
+    "message": "新しい録画は背景なしで始まります"
+  },
+  "edit_default_sound_saved": {
+    "message": "新しい録画はこの音量とフェードで始まります"
   }
 }

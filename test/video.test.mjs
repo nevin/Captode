@@ -184,6 +184,47 @@ function opusMp4(video, clip, { gapAt = Infinity, gap = 0 } = {}) {
   }, clip, gapAt, gap);
 }
 
+/** Adds an edit of `kind` in the Edit section, from `from` to `to` (s); it stays chosen. */
+async function addEdit(video, kind, from, to) {
+  await video.evaluate((from) => {
+    document.querySelector('#edit-section').open = true;
+    document.querySelector('#sound-section').open = true;
+    document.querySelector('#player').currentTime = from;
+  }, from);
+  await sleep(150);
+  await video.click(kind === 'mutes' ? '#au-mute' : `#ed-add [data-add="${kind}"]`);
+  await video.evaluate((to) => {
+    const el = document.querySelector('#ed-item [data-k="to"]');
+    el.value = String(to);
+    el.dispatchEvent(new Event('change', { bubbles: true }));
+  }, to);
+  await sleep(50);
+}
+const clearEdits = (video) => video.evaluate(() => captodeEdits.replace({}));
+/** The times stamped on the exported video's frames at `times`. */
+const outTimes = (video, times) => video.evaluate(async (times) => {
+  const v = document.querySelector('#out-video');
+  const res = [];
+  for (const t of times) {
+    await new Promise((r) => { v.addEventListener('seeked', r, { once: true }); v.currentTime = t; });
+    res.push(lab.frameTime(v));
+  }
+  return res;
+}, times);
+/** The loudest sample of the exported video's sound in each [from, to] (s). */
+const outLevels = (video, ranges) => video.evaluate(async (ranges) => {
+  const out = document.querySelector('#out-video');
+  const buf = await new OfflineAudioContext(1, 48000, 48000).decodeAudioData(await (await fetch(out.src)).arrayBuffer());
+  const d = buf.getChannelData(0);
+  return ranges.map(([a, b]) => d.subarray(Math.round(a * buf.sampleRate), Math.round(b * buf.sampleRate)).reduce((m, x) => Math.max(m, Math.abs(x)), 0));
+}, ranges);
+/** Clicks `sel` once scrolled to the middle of the panel, clear of the export bar under it. */
+async function tap(video, sel) {
+  await video.$eval(sel, (el) => el.scrollIntoView({ block: 'center' }));
+  await video.click(sel);
+}
+const shownLength = async (video) => parseFloat(await video.$eval('#dims b', (e) => e.textContent));
+
 export const tests = {
   async 'MP4 export: whole clip, faster than real time'({ exportAs, video }) {
     await video.click('#formats [data-f="mp4"]');
@@ -999,6 +1040,404 @@ export const tests = {
         await video.evaluate((title) => [...document.querySelectorAll('#slide-list .slide-item')].find((i) => i.querySelector('b').textContent === title)?.click(), title);
         await video.click('#sl-del');
       }
+    }
+  },
+  async 'edits: a part cut is left out of the picture and the sound, and playback skips it'({ video, exportAs }) {
+    try {
+      await addEdit(video, 'cuts', 2, 4);
+      near(await shownLength(video), 6, 0.1, 'length shown with the cut');
+      const r = await exportAs('mp4');
+      ok(!r.failed && !r.fallback, `export: ${r.failed || r.fallback}`);
+      near(r.duration, 6, 0.15, 'MP4 duration');
+      const [a, b] = await outTimes(video, [1, 3]);
+      near(a, 1, 0.07, 'frame before the cut');
+      near(b, 5, 0.07, 'frame after the cut');
+      const [before, after] = await outLevels(video, [[0.5, 1.8], [2.3, 5.5]]);
+      ok(before > 0.3 && after > 0.3, `sound either side of the cut: ${before.toFixed(2)}, ${after.toFixed(2)}`);
+      const w = await exportAs('webm');
+      ok(!w.failed && !w.fallback, `WebM export: ${w.failed || w.fallback}`);
+      near(w.duration, 6, 0.15, 'WebM duration');
+      // Playback jumps over it.
+      await video.evaluate(() => { document.querySelector('#player').currentTime = 1.7; });
+      await sleep(200);
+      await video.evaluate(() => document.querySelector('#play').click());
+      await sleep(900);
+      const now = await video.evaluate(() => { const p = document.querySelector('#player'); p.pause(); return p.currentTime; });
+      ok(now > 4, `playing from 1.7 s for 0.9 s reached ${now.toFixed(2)} s`);
+      // Delete takes it away again.
+      await video.evaluate(() => document.activeElement?.blur());
+      await video.keyboard.press('Delete');
+      near(await shownLength(video), 8, 0.1, 'length after deleting the cut');
+    } finally {
+      await clearEdits(video);
+    }
+  },
+
+  async 'edits: a sped-up part plays faster and silent'({ video, exportAs }) {
+    try {
+      await addEdit(video, 'speeds', 0, 4);
+      await video.click('#ed-item [data-seg="rate"] [data-v="4"]');
+      near(await shownLength(video), 5, 0.1, 'length shown at 4×');
+      const r = await exportAs('mp4');
+      ok(!r.failed && !r.fallback, `export: ${r.failed || r.fallback}`);
+      near(r.duration, 5, 0.15, 'duration');
+      const [a, b] = await outTimes(video, [0.5, 2]);
+      near(a, 2, 0.15, 'half a second in, at 4×');
+      near(b, 5, 0.07, 'after the sped-up part');
+      const [fast, normal] = await outLevels(video, [[0.1, 0.85], [1.3, 4.5]]);
+      ok(fast < 0.01 && normal > 0.3, `sound while sped up ${fast.toFixed(3)}, after ${normal.toFixed(2)}`);
+    } finally {
+      await clearEdits(video);
+    }
+  },
+
+  async 'edits: crop, a blurred box drawn on the picture, and a background'({ video, exportAs }) {
+    try {
+      await video.evaluate(() => { document.querySelector('#crop-section').open = true; document.querySelector('#bg-section').open = true; });
+      await video.click('#crop-on');
+      await video.click('#bg-on');
+      await addEdit(video, 'blurs', 0, 8);
+      await video.click('#ed-item [data-seg="mode"] [data-v="box"]');
+      await video.click('#ed-item [data-k="whole"]');
+      // Drawn anew on the picture: from 20 % to 40 % across, 20 % to 30 % down.
+      const r0 = await video.$eval('#fx-edit', (e) => { const r = e.getBoundingClientRect(); return { x: r.x, y: r.y, w: r.width, h: r.height, hidden: e.classList.contains('hidden') }; });
+      ok(!r0.hidden, 'the drawing layer shows while a blur is chosen');
+      await video.mouse.move(r0.x + r0.w * 0.2, r0.y + r0.h * 0.2);
+      await video.mouse.down();
+      await video.mouse.move(r0.x + r0.w * 0.4, r0.y + r0.h * 0.3, { steps: 5 });
+      await video.mouse.up();
+      const b = await video.evaluate(() => captodeEdits.get().blurs[0]);
+      ok(Math.abs(b.x - 0.2) < 0.01 && Math.abs(b.y - 0.2) < 0.01 && Math.abs(b.w - 0.2) < 0.01 && Math.abs(b.h - 0.1) < 0.01, `box drawn: ${JSON.stringify(b)}`);
+      // Not chosen: the player shows the picture as it will be exported.
+      await video.keyboard.press('Escape');
+      await sleep(200);
+      const view = await video.evaluate(() => ({ fx: !document.querySelector('#fx-view').classList.contains('hidden'), layer: !document.querySelector('#fx-edit').classList.contains('hidden') }));
+      ok(view.fx && !view.layer, `preview ${JSON.stringify(view)}`);
+      // The crop keeps 80 %: 1024 × 576; the padding is 6 % of 576 (35 px) each side.
+      const dims = await video.$eval('#dims', (e) => e.textContent);
+      ok(dims.includes('1094 × 646'), dims);
+      const r = await exportAs('mp4');
+      ok(!r.failed && !r.fallback, `export: ${r.failed || r.fallback}`);
+      ok(r.width === 1094 && r.height === 646, `size ${r.width}×${r.height}`);
+      const px = await video.evaluate(async () => {
+        const v = document.querySelector('#out-video');
+        await new Promise((res) => { v.addEventListener('seeked', res, { once: true }); v.currentTime = 1; });
+        const c = new OffscreenCanvas(v.videoWidth, v.videoHeight).getContext('2d', { willReadFrequently: true });
+        c.drawImage(v, 0, 0);
+        const at = (x, y) => [...c.getImageData(x, y, 1, 1).data].slice(0, 3);
+        // The box's middle, (0.3, 0.25) of the recording: (0.25, 0.1875) of the crop.
+        return { box: at(35 + 256, 35 + 108), corner: at(4, 4) };
+      });
+      ok(px.box.every((c) => c < 45), `blurred box ${px.box}`);
+      ok(diff(px.corner, [91, 75, 255]) < 40, `background ${px.corner}`);
+    } finally {
+      await clearEdits(video);
+      await video.evaluate(() => { for (const id of ['#crop-section', '#bg-section']) document.querySelector(id).open = false; });
+    }
+  },
+
+  async 'edits: a zoom shows the middle of the picture larger'({ video, exportAs }) {
+    try {
+      await addEdit(video, 'zooms', 0, 8);
+      const r = await exportAs('mp4');
+      ok(!r.failed && !r.fallback, `export: ${r.failed || r.fallback}`);
+      ok(r.width === 1280 && r.height === 720, `size ${r.width}×${r.height}`);
+      // At 2×, the stamp's bits 3–8 (x 385–885, y 500) show at twice the distance from the middle.
+      const out = await video.evaluate(async () => {
+        const read = async (v, t, map) => {
+          await new Promise((res) => { v.addEventListener('seeked', res, { once: true }); v.currentTime = t; });
+          const c = new OffscreenCanvas(1280, 720).getContext('2d', { willReadFrequently: true });
+          c.drawImage(v, 0, 0, 1280, 720);
+          let n = 0;
+          for (let b = 3; b <= 8; b++) { const [x, y] = map(85 + b * 100, 500); if (c.getImageData(x, y, 1, 1).data[1] > 128) n |= 1 << b; }
+          return n;
+        };
+        const res = [];
+        for (const t of [2, 4, 6]) {
+          const zoomed = await read(document.querySelector('#out-video'), t, (x, y) => [(x - 320) * 2, (y - 180) * 2]);
+          const src = await read(document.querySelector('#player'), t, (x, y) => [x, y]);
+          res.push([zoomed, src]);
+        }
+        return res;
+      });
+      ok(out.every(([z, s]) => z === s) && out.some(([, s]) => s), `bits zoomed / in the recording: ${JSON.stringify(out)}`);
+    } finally {
+      await clearEdits(video);
+    }
+  },
+
+  async 'edits: volume, a fade in and a muted part'({ video, exportAs, set }) {
+    try {
+      await video.evaluate(() => { document.querySelector('#sound-section').open = true; });
+      await set('#au-volume', '0');
+      let r = await exportAs('mp4');
+      ok(!r.failed && !r.fallback, `export: ${r.failed || r.fallback}`);
+      const [silent] = await outLevels(video, [[0.2, 7.5]]);
+      ok(silent < 0.01, `at volume 0: ${silent.toFixed(3)}`);
+      await set('#au-volume', '100');
+      await video.select('#au-fade-in', '2');
+      await addEdit(video, 'mutes', 3, 5);
+      r = await exportAs('mp4');
+      const [fading, before, muted, after] = await outLevels(video, [[0.05, 0.25], [2.2, 2.8], [3.2, 4.8], [5.3, 7]]);
+      ok(fading < 0.2, `fading in: ${fading.toFixed(2)}`);
+      ok(muted < 0.01 && before > 0.3 && after > 0.3, `muted ${muted.toFixed(3)}, before ${before.toFixed(2)}, after ${after.toFixed(2)}`);
+      // WebM, its sound encoded again, keeps the muted part too.
+      r = await exportAs('webm');
+      ok(!r.failed && !r.fallback, `WebM export: ${r.failed || r.fallback}`);
+      const [wMuted, wAfter] = await outLevels(video, [[3.2, 4.8], [5.3, 7]]);
+      ok(wMuted < 0.01 && wAfter > 0.3, `WebM muted ${wMuted.toFixed(3)}, after ${wAfter.toFixed(2)}`);
+    } finally {
+      await clearEdits(video);
+      await video.evaluate(() => { document.querySelector('#sound-section').open = false; });
+    }
+  },
+
+  async 'edits in the in-page exports, without the worker'({ video, exportAs, set }) {
+    try {
+      await addEdit(video, 'cuts', 2, 4);
+      await video.evaluate(() => { document.querySelector('#crop-section').open = true; });
+      await video.click('#crop-on');
+      await video.keyboard.press('Escape');
+      await breakWorker(video);
+      await set('#optimize', false);
+      const g = await exportAs('gif');
+      ok(!g.failed && g.fallback, `GIF: ${g.failed || 'not the in-page exporter'}`);
+      const planned = Number((await video.$eval('#dims', (e) => e.textContent)).match(/(\d+) frames/)[1]);
+      ok(g.frames === planned, `${g.frames} frames, ${planned} planned`);
+      ok(g.width / g.height > 1.7 && g.width / g.height < 1.8, `GIF ${g.width}×${g.height}`);
+      const m = await exportAs('mp4');
+      ok(!m.failed && m.fallback, `MP4: ${m.failed || 'not the in-page exporter'}`);
+      near(m.duration, 6, 0.3, 'in-page MP4 duration');
+      ok(m.width === 1024 && m.height === 576, `MP4 ${m.width}×${m.height}`);
+      // The stamp, read where the crop (from 10 %: 128, 72) put it.
+      const [a, b] = await video.evaluate(async () => {
+        const v = document.querySelector('#out-video');
+        const res = [];
+        for (const t of [1, 3]) {
+          await new Promise((r) => { v.addEventListener('seeked', r, { once: true }); v.currentTime = t; });
+          const c = new OffscreenCanvas(1024, 576).getContext('2d', { willReadFrequently: true });
+          c.drawImage(v, 0, 0, 1024, 576);
+          let n = 0;
+          for (let bit = 0; bit < 12; bit++) if (c.getImageData(85 + bit * 100 - 128, 500 - 72, 1, 1).data[1] > 128) n |= 1 << bit;
+          res.push(n / 100);
+        }
+        return res;
+      });
+      near(a, 1, 0.15, 'frame before the cut');
+      near(b, 5, 0.15, 'frame after the cut');
+    } finally {
+      await restoreWorker(video);
+      await set('#optimize', true);
+      await clearEdits(video);
+      await video.evaluate(() => { document.querySelector('#crop-section').open = false; });
+    }
+  },
+
+  async 'edits: kept with the recording, undone and redone; zooms on recorded clicks'({ video, clip }) {
+    await addEdit(video, 'cuts', 2, 3);
+    await sleep(700); // saved after a moment
+    // Clicks the recorder kept (tab recordings do): two close together, one later.
+    await video.evaluate(async (id) => {
+      const db = await import('/lib/db.js');
+      await db.updateMeta(id, { clicks: [{ t: 2, x: 0.7, y: 0.3 }, { t: 2.6, x: 0.72, y: 0.32 }, { t: 6, x: 0.2, y: 0.8 }] });
+    }, clip);
+    await video.reload();
+    await video.waitForFunction(() => /fps/.test(document.querySelector('#dims').textContent) && globalThis.captodeEdits, { polling: 100 });
+    await video.evaluate(async () => { window.lab = await import('/lab/lab.js'); console.warn = (...a) => { window.__fallback = a.join(' '); }; document.querySelector('#slides-section').open = true; });
+    try {
+      let e = await video.evaluate(() => captodeEdits.get());
+      ok(e.cuts.length === 1 && e.cuts[0].from === 2 && e.cuts[0].to === 3, `after reloading: ${JSON.stringify(e.cuts)}`);
+      await video.evaluate(() => document.activeElement?.blur());
+      await video.keyboard.press('x'); // a second cut, at the playhead
+      ok((await video.evaluate(() => captodeEdits.get().cuts.length)) === 2, 'X adds a cut');
+      const mod = process.platform === 'darwin' ? 'Meta' : 'Control';
+      await video.keyboard.down(mod);
+      await video.keyboard.press('z');
+      await video.keyboard.up(mod);
+      ok((await video.evaluate(() => captodeEdits.get().cuts.length)) === 1, 'undone');
+      await video.keyboard.down(mod);
+      await video.keyboard.down('Shift');
+      await video.keyboard.press('z');
+      await video.keyboard.up('Shift');
+      await video.keyboard.up(mod);
+      ok((await video.evaluate(() => captodeEdits.get().cuts.length)) === 2, 'redone');
+      ok(await video.$eval('#ed-autozoom', (b) => !b.classList.contains('hidden')), 'the zoom-on-clicks button shows');
+      await video.click('#ed-autozoom');
+      e = await video.evaluate(() => captodeEdits.get());
+      ok(e.zooms.length === 2 && e.zooms.every((z) => z.auto), `zooms: ${JSON.stringify(e.zooms)}`);
+      near(e.zooms[0].x, 0.71, 0.01, 'the first zoom between its two clicks');
+      near(e.zooms[1].from, 5.5, 0.05, 'the second zoom just before its click');
+      // Again: the zooms are replaced, not added to.
+      await video.click('#ed-autozoom');
+      ok((await video.evaluate(() => captodeEdits.get().zooms.length)) === 2, 'zooms on clicks made again replace the last ones');
+    } finally {
+      await clearEdits(video);
+      await sleep(600);
+    }
+  },
+
+  async 'edits: click rings in the export'({ video, exportAs }) {
+    // The recording has the clicks the last test gave it (at 2 s: 70 %, 30 %).
+    try {
+      ok(await video.$eval('#rings-row', (r) => !r.classList.contains('hidden')), 'the show-clicks switch shows');
+      await tap(video, '#rings-on');
+      const r = await exportAs('mp4');
+      ok(!r.failed && !r.fallback, `export: ${r.failed || r.fallback}`);
+      // The most orange around the click, before it and while its ring grows.
+      const [before, during] = await video.evaluate(async () => {
+        const v = document.querySelector('#out-video');
+        const res = [];
+        for (const t of [1.5, 2.15]) {
+          await new Promise((r) => { v.addEventListener('seeked', r, { once: true }); v.currentTime = t; });
+          const c = new OffscreenCanvas(1280, 720).getContext('2d', { willReadFrequently: true });
+          c.drawImage(v, 0, 0);
+          let m = 0;
+          for (let d = 30; d <= 75; d += 3) for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1]]) { // not up, into the clip's orange band
+            const p = c.getImageData(896 + dx * d, 216 + dy * d, 1, 1).data;
+            m = Math.max(m, p[0] - p[2]);
+          }
+          res.push(m);
+        }
+        return res;
+      });
+      ok(before < 40 && during > 100, `orange around the click: before ${before}, during ${during}`);
+    } finally {
+      await clearEdits(video);
+    }
+  },
+
+  async 'edits: preview as loud as the export'({ video, set }) {
+    try {
+      await video.evaluate(() => { document.querySelector('#sound-section').open = true; });
+      await set('#au-volume', '150');
+      await video.evaluate(() => { document.querySelector('#player').currentTime = 1; });
+      await video.click('#play');
+      await sleep(400);
+      const loud = await video.evaluate(() => captodePreview.gain());
+      near(loud, 1.5, 0.05, 'the preview at 150%');
+      await video.click('#play');
+      await addEdit(video, 'mutes', 3, 6);
+      await video.evaluate(() => { document.querySelector('#player').currentTime = 3.5; document.activeElement?.blur(); });
+      await video.click('#play');
+      await sleep(400);
+      const muted = await video.evaluate(() => captodePreview.gain());
+      await video.click('#play');
+      ok(muted < 0.02, `in the muted part: ${muted}`);
+    } finally {
+      await video.evaluate(() => { const p = document.querySelector('#player'); if (!p.paused) p.pause(); });
+      await set('#au-volume', '100');
+      await clearEdits(video);
+      await video.evaluate(() => { document.querySelector('#sound-section').open = false; });
+    }
+  },
+
+  async 'the waveform, silent parts found, and the frame under the pointer'({ video }) {
+    await video.waitForFunction(() => captodePreview.levels(), { timeout: 20000, polling: 100 });
+    const lit = await video.$eval('#wave', (c) => {
+      if (c.classList.contains('hidden')) return 0;
+      const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
+      let n = 0;
+      for (let i = 3; i < d.length; i += 4) if (d[i] > 128) n++;
+      return n / (c.width * c.height);
+    });
+    ok(lit > 0.2, `the waveform covers ${(lit * 100).toFixed(0)}% of its strip`);
+    // The test clip's tone never stops: nothing to cut.
+    await video.evaluate(() => { document.querySelector('#sound-section').open = true; });
+    ok(await video.$eval('#ed-silence', (b) => !b.disabled && !b.classList.contains('hidden')), 'Cut silent parts is ready');
+    await tap(video, '#ed-silence');
+    ok((await video.evaluate(() => captodeEdits.get().cuts.length)) === 0, 'no cuts in a sound that never stops');
+    // A sound with a pause in it: loud for 1 s, quiet for 1.5 s, loud again.
+    const found = await video.evaluate(async () => {
+      const { audioLevels, findSilences } = await import('/lib/audio-levels.js');
+      const ac = new AudioContext();
+      await ac.resume();
+      const o = ac.createOscillator(), g = ac.createGain(), d = ac.createMediaStreamDestination();
+      o.connect(g); g.connect(d); o.start();
+      const rec = new MediaRecorder(d.stream, { mimeType: 'audio/webm;codecs=opus' });
+      const chunks = [];
+      rec.ondataavailable = (e) => chunks.push(e.data);
+      rec.start();
+      await new Promise((r) => rec.addEventListener('start', r, { once: true }));
+      const t0 = ac.currentTime;
+      g.gain.setValueAtTime(1, t0);
+      g.gain.setValueAtTime(0, t0 + 1);
+      g.gain.setValueAtTime(1, t0 + 2.5);
+      await new Promise((r) => setTimeout(r, 3500));
+      rec.stop();
+      await new Promise((r) => rec.addEventListener('stop', r, { once: true }));
+      ac.close();
+      const levels = await audioLevels(new Blob(chunks, { type: 'audio/webm' }));
+      return findSilences(levels, 0, 3.4);
+    });
+    ok(found?.length === 1, `silent parts: ${JSON.stringify(found)}`);
+    near(found[0].from, 1.2, 0.2, 'the silence cut from just after the sound stops');
+    near(found[0].to, 2.3, 0.2, 'to just before it starts again');
+    await video.evaluate(() => { document.querySelector('#sound-section').open = false; });
+    // Pointing at the timeline shows that moment's frame.
+    const box = await video.$eval('#track', (t) => { const r = t.getBoundingClientRect(); return { x: r.x, y: r.y, w: r.width, h: r.height }; });
+    await video.mouse.move(box.x + box.w * 0.25, box.y + box.h / 2);
+    await video.mouse.move(box.x + box.w * 0.5, box.y + box.h / 2, { steps: 3 });
+    await sleep(600);
+    const peek = await video.evaluate(() => {
+      const p = document.querySelector('#peek');
+      const c = p.querySelector('canvas');
+      const d = c.getContext('2d').getImageData(c.width / 2, c.height / 2, 1, 1).data;
+      return { shown: !p.classList.contains('hidden'), time: p.querySelector('span').textContent, alpha: d[3] };
+    });
+    ok(peek.shown && peek.alpha === 255 && peek.time === '0:04.0', `the frame under the pointer: ${JSON.stringify(peek)}`);
+    await video.mouse.move(box.x + box.w * 0.5, box.y - 200);
+    ok(await video.$eval('#peek', (p) => p.classList.contains('hidden')), 'gone when the pointer leaves');
+  },
+
+  async 'edits: a cut marked with ⇧X, and an edit split at the playhead'({ video }) {
+    try {
+      await video.evaluate(() => { document.querySelector('#edit-section').open = true; document.activeElement?.blur(); document.querySelector('#player').currentTime = 1; });
+      await sleep(100);
+      await video.keyboard.down('Shift');
+      await video.keyboard.press('KeyX');
+      await video.keyboard.up('Shift');
+      ok(await video.$eval('#cut-pending', () => true).catch(() => false), 'the cut being marked shows on the timeline');
+      await video.evaluate(() => { document.querySelector('#player').currentTime = 2.5; });
+      await sleep(100);
+      await tap(video, '#ed-mark');
+      let e = await video.evaluate(() => captodeEdits.get());
+      ok(e.cuts.length === 1 && e.cuts[0].from === 1 && e.cuts[0].to === 2.5, `the cut marked: ${JSON.stringify(e.cuts)}`);
+      await addEdit(video, 'speeds', 4, 7);
+      await video.evaluate(() => { document.querySelector('#player').currentTime = 5.5; });
+      await video.waitForFunction(() => !document.querySelector('#ed-item [data-split]').disabled, { timeout: 3000, polling: 50 });
+      await tap(video, '#ed-item [data-split]');
+      e = await video.evaluate(() => captodeEdits.get());
+      const parts = e.speeds.map((s) => [s.from, s.to]).sort((a, b) => a[0] - b[0]);
+      ok(JSON.stringify(parts) === '[[4,5.5],[5.5,7]]', `split: ${JSON.stringify(parts)}`);
+    } finally {
+      await clearEdits(video);
+    }
+  },
+
+  async 'edits: a background and sound chosen for new recordings'({ video, browser, url, clip }) {
+    let other = null;
+    try {
+      await video.evaluate(() => { document.querySelector('#bg-section').open = true; document.querySelector('#sound-section').open = true; });
+      await tap(video, '#bg-on');
+      await video.select('#au-fade-in', '1');
+      await tap(video, '#bg-default');
+      await tap(video, '#au-default');
+      await sleep(200);
+      // A recording made after that starts with them.
+      const id = await video.evaluate(async (id) => {
+        const db = await import('/lib/db.js');
+        const r = await db.getCapture(id);
+        return db.putCapture(r.blob, r.meta);
+      }, clip);
+      other = await open(browser, url(`video/video.html?id=${id}`), { width: 1280, height: 800 });
+      await other.waitForFunction(() => /fps/.test(document.querySelector('#dims').textContent) && globalThis.captodeEdits, { polling: 100 });
+      const e = await other.evaluate(() => captodeEdits.get());
+      ok(e.background.on && e.audio.fadeIn === 1 && !e.cuts.length, `a new recording starts with: ${JSON.stringify({ bg: e.background.on, fadeIn: e.audio.fadeIn })}`);
+    } finally {
+      await other?.close();
+      await video.evaluate(() => chrome.storage.local.remove('videoDefaults'));
+      await clearEdits(video);
+      await video.bringToFront();
     }
   },
 };
