@@ -9,8 +9,8 @@ This is Captode's **first** submission to Edge, so you'll create a new listing.
 ## Before you start
 
 Download these files:
-- **The Edge package:** `captode-1.5.0-edge.zip`, from
-  https://github.com/nevin/Captode/releases/tag/v1.5.0 (under **Assets**), or from the
+- **The Edge package:** `captode-2.3.1-edge.zip`, from
+  https://github.com/nevin/Captode/releases/tag/v2.3.1 (under **Assets**), or from the
   project's `dist` folder. Don't unzip it.
 - **From the project's `store` folder:**
   - `icon-300.png` (the store logo)
@@ -28,7 +28,7 @@ Download these files:
 
 1. In the Edge dashboard, click **Create new extension**.
 2. **Upload the package**
-   1. Drag `captode-1.5.0-edge.zip` onto the upload box.
+   1. Drag `captode-2.3.1-edge.zip` onto the upload box.
    2. Wait for the green tick, then click **Continue**.
 3. **Availability**
    1. Visibility: **Public**.

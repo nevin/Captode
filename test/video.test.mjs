@@ -3,6 +3,8 @@
 import { open, recordClip, ok, near, sleep, prepare } from './helpers.mjs';
 import { boxFont } from './fonts.mjs';
 
+const equal = (a, b, m) => ok(a === b, `${m}: ${JSON.stringify(a)} (expected ${JSON.stringify(b)})`);
+
 export async function setup({ browser, url }) {
   const ctl = await open(browser, url('lab/lab.html'));
   await ctl.waitForFunction(() => globalThis.lab, { polling: 100 });
@@ -462,6 +464,45 @@ export const tests = {
     ok(got === `gif,${res},10`, `remembered ${got}, expected gif,${res},10`);
     await page.evaluate(() => chrome.storage.local.remove('lastExport'));
     await page.close();
+  },
+
+  async 'GIF and WebP start at the size text had on screen, and smaller sizes or low quality warn'({ browser, url, clip }) {
+    const ctl = await open(browser, url(`video/video.html?id=${clip}`), { width: 1440, height: 900 });
+    await ctl.evaluate(async (id) => { await chrome.storage.local.remove('lastExport'); const { updateMeta } = await import('/lib/db.js'); await updateMeta(id, { dpr: 2 }); }, clip);
+    await ctl.reload();
+    try {
+      await ctl.waitForFunction(() => /fps/.test(document.querySelector('#dims').textContent) && document.querySelector('#formats .on'), { polling: 100 });
+      const state = () => ctl.evaluate(() => ({
+        res: document.querySelector('#res').value,
+        label: document.querySelector('#res').selectedOptions[0].textContent,
+        values: [...document.querySelector('#res').options].map((o) => o.value),
+        resNote: !document.querySelector('#res-note').classList.contains('hidden'),
+        qNote: !document.querySelector('#v-quality-note').classList.contains('hidden'),
+      }));
+      const pick = (sel, v) => ctl.evaluate((sel, v) => { const el = document.querySelector(sel); el.value = v; el.dispatchEvent(new Event('input', { bubbles: true })); }, sel, v);
+      await ctl.$eval('#formats', (e) => e.scrollIntoView({ block: 'center' }));
+      await ctl.click('#formats [data-f="gif"]');
+      await ctl.waitForFunction(() => document.querySelector('#formats .on')?.dataset.f === 'gif', { polling: 100 });
+      let s = await state();
+      // 1280 × 720 recorded at 2× was 640 × 360 on screen.
+      ok(s.res === '360' && /360p/.test(s.label) && s.label !== '360p', `GIF starts at the sharp-text size: ${s.res} "${s.label}"`);
+      ok(s.values.filter((v) => v === '360').length === 1, `360p listed once: ${s.values}`);
+      ok(!s.resNote, 'no warning at the sharp-text size');
+      await pick('#res', '240');
+      ok((await state()).resNote, 'a smaller size warns that text may be hard to read');
+      await pick('#res', '0');
+      ok(!(await state()).resNote, 'no warning at the original size');
+      await ctl.click('#formats [data-f="mp4"]');
+      await ctl.waitForFunction(() => document.querySelector('#formats .on')?.dataset.f === 'mp4', { polling: 100 });
+      s = await state();
+      ok(s.res === '0' && !s.qNote, `MP4 starts at the original size, Balanced: ${s.res} ${s.qNote}`);
+      await pick('#v-quality', '0.04');
+      ok((await state()).qNote, 'Small file warns that small text can smear');
+      await pick('#v-quality', '0.08');
+    } finally {
+      await ctl.evaluate(async (id) => { await chrome.storage.local.remove('lastExport'); const { updateMeta } = await import('/lib/db.js'); await updateMeta(id, { dpr: undefined }); }, clip);
+      await ctl.close();
+    }
   },
 
   async 'video presets set the format, resolution and frame rate'({ browser, url, clip }) {
@@ -1419,6 +1460,135 @@ export const tests = {
       e = await video.evaluate(() => captodeEdits.get());
       const parts = e.speeds.map((s) => [s.from, s.to]).sort((a, b) => a[0] - b[0]);
       ok(JSON.stringify(parts) === '[[4,5.5],[5.5,7]]', `split: ${JSON.stringify(parts)}`);
+    } finally {
+      await clearEdits(video);
+    }
+  },
+
+  async 'edits: Cut right after a drag across the timeline cuts that part, and the trim goes back'({ video }) {
+    try {
+      await video.evaluate(() => { document.querySelector('#edit-section').open = true; });
+      const trimOf = () => video.evaluate(() => [document.querySelector('#t-start').value, document.querySelector('#t-end').value].join());
+      const before = await trimOf();
+      await video.$eval('#timeline', (e) => e.scrollIntoView({ block: 'center' }));
+      const box = await video.$eval('#track', (e) => { const r = e.getBoundingClientRect(); return { x: r.left, y: r.top + r.height / 2, w: r.width }; });
+      const dur = await video.evaluate(() => document.querySelector('#player').duration);
+      const x = (s) => box.x + (s / dur) * box.w;
+      await video.mouse.move(x(2), box.y);
+      await video.mouse.down();
+      await video.mouse.move(x(3), box.y, { steps: 4 });
+      await video.mouse.move(x(4), box.y, { steps: 4 });
+      await video.mouse.up();
+      ok(await trimOf() !== before, 'the drag chooses the part to keep');
+      ok(await video.$eval('#ed-picked', (n) => !n.classList.contains('hidden') && /0:02/.test(n.textContent)), 'the Edit section says the next edit covers it');
+      await tap(video, '#ed-add [data-add="cuts"]');
+      const e = await video.evaluate(() => captodeEdits.get());
+      const c = e.cuts[0];
+      ok(e.cuts.length === 1 && Math.abs(c.from - 2) <= 0.15 && Math.abs(c.to - 4) <= 0.15, `the cut covers the part dragged across: ${JSON.stringify(e.cuts)}`);
+      ok(await trimOf() === before, `the trim goes back: ${await trimOf()} (was ${before})`);
+      ok(await video.$eval('#ed-picked', (n) => n.classList.contains('hidden')), 'the note goes once used');
+      // Without a drag just before, a cut starts at the playhead, as before.
+      await video.evaluate(() => { document.querySelector('#player').currentTime = 6; });
+      await sleep(100);
+      await tap(video, '#ed-add [data-add="cuts"]');
+      const later = (await video.evaluate(() => captodeEdits.get())).cuts.find((k) => k.id !== c.id);
+      ok(later && later.from === 6 && later.to === 7, `a cut at the playhead: ${JSON.stringify(later)}`);
+    } finally {
+      await clearEdits(video);
+    }
+  },
+
+  async 'edits: a cut at the end stops playback there; with everything cut nothing plays or exports'({ video }) {
+    const toastText = () => video.evaluate(() => { const n = document.querySelector('.toast'); return n && !n.classList.contains('hidden') ? n.textContent : ''; });
+    try {
+      await addEdit(video, 'cuts', 6, 8);
+      await video.evaluate(() => { document.querySelector('#player').currentTime = 5.5; });
+      await sleep(200);
+      await video.evaluate(() => document.querySelector('#play').click());
+      await sleep(1500);
+      const tail = await video.evaluate(() => { const p = document.querySelector('#player'); return { t: p.currentTime, paused: p.paused }; });
+      ok(tail.paused && Math.abs(tail.t - 6) < 0.2, `playback stops where the cut starts: ${JSON.stringify(tail)}`);
+      // Play again: from the start.
+      await video.evaluate(() => document.querySelector('#play').click());
+      await sleep(300);
+      const again = await video.evaluate(() => { const p = document.querySelector('#player'); p.pause(); return p.currentTime; });
+      ok(again < 1, `playing again starts over: ${again.toFixed(2)}`);
+      await addEdit(video, 'cuts', 0, 6);
+      ok(await video.$eval('#tc-len', (n) => n.classList.contains('warn')), 'the timeline says everything is cut');
+      await video.evaluate(() => { document.querySelector('#player').currentTime = 2; document.querySelector('#play').click(); });
+      await sleep(300);
+      ok(await video.evaluate(() => document.querySelector('#player').paused), 'nothing plays');
+      ok(/cut/i.test(await toastText()), 'and it says why');
+      await video.evaluate(() => document.querySelector('.toast')?.classList.add('hidden'));
+      await video.evaluate(() => document.querySelector('#convert').click());
+      await sleep(300);
+      ok(/cut/i.test(await toastText()), 'Export says everything is cut');
+      ok(await video.evaluate(() => document.querySelector('#progress-wrap').classList.contains('hidden') && !document.querySelector('#convert').classList.contains('hidden')), 'and no export starts');
+    } finally {
+      await clearEdits(video);
+    }
+  },
+
+  async 'trim: an end before the start is moved, a drag is forgotten once played, and the part kept is saved'({ video, clip }) {
+    const trimOf = () => video.evaluate(() => [document.querySelector('#t-start').value, document.querySelector('#t-end').value].join());
+    const setTrim = (a, b) => video.evaluate(([a, b]) => {
+      for (const [id, v] of [['#t-start', a], ['#t-end', b]]) { const el = document.querySelector(id); el.value = v; el.dispatchEvent(new Event('input', { bubbles: true })); el.dispatchEvent(new Event('change', { bubbles: true })); }
+    }, [a, b]);
+    const full = await trimOf();
+    try {
+      await setTrim('4', '3');
+      equal(await trimOf(), '4.0,4.1', 'an end typed before the start is moved after it');
+      ok(await video.evaluate(() => /after the start/.test(document.querySelector('.toast').textContent)), 'and it says so');
+      await setTrim('0', '8');
+      // A drag, then play: the drag is the part to keep, and a later cut is at the playhead.
+      await video.evaluate(() => { document.querySelector('#edit-section').open = true; });
+      await video.$eval('#timeline', (e) => e.scrollIntoView({ block: 'center' }));
+      const box = await video.$eval('#track', (e) => { const r = e.getBoundingClientRect(); return { x: r.left, y: r.top + r.height / 2, w: r.width }; });
+      const dur = await video.evaluate(() => document.querySelector('#player').duration);
+      const x = (s) => box.x + (s / dur) * box.w;
+      await video.mouse.move(x(2), box.y);
+      await video.mouse.down();
+      await video.mouse.move(x(5), box.y, { steps: 6 });
+      await video.mouse.up();
+      const dragged = await trimOf();
+      await video.evaluate(() => { document.querySelector('#play').click(); });
+      await sleep(300);
+      await video.evaluate(() => { const p = document.querySelector('#player'); p.pause(); p.currentTime = 3; });
+      await sleep(150);
+      ok(await video.$eval('#ed-picked', (n) => n.classList.contains('hidden')), 'the note goes when playing');
+      await tap(video, '#ed-add [data-add="cuts"]');
+      const c = (await video.evaluate(() => captodeEdits.get())).cuts[0];
+      ok(c && c.from === 3 && c.to === 4, `the cut is at the playhead: ${JSON.stringify(c)}`);
+      equal(await trimOf(), dragged, 'and the part kept stays as dragged');
+      await clearEdits(video);
+      // Saved with the recording.
+      await sleep(600);
+      await video.reload();
+      await video.waitForFunction(() => /fps/.test(document.querySelector('#dims').textContent) && globalThis.captodeEdits, { polling: 100 });
+      await video.evaluate(async () => { window.lab = await import('/lab/lab.js'); console.warn = (...a) => { window.__fallback = a.join(' '); }; document.querySelector('#slides-section').open = true; });
+      equal(await trimOf(), dragged, 'the part kept comes back when opened again');
+    } finally {
+      await setTrim('0', full.split(',')[1]);
+      await sleep(600); // saved
+    }
+  },
+
+  async 'edits: typing a caption is undone in one step, and Undo after removing brings that edit back'({ video }) {
+    try {
+      await addEdit(video, 'captions', 1, 3);
+      await video.click('#ed-item textarea');
+      await video.keyboard.type('Hello there', { delay: 20 });
+      await video.evaluate(() => document.activeElement?.blur());
+      equal((await video.evaluate(() => captodeEdits.get())).captions[0].text, 'Hello there', 'the caption');
+      await video.click('#ed-undo');
+      const e = await video.evaluate(() => captodeEdits.get());
+      ok(e.captions.length === 1 && e.captions[0].text === '', `one undo takes back the typing: ${JSON.stringify(e.captions)}`);
+      // Removed, then something else changed: the message's Undo still brings the caption back.
+      await video.click('#ed-item [data-del]');
+      await video.evaluate(() => { document.querySelector('#player').currentTime = 5; captodeEdits.add('cuts'); });
+      await video.evaluate(() => document.querySelector('.toast .toast-action').click());
+      const after = await video.evaluate(() => captodeEdits.get());
+      ok(after.captions.length === 1 && after.cuts.length === 1, `the caption is back and the cut stays: ${after.captions.length} caption, ${after.cuts.length} cut`);
     } finally {
       await clearEdits(video);
     }

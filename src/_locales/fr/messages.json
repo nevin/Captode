@@ -3199,5 +3199,29 @@
   },
   "resize_keeps_original": {
     "message": "Redimensionner conserve les pixels d'origine : Taille d'origine les rétablit, aussi nets qu'avant."
+  },
+  "res_readable": {
+    "message": "$1 — texte net"
+  },
+  "video_res_blurry_text": {
+    "message": "Le texte risque d’être difficile à lire à cette taille. « Texte net » le garde aussi clair qu’à l’écran."
+  },
+  "video_quality_blurry_text": {
+    "message": "Le petit texte peut baver quand l’image bouge. Pour les enregistrements avec du texte, choisissez Équilibrée ou mieux."
+  },
+  "video_picked_part": {
+    "message": "La prochaine modification ajoutée couvre la partie glissée ($1–$2). Sans modification, c’est cette partie qui est conservée."
+  },
+  "video_all_cut": {
+    "message": "Tout est coupé : il n'y a rien à lire ni à exporter. Supprimez une coupe ou raccourcissez-la."
+  },
+  "trim_all_cut": {
+    "message": "Tout est coupé"
+  },
+  "trim_fixed": {
+    "message": "La fin doit venir après le début : elle a donc été déplacée."
+  },
+  "edit_no_sound": {
+    "message": "Cet enregistrement n'a pas de son à couper."
   }
 }

@@ -3199,5 +3199,29 @@
   },
   "resize_keeps_original": {
     "message": "크기를 바꿔도 원래 픽셀은 남아 있습니다. 원래 크기를 누르면 처음처럼 선명하게 돌아옵니다."
+  },
+  "res_readable": {
+    "message": "$1 — 선명한 글자"
+  },
+  "video_res_blurry_text": {
+    "message": "이 크기에서는 글자를 읽기 어려울 수 있습니다. ‘선명한 글자’를 고르면 화면에서처럼 또렷하게 유지됩니다."
+  },
+  "video_quality_blurry_text": {
+    "message": "화면이 움직이면 작은 글자가 번질 수 있습니다. 글자가 있는 녹화에는 ‘균형’ 이상을 고르세요."
+  },
+  "video_picked_part": {
+    "message": "다음에 추가하는 편집은 드래그한 구간($1–$2)에 적용됩니다. 추가하지 않으면 그 구간이 남습니다."
+  },
+  "video_all_cut": {
+    "message": "모두 잘려 있어 재생하거나 내보낼 내용이 없습니다. 자르기를 삭제하거나 짧게 줄이세요."
+  },
+  "trim_all_cut": {
+    "message": "모두 잘림"
+  },
+  "trim_fixed": {
+    "message": "끝은 시작보다 뒤에 있어야 하므로 위치를 옮겼습니다."
+  },
+  "edit_no_sound": {
+    "message": "이 녹화에는 음소거할 소리가 없습니다."
   }
 }

@@ -3199,5 +3199,29 @@
   },
   "resize_keeps_original": {
     "message": "Redimensionar mantém os pixels originais: Tamanho original os traz de volta, nítidos como eram."
+  },
+  "res_readable": {
+    "message": "$1 — texto nítido"
+  },
+  "video_res_blurry_text": {
+    "message": "O texto pode ficar difícil de ler neste tamanho. “Texto nítido” o mantém tão claro quanto na tela."
+  },
+  "video_quality_blurry_text": {
+    "message": "Textos pequenos podem borrar quando a imagem se move. Para gravações com texto, escolha Equilibrada ou acima."
+  },
+  "video_picked_part": {
+    "message": "A próxima edição que você adicionar cobre a parte arrastada ($1–$2). Sem ela, essa parte é a que fica."
+  },
+  "video_all_cut": {
+    "message": "Está tudo cortado, então não há nada para reproduzir ou exportar. Remova um corte ou encurte-o."
+  },
+  "trim_all_cut": {
+    "message": "Tudo cortado"
+  },
+  "trim_fixed": {
+    "message": "O fim precisa vir depois do início, então foi movido."
+  },
+  "edit_no_sound": {
+    "message": "Esta gravação não tem som para silenciar."
   }
 }

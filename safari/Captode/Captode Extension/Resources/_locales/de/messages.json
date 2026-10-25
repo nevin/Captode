@@ -3199,5 +3199,29 @@
   },
   "resize_keeps_original": {
     "message": "Beim Skalieren bleiben die Originalpixel erhalten: „Originalgröße“ stellt sie gestochen scharf wieder her."
+  },
+  "res_readable": {
+    "message": "$1 – scharfer Text"
+  },
+  "video_res_blurry_text": {
+    "message": "Text ist in dieser Größe eventuell schwer lesbar. „Scharfer Text“ hält ihn so klar wie auf dem Bildschirm."
+  },
+  "video_quality_blurry_text": {
+    "message": "Kleiner Text kann verschmieren, während sich das Bild bewegt. Für Aufnahmen mit Text wähle „Ausgewogen“ oder höher."
+  },
+  "video_picked_part": {
+    "message": "Die nächste Bearbeitung, die du hinzufügst, gilt für den gezogenen Teil ($1–$2). Ohne sie wird dieser Teil behalten."
+  },
+  "video_all_cut": {
+    "message": "Alles ist herausgeschnitten, es gibt nichts abzuspielen oder zu exportieren. Entferne einen Schnitt oder kürze ihn."
+  },
+  "trim_all_cut": {
+    "message": "Alles herausgeschnitten"
+  },
+  "trim_fixed": {
+    "message": "Das Ende muss nach dem Anfang liegen, daher wurde es verschoben."
+  },
+  "edit_no_sound": {
+    "message": "Diese Aufnahme hat keinen Ton zum Stummschalten."
   }
 }

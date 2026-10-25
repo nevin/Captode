@@ -50,23 +50,44 @@ export function mountEdits(opts) {
   const snapshot = () => JSON.stringify(edits);
 
   /** Makes a change: `fn` changes the edits; it can be undone. */
-  function change(fn, { history = true, quiet = false } = {}) {
+  // Changes in a row to the same thing (typing a caption, moving a slider) are undone
+  // together, rather than a letter or a step at a time.
+  let group = null, groupAt = 0;
+  function pushUndo(before, key = null) {
+    const now = Date.now();
+    if (!(key && key === group && now - groupAt < 1500)) { undo.push(before); if (undo.length > 100) undo.shift(); }
+    redo.length = 0;
+    group = key;
+    groupAt = now;
+  }
+  function change(fn, { history = true, quiet = false, group: key = null } = {}) {
     if (opts.busy()) return;
     const before = snapshot();
     fn(edits);
     if (snapshot() === before) return;
-    if (history) { undo.push(before); if (undo.length > 100) undo.shift(); redo.length = 0; }
+    if (history) pushUndo(before, key);
     after(quiet);
   }
+  let saveTimer = 0;
   function after(quiet = false) {
     if (selected && !item()) selected = null;
     render(quiet);
     opts.changed();
-    clearTimeout(after.timer);
-    after.timer = setTimeout(() => opts.save(JSON.parse(snapshot())), 400);
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(flush, 400);
   }
+  /** Saves now what is waiting to be saved (also when the page is closed or hidden). */
+  function flush() {
+    if (!saveTimer) return;
+    clearTimeout(saveTimer);
+    saveTimer = 0;
+    opts.save(JSON.parse(snapshot()));
+  }
+  addEventListener('pagehide', flush);
+  document.addEventListener('visibilitychange', () => { if (document.hidden) flush(); });
   function restore(from, to) {
     if (!from.length || opts.busy()) return;
+    group = null;
     to.push(snapshot());
     edits = normaliseEdits(JSON.parse(from.pop()));
     after();
@@ -75,10 +96,16 @@ export function mountEdits(opts) {
   // ---------- adding ----------
 
   function add(kind, fields = {}) {
+    if (kind === 'mutes' && !opts.meta.hasAudio) { toast(t('edit_no_sound')); return null; }
     const len = KINDS[kind].len;
+    // Right after a drag across the timeline, the edit covers the part dragged across
+    // (and the trim goes back to what it was); otherwise it starts at the playhead.
+    const picked = opts.takePicked?.();
     const { start, end } = opts.trim();
     const at = Math.min(Math.max(player.currentTime, start), Math.max(start, end - 0.1));
-    const base = { id: editId(), from: round(at), to: round(Math.min(opts.duration(), at + len)) };
+    const base = picked
+      ? { id: editId(), from: round(picked.from), to: round(Math.max(picked.to, picked.from + 0.1)) }
+      : { id: editId(), from: round(at), to: round(Math.min(opts.duration(), at + len)) };
     if (base.to - base.from < 0.1) base.from = round(Math.max(0, base.to - len));
     const extra = {
       speeds: { rate: 2 },
@@ -96,8 +123,15 @@ export function mountEdits(opts) {
   function remove(kind, id) {
     const x = list(kind).find((y) => y.id === id);
     if (!x) return;
+    const copy = JSON.parse(JSON.stringify(x));
     change((e) => { const l = list(kind, e); l.splice(l.indexOf(l.find((y) => y.id === id)), 1); });
-    toast(t('edit_removed', name(kind)), { ms: 5000, action: { label: t('editor_undo'), run: () => restore(undo, redo) } });
+    // Undo here brings back this edit, whatever else was changed since.
+    const back = () => {
+      if (list(kind).some((y) => y.id === id)) return;
+      change((e) => list(kind, e).push(copy));
+      select(kind, id);
+    };
+    toast(t('edit_removed', name(kind)), { ms: 5000, action: { label: t('editor_undo'), run: back } });
   }
 
   function select(kind, id) {
@@ -137,12 +171,20 @@ export function mountEdits(opts) {
     const { start, end } = opts.trim();
     const found = findSilences(opts.levels(), start, end);
     if (!found?.length) { toast(t('edit_no_silences')); return; }
+    const prev = edits.cuts.filter((c) => c.silence).map((c) => ({ ...c }));
+    const added = found.map((r) => ({ id: editId(), from: r.from, to: r.to, silence: true }));
     change((e) => {
       e.cuts = e.cuts.filter((c) => !c.silence);
-      for (const r of found) e.cuts.push({ id: editId(), from: r.from, to: r.to, silence: true });
+      e.cuts.push(...added.map((c) => ({ ...c })));
     });
     const secs = found.reduce((n, r) => n + r.to - r.from, 0);
-    toast(t('edit_silences_cut', [String(found.length), secs.toFixed(1)]), { kind: 'success', ms: 6000, action: { label: t('editor_undo'), run: () => restore(undo, redo) } });
+    // Undo here takes back these cuts (and puts back the ones found before), whatever else changed since.
+    const back = () => change((e) => {
+      const ids = new Set(added.map((c) => c.id));
+      e.cuts = e.cuts.filter((c) => !ids.has(c.id));
+      for (const c of prev) if (!e.cuts.some((y) => y.id === c.id)) e.cuts.push({ ...c });
+    });
+    toast(t('edit_silences_cut', [String(found.length), secs.toFixed(1)]), { kind: 'success', ms: 6000, action: { label: t('editor_undo'), run: back } });
   }
 
   /** ⇧X: the first press marks where a cut starts, the second where it ends. */
@@ -284,7 +326,7 @@ export function mountEdits(opts) {
       if (k === 'from') { x.from = Math.max(0, Math.min(v, x.to - 0.1)); }
       else if (k === 'to') { x.to = Math.min(opts.duration(), Math.max(v, x.from + 0.1)); }
       else x[k] = v;
-    }, opt);
+    }, { ...opt, group: opt?.quiet ? `${id}:${k}` : null });
   };
   form.addEventListener('input', (e) => {
     const k = e.target.dataset.k;
@@ -378,13 +420,14 @@ export function mountEdits(opts) {
       b.classList.toggle('on', selected?.id === x.id);
       b.style.left = pct(x.from);
       b.style.width = pct(Math.min(x.to, opts.duration()) - x.from);
-      b.style.setProperty('--row', String(Math.min(row, 3)));
+      b.style.setProperty('--row', String(row));
       b.style.background = KINDS[kind].colour;
       b.dataset.kind = kind;
       b.dataset.id = x.id;
       b.title = `${name(kind)} · ${describe(kind, x).when}`;
       lane.append(b);
     }
+    $('#timeline').style.setProperty('--edit-rows', String(ends.length || 1));
   }
 
   /** The cut being marked: from its start to the playhead. */
@@ -406,7 +449,8 @@ export function mountEdits(opts) {
     if (selected?.id !== id) select(kind, id);
     const x = list(kind).find((y) => y.id === id);
     const r = bar.getBoundingClientRect();
-    const mode = e.clientX - r.left < EDGE_PX ? 'from' : r.right - e.clientX < EDGE_PX ? 'to' : 'move';
+    const edge = Math.min(EDGE_PX, r.width / 3); // short bars can still be moved by their middle
+    const mode = e.clientX - r.left < edge ? 'from' : r.right - e.clientX < edge ? 'to' : 'move';
     const track = $('#track').getBoundingClientRect();
     const timeAt = (cx) => ((cx - track.left) / track.width) * opts.duration();
     const t0 = timeAt(e.clientX), from = x.from, to = x.to;
@@ -428,7 +472,7 @@ export function mountEdits(opts) {
       bar.removeEventListener('pointermove', move);
       bar.removeEventListener('pointerup', up);
       bar.removeEventListener('pointercancel', up);
-      if (snapshot() !== before) { undo.push(before); redo.length = 0; after(); }
+      if (snapshot() !== before) { pushUndo(before); after(); }
     };
     bar.addEventListener('pointermove', move);
     bar.addEventListener('pointerup', up);
@@ -660,7 +704,7 @@ export function mountEdits(opts) {
       layer.removeEventListener('pointermove', move);
       layer.removeEventListener('pointerup', up);
       layer.removeEventListener('pointercancel', up);
-      if (snapshot() !== before) { undo.push(before); redo.length = 0; edits = normaliseEdits(edits); after(); }
+      if (snapshot() !== before) { pushUndo(before); edits = normaliseEdits(edits); after(); }
     };
     layer.addEventListener('pointermove', move);
     layer.addEventListener('pointerup', up);
@@ -748,10 +792,10 @@ export function mountEdits(opts) {
   $('#bg-on').addEventListener('change', (e) => change((x) => { x.background.on = e.target.checked; }));
   $('#bg-kind').addEventListener('click', (e) => { const v = e.target.closest('button')?.dataset.v; if (v) change((x) => { x.background.kind = v; }); });
   for (const [id, k, num] of [['#bg-c1', 'c1'], ['#bg-c2', 'c2'], ['#bg-padding', 'padding', true], ['#bg-radius', 'radius', true], ['#bg-aspect', 'aspect']]) {
-    $(id).addEventListener('input', (e) => change((x) => { x.background[k] = num ? Number(e.target.value) : e.target.value; }, { quiet: true }));
+    $(id).addEventListener('input', (e) => change((x) => { x.background[k] = num ? Number(e.target.value) : e.target.value; }, { quiet: true, group: `bg:${k}` }));
   }
   $('#bg-shadow').addEventListener('change', (e) => change((x) => { x.background.shadow = e.target.checked; }));
-  $('#au-volume').addEventListener('input', (e) => change((x) => { x.audio.volume = Number(e.target.value) / 100; }, { quiet: true }));
+  $('#au-volume').addEventListener('input', (e) => change((x) => { x.audio.volume = Number(e.target.value) / 100; }, { quiet: true, group: 'volume' }));
   $('#au-fade-in').addEventListener('change', (e) => change((x) => { x.audio.fadeIn = Number(e.target.value); }));
   $('#au-fade-out').addEventListener('change', (e) => change((x) => { x.audio.fadeOut = Number(e.target.value); }));
   $('#au-mute').addEventListener('click', () => add('mutes'));
@@ -810,6 +854,8 @@ export function mountEdits(opts) {
   render();
   return {
     get: () => edits,
+    /** Adds an edit of `kind` (as its button does). */
+    add: (kind) => add(kind),
     /** Where each moment of the kept part plays. */
     map: () => { const { start, end } = opts.trim(); return clipMap(edits, start, end); },
     editing,

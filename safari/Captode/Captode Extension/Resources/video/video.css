@@ -65,6 +65,7 @@ body { display: flex; flex-direction: column; overflow: hidden; }
 .timeline .btn.icon { width: 34px; height: 34px; border-radius: 50%; }
 .timeline .play { fill: currentColor; stroke-width: 1.2; }
 .tc { font-variant-numeric: tabular-nums; font-size: 12px; min-width: 46px; white-space: nowrap; }
+.tc.warn { color: var(--rec); font-weight: 600; }
 .track { position: relative; flex: 1; height: 44px; border-radius: 7px; background: var(--panel-2); cursor: pointer; touch-action: none; }
 .film { position: absolute; inset: 0; display: flex; border-radius: 7px; overflow: hidden; }
 .film canvas { flex: 1; min-width: 0; height: 100%; object-fit: cover; }
@@ -215,7 +216,7 @@ body { display: flex; flex-direction: column; overflow: hidden; }
 .edit-mark::before { left: -2px; }
 .edit-mark::after { right: -2px; }
 .edit-mark.on { box-shadow: 0 0 0 2px var(--text); z-index: 1; }
-.timeline:has(.edit-mark) { margin-top: 10px; }
+.timeline:has(.edit-mark) { margin-top: calc(10px + max(0, var(--edit-rows, 1) - 4) * 8px); } /* room for more than 4 rows of edits */
 .ed-history { margin-left: auto; margin-right: 8px; display: inline-flex; gap: 2px; }
 .ed-history .btn { width: 26px; height: 26px; }
 #ed-count:not(:empty) { margin-right: 0; }

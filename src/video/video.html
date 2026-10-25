@@ -95,6 +95,7 @@
           <button type="button" class="btn ghost icon" id="ed-redo" disabled data-tip="Redo  ⇧⌘Z" data-tip-align="end" data-i18n-tip="edit_redo_tip"><svg class="i" viewBox="0 0 24 24"><path d="m15 14 5-5-5-5"/><path d="M20 9H10a6 6 0 0 0 0 12h3"/></svg></button>
         </span>
       </summary>
+      <p class="muted small hint hidden" id="ed-picked"></p>
       <div class="ed-add" id="ed-add">
         <button type="button" class="btn" data-add="cuts" data-tip="Leave out a part  X" data-i18n-tip="edit_add_cut_tip"><svg class="i" viewBox="0 0 24 24"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4 8.1 15.9M14.5 14.5 20 20M8.1 8.1 12 12"/></svg><span data-i18n="edit_kind_cuts">Cut</span></button>
         <button type="button" class="btn" data-add="speeds" data-tip="Play a part faster  P" data-i18n-tip="edit_add_speed_tip"><svg class="i" viewBox="0 0 24 24"><path d="m13 19 9-7-9-7zM2 19l9-7-9-7z"/></svg><span data-i18n="edit_kind_speeds">Speed up</span></button>
@@ -327,6 +328,7 @@
         <label class="field"><span data-i18n="popup_resolution">Resolution</span><select id="res"></select></label>
         <label class="field"><span data-i18n="popup_frame_rate">Frame rate</span><select id="fps"></select></label>
       </div>
+      <p class="muted small hint hidden" id="res-note" data-i18n="video_res_blurry_text">Text may be hard to read at this size. “Sharp text” keeps it as clear as it was on screen.</p>
       <label class="toggle hidden" id="v-logo-row"><span data-i18n="brand_add_logo">Add my logo<small data-i18n="brand_add_logo_hint">The logo you chose in Settings, in a corner of the picture</small></span><input type="checkbox" id="v-logo"></label>
 
       <div data-for="mp4 webm">
@@ -338,6 +340,7 @@
             <option value="0.02" data-i18n="video_smallest_file">Smallest file</option>
           </select>
         </label>
+        <p class="muted small hint hidden" id="v-quality-note" data-i18n="video_quality_blurry_text">Small text can smear while the picture moves. For recordings with text, choose Balanced or higher.</p>
         <label class="toggle"><span data-i18n="video_include_audio">Include audio<small id="v-audio-note" data-i18n="video_this_recording_has_no_sound">This recording has no sound</small></span><input type="checkbox" id="v-audio" checked></label>
       </div>
 

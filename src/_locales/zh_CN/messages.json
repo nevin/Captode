@@ -3199,5 +3199,29 @@
   },
   "resize_keeps_original": {
     "message": "调整尺寸会保留原始像素：点击“原始尺寸”即可恢复原有清晰度。"
+  },
+  "res_readable": {
+    "message": "$1 — 文字清晰"
+  },
+  "video_res_blurry_text": {
+    "message": "在此尺寸下文字可能难以辨认。选择“文字清晰”可保持与屏幕上一样清楚。"
+  },
+  "video_quality_blurry_text": {
+    "message": "画面移动时小字可能会模糊。对于含文字的录制，请选择“均衡”或更高。"
+  },
+  "video_picked_part": {
+    "message": "接下来添加的编辑会作用于你拖选的部分（$1–$2）。如果不添加，就保留这一部分。"
+  },
+  "video_all_cut": {
+    "message": "所有内容都被剪掉了，没有可播放或导出的内容。请删除或缩短某个剪切。"
+  },
+  "trim_all_cut": {
+    "message": "已全部剪掉"
+  },
+  "trim_fixed": {
+    "message": "结束时间必须在开始时间之后，因此已自动调整。"
+  },
+  "edit_no_sound": {
+    "message": "此录制没有可静音的声音。"
   }
 }

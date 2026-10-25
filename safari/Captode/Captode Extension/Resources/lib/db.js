@@ -147,6 +147,9 @@ export const putExtras = (id, extras) => changeExtras(id, (x) => { Object.assign
 /** Keeps a recording's edits with it (see lib/video-edits.js). */
 export const saveVideoEdits = (id, videoEdits) => changeExtras(id, (x) => { x.videoEdits = videoEdits; });
 
+/** Keeps the part of a recording chosen to keep: `{ start, end }` (s), or null for all of it. */
+export const saveTrim = (id, trim) => changeExtras(id, (x) => { x.trim = trim; });
+
 /** Deletes a capture. Resolves to the record, which `restoreCapture` can put back. */
 export async function deleteCapture(id) {
   const rec = await getCapture(id);

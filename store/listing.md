@@ -11,7 +11,7 @@ the GitHub release for the tag has the same files. Firefox has its own sheet,
 
 ## Package (uploaded zip)
 
-- Manifest V3, version 1.4.0, minimum Chrome 116.
+- Manifest V3, minimum Chrome 116. The version is the one `npm run release` sets (in `src/manifest.json`).
 - Translated into Spanish, Portuguese (Brazil), French, German, Italian, Japanese, Korean and
   Simplified Chinese. The Web Store shows the extension's name and short description in each of
   these languages from the package; the detailed description below can be added per language
@@ -159,7 +159,7 @@ lets the user annotate, review, compare, trim and export them as image, PDF or v
 | scripting | After the user starts a capture, injects a temporary overlay for selecting an area and a recording countdown into the active tab, and scrolls the page to stitch full-page screenshots. Nothing stays injected afterwards. |
 | tabCapture | Records the current tab (or a selected area of it) when the user starts a tab recording from the popup. |
 | offscreen | Hosts the MediaRecorder for tab recordings in an offscreen document, because a service worker cannot hold a media stream. The recording keeps running after the popup closes. |
-| storage | Stores the user's settings: theme, export background, default formats, and device-frame and recording options. |
+| storage | Stores the user's settings on their device: theme, export background, default formats, device-frame and recording options, the logo they choose to add to captures, and the default background and sound for new recordings. |
 | unlimitedStorage | Recordings and captures are kept in the extension's IndexedDB until the user exports them (and deleted after a day, or the time the user chooses in Settings). Screen recordings can be hundreds of megabytes; this keeps the browser from evicting a recording under storage pressure before the user has exported it. |
 
 **Are you using remote code?** No, I am not using remote code.

@@ -22,8 +22,8 @@ Don't unzip it. The store wants the zip file itself.
 3. **Upload the new version**
    1. In the left menu, click **Package**.
    2. Click **Upload new package**.
-   3. Choose `captode-1.5.0-chrome.zip`.
-   4. Wait until the page shows version **1.5.0**.
+   3. Choose `captode-<version>-chrome.zip` from `dist/` (for this release, `captode-2.3.1-chrome.zip`).
+   4. Wait until the page shows that version.
 4. **Update the description**
    1. Click **Store listing**.
    2. Open [`../listing.md`](../listing.md) and copy the text in the box under **Description**.

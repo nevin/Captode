@@ -1,6 +1,17 @@
 # Firefox Add-ons (addons.mozilla.org): step by step
 
-This is Captode's **first** submission to Firefox, so you'll create a new listing.
+Captode is already listed (https://addons.mozilla.org/firefox/addon/captode/). For a new
+version, follow **Updating** just below; the rest of this page is how the listing was first made.
+
+## Updating
+
+1. Go to https://addons.mozilla.org/developers/addons, click **Captode**, then **Upload New Version**.
+2. Choose `captode-<version>-firefox.zip` from `dist/`. Tick **Firefox** only (not Android).
+3. Wait for "validated with no errors" (the release already ran the same validator), then **Continue**.
+4. "Do you need to submit source code?": **Yes**, and upload `captode-<version>-source.zip`.
+5. **Release notes:** a sentence on what changed. **Notes to reviewer:** the box under
+   **Notes to reviewer** in [`../listing-firefox.md`](../listing-firefox.md), with `<version>` filled in.
+6. Click **Submit Version**.
 
 **You need:** a Mozilla account.
 **Cost:** free.
@@ -9,10 +20,10 @@ within a few days.
 
 ## Before you start
 
-From https://github.com/nevin/Captode/releases/tag/v1.5.0 (under **Assets**), or from the
+From https://github.com/nevin/Captode/releases/tag/v2.3.1 (under **Assets**), or from the
 project's `dist` folder, download these two files. Don't unzip either of them.
-- `captode-1.5.0-firefox.zip`: the add-on itself
-- `captode-1.5.0-source.zip`: Captode's source code. Firefox asks for it because Captode
+- `captode-2.3.1-firefox.zip`: the add-on itself
+- `captode-2.3.1-source.zip`: Captode's source code. Firefox asks for it because Captode
   contains two small image compressors written in WebAssembly.
 
 ## One-time setup
@@ -26,13 +37,13 @@ project's `dist` folder, download these two files. Don't unzip either of them.
 1. Click **Submit a New Add-on**.
 2. "How to distribute this version": choose **On this site**, then click **Continue**.
 3. **Upload the add-on**
-   1. Click **Select a file** and choose `captode-1.5.0-firefox.zip`.
+   1. Click **Select a file** and choose `captode-2.3.1-firefox.zip`.
    2. Under compatibility, tick **Firefox** only. Untick **Firefox for Android**, because
       Captode isn't made for phones.
    3. Wait for "Your add-on was validated with no errors", then click **Continue**.
 4. **Source code**
    1. When asked "Do you need to submit source code?", choose **Yes**.
-   2. Upload `captode-1.5.0-source.zip`.
+   2. Upload `captode-2.3.1-source.zip`.
    3. Click **Continue**.
 5. **Describe the add-on**: open [`../listing-firefox.md`](../listing-firefox.md) and copy
    each field from there.
@@ -50,7 +61,7 @@ project's `dist` folder, download these two files. Don't unzip either of them.
    8. **Privacy policy:** tick "This add-on has a privacy policy" and paste the text of
       `PRIVACY.md`.
    9. **Notes to reviewer:** copy the whole box under **Notes to reviewer**, changing
-      `<version>` to `1.5.0`.
+      `<version>` to `2.3.1`.
 6. Click **Submit Version**.
 7. **Add screenshots**
    1. Open Captode's page in the Developer Hub and click **Edit Product Page**.

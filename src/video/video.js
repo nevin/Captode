@@ -1,4 +1,4 @@
-import { getCapture, putCapture, saveSlides, saveVideoEdits, deleteCapture } from '../lib/db.js';
+import { getCapture, putCapture, saveSlides, saveVideoEdits, saveTrim, deleteCapture } from '../lib/db.js';
 import { GifEncoder } from '../lib/gif.js';
 import { buildPalette } from '../lib/quantize.js';
 import { getSettings } from '../lib/settings.js';
@@ -26,6 +26,7 @@ localize();
 
 const $ = (s) => document.querySelector(s);
 const player = $('#player');
+const captureId = new URLSearchParams(location.search).get('id');
 
 let source = null;   // the recorded Blob
 let meta = {};
@@ -53,6 +54,16 @@ const FPS = [5, 8, 10, 12, 15, 20, 24, 25, 30, 50, 60];
 const EXT = { mp4: 'mp4', webm: 'webm', gif: 'gif', webp: 'webp' };
 
 const even = (n) => Math.max(2, Math.round(n / 2) * 2);
+
+/** Recorded pixels per on-screen pixel: 2 on most Retina screens. Tab recordings
+ *  note it; for screens and windows this display's is the best guess. */
+const density = () => Math.min(4, Math.max(1, Number(meta.dpr) || devicePixelRatio || 1));
+/** The shorter side at which text is as sharp as it was on screen; 0 when that's the original. */
+function readableRes(short) {
+  const p = even(short / density());
+  return density() > 1.05 && p < short ? p : 0;
+}
+let readableAt = 0; // the smallest resolution that keeps text sharp, for the note under Resolution
 const once = (el, ev) => new Promise((r) => el.addEventListener(ev, r, { once: true }));
 const fmtTime = (s) => `${Math.floor(s / 60)}:${(s % 60).toFixed(1).padStart(4, '0')}`;
 
@@ -113,9 +124,14 @@ function fillResolutions(reset = false) {
   const r = outRenderer() || { width: w, height: h };
   const short = Math.min(r.width, r.height);
   const keep = reset ? '' : $('#res').value;
-  const def = format === 'gif' || format === 'webp' ? 480 : 0;
+  // GIF and WebP start smaller than the recording to keep files light, but no smaller
+  // than the size the text had on screen, so it stays readable.
+  const readable = readableRes(short);
+  readableAt = readable || even(short);
+  const def = format === 'gif' || format === 'webp' ? readable : 0;
+  const sizes = [...new Set([...RES.filter((p) => p < short), readable].filter(Boolean))].sort((a, b) => b - a);
   $('#res').innerHTML = `<option value="0" title="${even(r.width)} × ${even(r.height)}">${t('res_original', `${even(short)}p`)}</option>` +
-    RES.filter((p) => p < short).map((p) => `<option value="${p}">${p}p</option>`).join('');
+    sizes.map((p) => `<option value="${p}">${p === readable ? t('res_readable', `${p}p`) : `${p}p`}</option>`).join('');
   const values = [...$('#res').options].map((o) => o.value);
   $('#res').value = values.includes(keep) && keep !== '' ? keep : values.includes(String(def)) ? String(def) : '0';
 }
@@ -136,11 +152,17 @@ function syncUi() {
   $('#w-quality-f').classList.toggle('hidden', $('#w-lossless').checked);
   $('#denoise-row').classList.toggle('hidden', !$('#optimize').checked);
   $('#w-quality-v').textContent = $('#w-quality').value + '%';
+  $('#ed-picked').classList.toggle('hidden', !picked);
+  if (picked) $('#ed-picked').textContent = t('video_picked_part', [fmtTime(picked.from), fmtTime(picked.to)]);
+  const res = Number($('#res').value);
+  $('#res-note').classList.toggle('hidden', !res || res >= readableAt);
+  $('#v-quality-note').classList.toggle('hidden', Number($('#v-quality').value) >= 0.08);
   $('#g-lossy-v').textContent = Number($('#g-lossy').value) ? $('#g-lossy').value : t('video_off');
   $('#v-audio').disabled = !meta.hasAudio;
   $('#v-audio-note').classList.toggle('hidden', Boolean(meta.hasAudio));
   if (!meta.hasAudio) $('#v-audio').checked = false;
   drawTimeline();
+  keepTrim();
   if (!player.videoWidth) return;
   const p = plan();
   const { start, end } = trim();
@@ -162,6 +184,30 @@ function syncUi() {
   }
   stale();
 }
+
+// The part kept is saved with the recording, so it is still chosen when it is opened again.
+let savedTrim = '';
+let trimTimer = 0;
+function trimKey() {
+  const { start, end } = trim();
+  return start <= 0.05 && end >= duration - 0.05 ? 'null' : JSON.stringify({ start: Number(start.toFixed(1)), end: Number(end.toFixed(1)) });
+}
+function keepTrim() {
+  if (!duration || !captureId || !editor) return;
+  const key = trimKey();
+  if (key === savedTrim) return;
+  savedTrim = key;
+  clearTimeout(trimTimer);
+  trimTimer = setTimeout(flushTrim, 300);
+}
+function flushTrim() {
+  if (!trimTimer) return;
+  clearTimeout(trimTimer);
+  trimTimer = 0;
+  saveTrim(captureId, JSON.parse(savedTrim)).catch(() => {});
+}
+addEventListener('pagehide', flushTrim);
+document.addEventListener('visibilitychange', () => { if (document.hidden) flushTrim(); });
 
 /** Lets go of the last export's file, which can be as big as the recording. */
 function dropResult() {
@@ -216,8 +262,43 @@ document.querySelector('.inspector').addEventListener('input', (e) => {
   if (e.target.closest('#device-panel')) return; // handled by the panel's own callback
   syncUi();
 });
-const setStart = (t) => { if (busy) return; $('#t-start').value = Math.max(0, Math.min(t, trim().end - 0.1)).toFixed(1); syncUi(); };
-const setEnd = (t) => { if (busy) return; $('#t-end').value = Math.min(duration, Math.max(t, trim().start + 0.1)).toFixed(1); syncUi(); };
+// A part chosen by dragging across the timeline. It becomes the part to keep, unless an
+// edit (Cut, Zoom, …) is added next: the edit then covers that part, and the trim goes
+// back to what it was before the drag.
+let picked = null;
+function takePicked() {
+  const p = picked;
+  picked = null;
+  if (!p) return null;
+  [$('#t-start').value, $('#t-end').value] = p.before;
+  syncUi();
+  return { from: p.from, to: p.to };
+}
+/** Forgets the part dragged across: playing, exporting or Esc means it is the part to keep. */
+function forgetPicked() {
+  if (!picked) return;
+  picked = null;
+  $('#ed-picked').classList.add('hidden');
+}
+for (const id of ['#t-start', '#t-end']) $(id).addEventListener('input', () => { picked = null; }, true);
+// A start typed after the end (or an end before the start) is moved, and you're told.
+function fixTrim(which) {
+  const at = (v, d) => Math.max(0, Math.min(duration, Number.isFinite(v) ? v : d));
+  let s = at(parseFloat($('#t-start').value), 0), e = at(parseFloat($('#t-end').value), duration);
+  const wrong = e - s < 0.1;
+  if (wrong) {
+    if (which === 'start') s = Math.max(0, e - 0.1); else e = Math.min(duration, s + 0.1);
+    if (e - s < 0.1) s = Math.max(0, e - 0.1);
+  }
+  $('#t-start').value = s.toFixed(1);
+  $('#t-end').value = e.toFixed(1);
+  if (wrong) toast(t('trim_fixed'));
+  syncUi();
+}
+$('#t-start').addEventListener('change', () => fixTrim('start'));
+$('#t-end').addEventListener('change', () => fixTrim('end'));
+const setStart = (t) => { picked = null; if (busy) return; $('#t-start').value = Math.max(0, Math.min(t, trim().end - 0.1)).toFixed(1); syncUi(); };
+const setEnd = (t) => { picked = null; if (busy) return; $('#t-end').value = Math.min(duration, Math.max(t, trim().start + 0.1)).toFixed(1); syncUi(); };
 $('#t-start-set').addEventListener('click', () => setStart(player.currentTime));
 $('#t-end-set').addEventListener('click', () => setEnd(player.currentTime));
 
@@ -236,7 +317,9 @@ function drawTimeline() {
   // Inserted slides make the export longer than the part kept: the length with them, and what it's made of.
   const added = (slides?.all() || []).filter((s) => s.mode !== 'overlay' && s.at >= start - 1e-3 && s.at <= end + 1e-3).reduce((n, s) => n + s.duration, 0);
   const kept = clip().length; // without the parts cut, and sped-up parts shorter
-  $('#tc-len').textContent = added ? t('trim_with_slides', (kept + added).toFixed(1)) : t('trim_selected', kept.toFixed(1));
+  const none = duration > 0 && !clip().parts.length;
+  $('#tc-len').textContent = none ? t('trim_all_cut') : added ? t('trim_with_slides', (kept + added).toFixed(1)) : t('trim_selected', kept.toFixed(1));
+  $('#tc-len').classList.toggle('warn', none);
   $('#tc-len').title = added ? t('trim_with_slides_title', [kept.toFixed(1), added.toFixed(1)]) : '';
   // The length on the kept part itself, and each end's time on its handle.
   $('#range-len').style.left = `calc((${pct(start)} + ${pct(end)}) / 2)`;
@@ -273,7 +356,11 @@ $('#track').addEventListener('pointerdown', (e) => {
   const scrub = e.target.closest('#playhead');
   $('#track').setPointerCapture(e.pointerId);
   const from = timeAt(e), x0 = e.clientX;
-  let selecting = false;
+  let selecting = false, sel = null;
+  // Several drags in a row: the trim to go back to is the one before the first.
+  const before = picked?.before || [$('#t-start').value, $('#t-end').value];
+  picked = null;
+  $('#ed-picked').classList.add('hidden');
   $('#track').classList.add('dragging');
   const move = (ev) => {
     const at = timeAt(ev);
@@ -285,6 +372,7 @@ $('#track').addEventListener('pointerdown', (e) => {
       const [a, b] = [Math.min(from, at), Math.max(from, at)];
       $('#t-start').value = a.toFixed(1);
       $('#t-end').value = Math.max(b, a + 0.1).toFixed(1);
+      sel = [a, Math.max(b, a + 0.1)];
       syncUi();
       player.currentTime = at;
     }
@@ -292,13 +380,19 @@ $('#track').addEventListener('pointerdown', (e) => {
   };
   if (handle || scrub) move(e);
   const up = (ev) => {
-    if (!handle && !scrub && !selecting) { player.currentTime = timeAt(ev); drawPlayhead(); }
+    if (ev.type === 'pointerup' && !handle && !scrub && !selecting) { player.currentTime = timeAt(ev); drawPlayhead(); }
+    if (selecting && sel) {
+      picked = { from: sel[0], to: sel[1], before };
+      syncUi();
+    }
     $('#track').classList.remove('dragging');
     $('#track').removeEventListener('pointermove', move);
     $('#track').removeEventListener('pointerup', up);
+    $('#track').removeEventListener('pointercancel', up);
   };
   $('#track').addEventListener('pointermove', move);
   $('#track').addEventListener('pointerup', up);
+  $('#track').addEventListener('pointercancel', up);
 });
 
 for (const [id, set, get] of [['#h-start', setStart, () => trim().start], ['#h-end', setEnd, () => trim().end]]) {
@@ -317,8 +411,12 @@ function togglePlay() {
   if (busy || $('#player').classList.contains('hidden')) return;
   if (slides?.skip()) return; // a slide on screen during playback: carry on
   if (player.paused) {
-    const { start, end } = trim();
-    if (player.currentTime < start || player.currentTime >= end - 0.05) player.currentTime = start;
+    const map = clip();
+    if (!map.parts.length) { toast(t('video_all_cut'), { kind: 'error' }); return; }
+    forgetPicked();
+    // From the start again at the end of the last part kept (a cut can take the rest).
+    const { start } = trim();
+    if (player.currentTime < start || player.currentTime >= map.parts.at(-1).to - 0.05) player.currentTime = start;
     previewSound();
     playRules();
     player.play();
@@ -376,6 +474,7 @@ function playRules() {
     if (!part) {
       const next = map.parts.find((p) => p.from > t);
       if (next) player.currentTime = next.from;
+      else { player.pause(); player.currentTime = map.parts.at(-1)?.to ?? trim().start; } // the rest is cut
       return;
     }
     rate = part.rate;
@@ -454,6 +553,7 @@ document.addEventListener('keydown', (e) => {
   else if (k === 'i') setStart(player.currentTime);
   else if (k === 'o') setEnd(player.currentTime);
   else if (k === 'f') frameToEditor();
+  else if (k === 'escape') forgetPicked();
   else if (k === 's' && slides && !busy) { e.preventDefault(); slides.add(); }
   else if (k === 'arrowleft' && !e.target.closest('.handle')) { player.currentTime = Math.max(0, player.currentTime - (e.shiftKey ? 1 : 1 / (meta.fps || 30))); }
   else if (k === 'arrowright' && !e.target.closest('.handle')) { player.currentTime = Math.min(duration, player.currentTime + (e.shiftKey ? 1 : 1 / (meta.fps || 30))); }
@@ -758,14 +858,10 @@ async function convertRealtime(p, { start, end }) {
       paintOverlays(ctx, overlays, overlayArt, map.outOf(at) * p.fps, p.fps);
     };
     const total = map.length + slideSeconds(schedule, p.fps);
+    // As loud as the faster export and the preview: fades over the slides' time too, ramps into muted parts.
+    const gainAt = audioGain(e, map, total);
     const loud = (at, rate) => {
-      if (!gain) return;
-      const a = e.audio;
-      const u = map.outOf(at);
-      let g = rate !== 1 || a.mutes.some((m) => at >= m.from && at < m.to) ? 0 : a.volume;
-      if (a.fadeIn) g *= Math.min(1, u / a.fadeIn);
-      if (a.fadeOut) g *= Math.min(1, Math.max(0, (map.length - u) / a.fadeOut));
-      gain.gain.value = g;
+      if (gain) gain.gain.value = rate !== 1 ? 0 : gainAt(at, map.outOf(at) + slideTime, map.partAt(at));
     };
     let slideTime = 0; // seconds of slides recorded so far
     let next = 0;
@@ -897,8 +993,17 @@ function convertInWorker(p, range) {
   });
 }
 
+/** Whether anything is left to export; if not, says so. */
+function somethingKept() {
+  if (clip().parts.length) return true;
+  toast(t('video_all_cut'), { kind: 'error', ms: 5000 });
+  return false;
+}
+
 async function convert() {
   if (busy || !source) return;
+  forgetPicked();
+  if (!somethingKept()) return;
   busy = true;
   cancelled = false;
   $('#convert').disabled = true;
@@ -972,6 +1077,8 @@ const exportStem = async () => fileStem((await getSettings()).fileName, { title:
  */
 async function queueCurrent() {
   if (!source) return;
+  forgetPicked();
+  if (!somethingKept()) return;
   const id = new URLSearchParams(location.search).get('id');
   const button = $('#queue-export');
   button.disabled = true;
@@ -1220,6 +1327,13 @@ addEventListener('resize', () => { if (rv.tool !== 'off') placeOverlay(); });
   duration = await loadDuration(player);
   $('#t-end').value = duration.toFixed(1);
   $('#t-start').max = $('#t-end').max = duration.toFixed(1);
+  // The part kept when it was last open.
+  const kept = rec.trim;
+  if (kept && kept.start >= 0 && kept.end > kept.start + 0.05 && kept.start < duration) {
+    $('#t-start').value = kept.start.toFixed(1);
+    $('#t-end').value = Math.min(duration, kept.end).toFixed(1);
+  }
+  savedTrim = trimKey();
   $('#info').textContent = `${player.videoWidth} × ${player.videoHeight} · ${fmtTime(duration)} · ${fmtBytes(source.size)}`;
   if (meta.title) { $('#doc-name').textContent = meta.title; document.title = `${meta.title} — Captode`; }
   $('#make-guide').classList.toggle('hidden', !meta.clicks?.length);
@@ -1260,6 +1374,7 @@ addEventListener('resize', () => { if (rv.tool !== 'off') placeOverlay(); });
     },
     duration: () => duration,
     trim,
+    takePicked,
     fmtTime,
     changed: () => { fx = null; fillResolutions(); syncUi(); slides?.redraw(); },
     save: (e) => saveVideoEdits(id, e).catch(() => {}),

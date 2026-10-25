@@ -119,7 +119,10 @@ or install the zip from `npm run package`.
    or muted. Reload the page: the edits are still there. Turn on **Show clicks** and export:
    a ring appears at each click. Record a tab with the microphone, pausing while you speak,
    and press **Cut silent parts**: the pauses become cuts. Play at 150% volume with a fade in:
-   it is louder than at 100% and fades in.
+   it is louder than at 100% and fades in. Cut the last 3 seconds and play just before them:
+   playback stops where the cut starts. Set a start and end, close the page and open the
+   recording again: the same part is kept. Cut everything: the timeline says so and Export
+   explains instead of starting.
 24. **Pause:** record a tab, right-click the Captode icon and choose **Pause recording** (the badge
    shows ❚❚), click the page, wait 5 seconds, choose **Resume recording**, then stop. The video
    leaves the pause out, and **Show clicks** has no ring for the click made while paused. Record

@@ -3201,5 +3201,29 @@
   },
   "resize_keeps_original": {
     "message": "Resizing keeps the original pixels: Original size brings them back, as sharp as they were."
+  },
+  "res_readable": {
+    "message": "$1 — sharp text"
+  },
+  "video_res_blurry_text": {
+    "message": "Text may be hard to read at this size. “Sharp text” keeps it as clear as it was on screen."
+  },
+  "video_quality_blurry_text": {
+    "message": "Small text can smear while the picture moves. For recordings with text, choose Balanced or higher."
+  },
+  "video_picked_part": {
+    "message": "The next edit you add covers the part you dragged across ($1–$2). Without one, that part is what's kept."
+  },
+  "video_all_cut": {
+    "message": "Everything is cut, so there's nothing to play or export. Remove a cut or make one shorter."
+  },
+  "trim_all_cut": {
+    "message": "Everything is cut"
+  },
+  "trim_fixed": {
+    "message": "The end has to come after the start, so it was moved."
+  },
+  "edit_no_sound": {
+    "message": "This recording has no sound to mute."
   }
 }

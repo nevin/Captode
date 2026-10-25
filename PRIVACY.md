@@ -22,6 +22,9 @@ them. It does not collect, transmit, sell or share any personal or sensitive dat
   in Captode's storage on your device, kept until you remove it.
 - **Exports added to the queue** are made in the background on your device and kept in that
   storage until you remove them, or for a day.
+- **Translating captions** uses the translator built into your browser, on your device; Captode
+  sends the text nowhere. The first time, the browser may download its own language model.
+  Where the browser has no translator, the option isn't shown.
 - **Share** hands the file to the app you pick in your system's share sheet; Captode sends it
   nowhere itself.
 - **While you record**, the recording is also written to that storage a second at a time, so

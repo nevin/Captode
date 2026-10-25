@@ -147,7 +147,7 @@ opens in the video page, where you can:
 
 - Trim on a timeline with thumbnails and the sound's waveform: drag across it to choose the
   part to keep, drag its edges, or play to a point and press **I** (start) or **O** (end).
-  Pointing at it shows that moment's frame; a click moves the playhead and its knob scrubs. **Space** plays only the trimmed part; the arrow keys step frame by frame.
+  Pointing at it shows that moment's frame; a click moves the playhead and its knob scrubs. **Space** plays only the trimmed part (skipping what's cut, up to the last part kept); the arrow keys step frame by frame. The part kept is saved with the recording, and a start or end typed the wrong way round is put right.
 - **Slides** (or **S** at the playhead): title cards put into the recording at a moment you
   choose. The recording waits while a slide is on screen, then carries on from the same frame,
   with the sound kept in step. Each slide has a title, subtitle and description (a line each;
@@ -158,7 +158,9 @@ opens in the video page, where you can:
   playback shows slides as the export will. Slides are kept with the recording.
 - **Edit** the recording; playback and the preview show every change as the export will:
   - **Cut** (**X**) leaves a part out, picture and sound; playback jumps over it. Or press
-    **⇧X** where a cut should start and again where it should end.
+    **⇧X** where a cut should start and again where it should end. Or drag across the
+    timeline and press **Cut**: the cut covers the part dragged across (this works for every
+    edit below too), and the trim stays as it was.
   - **Speed up** (**P**) plays a part 1.5×, 2×, 4× or 8× as fast, silent (a page loading,
     a form being filled in).
   - **Zoom** (**Z**) moves in on part of the picture and back out, smoothly. **Zoom in on
@@ -173,7 +175,7 @@ opens in the video page, where you can:
     into the browser (recent Chrome), on the device; it isn't offered where there's none.
 
   Each is a bar above the timeline: drag it, or its ends; **Split** cuts the chosen one in two
-  at the playhead. **⌘Z**/**Ctrl+Z** undoes, **Delete** removes the one chosen. Edits are kept with the recording.
+  at the playhead. **⌘Z**/**Ctrl+Z** undoes, **Delete** removes the one chosen. Typing or moving a slider is undone in one step, and the **Undo** shown after removing an edit always brings that edit back. Edits are kept with the recording, saved as you make them. With everything cut, the timeline says so instead of exporting an empty clip.
 - **Step-by-step guide** (for tab recordings with clicks): a step for each click, with the
   frame at that moment, a numbered ring where you clicked, and a note that starts as what you
   clicked ("Click “Save”"). Edit, reorder or remove steps, then download a single web page, a
@@ -198,7 +200,11 @@ opens in the video page, where you can:
 - Export as **MP4** (H.264, with AAC audio), **GIF**, **WebP** (animated) or **WebM** (VP9, with
   Opus audio). Exports run in the background and much faster than real time: a 20-second
   clip takes about 2 seconds. Trims are frame-accurate.
-- Choose the resolution (original, 2160p down to 240p) and the frame rate.
+- Choose the resolution (original, 2160p down to 240p) and the frame rate. GIF and WebP
+  start at **sharp text**: the size the picture had on screen (half the recorded pixels on
+  a Retina display), so text stays readable while the file stays light. A smaller size,
+  or the Small file and Smallest file qualities for MP4 and WebM, shows a note that text
+  may blur.
 - **Reduce file size losslessly** (GIF and WebP). Repeated frames are merged and only the
   pixels that change are stored; every frame looks exactly as it would without this.
   **Ignore flicker** (on by default) also treats changes too small to see (2 levels out
