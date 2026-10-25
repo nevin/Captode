@@ -3,11 +3,12 @@
 // timeline and an item in the list; boxes and arrows are drawn on the picture. The
 // drawing and timing live in lib/video-edits.js, shared with the export.
 import {
-  normaliseEdits, editId, clipMap, composer, calloutBox, RATES, CALLOUT_COLOURS, ASPECTS,
+  normaliseEdits, editId, clipMap, composer, calloutBox, RATES, CALLOUT_COLOURS, CALLOUT_KINDS, ASPECTS,
 } from '../lib/video-edits.js';
 import { findSilences } from '../lib/audio-levels.js';
 import { toast } from '../lib/ui.js';
 import { t } from '../lib/i18n.js';
+import { canTranslate, languageOptions, translateAll, translateError, languageName } from '../lib/translate.js';
 
 const $ = (s) => document.querySelector(s);
 const EDGE_PX = 7; // how near a bar's ends a press resizes it
@@ -21,6 +22,7 @@ const KINDS = {
   blurs: { colour: '#8e4ec6', key: 'b', len: 3 },
   callouts: { colour: '#30a46c', key: 'c', len: 3 },
   mutes: { colour: '#64748b', key: 'm', len: 2 },
+  captions: { colour: '#0ea5e9', key: 't', len: 3 },
 };
 const SPATIAL = new Set(['zooms', 'blurs', 'callouts']);
 const name = (kind) => t(`edit_kind_${kind}`);
@@ -83,6 +85,7 @@ export function mountEdits(opts) {
       zooms: { x: 0.5, y: 0.5, scale: 2 },
       blurs: { x: 0.35, y: 0.4, w: 0.3, h: 0.12, mode: 'blur', strength: 5 },
       callouts: { kind: 'arrow', x1: 0.3, y1: 0.3, x2: 0.5, y2: 0.5, text: '', color: CALLOUT_COLOURS[0], size: 2 },
+      captions: { text: '', size: 2 },
     }[kind] || {};
     const x = { ...base, ...extra, ...fields };
     change((e) => list(kind, e).push(x));
@@ -185,7 +188,8 @@ export function mountEdits(opts) {
       speeds: () => `${x.rate}×`,
       zooms: () => `${Math.round(x.scale * 10) / 10}×`,
       blurs: () => t(`edit_blur_${x.mode}`),
-      callouts: () => (x.kind === 'text' && x.text.trim() ? `“${x.text.trim().slice(0, 24)}”` : t(`edit_callout_${x.kind}`)),
+      callouts: () => (x.kind === 'text' && x.text.trim() ? `“${x.text.trim().slice(0, 24)}”` : x.kind === 'step' ? `${t('edit_callout_step')} ${x.text.trim() || '1'}` : t(`edit_callout_${x.kind}`)),
+      captions: () => (x.text.trim() ? `“${x.text.trim().slice(0, 24)}”` : ''),
     }[kind]?.() || '';
     return { when, what };
   }
@@ -243,13 +247,21 @@ export function mountEdits(opts) {
       html += `<p class="muted small">${t('edit_draw_hint')}</p>`;
     }
     if (kind === 'callouts') {
-      html += field(t('edit_callout_kind'), `<div class="seg seg-wrap" data-seg="kind" role="radiogroup">${['arrow', 'box', 'text', 'spot'].map((k) => `<button type="button" data-v="${k}" role="radio" aria-checked="${k === x.kind}" class="${k === x.kind ? 'on' : ''}">${t(`edit_callout_${k}`)}</button>`).join('')}</div>`);
+      html += field(t('edit_callout_kind'), `<div class="seg seg-wrap" data-seg="kind" role="radiogroup">${CALLOUT_KINDS.map((k) => `<button type="button" data-v="${k}" role="radio" aria-checked="${k === x.kind}" class="${k === x.kind ? 'on' : ''}">${t(`edit_callout_${k}`)}</button>`).join('')}</div>`);
       if (x.kind === 'text') html += `<label class="field"><span>${t('edit_text')}</span><textarea rows="2" data-k="text" placeholder="${t('edit_text_placeholder')}"></textarea></label>`;
+      if (x.kind === 'step') html += `<label class="field"><span>${t('edit_step_label')}</span><textarea rows="1" maxlength="3" data-k="text" placeholder="1"></textarea></label>`;
       if (x.kind !== 'spot') {
         html += `<div class="field"><span>${t('edit_colour')}</span><div class="swatches ed-colours">${CALLOUT_COLOURS.map((c) => `<button type="button" data-colour="${c}" aria-pressed="${c === x.color}" style="background:${c}" aria-label="${c}"></button>`).join('')}</div></div>`;
         html += field(t('edit_size'), seg('size', [[1, 'S'], [2, 'M'], [3, 'L']], x.size));
       }
       html += `<p class="muted small">${t('edit_draw_hint')}</p>`;
+    }
+    if (kind === 'captions') {
+      html += `<label class="field"><span>${t('edit_text')}</span><textarea rows="2" data-k="text" placeholder="${t('edit_caption_placeholder')}"></textarea></label>`;
+      html += field(t('edit_size'), seg('size', [[1, 'S'], [2, 'M'], [3, 'L']], x.size));
+      html += `<p class="muted small">${t('edit_caption_hint')}</p>`;
+      html += `<div class="row ed-actions"><button type="button" class="btn" data-subs="srt" data-tip="${t('edit_subtitles_tip')}">${t('edit_subtitles_srt')}</button><button type="button" class="btn" data-subs="vtt" data-tip="${t('edit_subtitles_tip')}">${t('edit_subtitles_vtt')}</button></div>`;
+      if (canTranslate) html += `<label class="field"><span>${t('translate_captions')}</span><select data-translate>${languageOptions()}</select></label>`;
     }
     if (kind === 'mutes') html += `<p class="muted small">${t('edit_mute_hint')}</p>`;
     if (kind === 'cuts') html += `<p class="muted small">${t('edit_cut_hint')}</p>`;
@@ -282,6 +294,7 @@ export function mountEdits(opts) {
     if (e.target.type === 'range') return setField(k, Number(e.target.value), { quiet: true });
   });
   form.addEventListener('change', (e) => {
+    if (e.target.matches('[data-translate]')) { translateCaptions(e.target); return; }
     const k = e.target.dataset.k;
     if (k === 'from' || k === 'to') setField(k, Number(e.target.value) || 0);
     if (e.target.type === 'range') renderForm(); // the value in the label
@@ -293,12 +306,36 @@ export function mountEdits(opts) {
     if (b.dataset.split !== undefined) return split();
     if (b.dataset.now) return setField(b.dataset.now, round(player.currentTime));
     if (b.dataset.colour) return setField('color', b.dataset.colour);
+    if (b.dataset.subs) return opts.downloadSubtitles?.(b.dataset.subs);
     const s = b.closest('[data-seg]');
     if (s && b.dataset.v !== undefined) {
       const v = s.dataset.seg === 'rate' || s.dataset.seg === 'size' ? Number(b.dataset.v) : b.dataset.v;
+      // A new step takes the next number.
+      if (s.dataset.seg === 'kind' && v === 'step' && !/^\w{1,3}$/.test(item()?.text.trim() || '')) {
+        setField('text', String(edits.callouts.filter((c) => c.kind === 'step').length + 1), { history: false, quiet: true });
+      }
       setField(s.dataset.seg, v);
     }
   });
+
+  /** Every caption into the language chosen in `select`, as one change that can be undone. */
+  async function translateCaptions(select) {
+    const target = select.value;
+    if (!target) return;
+    select.disabled = true;
+    const texts = edits.captions.map((c) => c.text);
+    toast(t('translate_working'), { ms: 3000 });
+    try {
+      const out = await translateAll(texts, target, (f) => toast(t('translate_download', String(Math.round(f * 100))), { ms: 2000 }));
+      change((e) => { e.captions.forEach((c, i) => { if (typeof out[i] === 'string') c.text = out[i].slice(0, 300); }); });
+      toast(t('translate_done', languageName(target)), { kind: 'success' });
+    } catch (err) {
+      toast(translateError(err), { kind: 'error', ms: 6000 });
+    } finally {
+      select.value = '';
+      select.disabled = false;
+    }
+  }
 
   // ---------- the timeline ----------
 
@@ -429,7 +466,7 @@ export function mountEdits(opts) {
       return { kind: 'rect', box: { x: c.x + x.x * c.w - w / 2, y: c.y + x.y * c.h - h / 2, w, h }, fixed: true };
     }
     if (x.kind === 'arrow') return { kind: 'line' };
-    if (x.kind === 'text') return { kind: 'point' };
+    if (x.kind === 'text' || x.kind === 'step') return { kind: 'point' };
     return { kind: 'rect', box: calloutBox(x) };
   }
 

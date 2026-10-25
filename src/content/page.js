@@ -312,6 +312,63 @@ export function findPrivate(region, space) {
 }
 
 /**
+ * The words the page shows inside `region` (as for findPrivate), to copy from the
+ * screenshot later: [[x, y, w, h, text], …] in CSS pixels from the region's top left.
+ * A run of text on one line is one box; text that wraps is split into words. Kept with
+ * the capture on this device, like the picture itself.
+ */
+export function findText(region, space) {
+  const panel = space === 'panel' ? window.__captodeState?.panel : null;
+  if (space === 'panel' && !panel) return [];
+  let ox = 0, oy = 0;
+  if (space === 'document') { ox = window.scrollX; oy = window.scrollY; }
+  if (panel) {
+    const r = panel.getBoundingClientRect();
+    ox = -(r.left + panel.clientLeft);
+    oy = panel.scrollTop - (r.top + panel.clientTop);
+  }
+  const MAX = 40000;
+  const out = [];
+  const inside = (rect) => {
+    const cx = rect.left + ox - region.x + rect.width / 2, cy = rect.top + oy - region.y + rect.height / 2;
+    return rect.width >= 1 && rect.height >= 1 && cx >= 0 && cy >= 0 && cx <= region.w && cy <= region.h;
+  };
+  const add = (rect, text) => {
+    out.push([rect.left + ox - region.x, rect.top + oy - region.y, rect.width, rect.height, text]);
+  };
+  const root = panel || document.body;
+  if (!root) return out;
+  const seen = new Map(); // element → shown, checked once
+  const shown = (el) => {
+    if (!seen.has(el)) seen.set(el, el.checkVisibility ? el.checkVisibility({ opacityProperty: true, visibilityProperty: true }) : true);
+    return seen.get(el);
+  };
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+    acceptNode(n) {
+      const el = n.parentElement;
+      if (!el || !n.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
+      if (el.closest('script,style,noscript,template,textarea,select,[id^="__captode"]') || !shown(el)) return NodeFilter.FILTER_REJECT;
+      return NodeFilter.FILTER_ACCEPT;
+    },
+  });
+  const range = document.createRange();
+  for (let n = walker.nextNode(); n && out.length < MAX; n = walker.nextNode()) {
+    range.selectNodeContents(n);
+    const rects = [...range.getClientRects()].filter((r) => r.width >= 1 && r.height >= 1);
+    if (!rects.length || !rects.some(inside)) continue;
+    if (rects.length === 1) { add(rects[0], n.nodeValue.replace(/\s+/g, ' ').trim()); continue; }
+    for (const m of n.nodeValue.matchAll(/\S+/g)) {
+      range.setStart(n, m.index);
+      range.setEnd(n, m.index + m[0].length);
+      const r = range.getBoundingClientRect();
+      if (inside(r)) add(r, m[0]);
+      if (out.length >= MAX) break;
+    }
+  }
+  return out.filter((b) => inside({ left: b[0] - ox + region.x, top: b[1] - oy + region.y, width: b[2], height: b[3] }));
+}
+
+/**
  * Scrolls to (x, y), the window or the panel being captured. After the first tile it
  * hides what would repeat on every tile: fixed and sticky elements (inside the panel,
  * or floating over it), but never one that holds the panel.
@@ -538,9 +595,28 @@ export function showInputs(on, { clicks = true, cursor = false } = {}) {
 export function trackClicks(on) {
   window.__captodeClicks?.();
   if (!on) return;
+  // What was clicked, in the page's own words, for the step-by-step guide: a button's or
+  // link's text, or a field's name. Never what is typed in a field, and nothing for
+  // password fields or Captode's own drawing layer.
+  const clean = (s) => String(s || '').replace(/\s+/g, ' ').trim().slice(0, 80);
+  const labelOf = (target) => {
+    const el = target instanceof Element ? target : null;
+    if (!el) return {};
+    const field = el.closest('input, textarea, select, [contenteditable=""], [contenteditable="true"]');
+    if (field) {
+      if (field.type === 'password' || field.autocomplete?.includes('password')) return {};
+      if (['button', 'submit', 'reset'].includes(field.type)) return { label: clean(field.value || field.getAttribute('aria-label')) };
+      const named = field.getAttribute('aria-label') || field.labels?.[0]?.innerText || field.getAttribute('placeholder') || field.getAttribute('title');
+      return { label: clean(named), field: true };
+    }
+    const hit = el.closest('button, a, summary, label, [role=button], [role=link], [role=menuitem], [role=tab], [role=option], [role=checkbox], [role=switch], [role=radio]');
+    if (!hit) return {};
+    return { label: clean(hit.getAttribute('aria-label') || hit.innerText || hit.getAttribute('title') || hit.querySelector('img[alt]')?.alt) };
+  };
   const down = (e) => {
     if (e.button !== 0 && e.pointerType === 'mouse') return;
-    chrome.runtime.sendMessage({ type: 'rec-click', x: e.clientX / innerWidth, y: e.clientY / innerHeight, at: Date.now() }).catch(() => {});
+    if (e.target?.closest?.('#__captode_draw')) return;
+    chrome.runtime.sendMessage({ type: 'rec-click', x: e.clientX / innerWidth, y: e.clientY / innerHeight, at: Date.now(), ...labelOf(e.target) }).catch(() => {});
   };
   addEventListener('pointerdown', down, true);
   window.__captodeClicks = () => { removeEventListener('pointerdown', down, true); window.__captodeClicks = null; };
@@ -582,5 +658,92 @@ export async function copyImageHere(base64, label) {
   note.style.cssText = 'position:fixed;left:50%;bottom:28px;transform:translateX(-50%);z-index:2147483647;padding:10px 16px;border-radius:10px;background:rgba(23,23,28,.92);color:#fff;font:500 14px system-ui,sans-serif;box-shadow:0 6px 20px rgba(0,0,0,.25);pointer-events:none;';
   document.documentElement.appendChild(note);
   setTimeout(() => note.remove(), 1800);
+  return true;
+}
+
+/**
+ * Turns drawing on the page on or off while recording (`on` left out: the other way):
+ * strokes in red that fade a moment after each is drawn, so they show in the recording
+ * without anything to clear. Esc stops drawing. `on`: true, false or 'toggle'. Returns
+ * whether drawing is on.
+ */
+export function drawLayer(on, hint) {
+  const old = document.getElementById('__captode_draw');
+  if (on !== true && on !== false) on = !old; // 'toggle'
+  if (!on) { old?.__stop?.(); return false; }
+  if (old) return true;
+  const dpr = devicePixelRatio || 1;
+  const c = document.createElement('canvas');
+  c.id = '__captode_draw';
+  c.style.cssText = 'position:fixed;inset:0;width:100vw;height:100vh;z-index:2147483647;cursor:crosshair;touch-action:none;background:transparent;';
+  const ctx = c.getContext('2d');
+  const size = () => { c.width = Math.round(innerWidth * dpr); c.height = Math.round(innerHeight * dpr); };
+  size();
+  const strokes = []; // { points: [[x, y]], end: time it was finished, or 0 while drawn }
+  let current = null;
+  let frame = 0;
+  const HOLD = 1500, FADE = 800;
+  const paint = () => {
+    frame = 0;
+    const now = performance.now();
+    ctx.clearRect(0, 0, c.width, c.height);
+    for (let i = strokes.length - 1; i >= 0; i--) if (strokes[i].end && now - strokes[i].end > HOLD + FADE) strokes.splice(i, 1);
+    ctx.lineCap = ctx.lineJoin = 'round';
+    for (const s of strokes) {
+      const a = s.end ? Math.max(0, Math.min(1, 1 - (now - s.end - HOLD) / FADE)) : 1;
+      ctx.globalAlpha = a;
+      const p = s.points;
+      // A white edge under the red, so it shows on dark and red pages alike.
+      for (const [style, width] of [['rgba(255,255,255,.9)', 7], ['#e5484d', 4]]) {
+        ctx.strokeStyle = style;
+        ctx.lineWidth = width * dpr;
+        ctx.beginPath();
+        ctx.moveTo(p[0][0], p[0][1]);
+        if (p.length === 1) ctx.lineTo(p[0][0] + 0.1, p[0][1]);
+        for (let i = 1; i < p.length - 1; i++) ctx.quadraticCurveTo(p[i][0], p[i][1], (p[i][0] + p[i + 1][0]) / 2, (p[i][1] + p[i + 1][1]) / 2);
+        if (p.length > 1) ctx.lineTo(p[p.length - 1][0], p[p.length - 1][1]);
+        ctx.stroke();
+      }
+    }
+    ctx.globalAlpha = 1;
+    if (strokes.length) frame = requestAnimationFrame(paint);
+  };
+  const again = () => { if (!frame) frame = requestAnimationFrame(paint); };
+  const at = (e) => [e.clientX * dpr, e.clientY * dpr];
+  c.addEventListener('pointerdown', (e) => {
+    if (e.button !== 0) return;
+    e.preventDefault();
+    try { c.setPointerCapture(e.pointerId); } catch { /* a pen lifted already */ }
+    current = { points: [at(e)], end: 0 };
+    strokes.push(current);
+    again();
+  });
+  c.addEventListener('pointermove', (e) => {
+    if (!current) return;
+    for (const ev of e.getCoalescedEvents?.() || [e]) current.points.push(at(ev));
+    again();
+  });
+  const finish = () => { if (current) { current.end = performance.now(); current = null; again(); } };
+  c.addEventListener('pointerup', finish);
+  c.addEventListener('pointercancel', finish);
+  const key = (e) => { if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); stop(); } };
+  addEventListener('keydown', key, true);
+  addEventListener('resize', size);
+  // A short hint, which fades before it gets in the way.
+  const tip = document.createElement('div');
+  tip.textContent = hint || '';
+  tip.style.cssText = 'position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:2147483647;pointer-events:none;' +
+    'background:rgba(20,20,26,.85);color:#fff;font:600 13px/1.2 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding:8px 12px;border-radius:999px;transition:opacity .4s;';
+  const tipTimer = setTimeout(() => { tip.style.opacity = '0'; }, 1800);
+  function stop() {
+    cancelAnimationFrame(frame);
+    clearTimeout(tipTimer);
+    removeEventListener('keydown', key, true);
+    removeEventListener('resize', size);
+    c.remove();
+    tip.remove();
+  }
+  c.__stop = stop;
+  document.documentElement.append(c, ...(hint ? [tip] : []));
   return true;
 }

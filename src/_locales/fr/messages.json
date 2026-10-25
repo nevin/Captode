@@ -225,7 +225,7 @@
     "message": "Réinitialiser tous les paramètres ?"
   },
   "settings_theme_export_background_default_formats": {
-    "message": "Le thème, l'arrière-plan à l'export, les formats par défaut, le cadre d'appareil et les options d'enregistrement reviennent à leur état d'installation. Vos captures ne sont pas touchées."
+    "message": "Le thème, l'arrière-plan d'export, les formats par défaut, le cadre d'appareil, les options d'enregistrement, votre logo et les préréglages enregistrés reviennent à leur état d'installation de Captode. Vos captures ne sont pas touchées."
   },
   "settings_cancel": {
     "message": "Annuler"
@@ -288,7 +288,7 @@
     "message": "Choisir une image"
   },
   "editor_kept_on_this_device_for": {
-    "message": "Conservées sur cet appareil pendant 24 heures"
+    "message": "Gardées sur cet appareil pendant la durée choisie dans les paramètres, sauf si vous les gardez"
   },
   "editor_recent_captures": {
     "message": "Captures récentes"
@@ -861,7 +861,7 @@
     "message": "Enregistrement introuvable"
   },
   "video_recordings_are_kept_for_a": {
-    "message": "Les enregistrements sont conservés un jour. Lancez-en un nouveau avec le bouton Captode de la barre d'outils."
+    "message": "Les enregistrements non gardés sont supprimés après la durée choisie dans les paramètres. Lancez-en un nouveau avec le bouton Captode de la barre d'outils."
   },
   "video_trim": {
     "message": "Découper"
@@ -2028,7 +2028,7 @@
     "message": "La copier dans le presse-papiers"
   },
   "settings_after_hint": {
-    "message": "Téléchargée ou copiée comme le ferait l'éditeur : dans votre format par défaut, avec cadre d'appareil et flous s'ils sont activés. Chaque capture reste aussi un jour dans les captures récentes."
+    "message": "Téléchargée ou copiée comme le ferait l'éditeur, dans votre format par défaut, avec cadre d'appareil et flous s'ils sont activés. Chaque capture est aussi gardée dans Captures récentes."
   },
   "settings_long_pages": {
     "message": "Pages trop longues pour une image"
@@ -2126,11 +2126,11 @@
   "part_of": {
     "message": "partie $1 sur $2"
   },
-  "popup_new_in_captode_2_1": {
-    "message": "Nouveau dans Captode 2.1"
+  "popup_new_in_captode_2_3": {
+    "message": "Nouveau dans Captode 2.3"
   },
-  "popup_whats_new_2_1": {
-    "message": "Montez vos enregistrements : retirez ou accélérez des passages, zoomez (aussi là où vous avez cliqué), floutez les informations privées, ajoutez flèches et étiquettes, recadrez, placez la vidéo sur un arrière-plan et réglez le son."
+  "popup_whats_new_2_3": {
+    "message": "Mettez en pause et dessinez sur la page pendant l’enregistrement, ajoutez des légendes, copiez le texte des captures, ajoutez votre logo, et gardez vos captures ou enregistrez-les en fichiers de projet."
   },
   "slides_title": {
     "message": "Diapositives"
@@ -2704,5 +2704,500 @@
   },
   "edit_default_sound_saved": {
     "message": "Les nouveaux enregistrements commenceront avec ce volume et ces fondus"
+  },
+  "rec_pause": {
+    "message": "Pause"
+  },
+  "rec_resume": {
+    "message": "Reprendre"
+  },
+  "screen_recording_paused": {
+    "message": "En pause"
+  },
+  "screen_title_paused": {
+    "message": "❚❚ En pause — Captode"
+  },
+  "menu_pause_recording": {
+    "message": "Mettre l'enregistrement en pause"
+  },
+  "menu_resume_recording": {
+    "message": "Reprendre l'enregistrement"
+  },
+  "action_paused_title": {
+    "message": "Captode — enregistrement en pause. Cliquez pour l'arrêter, ou clic droit pour le reprendre"
+  },
+  "command_pause": {
+    "message": "Mettre en pause ou reprendre l'enregistrement"
+  },
+  "popup_recording_recovered": {
+    "message": "Un enregistrement a été sauvé"
+  },
+  "popup_recording_recovered_hint": {
+    "message": "Il s'est arrêté avant d'être enregistré (le navigateur ou sa page s'est fermé), alors Captode a gardé ce qu'il avait."
+  },
+  "popup_open_recording": {
+    "message": "Ouvrir l'enregistrement"
+  },
+  "guide_heading": {
+    "message": "Guide pas à pas"
+  },
+  "guide_make": {
+    "message": "Guide pas à pas"
+  },
+  "guide_make_title": {
+    "message": "Une étape par clic, avec une image et une note, à télécharger en page, PDF ou Markdown"
+  },
+  "guide_page_tip": {
+    "message": "Une page web avec toutes les étapes ; s'ouvre dans n'importe quel navigateur"
+  },
+  "guide_download_page": {
+    "message": "Page web"
+  },
+  "guide_download_pdf": {
+    "message": "PDF"
+  },
+  "guide_markdown_tip": {
+    "message": "Un zip avec un fichier Markdown et les images, pour la documentation et les wikis"
+  },
+  "guide_download_markdown": {
+    "message": "Markdown"
+  },
+  "guide_title_label": {
+    "message": "Titre"
+  },
+  "guide_lead": {
+    "message": "Une étape par clic de l'enregistrement. Modifiez les notes, retirez les étapes inutiles, puis téléchargez."
+  },
+  "guide_loading": {
+    "message": "Création des étapes…"
+  },
+  "guide_empty": {
+    "message": "Cet enregistrement n'a aucun clic pour créer des étapes. Enregistrez un onglet en cliquant au fil de l'eau."
+  },
+  "guide_step_click": {
+    "message": "Cliquez ici."
+  },
+  "guide_step_click_label": {
+    "message": "Cliquez sur « $1 »."
+  },
+  "guide_step_field": {
+    "message": "Cliquez dans le champ « $1 »."
+  },
+  "guide_step_n": {
+    "message": "Étape $1"
+  },
+  "guide_n_steps": {
+    "message": "Étapes : $1"
+  },
+  "guide_move_up": {
+    "message": "Monter"
+  },
+  "guide_move_down": {
+    "message": "Descendre"
+  },
+  "guide_remove_step": {
+    "message": "Retirer l'étape"
+  },
+  "guide_step_removed": {
+    "message": "Étape retirée"
+  },
+  "guide_working": {
+    "message": "Création…"
+  },
+  "menu_draw": {
+    "message": "Dessiner sur la page (Échap pour arrêter)"
+  },
+  "draw_hint": {
+    "message": "Dessinez pour montrer quelque chose ; cela s'efface tout seul. Échap arrête."
+  },
+  "command_draw": {
+    "message": "Dessiner sur la page pendant l'enregistrement"
+  },
+  "edit_kind_captions": {
+    "message": "Sous-titre"
+  },
+  "edit_add_caption_tip": {
+    "message": "Du texte en bas, aussi téléchargeable en sous-titres  T"
+  },
+  "edit_caption_placeholder": {
+    "message": "Ce qui est dit ou montré ici"
+  },
+  "edit_caption_hint": {
+    "message": "Affiché en bas dans chaque export, et dans les fichiers de sous-titres ci-dessous."
+  },
+  "edit_subtitles_srt": {
+    "message": "Télécharger .srt"
+  },
+  "edit_subtitles_vtt": {
+    "message": "Télécharger .vtt"
+  },
+  "edit_subtitles_tip": {
+    "message": "Tous les sous-titres dans un fichier, calés sur la vidéo exportée"
+  },
+  "edit_no_captions": {
+    "message": "Aucun sous-titre avec du texte dans la partie gardée"
+  },
+  "keep_off_tip": {
+    "message": "Garder : ne sera pas supprimé automatiquement"
+  },
+  "keep_on_tip": {
+    "message": "Gardé jusqu'à ce que vous le supprimiez (cliquez pour qu'il soit supprimé automatiquement)"
+  },
+  "keep_on": {
+    "message": "Gardé jusqu'à ce que vous le supprimiez"
+  },
+  "keep_off": {
+    "message": "Sera supprimé automatiquement après la durée choisie dans les paramètres"
+  },
+  "kept": {
+    "message": "Gardé"
+  },
+  "project_save_tip": {
+    "message": "Enregistrer le projet : tout dans un fichier, à rouvrir plus tard ou sur un autre ordinateur"
+  },
+  "project_save_failed": {
+    "message": "Impossible d'enregistrer le projet : $1"
+  },
+  "project_open": {
+    "message": "Ouvrir un projet…"
+  },
+  "project_not_project": {
+    "message": "Ce n'est pas un fichier de projet Captode"
+  },
+  "project_too_new": {
+    "message": "Ce projet a été enregistré par un Captode plus récent. Mettez Captode à jour pour l'ouvrir."
+  },
+  "storage_title": {
+    "message": "Captures et stockage"
+  },
+  "storage_hint": {
+    "message": "Les captures que vous ne gardez pas sont supprimées automatiquement après la durée choisie ici. Enregistrez un projet pour en garder une dans un fichier, avec tout ce que vous y avez fait."
+  },
+  "storage_used": {
+    "message": "Captures : $1 · $2 utilisés."
+  },
+  "storage_delete_unkept": {
+    "message": "Supprimer tout ce qui n'est pas gardé"
+  },
+  "storage_delete_unkept_text": {
+    "message": "Les captures non gardées seront supprimées, avec leurs modifications : $1."
+  },
+  "storage_deleted": {
+    "message": "Supprimées : $1"
+  },
+  "share_file": {
+    "message": "Partager"
+  },
+  "share_file_tip": {
+    "message": "Partager le fichier avec une autre app"
+  },
+  "share_file_cannot": {
+    "message": "Ce fichier ne peut pas être partagé ici ; téléchargez-le plutôt"
+  },
+  "share_file_failed": {
+    "message": "Partage impossible : $1"
+  },
+  "queue_add": {
+    "message": "Ajouter à la file"
+  },
+  "queue_add_tip": {
+    "message": "Ajouter à la file : continue en arrière-plan, même si vous fermez cette page"
+  },
+  "queue_title": {
+    "message": "Exports"
+  },
+  "queue_waiting": {
+    "message": "En attente"
+  },
+  "queue_running": {
+    "message": "Export… $1 %"
+  },
+  "queue_ready": {
+    "message": "Prêt · $1"
+  },
+  "queue_failed": {
+    "message": "Échec : $1"
+  },
+  "queue_failed_here": {
+    "message": "Impossible en arrière-plan ici ; utilisez Exporter sur la page vidéo"
+  },
+  "queue_cancel": {
+    "message": "Annuler"
+  },
+  "queue_added": {
+    "message": "Ajouté à la file : $1"
+  },
+  "edit_callout_ellipse": {
+    "message": "Cercle"
+  },
+  "edit_callout_step": {
+    "message": "Étape"
+  },
+  "edit_step_label": {
+    "message": "Numéro"
+  },
+  "format_smallest_name": {
+    "message": "Le plus léger"
+  },
+  "format_smallest": {
+    "message": "Les mêmes pixels dans le fichier le plus léger : PNG ou WebP sans perte, le plus petit des deux."
+  },
+  "format_webp_lossless_name": {
+    "message": "WebP sans perte"
+  },
+  "editor_webp_lossless": {
+    "message": "Sans perte"
+  },
+  "editor_webp_lossless_hint": {
+    "message": "Exactement les mêmes pixels, avec transparence ; plus lourd que le WebP avec perte"
+  },
+  "editor_scale_css": {
+    "message": "1× — comme à l'écran"
+  },
+  "editor_scale_css_n": {
+    "message": "1× — comme à l'écran ($1 %)"
+  },
+  "editor_use_smallest": {
+    "message": "Choisir le plus léger"
+  },
+  "fit_lossy_format": {
+    "message": "$1 avec perte"
+  },
+  "picked_only": {
+    "message": "Enregistré en $1."
+  },
+  "picked_note": {
+    "message": "Enregistré en $1 : $2 % plus léger que l'autre format sans perte."
+  },
+  "hint_smaller": {
+    "message": "Le plus léger serait $1 % plus petit, sans perte ($2)."
+  },
+  "editor_several": {
+    "message": "Plusieurs tailles ou formats"
+  },
+  "editor_several_hint": {
+    "message": "Chaque choix coché, dans un zip, avec les réglages ci-dessus."
+  },
+  "editor_several_download": {
+    "message": "Télécharger le zip"
+  },
+  "editor_several_none": {
+    "message": "Cochez au moins une échelle et un format"
+  },
+  "editor_several_working": {
+    "message": "Création $1 sur $2…"
+  },
+  "brand_title": {
+    "message": "Votre logo"
+  },
+  "brand_hint": {
+    "message": "Ajoutez votre logo dans un coin des captures et des enregistrements. Il reste sur cet appareil."
+  },
+  "brand_choose": {
+    "message": "Choisir une image…"
+  },
+  "brand_corner": {
+    "message": "Coin"
+  },
+  "brand_br": {
+    "message": "En bas à droite"
+  },
+  "brand_bl": {
+    "message": "En bas à gauche"
+  },
+  "brand_tr": {
+    "message": "En haut à droite"
+  },
+  "brand_tl": {
+    "message": "En haut à gauche"
+  },
+  "brand_small": {
+    "message": "Petit"
+  },
+  "brand_medium": {
+    "message": "Moyen"
+  },
+  "brand_large": {
+    "message": "Grand"
+  },
+  "brand_images": {
+    "message": "Ajouter aux nouvelles captures"
+  },
+  "brand_images_hint": {
+    "message": "Vous pouvez le retirer d'une capture dans l'onglet Exporter de l'éditeur"
+  },
+  "brand_videos": {
+    "message": "Ajouter aux enregistrements"
+  },
+  "brand_videos_hint": {
+    "message": "Vous pouvez le retirer d'un enregistrement dans ses options d'export"
+  },
+  "brand_add_logo": {
+    "message": "Ajouter mon logo"
+  },
+  "brand_add_logo_hint": {
+    "message": "Le logo choisi dans les paramètres, dans un coin de l'image"
+  },
+  "brand_not_image": {
+    "message": "Ce fichier n'est pas une image que Captode peut lire"
+  },
+  "storage_search": {
+    "message": "Rechercher par titre ou site"
+  },
+  "storage_show": {
+    "message": "Afficher"
+  },
+  "storage_recordings": {
+    "message": "Enregistrements"
+  },
+  "storage_none_match": {
+    "message": "Aucune capture ne correspond."
+  },
+  "guide_copy_tip": {
+    "message": "Toutes les étapes avec leurs images, à coller dans Google Docs, Notion, Confluence ou un e-mail"
+  },
+  "guide_copied": {
+    "message": "Guide copié. Collez-le dans votre document."
+  },
+  "guide_copy_failed": {
+    "message": "Le presse-papiers n'a pas répondu. Réessayez."
+  },
+  "tool_copy_text": {
+    "message": "Copier le texte"
+  },
+  "tool_about_copytext": {
+    "message": "Faites glisser sur des mots de la capture pour les copier, ou cliquez sur une ligne. Fonctionne avec les nouvelles captures de pages web."
+  },
+  "copy_text_none": {
+    "message": "Aucun texte à copier ici"
+  },
+  "copy_text_done": {
+    "message": "$1 mots copiés"
+  },
+  "translate_into": {
+    "message": "Traduire en…"
+  },
+  "translate_captions": {
+    "message": "Traduire toutes les légendes"
+  },
+  "translate_working": {
+    "message": "Traduction sur cet appareil…"
+  },
+  "translate_download": {
+    "message": "Le navigateur récupère son modèle de langue : $1 %"
+  },
+  "translate_done": {
+    "message": "Traduit en $1"
+  },
+  "translate_same": {
+    "message": "C'est déjà dans cette langue"
+  },
+  "translate_unavailable": {
+    "message": "Ce navigateur ne sait pas encore traduire entre ces langues"
+  },
+  "translate_failed": {
+    "message": "Traduction impossible : $1"
+  },
+  "settings_sections": {
+    "message": "Sections"
+  },
+  "settings_search": {
+    "message": "Rechercher dans les paramètres"
+  },
+  "settings_no_match": {
+    "message": "Aucun paramètre ne correspond."
+  },
+  "backup_title": {
+    "message": "Sauvegarder les paramètres"
+  },
+  "backup_hint": {
+    "message": "Enregistrez vos paramètres, votre logo et vos préréglages d'export dans un fichier, à charger sur un autre ordinateur ou navigateur, ou à partager avec votre équipe. Les captures ne sont pas incluses."
+  },
+  "backup_save": {
+    "message": "Enregistrer le fichier de paramètres"
+  },
+  "backup_load": {
+    "message": "Charger un fichier de paramètres…"
+  },
+  "backup_loaded": {
+    "message": "Paramètres chargés depuis le fichier"
+  },
+  "backup_not_file": {
+    "message": "Ce n'est pas un fichier de paramètres Captode"
+  },
+  "backup_too_new": {
+    "message": "Ces paramètres ont été enregistrés par une version plus récente de Captode. Mettez Captode à jour pour les charger."
+  },
+  "brand_preview": {
+    "message": "Aperçu"
+  },
+  "presets_title": {
+    "message": "Préréglages d'export"
+  },
+  "presets_hint": {
+    "message": "Les préréglages enregistrés dans l'éditeur et sur la page vidéo. Renommez-les, réordonnez-les ou supprimez-les ici."
+  },
+  "presets_none": {
+    "message": "Aucun préréglage enregistré. Enregistrez-en un depuis l'onglet Exporter de l'éditeur ou sur la page vidéo."
+  },
+  "keep_for_label": {
+    "message": "Supprimer les captures non gardées après"
+  },
+  "keep_for_1": {
+    "message": "Un jour"
+  },
+  "keep_for_7": {
+    "message": "Une semaine"
+  },
+  "keep_for_30": {
+    "message": "Un mois"
+  },
+  "keep_for_0": {
+    "message": "Jamais : je les supprimerai moi-même"
+  },
+  "storage_sort": {
+    "message": "Trier"
+  },
+  "storage_sort_new": {
+    "message": "Plus récentes d'abord"
+  },
+  "storage_sort_big": {
+    "message": "Plus volumineuses d'abord"
+  },
+  "storage_breakdown": {
+    "message": "Captures d'écran $1 · Enregistrements $2"
+  },
+  "fit_too_big_readable": {
+    "message": "Cette limite est trop petite pour garder le texte lisible. Le plus petit fichier lisible fait $1."
+  },
+  "fit_near_lossless": {
+    "message": "PNG avec moins de couleurs, d'aspect identique"
+  },
+  "fit_readable": {
+    "message": "Le texte reste lisible."
+  },
+  "fit_forced": {
+    "message": "Le texte risque d'être difficile à lire."
+  },
+  "fit_anyway": {
+    "message": "Ajuster quand même"
+  },
+  "fit_keep_readable": {
+    "message": "Garder lisible"
+  },
+  "fit_anyway_tip": {
+    "message": "Baisser la qualité et la taille jusqu'à ce que ça rentre, même si le texte devient flou"
+  },
+  "resize_original": {
+    "message": "Taille d'origine"
+  },
+  "resize_original_tip": {
+    "message": "Revenir à $1, avec les pixels d'origine"
+  },
+  "resized_original": {
+    "message": "Retour à la taille d'origine, $1"
+  },
+  "resize_keeps_original": {
+    "message": "Redimensionner conserve les pixels d'origine : Taille d'origine les rétablit, aussi nets qu'avant."
   }
 }

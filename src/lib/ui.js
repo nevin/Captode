@@ -185,3 +185,23 @@ export async function shareCaptode({ copyOnly = false } = {}) {
     toast(e.message || String(e), { kind: 'error' });
   }
 }
+
+/** Whether this browser can hand files to other apps (Mail, chat apps…) through the system's share sheet. */
+export const canShareFiles = (() => {
+  try { return !!navigator.canShare?.({ files: [new File([new Uint8Array(1)], 'captode.png', { type: 'image/png' })] }); } catch { return false; }
+})();
+
+/**
+ * Hands `blob`, named `name`, to the system's share sheet. Resolves true when it was
+ * shared or the sheet was closed, false when this file can't be shared here.
+ */
+export async function shareFile(blob, name) {
+  const file = new File([blob], name, { type: blob.type });
+  if (!navigator.canShare?.({ files: [file] })) return false;
+  try {
+    await navigator.share({ files: [file], title: name });
+  } catch (e) {
+    if (e?.name !== 'AbortError') throw e;
+  }
+  return true;
+}

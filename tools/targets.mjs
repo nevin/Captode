@@ -16,7 +16,7 @@ const CHROMIUM_ONLY_PERMISSIONS = ['tabCapture', 'offscreen'];
 // recorder: their packages hold no code for APIs they don't have.
 const WITHOUT_TAB_CAPTURE = {
   replace: { 'lib/tab-capture.js': 'tools/tab-capture-none.js' },
-  drop: ['recorder/offscreen.html', 'recorder/offscreen.js'],
+  drop: ['recorder/offscreen.html', 'recorder/offscreen.js', 'recorder/exports.js'],
 };
 
 const withoutChromium = (m) => {

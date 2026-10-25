@@ -394,3 +394,15 @@ dialog.modal.confirm { width: min(420px, calc(100vw - 32px)); }
 .btn.danger-solid { background: var(--rec); border-color: var(--rec); color: #fff; }
 .btn.danger-solid:hover { background: #d13c41; border-color: #d13c41; }
 .btn.discard:hover { color: var(--rec); }
+
+/* The export queue (lib/export-queue.js), in the video page and the popup. */
+.jobs { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.jobs .job { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border: 1px solid var(--line); border-radius: var(--radius-sm); min-width: 0; }
+.jobs .job-what { flex: 1; min-width: 0; display: grid; gap: 2px; }
+.jobs .job-what b { font-weight: 600; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.jobs .job-status { color: var(--muted); font-size: 11px; }
+.jobs .job.failed .job-status { color: var(--rec); }
+.jobs .job.done .job-status { color: var(--ok); }
+.jobs progress { width: 100%; height: 4px; accent-color: var(--accent); }
+.jobs .job-actions { display: flex; gap: 2px; flex: none; }
+.jobs .job-actions .btn { width: 28px; height: 28px; }

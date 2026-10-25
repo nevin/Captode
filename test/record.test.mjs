@@ -51,7 +51,7 @@ export async function setup({ browser, url, site }) {
     await video.close();
     return info;
   };
-  return { page, ctl, record };
+  return { page, ctl, record, probe, tabId, seen };
 }
 
 const black = (p) => p.every((v) => v < 16);
@@ -129,6 +129,56 @@ export const tests = {
     }
   },
 
+  async 'a paused recording leaves the pause out, and carries on where it was'() {
+    const env = await launch();
+    try {
+      const lab = await open(env.browser, env.url('lab/lab.html'));
+      await lab.bringToFront();
+      const r = await lab.evaluate(async () => {
+        const { record } = await import('/lib/recorder.js');
+        // A picture whose red says how long since the start (40 a second).
+        const c = document.createElement('canvas'); c.width = 320; c.height = 240; document.body.append(c);
+        const g = c.getContext('2d');
+        const t0 = performance.now();
+        const draw = () => { g.fillStyle = `rgb(${Math.min(255, Math.round((performance.now() - t0) / 25))},0,0)`; g.fillRect(0, 0, 320, 240); };
+        const timer = setInterval(draw, 20); draw();
+        const wait = (ms) => new Promise((res) => setTimeout(res, ms));
+        const session = await record(c.captureStream(30), { fps: 30 });
+        await wait(1000);
+        const paused = [session.pause(), session.paused, session.pause()];
+        await wait(1500);
+        const during = session.elapsed();
+        const resumed = [session.resume(), session.paused, session.resume()];
+        await wait(1000);
+        const { blob, meta } = await session.stop();
+        clearInterval(timer);
+        const v = document.createElement('video'); v.muted = true; v.src = URL.createObjectURL(blob);
+        await new Promise((res) => { v.onloadedmetadata = res; });
+        // MediaRecorder's WebM has no length written; seeking far finds it.
+        if (!Number.isFinite(v.duration)) { v.currentTime = 1e6; await new Promise((res) => { v.ondurationchange = res; }); }
+        const duration = v.duration;
+        const red = async (t) => {
+          v.currentTime = t; await new Promise((res) => { v.onseeked = res; });
+          const k = new OffscreenCanvas(v.videoWidth, v.videoHeight).getContext('2d', { willReadFrequently: true });
+          k.drawImage(v, 0, 0);
+          return k.getImageData(10, 10, 1, 1).data[0] * 25 / 1000; // seconds since the start
+        };
+        return { paused, resumed, during, meta, duration, before: await red(0.5), after: await red(1.5) };
+      });
+      ok(r.paused.join() === 'true,true,false' && r.resumed.join() === 'true,false,false', `pause ${r.paused}, resume ${r.resumed}`);
+      near(r.during, 1, 0.2, 'time recorded stands still while paused');
+      near(r.meta.duration, 2, 0.25, 'recorded duration');
+      near(r.duration, 2, 0.4, 'video length');
+      // Half a second in, the picture is from half a second in; 1.5 s in, it is from after
+      // the pause (about 3 s from the start), not from during it.
+      near(r.before, 0.5, 0.3, 'picture before the pause');
+      near(r.after, 3, 0.4, 'picture after the pause');
+      return `video ${r.duration.toFixed(2)} s; picture at 1.5 s from ${r.after.toFixed(2)} s`;
+    } finally {
+      await env.close();
+    }
+  },
+
   async 'a tab recording is the page at its own size'({ page, record }) {
     const want = await page.evaluate(() => [innerWidth * devicePixelRatio, innerHeight * devicePixelRatio]);
     const r = await record();
@@ -156,5 +206,40 @@ export const tests = {
       await cdp.send('Emulation.clearDeviceMetricsOverride');
       await cdp.detach();
     }
+  },
+
+  async 'pausing a tab recording leaves clicks made while paused out, and times the rest without the pause'({ page, ctl, probe, tabId, seen }) {
+    if (probe) throw new Skip(`this browser can't capture tabs here (${probe})`);
+    await page.bringToFront();
+    await ctl.evaluate((tabId) => chrome.runtime.sendMessage({ type: 'record-start', mode: 'visible', tabId, fps: 30, audio: false, countdown: 0 }), tabId);
+    await ctl.waitForFunction(async () => (await chrome.storage.session.get('rec')).rec?.state === 'recording', { polling: 100, timeout: 10000 });
+    await page.bringToFront();
+    await page.evaluate(() => { window.__tick = setInterval(() => { document.body.style.outline = `${Date.now() % 7}px solid transparent`; }, 50); });
+    const setPaused = async (pause) => {
+      await ctl.evaluate((pause) => chrome.runtime.sendMessage({ target: 'recorder', type: 'rec-pause', pause }), pause);
+      await ctl.waitForFunction(async (pause) => !!(await chrome.storage.session.get('rec')).rec?.pausedAt === pause, { polling: 50, timeout: 3000 }, pause);
+    };
+    await sleep(700);
+    await page.mouse.click(100, 100); // at about 0.7 s
+    await setPaused(true);
+    await page.mouse.click(200, 200); // while paused: left out
+    await sleep(1500);
+    await setPaused(false);
+    await sleep(500);
+    await page.mouse.click(300, 300); // at about 1.2 s of video
+    await sleep(500);
+    await ctl.evaluate(() => chrome.runtime.sendMessage({ target: 'recorder', type: 'rec-stop' }));
+    const video = await waitForTab(page.browser(), (u) => u.includes('video.html?id=') && !seen.has(u), 45000);
+    seen.add(video.url());
+    await page.evaluate(() => clearInterval(window.__tick));
+    const id = new URL(video.url()).searchParams.get('id');
+    const meta = await video.evaluate(async (id) => (await (await import('/lib/db.js')).getCapture(id)).meta, id);
+    await video.close();
+    const clicks = meta.clicks || [];
+    ok(clicks.length === 2, `clicks ${JSON.stringify(clicks)}`);
+    near(clicks[0].t, 0.7, 0.4, 'first click');
+    near(clicks[1].t, 1.2, 0.45, 'click after the pause');
+    near(meta.duration, 1.7, 0.4, 'recorded duration');
+    return `clicks at ${clicks.map((c) => c.t).join(', ')} s of ${meta.duration.toFixed(2)} s`;
   },
 };

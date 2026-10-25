@@ -225,7 +225,7 @@
     "message": "すべての設定をリセットしますか？"
   },
   "settings_theme_export_background_default_formats": {
-    "message": "テーマ、書き出し時の背景、デフォルトの形式、デバイスフレーム、録画のオプションがインストール時の状態に戻ります。キャプチャには影響しません。"
+    "message": "テーマ、書き出し背景、既定の形式、デバイスフレーム、録画オプション、ロゴ、保存したプリセットが Captode をインストールしたときの状態に戻ります。キャプチャには影響しません。"
   },
   "settings_cancel": {
     "message": "キャンセル"
@@ -288,7 +288,7 @@
     "message": "画像を選択"
   },
   "editor_kept_on_this_device_for": {
-    "message": "このデバイスに 24 時間保存されます"
+    "message": "保持しない限り、設定で決めた期間このデバイスに残ります"
   },
   "editor_recent_captures": {
     "message": "最近のキャプチャ"
@@ -861,7 +861,7 @@
     "message": "録画が見つかりません"
   },
   "video_recordings_are_kept_for_a": {
-    "message": "録画は 1 日保存されます。ツールバーの Captode ボタンで新しく録画してください。"
+    "message": "保持していない録画は、設定で決めた期間が過ぎると削除されます。ツールバーの Captode ボタンから新しく録画してください。"
   },
   "video_trim": {
     "message": "トリミング"
@@ -2028,7 +2028,7 @@
     "message": "クリップボードにコピー"
   },
   "settings_after_hint": {
-    "message": "エディタと同じように、既定の形式で、オンになっていればデバイスフレームとぼかしも付けてダウンロードまたはコピーします。スクリーンショットは最近のキャプチャにも 1 日残ります。"
+    "message": "エディタと同じように、既定の形式で、オンになっていればデバイスフレームとぼかし付きでダウンロードまたはコピーします。スクリーンショットは「最近のキャプチャ」にも残ります。"
   },
   "settings_long_pages": {
     "message": "1 枚の画像に収まらない長いページ"
@@ -2126,11 +2126,11 @@
   "part_of": {
     "message": "$2 のうち $1"
   },
-  "popup_new_in_captode_2_1": {
-    "message": "Captode 2.1 の新機能"
+  "popup_new_in_captode_2_3": {
+    "message": "Captode 2.3 の新機能"
   },
-  "popup_whats_new_2_1": {
-    "message": "録画を編集：一部をカット・早送り、ズーム（クリックした場所にも）、個人情報のぼかし、矢印やラベルの追加、切り抜き、背景の追加、音声の調整。"
+  "popup_whats_new_2_3": {
+    "message": "録画中の一時停止とページへの描画、字幕、スクリーンショットからのテキストのコピー、ロゴの追加、キャプチャの保持とプロジェクトファイルへの保存に対応しました。"
   },
   "slides_title": {
     "message": "スライド"
@@ -2704,5 +2704,500 @@
   },
   "edit_default_sound_saved": {
     "message": "新しい録画はこの音量とフェードで始まります"
+  },
+  "rec_pause": {
+    "message": "一時停止"
+  },
+  "rec_resume": {
+    "message": "再開"
+  },
+  "screen_recording_paused": {
+    "message": "一時停止中"
+  },
+  "screen_title_paused": {
+    "message": "❚❚ 一時停止中 — Captode"
+  },
+  "menu_pause_recording": {
+    "message": "録画を一時停止"
+  },
+  "menu_resume_recording": {
+    "message": "録画を再開"
+  },
+  "action_paused_title": {
+    "message": "Captode — 録画を一時停止中。クリックで停止、右クリックで再開"
+  },
+  "command_pause": {
+    "message": "録画を一時停止または再開"
+  },
+  "popup_recording_recovered": {
+    "message": "録画を保存しました"
+  },
+  "popup_recording_recovered_hint": {
+    "message": "保存される前に止まりました（ブラウザーまたはそのページが閉じられました）。Captode はそこまでの内容を残しました。"
+  },
+  "popup_open_recording": {
+    "message": "録画を開く"
+  },
+  "guide_heading": {
+    "message": "手順ガイド"
+  },
+  "guide_make": {
+    "message": "手順ガイド"
+  },
+  "guide_make_title": {
+    "message": "クリックごとに画像とメモ付きの手順を作り、ページ・PDF・Markdown でダウンロード"
+  },
+  "guide_page_tip": {
+    "message": "すべての手順を 1 つのウェブページに。どのブラウザーでも開けます"
+  },
+  "guide_download_page": {
+    "message": "ウェブページ"
+  },
+  "guide_download_pdf": {
+    "message": "PDF"
+  },
+  "guide_markdown_tip": {
+    "message": "Markdown ファイルと画像の zip。ドキュメントや Wiki 用"
+  },
+  "guide_download_markdown": {
+    "message": "Markdown"
+  },
+  "guide_title_label": {
+    "message": "タイトル"
+  },
+  "guide_lead": {
+    "message": "録画内のクリックごとに 1 つの手順です。メモを編集し、不要な手順を削除してからダウンロードします。"
+  },
+  "guide_loading": {
+    "message": "手順を作成しています…"
+  },
+  "guide_empty": {
+    "message": "この録画には手順を作るためのクリックがありません。タブを録画しながらクリックしてください。"
+  },
+  "guide_step_click": {
+    "message": "ここをクリックします。"
+  },
+  "guide_step_click_label": {
+    "message": "「$1」をクリックします。"
+  },
+  "guide_step_field": {
+    "message": "「$1」欄をクリックします。"
+  },
+  "guide_step_n": {
+    "message": "手順 $1"
+  },
+  "guide_n_steps": {
+    "message": "手順: $1"
+  },
+  "guide_move_up": {
+    "message": "上へ移動"
+  },
+  "guide_move_down": {
+    "message": "下へ移動"
+  },
+  "guide_remove_step": {
+    "message": "手順を削除"
+  },
+  "guide_step_removed": {
+    "message": "手順を削除しました"
+  },
+  "guide_working": {
+    "message": "作成中…"
+  },
+  "menu_draw": {
+    "message": "ページに描く（Esc で終了）"
+  },
+  "draw_hint": {
+    "message": "描いて示せます。自動で消えます。Esc で終了。"
+  },
+  "command_draw": {
+    "message": "録画中にページに描く"
+  },
+  "edit_kind_captions": {
+    "message": "字幕"
+  },
+  "edit_add_caption_tip": {
+    "message": "下部に表示する文字。字幕ファイルとしても保存可  T"
+  },
+  "edit_caption_placeholder": {
+    "message": "ここで話す・見せる内容"
+  },
+  "edit_caption_hint": {
+    "message": "すべての書き出しの下部に表示され、下の字幕ファイルにも入ります。"
+  },
+  "edit_subtitles_srt": {
+    "message": ".srt をダウンロード"
+  },
+  "edit_subtitles_vtt": {
+    "message": ".vtt をダウンロード"
+  },
+  "edit_subtitles_tip": {
+    "message": "すべての字幕を、書き出した動画に合わせたファイルに"
+  },
+  "edit_no_captions": {
+    "message": "残す部分に文字のある字幕がありません"
+  },
+  "keep_off_tip": {
+    "message": "保持: 自動で削除されなくなります"
+  },
+  "keep_on_tip": {
+    "message": "削除するまで保持します（クリックすると自動削除に戻ります）"
+  },
+  "keep_on": {
+    "message": "削除するまで保持します"
+  },
+  "keep_off": {
+    "message": "設定で決めた期間が過ぎると自動で削除されます"
+  },
+  "kept": {
+    "message": "保持中"
+  },
+  "project_save_tip": {
+    "message": "プロジェクトを保存: すべてを 1 つのファイルに。後で、または別のコンピューターで開けます"
+  },
+  "project_save_failed": {
+    "message": "プロジェクトを保存できませんでした: $1"
+  },
+  "project_open": {
+    "message": "プロジェクトを開く…"
+  },
+  "project_not_project": {
+    "message": "Captode のプロジェクトファイルではありません"
+  },
+  "project_too_new": {
+    "message": "このプロジェクトは新しい Captode で保存されています。開くには Captode を更新してください。"
+  },
+  "storage_title": {
+    "message": "キャプチャと保存領域"
+  },
+  "storage_hint": {
+    "message": "保持していないキャプチャは、ここで選んだ期間が過ぎると自動で削除されます。プロジェクトとして保存すると、編集内容ごとファイルに残せます。"
+  },
+  "storage_used": {
+    "message": "キャプチャ: $1 · 使用量 $2。"
+  },
+  "storage_delete_unkept": {
+    "message": "保持していないものをすべて削除"
+  },
+  "storage_delete_unkept_text": {
+    "message": "保持していないキャプチャを編集内容ごと削除します: $1 件。"
+  },
+  "storage_deleted": {
+    "message": "削除しました: $1 件"
+  },
+  "share_file": {
+    "message": "共有"
+  },
+  "share_file_tip": {
+    "message": "ファイルを別のアプリと共有"
+  },
+  "share_file_cannot": {
+    "message": "このファイルはここでは共有できません。ダウンロードしてください"
+  },
+  "share_file_failed": {
+    "message": "共有できませんでした: $1"
+  },
+  "queue_add": {
+    "message": "キューに追加"
+  },
+  "queue_add_tip": {
+    "message": "キューに追加: このページを閉じてもバックグラウンドで続きます"
+  },
+  "queue_title": {
+    "message": "書き出し"
+  },
+  "queue_waiting": {
+    "message": "待機中"
+  },
+  "queue_running": {
+    "message": "書き出し中… $1%"
+  },
+  "queue_ready": {
+    "message": "完了 · $1"
+  },
+  "queue_failed": {
+    "message": "失敗: $1"
+  },
+  "queue_failed_here": {
+    "message": "ここではバックグラウンドで作成できません。動画ページの書き出しを使ってください"
+  },
+  "queue_cancel": {
+    "message": "キャンセル"
+  },
+  "queue_added": {
+    "message": "キューに追加しました: $1"
+  },
+  "edit_callout_ellipse": {
+    "message": "円"
+  },
+  "edit_callout_step": {
+    "message": "番号"
+  },
+  "edit_step_label": {
+    "message": "番号"
+  },
+  "format_smallest_name": {
+    "message": "最小"
+  },
+  "format_smallest": {
+    "message": "同じピクセルを最小のファイルで: PNG か可逆 WebP の小さい方。"
+  },
+  "format_webp_lossless_name": {
+    "message": "可逆 WebP"
+  },
+  "editor_webp_lossless": {
+    "message": "可逆圧縮"
+  },
+  "editor_webp_lossless_hint": {
+    "message": "ピクセルはまったく同じで透明も保持。非可逆 WebP より大きくなります"
+  },
+  "editor_scale_css": {
+    "message": "1× — 画面での大きさ"
+  },
+  "editor_scale_css_n": {
+    "message": "1× — 画面での大きさ（$1%）"
+  },
+  "editor_use_smallest": {
+    "message": "最小を使う"
+  },
+  "fit_lossy_format": {
+    "message": "非可逆 $1"
+  },
+  "picked_only": {
+    "message": "$1 で保存します。"
+  },
+  "picked_note": {
+    "message": "$1 で保存: もう一方の可逆形式より $2% 小さくなります。"
+  },
+  "hint_smaller": {
+    "message": "最小にすると、劣化なしで $1% 小さくなります（$2）。"
+  },
+  "editor_several": {
+    "message": "複数のサイズや形式"
+  },
+  "editor_several_hint": {
+    "message": "チェックしたものを、上の設定で 1 つの zip にまとめます。"
+  },
+  "editor_several_download": {
+    "message": "zip をダウンロード"
+  },
+  "editor_several_none": {
+    "message": "倍率と形式を少なくとも 1 つずつ選んでください"
+  },
+  "editor_several_working": {
+    "message": "$2 件中 $1 件目を作成中…"
+  },
+  "brand_title": {
+    "message": "ロゴ"
+  },
+  "brand_hint": {
+    "message": "スクリーンショットや録画の隅にロゴを入れます。ロゴはこのデバイスに保存されます。"
+  },
+  "brand_choose": {
+    "message": "画像を選択…"
+  },
+  "brand_corner": {
+    "message": "位置"
+  },
+  "brand_br": {
+    "message": "右下"
+  },
+  "brand_bl": {
+    "message": "左下"
+  },
+  "brand_tr": {
+    "message": "右上"
+  },
+  "brand_tl": {
+    "message": "左上"
+  },
+  "brand_small": {
+    "message": "小"
+  },
+  "brand_medium": {
+    "message": "中"
+  },
+  "brand_large": {
+    "message": "大"
+  },
+  "brand_images": {
+    "message": "新しいスクリーンショットに入れる"
+  },
+  "brand_images_hint": {
+    "message": "個別のスクリーンショットでは、エディタの「書き出し」タブでオフにできます"
+  },
+  "brand_videos": {
+    "message": "録画に入れる"
+  },
+  "brand_videos_hint": {
+    "message": "個別の録画では、書き出し設定でオフにできます"
+  },
+  "brand_add_logo": {
+    "message": "ロゴを入れる"
+  },
+  "brand_add_logo_hint": {
+    "message": "設定で選んだロゴを画像の隅に入れます"
+  },
+  "brand_not_image": {
+    "message": "このファイルは Captode で読み込める画像ではありません"
+  },
+  "storage_search": {
+    "message": "タイトルやサイトで検索"
+  },
+  "storage_show": {
+    "message": "表示"
+  },
+  "storage_recordings": {
+    "message": "録画"
+  },
+  "storage_none_match": {
+    "message": "一致するキャプチャはありません。"
+  },
+  "guide_copy_tip": {
+    "message": "すべての手順を画像付きでコピーし、Google ドキュメント、Notion、Confluence、メールに貼り付けられます"
+  },
+  "guide_copied": {
+    "message": "ガイドをコピーしました。ドキュメントに貼り付けてください。"
+  },
+  "guide_copy_failed": {
+    "message": "クリップボードが応答しませんでした。もう一度お試しください。"
+  },
+  "tool_copy_text": {
+    "message": "テキストをコピー"
+  },
+  "tool_about_copytext": {
+    "message": "スクリーンショット上の文字をドラッグしてコピーするか、行をクリックします。新しく撮った Web ページのスクリーンショットで使えます。"
+  },
+  "copy_text_none": {
+    "message": "コピーできるテキストがありません"
+  },
+  "copy_text_done": {
+    "message": "$1 語をコピーしました"
+  },
+  "translate_into": {
+    "message": "翻訳先…"
+  },
+  "translate_captions": {
+    "message": "すべての字幕を翻訳"
+  },
+  "translate_working": {
+    "message": "このデバイスで翻訳しています…"
+  },
+  "translate_download": {
+    "message": "ブラウザが言語モデルを取得しています: $1%"
+  },
+  "translate_done": {
+    "message": "$1 に翻訳しました"
+  },
+  "translate_same": {
+    "message": "すでにその言語です"
+  },
+  "translate_unavailable": {
+    "message": "このブラウザはまだこの言語の組み合わせを翻訳できません"
+  },
+  "translate_failed": {
+    "message": "翻訳できませんでした: $1"
+  },
+  "settings_sections": {
+    "message": "セクション"
+  },
+  "settings_search": {
+    "message": "設定を検索"
+  },
+  "settings_no_match": {
+    "message": "一致する設定はありません。"
+  },
+  "backup_title": {
+    "message": "設定のバックアップ"
+  },
+  "backup_hint": {
+    "message": "設定、ロゴ、書き出しプリセットをファイルに保存し、別のコンピュータやブラウザで読み込んだり、チームと共有したりできます。キャプチャは含まれません。"
+  },
+  "backup_save": {
+    "message": "設定ファイルを保存"
+  },
+  "backup_load": {
+    "message": "設定ファイルを読み込む…"
+  },
+  "backup_loaded": {
+    "message": "ファイルから設定を読み込みました"
+  },
+  "backup_not_file": {
+    "message": "Captode の設定ファイルではありません"
+  },
+  "backup_too_new": {
+    "message": "この設定は新しいバージョンの Captode で保存されています。読み込むには Captode を更新してください。"
+  },
+  "brand_preview": {
+    "message": "プレビュー"
+  },
+  "presets_title": {
+    "message": "書き出しプリセット"
+  },
+  "presets_hint": {
+    "message": "エディタや動画ページで保存したプリセットです。ここで名前の変更、並べ替え、削除ができます。"
+  },
+  "presets_none": {
+    "message": "保存されたプリセットはまだありません。エディタの「書き出し」タブか動画ページで保存できます。"
+  },
+  "keep_for_label": {
+    "message": "保持していないキャプチャを削除するまでの期間"
+  },
+  "keep_for_1": {
+    "message": "1 日"
+  },
+  "keep_for_7": {
+    "message": "1 週間"
+  },
+  "keep_for_30": {
+    "message": "1 か月"
+  },
+  "keep_for_0": {
+    "message": "削除しない（自分で削除）"
+  },
+  "storage_sort": {
+    "message": "並べ替え"
+  },
+  "storage_sort_new": {
+    "message": "新しい順"
+  },
+  "storage_sort_big": {
+    "message": "サイズの大きい順"
+  },
+  "storage_breakdown": {
+    "message": "スクリーンショット $1 · 録画 $2"
+  },
+  "fit_too_big_readable": {
+    "message": "この上限では文字を読みやすく保てません。読みやすさを保った最小のファイルは $1 です。"
+  },
+  "fit_near_lossless": {
+    "message": "見た目を変えずに色数を減らした PNG"
+  },
+  "fit_readable": {
+    "message": "文字は読みやすいままです。"
+  },
+  "fit_forced": {
+    "message": "文字が読みにくくなる場合があります。"
+  },
+  "fit_anyway": {
+    "message": "それでも収める"
+  },
+  "fit_keep_readable": {
+    "message": "読みやすさを保つ"
+  },
+  "fit_anyway_tip": {
+    "message": "文字がぼやけても、収まるまで画質とサイズを下げます"
+  },
+  "resize_original": {
+    "message": "元のサイズ"
+  },
+  "resize_original_tip": {
+    "message": "元のピクセルのまま $1 に戻します"
+  },
+  "resized_original": {
+    "message": "元のサイズ ($1) に戻しました"
+  },
+  "resize_keeps_original": {
+    "message": "サイズを変えても元のピクセルは残ります。「元のサイズ」で元どおりの鮮明さに戻せます。"
   }
 }

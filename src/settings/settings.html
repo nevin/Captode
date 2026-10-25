@@ -17,7 +17,12 @@
 </header>
 
 <main class="page">
-  <section class="card">
+  <nav class="settings-nav" id="settings-nav" aria-label="Sections" data-i18n-aria-label="settings_sections">
+    <input type="search" id="settings-search" placeholder="Search settings" data-i18n-placeholder="settings_search" aria-label="Search settings" data-i18n-aria-label="settings_search" autocomplete="off">
+    <div class="jump" id="settings-jump"></div>
+  </nav>
+  <p class="muted hidden" id="settings-none" data-i18n="settings_no_match">No settings match.</p>
+  <section class="card" id="appearance">
     <h2 data-i18n="settings_appearance">Appearance</h2>
     <p class="muted" data-i18n="settings_how_captode_s_own_pages">How Captode's own pages look.</p>
     <div class="choices three" id="theme" role="radiogroup" aria-label="Theme" data-i18n-aria-label="settings_theme">
@@ -57,8 +62,19 @@
         </select>
       </label>
     </div>
+    <div class="grid2">
+        <label class="field"><span data-i18n="settings_screenshot_format">Screenshot format</span>
+        <select id="imageFormat">
+          <option value="last" data-i18n="settings_the_last_one_used">The last one used</option><option value="smallest" data-i18n="format_smallest_name">Smallest</option><option value="png">PNG</option><option value="png8" data-i18n="settings_png_8_compressed">PNG-8 (compressed)</option><option value="jpeg">JPEG</option>
+          <option value="webp">WebP</option><option value="gif">GIF</option><option value="pdf">PDF</option><option value="bmp">BMP</option>
+        </select>
+      </label>
+    </div>
+    <label class="toggle"><span data-i18n="popup_device_frame">Device frame<small data-i18n="settings_show_captures_in_a_phone">Show captures in a phone or tablet frame by default</small></span><input type="checkbox" id="device"></label>
+    <label class="toggle"><span data-i18n="settings_copy_screenshots_to_the_clipboard">Copy screenshots to the clipboard<small data-i18n="settings_each_new_screenshot_is_copied">Each new screenshot is copied as soon as it opens, ready to paste</small></span><input type="checkbox" id="autoCopy"></label>
+    <label class="toggle"><span data-i18n="settings_blur_private">Blur private details<small data-i18n="settings_blur_private_hint">Email addresses and phone and card numbers are blurred in new screenshots; each blur can be removed</small></span><input type="checkbox" id="autoBlur"></label>
     <p class="muted hint" id="icon-hint" data-i18n="settings_icon_hint">Captode's menu is then in the icon's right-click menu.</p>
-    <p class="muted hint" id="after-hint" data-i18n="settings_after_hint">Downloaded or copied as the editor would, in your default format, with a device frame and blurs if they're on. Every screenshot is also kept in Recent captures for a day.</p>
+    <p class="muted hint" id="after-hint" data-i18n="settings_after_hint">Downloaded or copied as the editor would, in your default format, with a device frame and blurs if they're on. Every screenshot is also kept in Recent captures.</p>
     <label class="field"><span data-i18n="settings_long_pages">Pages too long for one image</span>
       <select id="longPages" aria-describedby="long-hint">
         <option value="cut" data-i18n="settings_long_cut">Cut off at the limit</option>
@@ -82,6 +98,9 @@
     <h2 data-i18n="settings_recording">Recording</h2>
     <p class="muted" data-i18n="settings_recording_hint">For every new recording. The same options are under Options in Captode's menu.</p>
     <div class="grid2">
+      <label class="field"><span data-i18n="settings_recording_format">Recording format</span>
+        <select id="videoFormat"><option value="last" data-i18n="settings_the_last_one_used">The last one used</option><option value="mp4">MP4</option><option value="gif">GIF</option><option value="webp">WebP</option><option value="webm">WebM</option></select>
+      </label>
       <label class="field"><span data-i18n="popup_frame_rate">Frame rate</span>
         <select id="rec-fps"><option value="15">15 fps</option><option value="24">24 fps</option><option value="30">30 fps</option><option value="60">60 fps</option></select>
       </label>
@@ -102,7 +121,7 @@
     <label class="toggle"><span data-i18n="popup_cursor">Highlight the cursor<small data-i18n="popup_cursor_hint">In tab recordings, a soft circle follows the mouse</small></span><input type="checkbox" id="rec-cursor"></label>
   </section>
 
-  <section class="card">
+  <section class="card" id="export-background">
     <h2 data-i18n="settings_export_background">Export background</h2>
     <p class="muted" data-i18n="settings_the_background_behind_device_frames">The background behind device frames and around padded screenshots in the files you download. You can still change it for a single export.</p>
     <div class="choices three" id="background" role="radiogroup" aria-label="Export background" data-i18n-aria-label="settings_export_background">
@@ -127,25 +146,59 @@
     <p class="callout" data-i18n="settings_jpeg_bmp_pdf_mp4_and">JPEG, BMP, PDF, MP4 and WebM can't be transparent. With Transparent chosen, they get a white background.</p>
   </section>
 
-  <section class="card">
-    <h2 data-i18n="settings_defaults">Defaults</h2>
-    <div class="grid2">
-      <label class="field"><span data-i18n="settings_screenshot_format">Screenshot format</span>
-        <select id="imageFormat">
-          <option value="last" data-i18n="settings_the_last_one_used">The last one used</option><option value="png">PNG</option><option value="png8" data-i18n="settings_png_8_compressed">PNG-8 (compressed)</option><option value="jpeg">JPEG</option>
-          <option value="webp">WebP</option><option value="gif">GIF</option><option value="pdf">PDF</option><option value="bmp">BMP</option>
-        </select>
-      </label>
-      <label class="field"><span data-i18n="settings_recording_format">Recording format</span>
-        <select id="videoFormat"><option value="last" data-i18n="settings_the_last_one_used">The last one used</option><option value="mp4">MP4</option><option value="gif">GIF</option><option value="webp">WebP</option><option value="webm">WebM</option></select>
-      </label>
+  <section class="card" id="brand">
+    <h2 data-i18n="brand_title">Your logo</h2>
+    <p class="muted" data-i18n="brand_hint">Add your logo to a corner of screenshots and recordings. It stays on this device.</p>
+    <div class="row brand-row">
+      <img id="brand-preview" class="brand-preview hidden" alt="">
+      <label class="btn"><span data-i18n="brand_choose">Choose image…</span><input type="file" id="brand-file" accept="image/png,image/jpeg,image/webp,image/svg+xml" hidden></label>
+      <button class="btn hidden" id="brand-remove" data-i18n="remove">Remove</button>
     </div>
-    <label class="toggle"><span data-i18n="popup_device_frame">Device frame<small data-i18n="settings_show_captures_in_a_phone">Show captures in a phone or tablet frame by default</small></span><input type="checkbox" id="device"></label>
-    <label class="toggle"><span data-i18n="settings_copy_screenshots_to_the_clipboard">Copy screenshots to the clipboard<small data-i18n="settings_each_new_screenshot_is_copied">Each new screenshot is copied as soon as it opens, ready to paste</small></span><input type="checkbox" id="autoCopy"></label>
-    <label class="toggle"><span data-i18n="settings_blur_private">Blur private details<small data-i18n="settings_blur_private_hint">Email addresses and phone and card numbers are blurred in new screenshots; each blur can be removed</small></span><input type="checkbox" id="autoBlur"></label>
+    <div id="brand-options" class="hidden">
+      <canvas id="brand-sample" class="brand-sample" width="480" height="270" role="img" aria-label="Preview" data-i18n-aria-label="brand_preview"></canvas>
+      <div class="grid2">
+        <label class="field"><span data-i18n="brand_corner">Corner</span>
+          <select id="brand-position"><option value="br" data-i18n="brand_br">Bottom right</option><option value="bl" data-i18n="brand_bl">Bottom left</option><option value="tr" data-i18n="brand_tr">Top right</option><option value="tl" data-i18n="brand_tl">Top left</option></select>
+        </label>
+        <label class="field"><span data-i18n="editor_size">Size</span>
+          <select id="brand-size"><option value="1" data-i18n="brand_small">Small</option><option value="2" data-i18n="brand_medium">Medium</option><option value="3" data-i18n="brand_large">Large</option></select>
+        </label>
+      </div>
+      <label class="field"><span data-i18n="editor_opacity">Opacity</span><input type="range" id="brand-opacity" min="10" max="100" step="5"></label>
+      <label class="toggle"><span data-i18n="brand_images">Add to new screenshots<small data-i18n="brand_images_hint">You can turn it off for one screenshot in the editor's Export tab</small></span><input type="checkbox" id="brand-images"></label>
+      <label class="toggle"><span data-i18n="brand_videos">Add to recordings<small data-i18n="brand_videos_hint">You can turn it off for one recording in its export settings</small></span><input type="checkbox" id="brand-videos"></label>
+    </div>
   </section>
 
-  <section class="card">
+  <section class="card" id="presets">
+    <h2 data-i18n="presets_title">Export presets</h2>
+    <p class="muted" data-i18n="presets_hint">Presets you saved in the editor and on the video page. Rename, reorder or delete them here.</p>
+    <div id="preset-lists"></div>
+    <p class="muted hidden" id="presets-none" data-i18n="presets_none">No presets saved yet. Save one from the Export tab in the editor or on the video page.</p>
+  </section>
+
+  <section class="card" id="storage">
+    <h2 data-i18n="storage_title">Captures and storage</h2>
+    <p class="muted" id="storage-usage" data-i18n="storage_hint">Captures you don't keep are removed automatically after the time chosen here. Save a project to keep one in a file, with everything you did to it.</p>
+    <label class="field keep-for"><span data-i18n="keep_for_label">Remove captures not kept after</span>
+      <select id="keepFor"><option value="1" data-i18n="keep_for_1">A day</option><option value="7" data-i18n="keep_for_7">A week</option><option value="30" data-i18n="keep_for_30">A month</option><option value="0" data-i18n="keep_for_0">Never: I'll delete them</option></select>
+    </label>
+    <div class="meter hidden" id="storage-meter" aria-hidden="true"><span class="m-img"></span><span class="m-vid"></span></div>
+    <p class="muted small hidden" id="storage-breakdown"></p>
+    <div class="row storage-actions">
+      <label class="btn" data-i18n="project_open">Open project…<input type="file" id="open-project" accept=".captode,application/zip" hidden></label>
+      <button class="btn" id="delete-unkept" data-i18n="storage_delete_unkept">Delete all not kept</button>
+    </div>
+    <div class="row storage-filter hidden" id="storage-filter">
+      <input type="search" id="storage-search" placeholder="Search by title or website" data-i18n-placeholder="storage_search" aria-label="Search by title or website" data-i18n-aria-label="storage_search">
+      <select id="storage-kind" aria-label="Show" data-i18n-aria-label="storage_show"><option value="" data-i18n="picker_all">All</option><option value="image" data-i18n="settings_screenshots">Screenshots</option><option value="video" data-i18n="storage_recordings">Recordings</option><option value="kept" data-i18n="kept">Kept</option></select>
+      <select id="storage-sort" aria-label="Sort" data-i18n-aria-label="storage_sort"><option value="new" data-i18n="storage_sort_new">Newest first</option><option value="big" data-i18n="storage_sort_big">Largest first</option></select>
+    </div>
+    <ul class="storage-list" id="storage-list"></ul>
+    <p class="muted hidden" id="storage-none" data-i18n="storage_none_match">No captures match.</p>
+  </section>
+
+  <section class="card" id="keyboard">
     <h2 data-i18n="settings_keyboard_shortcuts">Keyboard shortcuts</h2>
     <p class="muted" data-i18n="settings_shortcuts_work_everywhere">They work on any page, without opening Captode first.</p>
     <dl class="shortcut-list" id="shortcut-list">
@@ -154,6 +207,8 @@
       <div data-command="capture-visible"><dt data-i18n="menu_visible">Screenshot the visible area</dt><dd></dd></div>
       <div data-command="capture-area"><dt data-i18n="menu_area">Screenshot a selected area…</dt><dd></dd></div>
       <div data-command="capture-element"><dt data-i18n="menu_element">Screenshot an element…</dt><dd></dd></div>
+      <div data-command="pause-recording"><dt data-i18n="command_pause">Pause or resume the recording</dt><dd></dd></div>
+      <div data-command="draw-on-page"><dt data-i18n="command_draw">Draw on the page while recording</dt><dd></dd></div>
     </dl>
     <div class="row shortcut">
       <p class="muted" data-i18n="settings_menu_too">Every kind of screenshot is also in the page's right-click menu.</p>
@@ -161,7 +216,16 @@
     </div>
   </section>
 
-  <section class="card">
+  <section class="card" id="backup">
+    <h2 data-i18n="backup_title">Back up settings</h2>
+    <p class="muted" data-i18n="backup_hint">Save your settings, logo and export presets in a file, to load on another computer or browser, or to share with your team. Captures aren't included.</p>
+    <div class="row backup-actions">
+      <button class="btn" id="backup-save" data-i18n="backup_save">Save settings file</button>
+      <label class="btn"><span data-i18n="backup_load">Load settings file…</span><input type="file" id="backup-load" accept=".json,application/json" hidden></label>
+    </div>
+  </section>
+
+  <section class="card" id="about">
     <h2 data-i18n="settings_about">About</h2>
     <div class="about">
       <img src="../icons/icon128.png" alt="" width="44" height="44">
@@ -183,7 +247,7 @@
 <dialog class="modal confirm" id="reset-dialog" aria-labelledby="reset-title">
   <div class="modal-body">
     <h2 id="reset-title" data-i18n="settings_reset_all_settings_2">Reset all settings?</h2>
-    <p class="muted" data-i18n="settings_theme_export_background_default_formats">Theme, export background, default formats, the device frame and recording options go back to how they were when you installed Captode. Your captures aren't affected.</p>
+    <p class="muted" data-i18n="settings_theme_export_background_default_formats">Theme, export background, default formats, the device frame, recording options, your logo and saved presets go back to how they were when you installed Captode. Your captures aren't affected.</p>
     <div class="row actions">
       <button class="btn" data-close data-i18n="settings_cancel">Cancel</button>
       <button class="btn primary danger" id="reset-yes" data-i18n="settings_reset">Reset</button>

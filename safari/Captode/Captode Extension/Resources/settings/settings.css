@@ -52,3 +52,33 @@
 .card .name-example { font-family: ui-monospace, Menlo, monospace; overflow-wrap: anywhere; }
 #fileName { font-family: ui-monospace, Menlo, monospace; }
 @media (max-width: 560px) { .card .grid2 { grid-template-columns: 1fr; } .choices.three { grid-template-columns: 1fr; } }
+
+.storage-actions { gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+.storage-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.storage-list li { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border: 1px solid var(--line); border-radius: var(--radius-sm); min-width: 0; }
+.storage-list .what { flex: 1; min-width: 0; display: grid; }
+.storage-list .what b { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.storage-list .what small { color: var(--muted); font-size: 12px; }
+.storage-list .btn.on { color: var(--accent); }
+.storage-list .btn.on .i { fill: currentColor; }
+.brand-row { gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; }
+.brand-preview { max-width: 120px; max-height: 56px; object-fit: contain; padding: 6px; border: 1px solid var(--line); border-radius: var(--radius-sm); background: repeating-conic-gradient(var(--line) 0 25%, transparent 0 50%) 0 0 / 12px 12px; }
+.storage-filter { gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+.storage-filter input { flex: 1; min-width: 160px; }
+.storage-filter select { width: auto; }
+.settings-nav { position: sticky; top: 0; z-index: 5; display: grid; gap: 8px; padding: 10px 0; background: var(--bg, var(--stage)); }
+.settings-nav input { width: 100%; }
+.settings-nav .jump { display: flex; gap: 6px; flex-wrap: wrap; }
+.settings-nav .jump a { white-space: nowrap; text-decoration: none; }
+.card[id] { scroll-margin-top: 150px; }
+.s-hide { display: none !important; }
+.brand-sample { display: block; width: 100%; max-width: 360px; height: auto; margin: 0 0 14px; border: 1px solid var(--line); border-radius: var(--radius-sm); }
+.meter { display: flex; height: 8px; border-radius: 4px; overflow: hidden; background: var(--line); margin: 4px 0 6px; }
+.meter .m-img { background: var(--accent); }
+.meter .m-vid { background: #f5a524; }
+.keep-for { max-width: 320px; }
+.backup-actions { gap: 8px; flex-wrap: wrap; }
+.preset-kind { margin: 14px 0 6px; font-size: 13px; }
+.preset-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.preset-list li { display: flex; align-items: center; gap: 8px; }
+.preset-list input { flex: 1; min-width: 0; }

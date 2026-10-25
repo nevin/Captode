@@ -1,6 +1,6 @@
 # Captode privacy policy
 
-_Last updated: 20 October 2026_
+_Last updated: 25 October 2026_
 
 Captode is a browser extension for taking screenshots and screen recordings and editing
 them. It does not collect, transmit, sell or share any personal or sensitive data.
@@ -11,9 +11,23 @@ them. It does not collect, transmit, sell or share any personal or sensitive dat
   browser, on your device. Nothing is uploaded anywhere.
 - **Until you download them**, captures (and the edits you make to them) are kept in the
   extension's own browser storage (IndexedDB) so the editor and video pages can open them,
-  and so you can reopen a recent capture where you left off. They are deleted automatically after 24 hours, and you can remove any of them
+  and so you can reopen a recent capture where you left off. They are deleted automatically after a day (or a week, a month, or never, as you choose in Settings → Captures and storage), and you can remove any of them
   sooner from the editor's Recent captures list, or with **Discard** (the bin button) in the
   editor or the video page, which deletes the capture with its edits and slides.
+- **Kept captures:** a capture you choose to **Keep** stays in that storage until you remove
+  it (Settings → Captures and storage lists them, with what they take up), instead of being
+  deleted automatically.
+- **Project files** (.captode), made with Save project, are files you download: a capture with
+  its edits, slides, guide and captions. Captode doesn't upload them. Opening one puts it back
+  in Captode's storage on your device, kept until you remove it.
+- **Exports added to the queue** are made in the background on your device and kept in that
+  storage until you remove them, or for a day.
+- **Share** hands the file to the app you pick in your system's share sheet; Captode sends it
+  nowhere itself.
+- **While you record**, the recording is also written to that storage a second at a time, so
+  it isn't lost if the browser closes or crashes first. That copy is deleted as soon as the
+  recording is saved; if it was cut off, Captode saves what it has as a capture (offered in
+  the popup), which is then kept and deleted like any other.
 - **Slides** you add to a recording, and any pictures you choose for them (background,
   logo, picture), are kept with that recording in the same storage and deleted with it.
 - **Your settings** (theme, export background, default formats, device-frame and
@@ -39,9 +53,15 @@ them. It does not collect, transmit, sell or share any personal or sensitive dat
   turn on Blur private details in Settings, on the page you capture, at the moment you
   capture it, to blur them. Their positions
   are kept with the capture; the text itself isn't kept or sent.
-- **Where you click** while Captode records a tab (the position on the page and the time,
-  nothing else) is kept with the recording on your device, so the video page can offer
-  **Zoom in on clicks** and **Show clicks**. It is deleted with the recording.
+- **Where you click** while Captode records a tab (the position on the page, the time, and
+  the words on the button or link clicked, or the name of the field) is kept with the
+  recording on your device, so the video page can offer **Zoom in on clicks**, **Show
+  clicks** and **Step-by-step guide**. What you type is never kept, and nothing is kept
+  about password fields. It is deleted with the recording.
+- **Step-by-step guides** and **subtitle files** are files you download; Captode doesn't
+  upload them. A guide holds the pictures and notes of its steps.
+- **Drawing on the page** while recording happens on that page only, and is part of the
+  recording; nothing about it is kept.
 - **Copy it to the clipboard** (Settings → After a screenshot) puts the screenshot on your
   clipboard through the tab you captured, which has the focus the clipboard needs. The image
   is handed over in Captode's own isolated script, which the page's scripts can't read, and

@@ -2,11 +2,13 @@
 // MediaStream itself, so it hands this document a tab-capture stream id.
 import { record, openCameraAndMic } from '../lib/recorder.js';
 import { t } from '../lib/i18n.js';
-import { putCapture } from '../lib/db.js';
+import { putCapture, dropParts } from '../lib/db.js';
+import './exports.js'; // exports queued in the background run here too
 
 let session = null;
 let ticker = 0;
 let stopTimer = 0; // Settings → Stop recording after
+let autoStopAt = 0; // seconds of recording (pauses left out)
 let audioContext = null;
 let title = '';
 let cssWidth = 0; // the recorded part of the page, in CSS pixels
@@ -36,7 +38,7 @@ async function start({ streamId, fps, audio, aspect, crop, size, pageWidth, titl
     }
     // The page's shape lets the recorder find it within the tab's picture, and leave
     // out the black around it when the page is shown smaller (DevTools' device mode).
-    session = await record(stream, { fps, aspect, crop, size, ...extras, onEnded: stop });
+    session = await record(stream, { fps, aspect, crop, size, ...extras, onEnded: stop, backup: { title: tabTitle || '' } });
   } catch (e) {
     // Not started: let go of the tab, camera and microphone (the camera light goes off).
     for (const tr of [...(stream?.getTracks() || []), extras.camera, extras.mic]) tr?.stop();
@@ -45,9 +47,23 @@ async function start({ streamId, fps, audio, aspect, crop, size, pageWidth, titl
     throw e;
   }
   ticker = setInterval(() => {
-    chrome.runtime.sendMessage({ type: 'rec-tick', elapsed: (performance.now() - session.started) / 1000 });
+    chrome.runtime.sendMessage({ type: 'rec-tick', elapsed: session.elapsed(), paused: session.paused });
   }, 1000);
-  if (autoStop > 0) stopTimer = setTimeout(stop, autoStop * 1000);
+  autoStopAt = autoStop > 0 ? autoStop : 0;
+  armStop();
+}
+
+/** The time limit counts recorded time only, so it waits while paused. */
+function armStop() {
+  clearTimeout(stopTimer);
+  if (autoStopAt && session && !session.paused) stopTimer = setTimeout(stop, Math.max(0, autoStopAt - session.elapsed()) * 1000);
+}
+
+/** Pauses or resumes (`pause` true or false; toggles if left out), and tells the service worker. */
+function setPaused(pause = !session.paused) {
+  if (!(pause ? session.pause() : session.resume())) return;
+  armStop();
+  chrome.runtime.sendMessage({ type: 'rec-paused', paused: session.paused, elapsed: session.elapsed() });
 }
 
 async function stop() {
@@ -62,6 +78,7 @@ async function stop() {
   // Video pixels per CSS pixel of the page, for measuring on the video page.
   const dpr = cssWidth && current.width ? current.width / cssWidth : undefined;
   const id = await putCapture(blob, { ...meta, title, dpr });
+  await dropParts(current.backup).catch(() => {});
   chrome.runtime.sendMessage({ type: 'rec-done', id, kind: 'offscreen' });
 }
 
@@ -73,6 +90,11 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
       (e) => sendResponse({ ok: false, error: e.message || String(e) }),
     );
     return true;
+  }
+  if (msg.type === 'rec-pause' && session) {
+    setPaused(msg.pause);
+    sendResponse({ ok: true, paused: session.paused });
+    return;
   }
   if (msg.type === 'rec-stop' && session) {
     stop();

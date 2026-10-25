@@ -79,3 +79,6 @@ details.opts[open] { padding-bottom: 8px; }
 /* "Off" is long in some languages: the choices stay on one line, the row widens instead. */
 .delay-row .seg > button { height: 26px; font-size: 12px; white-space: nowrap; padding: 0 8px; }
 .delay-row .seg > button.on { background: var(--accent); color: #fff; }
+
+.exports { margin: 0 0 10px; }
+.exports-title { margin: 0 0 6px; font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }

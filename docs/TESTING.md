@@ -120,6 +120,44 @@ or install the zip from `npm run package`.
    a ring appears at each click. Record a tab with the microphone, pausing while you speak,
    and press **Cut silent parts**: the pauses become cuts. Play at 150% volume with a fade in:
    it is louder than at 100% and fades in.
+24. **Pause:** record a tab, right-click the Captode icon and choose **Pause recording** (the badge
+   shows ❚❚), click the page, wait 5 seconds, choose **Resume recording**, then stop. The video
+   leaves the pause out, and **Show clicks** has no ring for the click made while paused. Record
+   the full screen and use the page's **Pause** and **Resume**, with **Stop recording after** set:
+   it stops after that much recorded time, not counting the pause. Set a shortcut for **Pause or
+   resume the recording** in the browser's shortcut settings and try it.
+25. **Recovery:** start a long tab recording and quit the browser (⌘Q / Alt+F4) or close the full
+   screen recording page. Reopen and open the popup: it offers the recording; open it, it plays
+   up to about when it stopped, and exports.
+26. **Draw on the page:** while recording a tab, right-click the Captode icon and choose **Draw on
+   the page**; draw with the mouse (and a finger on a touchscreen), check strokes fade, press Esc.
+   The drawing is in the video, and no click ring or guide step comes from drawing.
+27. **Step-by-step guide:** record a tab clicking a button, a link and a text field (type
+   something, and into a password field too). In the video page press **Step-by-step guide**:
+   a step per click, notes naming the button, link and field (never what was typed, nothing for
+   the password field). Edit a note, move and remove steps, reload: the changes are kept.
+   Download the web page, PDF and Markdown zip, and open each.
+28. **Captions:** add two captions (**T**), cut a part before the second, and export MP4: the
+   captions show at the bottom. Download .srt and .vtt and load them in VLC with the MP4:
+   they line up.
+29. **Keep and projects:** press Keep in the editor and the video page (the bookmark fills),
+   check Settings → Captures and storage lists both as Kept; set the computer's clock a day
+   ahead (or wait), take a new screenshot: kept ones stay, others go. Save project for a
+   recording with edits, slides, a guide and captions, delete the recording, and open the
+   .captode file from Settings and from the editor's Open: everything is back. Open it in
+   another browser profile too.
+30. **Export queue (Chrome, Edge):** add an MP4 and a GIF to the queue, close the video page:
+   the badge counts up and shows ✓; the popup lists both with Download and Share. Quit the
+   browser mid-export and reopen: it carries on. Cancel one while it runs.
+31. **Share:** on Windows, macOS and ChromeOS, Share an exported MP4 and an edited screenshot to
+   Mail or a chat app: the file arrives. Where the share sheet takes no files, no Share button.
+32. **Callouts:** add a circle and a numbered step on a recording, export: they look like the
+   editor's ellipse and step, in the same colours.
+33. **Image export:** take a screenshot of a text-heavy page on a Retina or 150% display.
+   Choose **Smallest**: the note says which format won; open the file. WebP with **Lossless**
+   on opens pixel-identical. With PNG chosen, a hint offers Smallest when it's 15% smaller.
+   Choose **1× — as on screen**: the file is the page's CSS size. In **Several sizes or
+   formats**, tick 100%, 1×, PNG and WebP and download: the zip holds four files.
 
 ### Windows
 

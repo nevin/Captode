@@ -162,7 +162,7 @@ export const tests = {
         name: r.dataset.command, label: r.querySelector('dt').textContent, shown: r.querySelector('dd').textContent.replace(/\s+/g, ''), chrome: chromeHas[r.dataset.command],
       }));
     });
-    ok(rows.length === 5 && rows.every((r) => r.chrome !== undefined && r.label), `rows: ${JSON.stringify(rows)}`);
+    ok(rows.length === 7 && rows.every((r) => r.chrome !== undefined && r.label), `rows: ${JSON.stringify(rows)}`);
     const wrong = rows.filter((r) => (r.chrome ? r.shown !== r.chrome : r.shown !== 'noshortcutset'));
     ok(!wrong.length, `shown differently from Chrome: ${JSON.stringify(wrong)}`);
 
@@ -348,7 +348,9 @@ export const tests = {
       const query = chrome.tabs.query.bind(chrome.tabs);
       chrome.tabs.query = (q) => (q?.active ? query({ url: pageUrl }) : query(q));
       window.__sent = [];
-      chrome.runtime.sendMessage = async (m) => { window.__sent.push(m); };
+      // The popup also asks the service worker to save any cut-off recording; let that through.
+      const send = chrome.runtime.sendMessage.bind(chrome.runtime);
+      chrome.runtime.sendMessage = async (m) => (m?.type === 'recover' ? send(m) : window.__sent.push(m));
       window.close = () => {};
     }, page.url());
     await pop.setViewport({ width: 340, height: 600 });
@@ -411,7 +413,7 @@ export const tests = {
     // One Download button, with the format and the file's size and dimensions.
     await ed.evaluate(() => document.querySelector('[data-pane="export"]').click());
     await ed.waitForFunction(() => /B$/.test(document.querySelector('#x-estimate').textContent), { polling: 100, timeout: 30000 });
-    const r = await ed.evaluate(() => ({ label: document.querySelector('#download2').textContent.trim(), dims: document.querySelector('#x-dims').textContent, copies: document.querySelectorAll('.export-bar button').length }));
+    const r = await ed.evaluate(() => ({ label: document.querySelector('#download2').textContent.trim(), dims: document.querySelector('#x-dims').textContent, copies: document.querySelectorAll('.export-bar button:not(#share-file):not(#x-hint-use):not(#x-fit-anyway)').length }));
     ok(/^Download PNG\s*[\d.]+ (B|KB|MB)$/.test(r.label) && /^The file will be \d+ × \d+ px$/.test(r.dims) && r.copies === 1, JSON.stringify(r));
     await ed.close();
   },
@@ -1167,7 +1169,7 @@ export const tests = {
   async 'after an update, the popup says what is new, once'({ browser, url }) {
     const pop = await open(browser, url('popup/popup.html'), { width: 340, height: 700 });
     ok(await pop.$eval('#whats-new', (e) => e.classList.contains('hidden')), 'nothing new on a fresh install');
-    await pop.evaluate(() => chrome.storage.local.set({ whatsNew: '2.1.0' }));
+    await pop.evaluate(() => chrome.storage.local.set({ whatsNew: '2.3.0' }));
     await pop.reload();
     await pop.waitForFunction(() => !document.querySelector('#whats-new').classList.contains('hidden'), { polling: 100 });
     await pop.click('#whats-new-close');
@@ -1867,6 +1869,49 @@ export const tests = {
       await s.evaluate(async (before, keys) => { await chrome.storage.local.remove(keys); await chrome.storage.local.set(before); }, before, keys);
       await s.close();
     }
+  },
+
+  async 'pausing a recording: the page, the toolbar and the time limit all wait'({ browser, url }) {
+    const p = await open(browser, url('recorder/screen.html?fps=30&audio=0&countdown=0&stop=2'), { width: 800, height: 600 });
+    const ctl = await open(browser, url('popup/popup.html'), { width: 340, height: 600 });
+    await p.evaluate(() => {
+      navigator.mediaDevices.getDisplayMedia = async () => {
+        const c = document.createElement('canvas'); c.width = 320; c.height = 240;
+        const x = c.getContext('2d');
+        setInterval(() => { x.fillStyle = `hsl(${Date.now() / 10 % 360} 60% 50%)`; x.fillRect(0, 0, 320, 240); }, 33);
+        return c.captureStream(30);
+      };
+    });
+    const toolbar = () => ctl.evaluate(async () => ({ badge: await chrome.action.getBadgeText({}), title: await chrome.action.getTitle({}), rec: (await chrome.storage.session.get('rec')).rec }));
+    await p.click('#choose');
+    await p.waitForFunction(() => !document.getElementById('live').classList.contains('hidden'), { polling: 100, timeout: 5000 });
+    await sleep(800);
+    // Paused on the page itself.
+    await p.click('#pause');
+    await ctl.waitForFunction(async () => (await chrome.action.getBadgeText({})) === '❚❚', { polling: 100, timeout: 3000 });
+    const paused = await p.evaluate(() => ({ title: document.getElementById('live-title').textContent, button: document.getElementById('pause').getAttribute('aria-pressed'), time: document.getElementById('time').textContent }));
+    const bar = await toolbar();
+    ok(paused.title === 'Paused' && paused.button === 'true', `page while paused: ${JSON.stringify(paused)}`);
+    ok(/paused/.test(bar.title) && bar.rec.pausedAt > 0, `toolbar while paused: ${JSON.stringify(bar)}`);
+    // Past the 2 s limit in wall time, but not in recorded time: still recording.
+    await sleep(2500);
+    ok(p.url().includes('screen.html'), 'stopped while paused');
+    ok((await p.$eval('#time', (e) => e.textContent)) === paused.time, 'the clock ran while paused');
+    // Resumed from elsewhere, as the toolbar menu and the shortcut do.
+    await ctl.evaluate(() => chrome.runtime.sendMessage({ target: 'recorder', type: 'rec-pause', pause: false }).catch(() => {}));
+    await p.waitForFunction(() => document.getElementById('pause').getAttribute('aria-pressed') === 'false', { polling: 100, timeout: 3000 });
+    await ctl.waitForFunction(async () => !(await chrome.storage.session.get('rec')).rec?.pausedAt, { polling: 100, timeout: 3000 });
+    const t0 = Date.now();
+    await p.waitForNavigation({ timeout: 15000 });
+    const rest = (Date.now() - t0) / 1000;
+    ok(rest > 0.6 && rest < 2.5, `stopped ${rest.toFixed(1)} s after resuming (about 1.2 s left)`);
+    const id = new URL(p.url()).searchParams.get('id');
+    const meta = await p.evaluate(async (id) => (await (await import('/lib/db.js')).getCapture(id)).meta, id);
+    near(meta.duration, 2, 0.35, 'recorded duration');
+    ok((await ctl.evaluate(() => chrome.action.getBadgeText({}))) === '', 'badge cleared');
+    await p.close();
+    await ctl.close();
+    return `${meta.duration.toFixed(2)} s recorded`;
   },
 
   async 'a recording stops on its own after the time chosen in Settings'({ browser, url }) {

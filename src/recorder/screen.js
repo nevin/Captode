@@ -1,7 +1,7 @@
 // Records the whole screen or a window. This runs in a normal extension tab because
 // picking a screen needs a page the browser can show its picker over.
 import { record, openCameraAndMic } from '../lib/recorder.js';
-import { putCapture } from '../lib/db.js';
+import { putCapture, dropParts } from '../lib/db.js';
 import { t, localize } from '../lib/i18n.js';
 
 localize();
@@ -19,6 +19,7 @@ const $ = (id) => document.getElementById(id);
 let session = null;
 let ticker = 0;
 let stopTimer = 0;
+let limit = ''; // ' / 0:30' with a time limit
 let cancelCountdown = null;
 
 const fmt = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
@@ -64,19 +65,39 @@ async function choose() {
     $('pick').classList.remove('hidden');
     return;
   }
-  session = await record(stream, { fps, size, ...extras, onEnded: stop });
+  session = await record(stream, { fps, size, ...extras, onEnded: stop, backup: {} });
   $('live').classList.remove('hidden');
   document.title = t('screen_title_recording');
   chrome.runtime.sendMessage({ type: 'rec-started', kind: 'page' });
   // With a time limit, the clock shows it too: 0:12 / 0:30.
-  const limit = autoStop ? ` / ${fmt(autoStop)}` : '';
+  limit = autoStop ? ` / ${fmt(autoStop)}` : '';
   $('time').textContent = fmt(0) + limit;
   ticker = setInterval(() => {
-    const elapsed = (performance.now() - session.started) / 1000;
+    const elapsed = session.elapsed();
     $('time').textContent = fmt(elapsed) + limit;
-    chrome.runtime.sendMessage({ type: 'rec-tick', elapsed });
+    chrome.runtime.sendMessage({ type: 'rec-tick', elapsed, paused: session.paused });
   }, 1000);
-  if (autoStop) stopTimer = setTimeout(stop, autoStop * 1000);
+  armStop();
+}
+
+/** The time limit counts recorded time only, so it waits while paused. */
+function armStop() {
+  clearTimeout(stopTimer);
+  if (autoStop && session && !session.paused) stopTimer = setTimeout(stop, Math.max(0, autoStop - session.elapsed()) * 1000);
+}
+
+/** Pauses or resumes (`pause` true or false; toggles if left out), here and on the toolbar. */
+function setPaused(pause = !session.paused) {
+  if (!session || !(pause ? session.pause() : session.resume())) return;
+  armStop();
+  const paused = session.paused;
+  $('live').classList.toggle('paused', paused);
+  $('live-title').textContent = t(paused ? 'screen_recording_paused' : 'video_recording');
+  $('pause').textContent = t(paused ? 'rec_resume' : 'rec_pause');
+  $('pause').setAttribute('aria-pressed', String(paused));
+  $('time').textContent = fmt(session.elapsed()) + limit;
+  document.title = t(paused ? 'screen_title_paused' : 'screen_title_recording');
+  chrome.runtime.sendMessage({ type: 'rec-paused', paused, elapsed: session.elapsed() });
 }
 
 /**
@@ -125,14 +146,18 @@ async function stop() {
   $('saving').classList.remove('hidden');
   const { blob, meta } = await current.stop();
   const id = await putCapture(blob, meta);
+  await dropParts(current.backup).catch(() => {});
   await chrome.runtime.sendMessage({ type: 'rec-done', id, kind: 'page' });
   location.replace(chrome.runtime.getURL(`video/video.html?id=${id}`));
 }
 
 $('choose').addEventListener('click', choose);
 $('stop').addEventListener('click', stop);
+$('pause').addEventListener('click', () => setPaused());
 $('cancel').addEventListener('click', () => cancelCountdown?.());
 chrome.runtime.onMessage.addListener((msg) => {
-  if (msg.target === 'recorder' && msg.type === 'rec-stop' && session) stop();
+  if (msg.target !== 'recorder' || !session) return;
+  if (msg.type === 'rec-stop') stop();
+  if (msg.type === 'rec-pause') setPaused(msg.pause);
 });
 window.addEventListener('beforeunload', (e) => { if (session) e.preventDefault(); });

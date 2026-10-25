@@ -1,13 +1,13 @@
 // Captode service worker: runs captures, coordinates recordings and switches the
 // toolbar icon between "open the popup" and "stop recording".
-import { putCapture, updateMeta } from './lib/db.js';
+import { putCapture, updateMeta, recoverRecordings, listJobs } from './lib/db.js';
 import { getSettings } from './lib/settings.js';
 import {
   pickArea, pickElement, fullPagePrepare, fullPageScroll, fullPageRestore,
-  countdown, captureDelay, showOutline, hideOutline, showInputs, trackClicks, findPrivate,
+  countdown, captureDelay, showOutline, hideOutline, showInputs, trackClicks, findPrivate, findText, drawLayer,
 } from './content/page.js';
 import { t } from './lib/i18n.js';
-import { canRecordTabs, startTabCapture, endTabCapture } from './lib/tab-capture.js';
+import { canRecordTabs, startTabCapture, endTabCapture, runExports, endExports } from './lib/tab-capture.js';
 
 
 // ---------- helpers ----------
@@ -69,6 +69,7 @@ async function waitBeforeCapture(tab, seconds) {
  * just has none.
  */
 async function notePrivate(tab, meta, region, space, scale) {
+  await noteText(tab, meta, region, space, scale);
   if (!(await chrome.storage.local.get('settings')).settings?.autoBlur) return; // off unless chosen in Settings
   const boxes = await run(tab.id, findPrivate, region, space).catch(() => null);
   if (!boxes?.length) return;
@@ -77,6 +78,17 @@ async function notePrivate(tab, meta, region, space, scale) {
     x: Math.round(b.x * scale - pad), y: Math.round(b.y * scale - pad),
     w: Math.round(b.w * scale + pad * 2), h: Math.round(b.h * scale + pad * 2), kind: b.kind,
   }));
+}
+
+/**
+ * The page's words in the picture (see findText), as boxes in image pixels stored
+ * with the capture, so the editor can copy text from it. None if the page can't be read.
+ */
+async function noteText(tab, meta, region, space, scale) {
+  const boxes = await run(tab.id, findText, region, space).catch(() => null);
+  if (!boxes?.length) return;
+  const r = (v) => Math.round(v * scale);
+  meta.text = boxes.map(([x, y, w, h, s]) => [r(x), r(y), Math.max(1, r(w)), Math.max(1, r(h)), s]);
 }
 
 async function captureImage(mode, tab, delay = 0) {
@@ -120,8 +132,9 @@ async function captureImage(mode, tab, delay = 0) {
   // A page split into parts gives several images, each with the private details in it.
   const parts = Array.isArray(blob) ? blob : [{ blob }];
   for (const [i, part] of parts.entries()) {
-    const m = parts.length > 1 ? { ...meta, part: [i + 1, parts.length], private: part.private } : meta;
+    const m = parts.length > 1 ? { ...meta, part: [i + 1, parts.length], private: part.private, text: part.text } : meta;
     if (!m.private?.length) delete m.private;
+    if (!m.text?.length) delete m.text;
     const id = await putCapture(part.blob, m);
     // Downloaded or copied the way the editor would (format, device frame, blurs), by an
     // editor working in a background tab, which closes itself when done.
@@ -382,7 +395,11 @@ async function captureFullPage(tab, meta, longPages = 'cut') {
       if (parts.length === 1) return blob;
       // The private details in this part, moved to its own top.
       const y0 = top * s, y1 = (top + h) * s;
-      out.push({ blob, private: meta.private?.filter((b) => b.y + b.h > y0 && b.y < y1).map((b) => ({ ...b, y: Math.round(b.y - y0) })) });
+      out.push({
+        blob,
+        private: meta.private?.filter((b) => b.y + b.h > y0 && b.y < y1).map((b) => ({ ...b, y: Math.round(b.y - y0) })),
+        text: meta.text?.filter((b) => b[1] + b[3] / 2 >= y0 && b[1] + b[3] / 2 < y1).map((b) => [b[0], Math.round(b[1] - y0), b[2], b[3], b[4]]),
+      });
     }
     return out;
   } finally {
@@ -437,10 +454,16 @@ async function startRecording({ mode, fps, audio, size = 'page', countdown: want
     return;
   }
 
-  const streamId = await startTabCapture(tab.id);
-  const res = await chrome.runtime.sendMessage({
-    target: 'recorder', to: 'offscreen', type: 'rec-start', streamId, fps, audio, aspect, crop, size, pageWidth, title: tab.title, camera: !!camera, mic: !!mic, autoStop: stopAfter,
-  });
+  tabStarting = true; // the export queue mustn't close the offscreen document meanwhile
+  let res;
+  try {
+    const streamId = await startTabCapture(tab.id);
+    res = await chrome.runtime.sendMessage({
+      target: 'recorder', to: 'offscreen', type: 'rec-start', streamId, fps, audio, aspect, crop, size, pageWidth, title: tab.title, camera: !!camera, mic: !!mic, autoStop: stopAfter,
+    });
+  } finally {
+    tabStarting = false;
+  }
   if (!res?.ok) {
     await endTabCapture();
     await run(tab.id, hideOutline).catch(() => {});
@@ -468,13 +491,18 @@ let clickQueue = Promise.resolve();
 function keepClick(msg, tabId) {
   clickQueue = clickQueue.then(async () => {
     const rec = await getRec();
-    if (rec?.state !== 'recording' || rec.kind !== 'offscreen' || rec.tabId !== tabId || !rec.startedAt) return;
+    if (rec?.state !== 'recording' || rec.kind !== 'offscreen' || rec.tabId !== tabId || !rec.startedAt || rec.pausedAt) return;
     let { x, y } = msg;
     if (rec.crop) { x = (x - rec.crop.x) / rec.crop.w; y = (y - rec.crop.y) / rec.crop.h; } // in the area recorded
     if (!(x >= 0 && x <= 1 && y >= 0 && y <= 1)) return;
     const { recClicks = [] } = await chrome.storage.session.get('recClicks');
     if (recClicks.length >= 2000) return;
-    recClicks.push({ t: Math.round(Math.max(0, msg.at - rec.startedAt)) / 1000, x: Math.round(x * 1e4) / 1e4, y: Math.round(y * 1e4) / 1e4 });
+    // On the video's clock, which leaves out time spent paused.
+    const label = typeof msg.label === 'string' ? msg.label.slice(0, 80) : '';
+    recClicks.push({
+      t: Math.round(Math.max(0, msg.at - rec.startedAt - (rec.pausedMs || 0))) / 1000, x: Math.round(x * 1e4) / 1e4, y: Math.round(y * 1e4) / 1e4,
+      ...(label && { label }), ...(label && msg.field && { field: true }),
+    });
     await chrome.storage.session.set({ recClicks });
   }).catch(() => {});
   return clickQueue;
@@ -483,13 +511,93 @@ function keepClick(msg, tabId) {
 async function enterRecordingUi() {
   await chrome.action.setPopup({ popup: '' });
   await chrome.action.setTitle({ title: t('action_stop_title') });
+  pauseMenu(false);
   await badge('REC');
 }
 
 async function leaveRecordingUi() {
   await applyIconAction();
   await chrome.action.setTitle({ title: 'Captode' });
+  chrome.contextMenus.remove('rec-pause', () => void chrome.runtime.lastError);
+  chrome.contextMenus.remove('rec-draw', () => void chrome.runtime.lastError);
   await badge('');
+}
+
+/** The toolbar icon's menu offers Pause recording, or Resume recording when paused. */
+function pauseMenu(paused) {
+  const title = t(paused ? 'menu_resume_recording' : 'menu_pause_recording');
+  chrome.contextMenus.update('rec-pause', { title }, () => {
+    if (chrome.runtime.lastError) chrome.contextMenus.create({ id: 'rec-pause', title, contexts: ['action'] }, () => void chrome.runtime.lastError);
+  });
+  chrome.contextMenus.create({ id: 'rec-draw', title: t('menu_draw'), contexts: ['action'] }, () => void chrome.runtime.lastError);
+}
+
+/** Turns drawing on the page on or off in `tab` while recording (a menu click or shortcut lets Captode in). */
+async function toggleDrawing(tab) {
+  const rec = await getRec();
+  if (rec?.state !== 'recording') return;
+  tab ||= (await chrome.tabs.query({ active: true, lastFocusedWindow: true }))[0];
+  if (!tab?.id || tab.id < 0) return;
+  // Pages the browser protects can't be drawn on; the recording carries on as it was.
+  const on = await run(tab.id, drawLayer, 'toggle', t('draw_hint')).catch(() => false);
+  if (on) await setRec({ ...(await getRec()), drawTab: tab.id });
+}
+
+/** Asks the recorder to pause or resume (toggles when `pause` is left out). */
+async function pauseRecording(pause) {
+  if ((await getRec())?.state !== 'recording') return;
+  chrome.runtime.sendMessage({ target: 'recorder', type: 'rec-pause', pause }).catch(() => {});
+}
+
+// The recorder paused or resumed: the toolbar shows it, and clicks are timed without the pause.
+// Queued with the clicks, so each click is timed against the pauses before it.
+function recordPaused({ paused, elapsed }) {
+  clickQueue = clickQueue.then(async () => {
+    const rec = await getRec();
+    if (rec?.state !== 'recording' || !!rec.pausedAt === paused) return;
+    if (paused) rec.pausedAt = Date.now();
+    else { rec.pausedMs = (rec.pausedMs || 0) + Date.now() - rec.pausedAt; delete rec.pausedAt; }
+    await setRec(rec);
+    await chrome.action.setTitle({ title: t(paused ? 'action_paused_title' : 'action_stop_title') });
+    pauseMenu(paused);
+    await (paused ? badge('❚❚', '#8b8d98') : tickBadge(elapsed));
+  }).catch(() => {});
+  return clickQueue;
+}
+
+const tickBadge = (elapsed) => {
+  const s = Math.floor(elapsed || 0);
+  return badge(s < 60 ? `${s}s` : `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`);
+};
+
+// Recordings that stopped without being saved (the browser closed or crashed, or the
+// recorder's page was closed) are saved from the copy kept while recording; the popup
+// then offers to open them. One check at a time, so none is saved twice.
+let recovering = Promise.resolve();
+function recover(quietFor) {
+  recovering = recovering.then(async () => {
+    const rec = await getRec();
+    if (quietFor && (rec?.state === 'recording' || rec?.state === 'starting')) return;
+    const ids = await recoverRecordings(quietFor);
+    if (!ids.length) return;
+    const { recovered = [] } = await chrome.storage.local.get('recovered');
+    await chrome.storage.local.set({ recovered: [...recovered, ...ids].slice(-10) });
+    await badge('!', '#6c56ff');
+  }).catch(() => {});
+  return recovering;
+}
+
+// ---------- exports in the background ----------
+
+// Exports queued from the video page run in the offscreen document; the toolbar badge
+// shows how far the current one is, then ✓ until the popup is opened.
+let tabStarting = false;
+const recording = async () => tabStarting || ['recording', 'starting'].includes((await getRec())?.state);
+
+async function exportBadge(msg) {
+  if (await recording()) return;
+  if (msg.type === 'export-progress') await badge(`${Math.round(msg.f * 100)}%`, '#6c56ff');
+  else if (msg.type === 'export-done') await badge('✓', '#30a46c');
 }
 
 // ---------- the toolbar icon ----------
@@ -526,6 +634,7 @@ async function finishRecording(id, kind) {
   await setRec(null);
   await leaveRecordingUi();
   if (rec?.outline) await run(rec.tabId, hideOutline).catch(() => {});
+  if (rec?.drawTab) await run(rec.drawTab, drawLayer, false).catch(() => {});
   if (rec?.inputs || rec?.cursor) await run(rec.tabId, showInputs, false).catch(() => {});
   if (kind === 'offscreen') {
     if (rec) await run(rec.tabId, trackClicks, false).catch(() => {});
@@ -548,6 +657,7 @@ async function iconClicked(tab) {
       // The recorder is gone (the browser restarted it away); reset the button.
       await setRec(null);
       await leaveRecordingUi();
+      await recover(0);
     });
     return;
   }
@@ -573,6 +683,7 @@ chrome.tabs.onRemoved.addListener(async (tabId) => {
   if (rec && rec.kind === 'page' && rec.recorderTabId === tabId) {
     await setRec(null);
     await leaveRecordingUi();
+    await recover(0); // closed while recording
   }
 });
 
@@ -601,16 +712,22 @@ async function createMenu() {
   if ((await getSettings()).iconAction !== 'popup') {
     chrome.contextMenus.create({ id: 'open-popup', title: t('menu_open_popup'), contexts: ['action'] }, () => void chrome.runtime.lastError);
   }
+  const rec = await getRec();
+  if (rec?.state === 'recording') pauseMenu(!!rec.pausedAt);
 }
 
 chrome.contextMenus.onClicked.addListener((info, tab) => {
   if (info.menuItemId === 'open-popup') { openMenu(); return; }
+  if (info.menuItemId === 'rec-pause') { pauseRecording(); return; }
+  if (info.menuItemId === 'rec-draw') { toggleDrawing(tab); return; }
   if (!tab?.id || tab.id < 0 || !MENU.some(([id]) => id === info.menuItemId)) return;
   captureImage(info.menuItemId, tab).catch(reportError);
 });
 
 // A shortcut for each kind of screenshot (set or changed in the browser's shortcut settings).
 chrome.commands.onCommand.addListener(async (command, tab) => {
+  if (command === 'pause-recording') { pauseRecording(); return; }
+  if (command === 'draw-on-page') { toggleDrawing(tab); return; }
   const mode = /^capture-(full|visible|area|element)$/.exec(command)?.[1];
   if (!mode) return;
   tab ||= (await chrome.tabs.query({ active: true, lastFocusedWindow: true }))[0];
@@ -646,8 +763,33 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   }
 
   if (msg.type === 'rec-tick') {
-    const s = Math.floor(msg.elapsed);
-    badge(s < 60 ? `${s}s` : `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`);
+    if (!msg.paused) tickBadge(msg.elapsed);
+    return;
+  }
+
+  if (msg.type === 'export-queued') {
+    runExports().then(() => sendResponse({ ok: true }), (e) => sendResponse({ ok: false, error: String(e?.message || e) }));
+    return true;
+  }
+  if (msg.type === 'export-progress' || msg.type === 'export-done') {
+    exportBadge(msg);
+    return;
+  }
+  if (msg.type === 'exports-idle') {
+    (async () => {
+      const rec = await getRec();
+      endExports(tabStarting || (rec?.kind === 'offscreen' && rec.state === 'recording'));
+    })();
+    return;
+  }
+
+  if (msg.type === 'recover') {
+    recover(15000).then(() => sendResponse({ ok: true }));
+    return true;
+  }
+
+  if (msg.type === 'rec-paused') {
+    recordPaused(msg);
     return;
   }
 
@@ -658,7 +800,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 });
 
 // After an update that adds features, the popup says what's new, once.
-const WHATS_NEW = '2.1.0';
+const WHATS_NEW = '2.3.0';
 chrome.runtime.onInstalled.addListener(({ reason, previousVersion }) => {
   createMenu();
   applyIconAction();
@@ -674,4 +816,8 @@ chrome.runtime.onStartup.addListener(async () => {
   createMenu(); // in the browser's current language
   await setRec(null);
   await leaveRecordingUi();
+  await recover(0); // nothing can be recording yet
+  // Exports cut off when the browser closed carry on.
+  if ((await listJobs().catch(() => [])).some((j) => j.status === 'queued' || j.status === 'running')) await runExports().catch(() => {});
+
 });

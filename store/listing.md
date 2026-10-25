@@ -55,7 +55,8 @@ or press a keyboard shortcut on any page.
 Mark up
 Add arrows, shapes, text, callouts, highlights and numbered steps, spotlight or magnify
 what matters, and blur or black out anything private before you share. Captode can also blur
-email addresses and phone or card numbers in every new screenshot, if you turn that on. Select several
+email addresses and phone or card numbers in every new screenshot, if you turn that on. Copy the
+text out of a screenshot of a web page, and add your own logo to a corner. Select several
 things to align, arrange or copy them, and pick up where you left off: your edits are
 kept with each capture. Crop, resize, or add padding, a background and a shadow. Every tool has a
 keyboard shortcut, and changes can be undone.
@@ -63,14 +64,28 @@ keyboard shortcut, and changes can be undone.
 Save
 Save as an image or a PDF, or copy straight to the clipboard, automatically if you like. You can see the file size
 before you save, and set a size limit for email or chat apps: Captode keeps the best
-quality that fits.
+quality that fits. Smallest keeps every pixel in the smallest file, a screenshot from a
+high-resolution display can be saved at its on-screen size, and several sizes can be saved
+in one zip. Where your system allows it, Share sends a file straight to another app.
+
+Keep your work
+Captures are cleared after a day unless you keep them, or after a week or a month if you
+choose. Save a project file to carry on later, or on another computer, with every edit still
+in place. Back up your settings, logo and presets in a file to set up another computer.
 
 Record
 Record the current tab, an area of it, or your whole screen or a window, with sound if
 you like. Only the page is kept, even when DevTools shows it at a phone's size, and you can
 record it as shown, scaled up or down, or at a standard resolution. Talk over it with your
 microphone, add yourself in a round camera bubble, and show your clicks. A countdown of up to 30
-seconds gives you time to get ready, and one click on the toolbar button stops the recording.
+seconds gives you time to get ready, you can pause and carry on or draw on the page to point
+things out, and one click on the toolbar button stops the recording. If the browser closes
+mid-recording, what was recorded is kept.
+
+Turn a recording into a step-by-step guide: a numbered picture and a note for each click,
+downloaded as a web page, PDF or Markdown, or copied with its pictures to paste into a
+document. Add captions, burned in or as subtitle files, and translate guides and captions
+on your device with the browser's built-in translator.
 
 Review designs
 Check a build against its design: measure spacing in CSS pixels, check colour contrast against
@@ -79,8 +94,10 @@ or a highlight of what changed. Share a capture for review as a single web page 
 each numbered step.
 
 Edit recordings
-Trim the start and end on a timeline, then save the result as a video or an animated
-GIF. Exports take seconds rather than the length of the recording.
+Trim on a timeline, cut parts out, speed parts up, zoom in, blur private
+details, add arrows, labels and captions, crop, and put the video on a background. Then save
+it as a video or an animated GIF, in seconds rather than the length of the recording, or
+queue the export to carry on in the background.
 
 Device frames
 Present any screenshot or recording inside real phone and tablet models, portrait or
@@ -92,7 +109,8 @@ readers and high-contrast mode, and runs wherever Chrome does, including Chromeb
 
 Private by design
 Captode has no servers and makes no network requests. Your captures stay on your
-device until you save them, and are cleared automatically after 24 hours. There is no
+device until you save them, and are cleared automatically after a day unless you
+keep them (or after a week or a month, or never, as you choose). There is no
 account, analytics or tracking.
 
 Captode is open source: https://github.com/nevin/Captode
@@ -142,7 +160,7 @@ lets the user annotate, review, compare, trim and export them as image, PDF or v
 | tabCapture | Records the current tab (or a selected area of it) when the user starts a tab recording from the popup. |
 | offscreen | Hosts the MediaRecorder for tab recordings in an offscreen document, because a service worker cannot hold a media stream. The recording keeps running after the popup closes. |
 | storage | Stores the user's settings: theme, export background, default formats, and device-frame and recording options. |
-| unlimitedStorage | Recordings and captures are kept in the extension's IndexedDB until the user exports them (and deleted after 24 hours). Screen recordings can be hundreds of megabytes; this keeps the browser from evicting a recording under storage pressure before the user has exported it. |
+| unlimitedStorage | Recordings and captures are kept in the extension's IndexedDB until the user exports them (and deleted after a day, or the time the user chooses in Settings). Screen recordings can be hundreds of megabytes; this keeps the browser from evicting a recording under storage pressure before the user has exported it. |
 
 **Are you using remote code?** No, I am not using remote code.
 

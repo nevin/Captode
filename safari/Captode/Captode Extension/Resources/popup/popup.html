@@ -37,9 +37,19 @@
     <div><b data-i18n="popup_the_last_capture_didn_t">The last capture didn't work</b><span id="error-text"></span></div>
     <button class="btn ghost icon close" id="error-close" data-tip="Dismiss" data-i18n-tip="popup_dismiss"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
   </div>
+  <section id="exports" class="exports hidden" aria-labelledby="exports-title">
+    <h2 id="exports-title" class="exports-title" data-i18n="queue_title">Exports</h2>
+    <ul class="jobs" id="exports-list"></ul>
+  </section>
+  <div id="recovered" class="banner new hidden" role="status">
+    <svg class="i" viewBox="0 0 24 24"><rect x="3" y="6" width="13" height="12" rx="2"/><path d="m16 10 5-3v10l-5-3z"/></svg>
+    <div><b data-i18n="popup_recording_recovered">A recording was saved for you</b><span data-i18n="popup_recording_recovered_hint">It stopped before it could be saved (the browser closed, or its page did), so Captode kept what it had.</span>
+      <button class="btn small" id="recovered-open" data-i18n="popup_open_recording">Open the recording</button></div>
+    <button class="btn ghost icon close" id="recovered-close" data-tip="Dismiss" aria-label="Dismiss" data-i18n-aria-label="popup_dismiss" data-i18n-tip="popup_dismiss"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+  </div>
   <div id="whats-new" class="banner new hidden" role="status">
     <svg class="i" viewBox="0 0 24 24"><path d="M12 3l2.4 5.3 5.6.6-4.2 3.8 1.2 5.6L12 15.5 7 18.3l1.2-5.6L4 8.9l5.6-.6z"/></svg>
-    <div><b data-i18n="popup_new_in_captode_2_1">New in Captode 2.1</b><span data-i18n="popup_whats_new_2_1">Edit your recordings: cut parts out, speed parts up, zoom in (also where you clicked), blur private details, add arrows and labels, crop, put the video on a background, and change the sound.</span></div>
+    <div><b data-i18n="popup_new_in_captode_2_3">New in Captode 2.3</b><span data-i18n="popup_whats_new_2_3">Pause and draw on the page while recording, add captions, copy text from screenshots, add your logo, and keep captures or save them as project files.</span></div>
     <button class="btn ghost icon close" id="whats-new-close" data-tip="Dismiss" aria-label="Dismiss" data-i18n-aria-label="popup_dismiss" data-i18n-tip="popup_dismiss"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
   </div>
   <div id="blocked" class="banner warn hidden">

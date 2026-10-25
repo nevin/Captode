@@ -225,7 +225,7 @@
     "message": "要重置所有设置吗？"
   },
   "settings_theme_export_background_default_formats": {
-    "message": "主题、导出背景、默认格式、设备外框和录制选项都将恢复为安装 Captode 时的状态。你的截图不受影响。"
+    "message": "主题、导出背景、默认格式、设备边框、录屏选项、你的标志和已保存的预设都会恢复到安装 Captode 时的状态。你的截图和录屏不受影响。"
   },
   "settings_cancel": {
     "message": "取消"
@@ -288,7 +288,7 @@
     "message": "选择图片"
   },
   "editor_kept_on_this_device_for": {
-    "message": "在此设备上保留 24 小时"
+    "message": "除非你保留，否则会在此设备上保存设置中指定的时间"
   },
   "editor_recent_captures": {
     "message": "最近的截图"
@@ -861,7 +861,7 @@
     "message": "找不到录制内容"
   },
   "video_recordings_are_kept_for_a": {
-    "message": "录制内容会保留一天。点击工具栏中的 Captode 按钮开始新的录制。"
+    "message": "未保留的录屏会在设置中指定的时间后删除。可用工具栏中的 Captode 按钮开始新的录屏。"
   },
   "video_trim": {
     "message": "剪辑"
@@ -2028,7 +2028,7 @@
     "message": "复制到剪贴板"
   },
   "settings_after_hint": {
-    "message": "与编辑器的做法相同：使用默认格式，若已开启则带设备外框和模糊。每张截图也会在“最近的截图”中保留一天。"
+    "message": "像编辑器一样以默认格式下载或复制，开启时带设备边框和模糊。每张截图也会保存在“最近的截图和录屏”中。"
   },
   "settings_long_pages": {
     "message": "过长、无法放进一张图的页面"
@@ -2126,11 +2126,11 @@
   "part_of": {
     "message": "第 $1 部分，共 $2 部分"
   },
-  "popup_new_in_captode_2_1": {
-    "message": "Captode 2.1 新功能"
+  "popup_new_in_captode_2_3": {
+    "message": "Captode 2.3 新功能"
   },
-  "popup_whats_new_2_1": {
-    "message": "编辑录制：剪掉或加速某些片段、放大（也可放大点击的位置）、模糊隐私信息、添加箭头和标签、裁剪、给视频加背景，以及调整声音。"
+  "popup_whats_new_2_3": {
+    "message": "录屏时可暂停并在页面上绘制，可添加字幕、从截图中复制文字、加上你的标志，还可保留截图或保存为项目文件。"
   },
   "slides_title": {
     "message": "幻灯片"
@@ -2704,5 +2704,500 @@
   },
   "edit_default_sound_saved": {
     "message": "新录制将使用此音量和淡入淡出"
+  },
+  "rec_pause": {
+    "message": "暂停"
+  },
+  "rec_resume": {
+    "message": "继续"
+  },
+  "screen_recording_paused": {
+    "message": "已暂停"
+  },
+  "screen_title_paused": {
+    "message": "❚❚ 已暂停 — Captode"
+  },
+  "menu_pause_recording": {
+    "message": "暂停录制"
+  },
+  "menu_resume_recording": {
+    "message": "继续录制"
+  },
+  "action_paused_title": {
+    "message": "Captode — 录制已暂停。单击停止，右键单击继续"
+  },
+  "command_pause": {
+    "message": "暂停或继续录制"
+  },
+  "popup_recording_recovered": {
+    "message": "已为你保存了一段录制"
+  },
+  "popup_recording_recovered_hint": {
+    "message": "它在保存之前就停止了（浏览器或其页面已关闭），Captode 保留了已有的内容。"
+  },
+  "popup_open_recording": {
+    "message": "打开录制"
+  },
+  "guide_heading": {
+    "message": "分步指南"
+  },
+  "guide_make": {
+    "message": "分步指南"
+  },
+  "guide_make_title": {
+    "message": "每次点击一个步骤，附图片和说明，可下载为网页、PDF 或 Markdown"
+  },
+  "guide_page_tip": {
+    "message": "包含所有步骤的单个网页，可在任何浏览器中打开"
+  },
+  "guide_download_page": {
+    "message": "网页"
+  },
+  "guide_download_pdf": {
+    "message": "PDF"
+  },
+  "guide_markdown_tip": {
+    "message": "包含 Markdown 文件和图片的 zip，适用于文档和 Wiki"
+  },
+  "guide_download_markdown": {
+    "message": "Markdown"
+  },
+  "guide_title_label": {
+    "message": "标题"
+  },
+  "guide_lead": {
+    "message": "录制中的每次点击对应一个步骤。编辑说明、删除不需要的步骤，然后下载。"
+  },
+  "guide_loading": {
+    "message": "正在生成步骤…"
+  },
+  "guide_empty": {
+    "message": "此录制中没有可生成步骤的点击。录制标签页时边操作边点击即可。"
+  },
+  "guide_step_click": {
+    "message": "点击这里。"
+  },
+  "guide_step_click_label": {
+    "message": "点击“$1”。"
+  },
+  "guide_step_field": {
+    "message": "点击“$1”字段。"
+  },
+  "guide_step_n": {
+    "message": "第 $1 步"
+  },
+  "guide_n_steps": {
+    "message": "步骤：$1"
+  },
+  "guide_move_up": {
+    "message": "上移"
+  },
+  "guide_move_down": {
+    "message": "下移"
+  },
+  "guide_remove_step": {
+    "message": "删除步骤"
+  },
+  "guide_step_removed": {
+    "message": "已删除步骤"
+  },
+  "guide_working": {
+    "message": "正在生成…"
+  },
+  "menu_draw": {
+    "message": "在页面上绘制（按 Esc 停止）"
+  },
+  "draw_hint": {
+    "message": "绘制以指出内容，会自动淡出。按 Esc 停止。"
+  },
+  "command_draw": {
+    "message": "录制时在页面上绘制"
+  },
+  "edit_kind_captions": {
+    "message": "字幕"
+  },
+  "edit_add_caption_tip": {
+    "message": "显示在底部的文字，也可下载为字幕文件  T"
+  },
+  "edit_caption_placeholder": {
+    "message": "此处所说或所展示的内容"
+  },
+  "edit_caption_hint": {
+    "message": "显示在每次导出的底部，也包含在下方的字幕文件中。"
+  },
+  "edit_subtitles_srt": {
+    "message": "下载 .srt"
+  },
+  "edit_subtitles_vtt": {
+    "message": "下载 .vtt"
+  },
+  "edit_subtitles_tip": {
+    "message": "所有字幕保存为一个文件，与导出的视频时间对应"
+  },
+  "edit_no_captions": {
+    "message": "保留部分中没有带文字的字幕"
+  },
+  "keep_off_tip": {
+    "message": "保留：不会被自动删除"
+  },
+  "keep_on_tip": {
+    "message": "保留到你删除为止（点击后改为自动删除）"
+  },
+  "keep_on": {
+    "message": "将保留到你删除为止"
+  },
+  "keep_off": {
+    "message": "将在设置中指定的时间后自动删除"
+  },
+  "kept": {
+    "message": "已保留"
+  },
+  "project_save_tip": {
+    "message": "保存项目：全部内容存为一个文件，可稍后或在其他电脑上打开"
+  },
+  "project_save_failed": {
+    "message": "无法保存项目：$1"
+  },
+  "project_open": {
+    "message": "打开项目…"
+  },
+  "project_not_project": {
+    "message": "这不是 Captode 项目文件"
+  },
+  "project_too_new": {
+    "message": "此项目由更新版本的 Captode 保存。请更新 Captode 后再打开。"
+  },
+  "storage_title": {
+    "message": "捕获内容与存储"
+  },
+  "storage_hint": {
+    "message": "未保留的截图和录屏会在此处选择的时间后自动删除。保存为项目即可将其连同所有编辑保存在文件中。"
+  },
+  "storage_used": {
+    "message": "捕获：$1 · 已用 $2。"
+  },
+  "storage_delete_unkept": {
+    "message": "删除所有未保留的内容"
+  },
+  "storage_delete_unkept_text": {
+    "message": "未保留的捕获内容将连同编辑一起删除：$1 个。"
+  },
+  "storage_deleted": {
+    "message": "已删除：$1 个"
+  },
+  "share_file": {
+    "message": "分享"
+  },
+  "share_file_tip": {
+    "message": "将文件分享到其他应用"
+  },
+  "share_file_cannot": {
+    "message": "此文件无法在此分享，请改为下载"
+  },
+  "share_file_failed": {
+    "message": "无法分享：$1"
+  },
+  "queue_add": {
+    "message": "加入队列"
+  },
+  "queue_add_tip": {
+    "message": "加入队列：即使关闭此页面也会在后台继续"
+  },
+  "queue_title": {
+    "message": "导出"
+  },
+  "queue_waiting": {
+    "message": "等待中"
+  },
+  "queue_running": {
+    "message": "正在导出… $1%"
+  },
+  "queue_ready": {
+    "message": "已完成 · $1"
+  },
+  "queue_failed": {
+    "message": "失败：$1"
+  },
+  "queue_failed_here": {
+    "message": "此处无法在后台生成，请在视频页面使用“导出”"
+  },
+  "queue_cancel": {
+    "message": "取消"
+  },
+  "queue_added": {
+    "message": "已加入队列：$1"
+  },
+  "edit_callout_ellipse": {
+    "message": "圆圈"
+  },
+  "edit_callout_step": {
+    "message": "步骤"
+  },
+  "edit_step_label": {
+    "message": "编号"
+  },
+  "format_smallest_name": {
+    "message": "最小"
+  },
+  "format_smallest": {
+    "message": "相同像素、最小文件：PNG 或无损 WebP，取较小者。"
+  },
+  "format_webp_lossless_name": {
+    "message": "无损 WebP"
+  },
+  "editor_webp_lossless": {
+    "message": "无损"
+  },
+  "editor_webp_lossless_hint": {
+    "message": "像素完全相同并保留透明度；比有损 WebP 大"
+  },
+  "editor_scale_css": {
+    "message": "1× — 与屏幕显示相同"
+  },
+  "editor_scale_css_n": {
+    "message": "1× — 与屏幕显示相同（$1%）"
+  },
+  "editor_use_smallest": {
+    "message": "使用最小"
+  },
+  "fit_lossy_format": {
+    "message": "有损 $1"
+  },
+  "picked_only": {
+    "message": "保存为 $1。"
+  },
+  "picked_note": {
+    "message": "保存为 $1：比另一种无损格式小 $2%。"
+  },
+  "hint_smaller": {
+    "message": "选“最小”可无损缩小 $1%（$2）。"
+  },
+  "editor_several": {
+    "message": "多个尺寸或格式"
+  },
+  "editor_several_hint": {
+    "message": "勾选的每一项，按上方设置打包为一个 zip。"
+  },
+  "editor_several_download": {
+    "message": "下载 zip"
+  },
+  "editor_several_none": {
+    "message": "请至少勾选一个比例和一种格式"
+  },
+  "editor_several_working": {
+    "message": "正在生成第 $1 个，共 $2 个…"
+  },
+  "brand_title": {
+    "message": "你的标志"
+  },
+  "brand_hint": {
+    "message": "在截图和录屏的角落加上你的标志。标志只保存在此设备上。"
+  },
+  "brand_choose": {
+    "message": "选择图片…"
+  },
+  "brand_corner": {
+    "message": "位置"
+  },
+  "brand_br": {
+    "message": "右下角"
+  },
+  "brand_bl": {
+    "message": "左下角"
+  },
+  "brand_tr": {
+    "message": "右上角"
+  },
+  "brand_tl": {
+    "message": "左上角"
+  },
+  "brand_small": {
+    "message": "小"
+  },
+  "brand_medium": {
+    "message": "中"
+  },
+  "brand_large": {
+    "message": "大"
+  },
+  "brand_images": {
+    "message": "添加到新截图"
+  },
+  "brand_images_hint": {
+    "message": "可在编辑器的“导出”标签页中为单张截图关闭"
+  },
+  "brand_videos": {
+    "message": "添加到录屏"
+  },
+  "brand_videos_hint": {
+    "message": "可在单个录屏的导出设置中关闭"
+  },
+  "brand_add_logo": {
+    "message": "添加我的标志"
+  },
+  "brand_add_logo_hint": {
+    "message": "在画面角落加上你在设置中选择的标志"
+  },
+  "brand_not_image": {
+    "message": "Captode 无法读取这个图片文件"
+  },
+  "storage_search": {
+    "message": "按标题或网站搜索"
+  },
+  "storage_show": {
+    "message": "显示"
+  },
+  "storage_recordings": {
+    "message": "录屏"
+  },
+  "storage_none_match": {
+    "message": "没有匹配的截图或录屏。"
+  },
+  "guide_copy_tip": {
+    "message": "复制所有步骤及图片，可粘贴到 Google 文档、Notion、Confluence 或邮件中"
+  },
+  "guide_copied": {
+    "message": "已复制指南，请粘贴到你的文档中。"
+  },
+  "guide_copy_failed": {
+    "message": "剪贴板没有响应，请重试。"
+  },
+  "tool_copy_text": {
+    "message": "复制文字"
+  },
+  "tool_about_copytext": {
+    "message": "在截图中拖过文字即可复制，或点击一行。适用于新截取的网页截图。"
+  },
+  "copy_text_none": {
+    "message": "那里没有可复制的文字"
+  },
+  "copy_text_done": {
+    "message": "已复制 $1 个词"
+  },
+  "translate_into": {
+    "message": "翻译成…"
+  },
+  "translate_captions": {
+    "message": "翻译所有字幕"
+  },
+  "translate_working": {
+    "message": "正在此设备上翻译…"
+  },
+  "translate_download": {
+    "message": "浏览器正在获取语言模型：$1%"
+  },
+  "translate_done": {
+    "message": "已翻译成$1"
+  },
+  "translate_same": {
+    "message": "已经是该语言"
+  },
+  "translate_unavailable": {
+    "message": "此浏览器暂时无法在这两种语言之间翻译"
+  },
+  "translate_failed": {
+    "message": "无法翻译：$1"
+  },
+  "settings_sections": {
+    "message": "分区"
+  },
+  "settings_search": {
+    "message": "搜索设置"
+  },
+  "settings_no_match": {
+    "message": "没有匹配的设置。"
+  },
+  "backup_title": {
+    "message": "备份设置"
+  },
+  "backup_hint": {
+    "message": "将设置、标志和导出预设保存到文件中，可在其他电脑或浏览器上载入，或与团队共享。不包含截图和录屏。"
+  },
+  "backup_save": {
+    "message": "保存设置文件"
+  },
+  "backup_load": {
+    "message": "载入设置文件…"
+  },
+  "backup_loaded": {
+    "message": "已从文件载入设置"
+  },
+  "backup_not_file": {
+    "message": "这不是 Captode 设置文件"
+  },
+  "backup_too_new": {
+    "message": "这些设置由更新版本的 Captode 保存。请更新 Captode 后再载入。"
+  },
+  "brand_preview": {
+    "message": "预览"
+  },
+  "presets_title": {
+    "message": "导出预设"
+  },
+  "presets_hint": {
+    "message": "你在编辑器和视频页面保存的预设。可在这里重命名、调整顺序或删除。"
+  },
+  "presets_none": {
+    "message": "还没有保存的预设。可在编辑器的“导出”标签页或视频页面中保存。"
+  },
+  "keep_for_label": {
+    "message": "未保留的截图和录屏删除时间"
+  },
+  "keep_for_1": {
+    "message": "一天后"
+  },
+  "keep_for_7": {
+    "message": "一周后"
+  },
+  "keep_for_30": {
+    "message": "一个月后"
+  },
+  "keep_for_0": {
+    "message": "从不：我自己删除"
+  },
+  "storage_sort": {
+    "message": "排序"
+  },
+  "storage_sort_new": {
+    "message": "最新的在前"
+  },
+  "storage_sort_big": {
+    "message": "最大的在前"
+  },
+  "storage_breakdown": {
+    "message": "截图 $1 · 录屏 $2"
+  },
+  "fit_too_big_readable": {
+    "message": "此限制太小，无法保持文字清晰可读。可读的最小文件为 $1。"
+  },
+  "fit_near_lossless": {
+    "message": "减少颜色的 PNG，看起来完全一样"
+  },
+  "fit_readable": {
+    "message": "文字仍清晰可读。"
+  },
+  "fit_forced": {
+    "message": "文字可能难以辨认。"
+  },
+  "fit_anyway": {
+    "message": "仍然压缩到限制内"
+  },
+  "fit_keep_readable": {
+    "message": "保持清晰可读"
+  },
+  "fit_anyway_tip": {
+    "message": "降低质量和尺寸直到符合限制，即使文字会变模糊"
+  },
+  "resize_original": {
+    "message": "原始尺寸"
+  },
+  "resize_original_tip": {
+    "message": "恢复为 $1，使用原始像素"
+  },
+  "resized_original": {
+    "message": "已恢复原始尺寸 $1"
+  },
+  "resize_keeps_original": {
+    "message": "调整尺寸会保留原始像素：点击“原始尺寸”即可恢复原有清晰度。"
   }
 }

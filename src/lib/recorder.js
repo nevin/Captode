@@ -1,5 +1,6 @@
 // Records a MediaStream to WebM. Used by the offscreen document (tab capture) and
 // by the screen recorder page (whole screen or a window).
+import { newId, savePart, recordingAlive } from './db.js';
 
 const MIME_TYPES = [
   'video/webm;codecs=vp9,opus',
@@ -267,9 +268,14 @@ export async function openCameraAndMic({ camera = false, mic = false } = {}) {
  * pressed Chrome's "Stop sharing", or the captured tab closed). `aspect`, `crop` and
  * `size` choose what part of the picture is kept and how large (see processTrack).
  * `camera` and `mic` (see openCameraAndMic) add a camera bubble and narration; they
- * are stopped with the recording. Resolves to `{ stop(): Promise<{ blob, meta }>, started, width, height }`.
+ * are stopped with the recording. `backup` (details such as `{ title }`) also writes the
+ * recording to storage as it goes, so it can be recovered if it is never saved; the
+ * caller drops that copy with dropParts(session.backup) once it has saved the recording.
+ * Resolves to `{ stop(): Promise<{ blob, meta }>, pause(),
+ * resume(), paused, elapsed(), started, width, height }`: `elapsed()` is the seconds
+ * recorded so far, leaving out time spent paused (the video leaves it out too).
  */
-export async function record(stream, { fps = 30, aspect = null, crop = null, size = 'page', camera = null, mic = null, onEnded } = {}) {
+export async function record(stream, { fps = 30, aspect = null, crop = null, size = 'page', camera = null, mic = null, onEnded, backup = null } = {}) {
   const source = stream.getVideoTracks()[0];
   const settings = source.getSettings();
   let video = source;
@@ -314,14 +320,51 @@ export async function record(stream, { fps = 30, aspect = null, crop = null, siz
     videoKeyFrameIntervalDuration: 2000,
   });
   const chunks = [];
-  recorder.ondataavailable = (e) => e.data.size && chunks.push(e.data);
+  const backupId = backup ? newId() : null;
+  let writes = Promise.resolve(); // the copy's pieces, in order, waited for before stopping
+  recorder.ondataavailable = (e) => {
+    if (!e.data.size) return;
+    chunks.push(e.data);
+    if (backupId) {
+      const n = chunks.length - 1;
+      writes = writes.then(() => savePart(backupId, n, e.data, details())).catch(() => {});
+    }
+  };
   const started = performance.now();
+  let pausedFor = 0; // ms spent paused, before the current pause
+  let pausedAt = 0; // when the current pause began (0: recording)
+  const elapsed = () => ((pausedAt || performance.now()) - started - pausedFor) / 1000;
+  const pause = () => {
+    if (pausedAt || recorder.state !== 'recording') return false;
+    recorder.pause();
+    pausedAt = performance.now();
+    return true;
+  };
+  const resume = () => {
+    if (!pausedAt || recorder.state !== 'paused') return false;
+    recorder.resume();
+    pausedFor += performance.now() - pausedAt;
+    pausedAt = 0;
+    return true;
+  };
+
+  // While it runs (paused too, when no pieces come), the copy says so, with what it would be saved with.
+  function details() {
+    return {
+      ...backup, fps, mime: recorder.mimeType || 'video/webm', duration: elapsed(), hasAudio: audio.length > 0,
+      ...(camera && { camera: true }), ...(mic && { mic: true }),
+    };
+  }
+  const alive = () => { writes = writes.then(() => recordingAlive(backupId, details())).catch(() => {}); };
+  const heartbeat = backupId ? setInterval(alive, 5000) : 0;
 
   let stopped = null;
   const stop = () => {
     if (stopped) return stopped;
     stopped = new Promise((resolve) => {
-      recorder.onstop = () => {
+      recorder.onstop = async () => {
+        clearInterval(heartbeat);
+        await writes;
         stream.getTracks().forEach((t) => t.stop());
         tracks.forEach((t) => t.stop());
         camera?.stop();
@@ -333,7 +376,7 @@ export async function record(stream, { fps = 30, aspect = null, crop = null, siz
           meta: {
             fps,
             mime: blob.type,
-            duration: (performance.now() - started) / 1000,
+            duration: elapsed(),
             hasAudio: audio.length > 0,
             ...(camera && { camera: true }),
             ...(mic && { mic: true }),
@@ -348,5 +391,6 @@ export async function record(stream, { fps = 30, aspect = null, crop = null, siz
 
   source.addEventListener('ended', () => onEnded?.());
   recorder.start(1000);
-  return { stop, started, width: w, height: h };
+  if (backupId) alive();
+  return { stop, pause, resume, elapsed, get paused() { return !!pausedAt; }, started, width: w, height: h, backup: backupId };
 }

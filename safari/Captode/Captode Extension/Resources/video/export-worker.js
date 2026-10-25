@@ -368,6 +368,7 @@ async function run(job) {
   const W = job.width, H = job.height, fps = job.fps;
   const start = Math.round(job.start * 1e6), end = Math.round(job.end * 1e6);
   const edits = normaliseEdits(job.edits);
+  const logo = job.logo?.blob ? { ...job.logo, bitmap: await createImageBitmap(job.logo.blob).catch(() => null) } : null;
   const map = clipMap(edits, job.start, job.end);
   const count = clipFrames(map, fps);
   const frameUs = 1e6 / fps;
@@ -403,8 +404,8 @@ async function run(job) {
   const paint = (frame, t, o) => {
     if (!draw) {
       const sw = frame.displayWidth, sh = frame.displayHeight;
-      if (hasSpatial(edits)) {
-        comp = composer(edits, map, sw, sh, job.clicks);
+      if (hasSpatial(edits) || logo?.bitmap) {
+        comp = composer(edits, map, sw, sh, job.clicks, logo?.bitmap ? logo : null);
         content = new OffscreenCanvas(comp.width, comp.height);
         cctx = content.getContext('2d');
       }

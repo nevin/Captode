@@ -225,7 +225,7 @@
     "message": "모든 설정을 초기화할까요?"
   },
   "settings_theme_export_background_default_formats": {
-    "message": "테마, 내보내기 배경, 기본 형식, 기기 프레임, 녹화 옵션이 Captode를 설치했을 때의 상태로 돌아갑니다. 캡처는 영향을 받지 않습니다."
+    "message": "테마, 내보내기 배경, 기본 형식, 기기 프레임, 녹화 옵션, 로고, 저장한 프리셋이 Captode를 설치했을 때로 돌아갑니다. 캡처는 영향을 받지 않습니다."
   },
   "settings_cancel": {
     "message": "취소"
@@ -288,7 +288,7 @@
     "message": "이미지 선택"
   },
   "editor_kept_on_this_device_for": {
-    "message": "이 기기에 24시간 동안 보관됩니다"
+    "message": "보관하지 않으면 설정에서 정한 기간 동안 이 기기에 남습니다"
   },
   "editor_recent_captures": {
     "message": "최근 캡처"
@@ -861,7 +861,7 @@
     "message": "녹화를 찾을 수 없습니다"
   },
   "video_recordings_are_kept_for_a": {
-    "message": "녹화는 하루 동안 보관됩니다. 도구 모음의 Captode 버튼으로 새로 녹화하세요."
+    "message": "보관하지 않은 녹화는 설정에서 정한 기간이 지나면 삭제됩니다. 도구 모음의 Captode 버튼으로 새로 녹화하세요."
   },
   "video_trim": {
     "message": "자르기"
@@ -2028,7 +2028,7 @@
     "message": "클립보드에 복사"
   },
   "settings_after_hint": {
-    "message": "편집기와 같은 방식으로, 기본 형식에 켜져 있다면 기기 프레임과 흐림까지 적용해 다운로드하거나 복사합니다. 모든 스크린샷은 최근 캡처에도 하루 동안 남습니다."
+    "message": "편집기와 같은 방식으로 기본 형식, 켜져 있으면 기기 프레임과 흐림 효과를 적용해 다운로드하거나 복사합니다. 모든 스크린샷은 최근 캡처에도 남습니다."
   },
   "settings_long_pages": {
     "message": "이미지 하나에 담기엔 너무 긴 페이지"
@@ -2126,11 +2126,11 @@
   "part_of": {
     "message": "$2개 중 $1번째"
   },
-  "popup_new_in_captode_2_1": {
-    "message": "Captode 2.1의 새 기능"
+  "popup_new_in_captode_2_3": {
+    "message": "Captode 2.3의 새로운 기능"
   },
-  "popup_whats_new_2_1": {
-    "message": "녹화 편집: 일부 잘라내기와 빠르게 재생, 확대(클릭한 곳도), 개인 정보 흐리게, 화살표와 라벨 추가, 자르기, 배경 넣기, 소리 조정."
+  "popup_whats_new_2_3": {
+    "message": "녹화 중 일시 정지와 페이지에 그리기, 자막 추가, 스크린샷에서 텍스트 복사, 로고 넣기, 캡처 보관 및 프로젝트 파일로 저장을 지원합니다."
   },
   "slides_title": {
     "message": "슬라이드"
@@ -2704,5 +2704,500 @@
   },
   "edit_default_sound_saved": {
     "message": "새 녹화는 이 볼륨과 페이드로 시작합니다"
+  },
+  "rec_pause": {
+    "message": "일시 정지"
+  },
+  "rec_resume": {
+    "message": "다시 시작"
+  },
+  "screen_recording_paused": {
+    "message": "일시 정지됨"
+  },
+  "screen_title_paused": {
+    "message": "❚❚ 일시 정지됨 — Captode"
+  },
+  "menu_pause_recording": {
+    "message": "녹화 일시 정지"
+  },
+  "menu_resume_recording": {
+    "message": "녹화 다시 시작"
+  },
+  "action_paused_title": {
+    "message": "Captode — 녹화 일시 정지됨. 클릭하면 중지, 오른쪽 클릭하면 다시 시작"
+  },
+  "command_pause": {
+    "message": "녹화 일시 정지 또는 다시 시작"
+  },
+  "popup_recording_recovered": {
+    "message": "녹화를 저장했습니다"
+  },
+  "popup_recording_recovered_hint": {
+    "message": "저장되기 전에 멈췄습니다(브라우저나 녹화 페이지가 닫혔습니다). Captode가 그때까지의 내용을 남겨 두었습니다."
+  },
+  "popup_open_recording": {
+    "message": "녹화 열기"
+  },
+  "guide_heading": {
+    "message": "단계별 가이드"
+  },
+  "guide_make": {
+    "message": "단계별 가이드"
+  },
+  "guide_make_title": {
+    "message": "클릭마다 그림과 메모가 있는 단계를 만들어 페이지, PDF, Markdown으로 다운로드"
+  },
+  "guide_page_tip": {
+    "message": "모든 단계가 담긴 웹 페이지 한 개, 어느 브라우저에서나 열립니다"
+  },
+  "guide_download_page": {
+    "message": "웹 페이지"
+  },
+  "guide_download_pdf": {
+    "message": "PDF"
+  },
+  "guide_markdown_tip": {
+    "message": "Markdown 파일과 그림이 든 zip, 문서와 위키용"
+  },
+  "guide_download_markdown": {
+    "message": "Markdown"
+  },
+  "guide_title_label": {
+    "message": "제목"
+  },
+  "guide_lead": {
+    "message": "녹화의 클릭마다 단계가 하나씩 있습니다. 메모를 고치고 필요 없는 단계를 지운 뒤 다운로드하세요."
+  },
+  "guide_loading": {
+    "message": "단계를 만드는 중…"
+  },
+  "guide_empty": {
+    "message": "이 녹화에는 단계를 만들 클릭이 없습니다. 탭을 녹화하면서 클릭해 보세요."
+  },
+  "guide_step_click": {
+    "message": "여기를 클릭하세요."
+  },
+  "guide_step_click_label": {
+    "message": "“$1”을(를) 클릭하세요."
+  },
+  "guide_step_field": {
+    "message": "“$1” 입력란을 클릭하세요."
+  },
+  "guide_step_n": {
+    "message": "$1단계"
+  },
+  "guide_n_steps": {
+    "message": "단계: $1"
+  },
+  "guide_move_up": {
+    "message": "위로 이동"
+  },
+  "guide_move_down": {
+    "message": "아래로 이동"
+  },
+  "guide_remove_step": {
+    "message": "단계 삭제"
+  },
+  "guide_step_removed": {
+    "message": "단계를 삭제했습니다"
+  },
+  "guide_working": {
+    "message": "만드는 중…"
+  },
+  "menu_draw": {
+    "message": "페이지에 그리기(Esc로 중지)"
+  },
+  "draw_hint": {
+    "message": "그려서 가리켜 보세요. 저절로 사라집니다. Esc로 중지."
+  },
+  "command_draw": {
+    "message": "녹화 중 페이지에 그리기"
+  },
+  "edit_kind_captions": {
+    "message": "자막"
+  },
+  "edit_add_caption_tip": {
+    "message": "아래쪽에 표시되는 글자, 자막 파일로도 다운로드  T"
+  },
+  "edit_caption_placeholder": {
+    "message": "여기에서 말하거나 보여 주는 내용"
+  },
+  "edit_caption_hint": {
+    "message": "모든 내보내기의 아래쪽에 표시되고, 아래 자막 파일에도 들어갑니다."
+  },
+  "edit_subtitles_srt": {
+    "message": ".srt 다운로드"
+  },
+  "edit_subtitles_vtt": {
+    "message": ".vtt 다운로드"
+  },
+  "edit_subtitles_tip": {
+    "message": "모든 자막을 내보낸 동영상 시간에 맞춘 파일로"
+  },
+  "edit_no_captions": {
+    "message": "남긴 부분에 글자가 있는 자막이 없습니다"
+  },
+  "keep_off_tip": {
+    "message": "보관: 자동으로 삭제되지 않습니다"
+  },
+  "keep_on_tip": {
+    "message": "직접 삭제할 때까지 보관됩니다(클릭하면 자동 삭제로 돌아갑니다)"
+  },
+  "keep_on": {
+    "message": "직접 삭제할 때까지 보관합니다"
+  },
+  "keep_off": {
+    "message": "설정에서 정한 기간이 지나면 자동으로 삭제됩니다"
+  },
+  "kept": {
+    "message": "보관됨"
+  },
+  "project_save_tip": {
+    "message": "프로젝트 저장: 모든 것을 파일 하나로, 나중에 또는 다른 컴퓨터에서 열기"
+  },
+  "project_save_failed": {
+    "message": "프로젝트를 저장하지 못했습니다: $1"
+  },
+  "project_open": {
+    "message": "프로젝트 열기…"
+  },
+  "project_not_project": {
+    "message": "Captode 프로젝트 파일이 아닙니다"
+  },
+  "project_too_new": {
+    "message": "이 프로젝트는 더 새로운 Captode로 저장되었습니다. 열려면 Captode를 업데이트하세요."
+  },
+  "storage_title": {
+    "message": "캡처와 저장 공간"
+  },
+  "storage_hint": {
+    "message": "보관하지 않은 캡처는 여기서 고른 기간이 지나면 자동으로 삭제됩니다. 프로젝트로 저장하면 편집 내용과 함께 파일로 보관할 수 있습니다."
+  },
+  "storage_used": {
+    "message": "캡처: $1 · $2 사용 중."
+  },
+  "storage_delete_unkept": {
+    "message": "보관하지 않은 항목 모두 삭제"
+  },
+  "storage_delete_unkept_text": {
+    "message": "보관하지 않은 캡처를 편집 내용과 함께 삭제합니다: $1개."
+  },
+  "storage_deleted": {
+    "message": "삭제함: $1개"
+  },
+  "share_file": {
+    "message": "공유"
+  },
+  "share_file_tip": {
+    "message": "다른 앱으로 파일 공유"
+  },
+  "share_file_cannot": {
+    "message": "이 파일은 여기서 공유할 수 없습니다. 대신 다운로드하세요"
+  },
+  "share_file_failed": {
+    "message": "공유하지 못했습니다: $1"
+  },
+  "queue_add": {
+    "message": "대기열에 추가"
+  },
+  "queue_add_tip": {
+    "message": "대기열에 추가: 이 페이지를 닫아도 백그라운드에서 계속됩니다"
+  },
+  "queue_title": {
+    "message": "내보내기"
+  },
+  "queue_waiting": {
+    "message": "대기 중"
+  },
+  "queue_running": {
+    "message": "내보내는 중… $1%"
+  },
+  "queue_ready": {
+    "message": "완료 · $1"
+  },
+  "queue_failed": {
+    "message": "실패: $1"
+  },
+  "queue_failed_here": {
+    "message": "여기서는 백그라운드로 만들 수 없습니다. 동영상 페이지의 내보내기를 사용하세요"
+  },
+  "queue_cancel": {
+    "message": "취소"
+  },
+  "queue_added": {
+    "message": "대기열에 추가함: $1"
+  },
+  "edit_callout_ellipse": {
+    "message": "원"
+  },
+  "edit_callout_step": {
+    "message": "단계"
+  },
+  "edit_step_label": {
+    "message": "번호"
+  },
+  "format_smallest_name": {
+    "message": "가장 작게"
+  },
+  "format_smallest": {
+    "message": "같은 픽셀을 가장 작은 파일로: PNG와 무손실 WebP 중 더 작은 것."
+  },
+  "format_webp_lossless_name": {
+    "message": "무손실 WebP"
+  },
+  "editor_webp_lossless": {
+    "message": "무손실"
+  },
+  "editor_webp_lossless_hint": {
+    "message": "픽셀이 완전히 같고 투명도도 유지, 손실 WebP보다 큽니다"
+  },
+  "editor_scale_css": {
+    "message": "1× — 화면에 보이는 크기"
+  },
+  "editor_scale_css_n": {
+    "message": "1× — 화면에 보이는 크기($1%)"
+  },
+  "editor_use_smallest": {
+    "message": "가장 작게 사용"
+  },
+  "fit_lossy_format": {
+    "message": "손실 $1"
+  },
+  "picked_only": {
+    "message": "$1(으)로 저장합니다."
+  },
+  "picked_note": {
+    "message": "$1(으)로 저장: 다른 무손실 형식보다 $2% 작습니다."
+  },
+  "hint_smaller": {
+    "message": "가장 작게로 하면 손실 없이 $1% 작아집니다($2)."
+  },
+  "editor_several": {
+    "message": "여러 크기나 형식"
+  },
+  "editor_several_hint": {
+    "message": "선택한 항목을 위 설정으로 zip 하나에 담습니다."
+  },
+  "editor_several_download": {
+    "message": "zip 다운로드"
+  },
+  "editor_several_none": {
+    "message": "크기와 형식을 하나 이상씩 선택하세요"
+  },
+  "editor_several_working": {
+    "message": "$2개 중 $1번째 만드는 중…"
+  },
+  "brand_title": {
+    "message": "내 로고"
+  },
+  "brand_hint": {
+    "message": "스크린샷과 녹화의 모서리에 로고를 넣습니다. 로고는 이 기기에만 저장됩니다."
+  },
+  "brand_choose": {
+    "message": "이미지 선택…"
+  },
+  "brand_corner": {
+    "message": "위치"
+  },
+  "brand_br": {
+    "message": "오른쪽 아래"
+  },
+  "brand_bl": {
+    "message": "왼쪽 아래"
+  },
+  "brand_tr": {
+    "message": "오른쪽 위"
+  },
+  "brand_tl": {
+    "message": "왼쪽 위"
+  },
+  "brand_small": {
+    "message": "작게"
+  },
+  "brand_medium": {
+    "message": "보통"
+  },
+  "brand_large": {
+    "message": "크게"
+  },
+  "brand_images": {
+    "message": "새 스크린샷에 넣기"
+  },
+  "brand_images_hint": {
+    "message": "스크린샷마다 편집기의 내보내기 탭에서 끌 수 있습니다"
+  },
+  "brand_videos": {
+    "message": "녹화에 넣기"
+  },
+  "brand_videos_hint": {
+    "message": "녹화마다 내보내기 설정에서 끌 수 있습니다"
+  },
+  "brand_add_logo": {
+    "message": "내 로고 넣기"
+  },
+  "brand_add_logo_hint": {
+    "message": "설정에서 고른 로고를 그림 모서리에 넣습니다"
+  },
+  "brand_not_image": {
+    "message": "Captode에서 읽을 수 있는 이미지 파일이 아닙니다"
+  },
+  "storage_search": {
+    "message": "제목이나 사이트로 검색"
+  },
+  "storage_show": {
+    "message": "표시"
+  },
+  "storage_recordings": {
+    "message": "녹화"
+  },
+  "storage_none_match": {
+    "message": "일치하는 캡처가 없습니다."
+  },
+  "guide_copy_tip": {
+    "message": "모든 단계를 그림과 함께 복사해 Google Docs, Notion, Confluence, 이메일에 붙여 넣을 수 있습니다"
+  },
+  "guide_copied": {
+    "message": "가이드를 복사했습니다. 문서에 붙여 넣으세요."
+  },
+  "guide_copy_failed": {
+    "message": "클립보드가 응답하지 않습니다. 다시 시도하세요."
+  },
+  "tool_copy_text": {
+    "message": "텍스트 복사"
+  },
+  "tool_about_copytext": {
+    "message": "스크린샷의 글자 위를 드래그해 복사하거나 줄을 클릭하세요. 새로 찍은 웹 페이지 스크린샷에서 사용할 수 있습니다."
+  },
+  "copy_text_none": {
+    "message": "복사할 텍스트가 없습니다"
+  },
+  "copy_text_done": {
+    "message": "$1개 단어를 복사했습니다"
+  },
+  "translate_into": {
+    "message": "번역할 언어…"
+  },
+  "translate_captions": {
+    "message": "모든 자막 번역"
+  },
+  "translate_working": {
+    "message": "이 기기에서 번역하는 중…"
+  },
+  "translate_download": {
+    "message": "브라우저가 언어 모델을 받는 중: $1%"
+  },
+  "translate_done": {
+    "message": "$1(으)로 번역했습니다"
+  },
+  "translate_same": {
+    "message": "이미 그 언어입니다"
+  },
+  "translate_unavailable": {
+    "message": "이 브라우저는 아직 이 언어 간 번역을 지원하지 않습니다"
+  },
+  "translate_failed": {
+    "message": "번역하지 못했습니다: $1"
+  },
+  "settings_sections": {
+    "message": "섹션"
+  },
+  "settings_search": {
+    "message": "설정 검색"
+  },
+  "settings_no_match": {
+    "message": "일치하는 설정이 없습니다."
+  },
+  "backup_title": {
+    "message": "설정 백업"
+  },
+  "backup_hint": {
+    "message": "설정, 로고, 내보내기 프리셋을 파일로 저장해 다른 컴퓨터나 브라우저에서 불러오거나 팀과 공유할 수 있습니다. 캡처는 포함되지 않습니다."
+  },
+  "backup_save": {
+    "message": "설정 파일 저장"
+  },
+  "backup_load": {
+    "message": "설정 파일 불러오기…"
+  },
+  "backup_loaded": {
+    "message": "파일에서 설정을 불러왔습니다"
+  },
+  "backup_not_file": {
+    "message": "Captode 설정 파일이 아닙니다"
+  },
+  "backup_too_new": {
+    "message": "이 설정은 더 새로운 Captode에서 저장되었습니다. 불러오려면 Captode를 업데이트하세요."
+  },
+  "brand_preview": {
+    "message": "미리 보기"
+  },
+  "presets_title": {
+    "message": "내보내기 프리셋"
+  },
+  "presets_hint": {
+    "message": "편집기와 동영상 페이지에서 저장한 프리셋입니다. 여기에서 이름을 바꾸거나 순서를 바꾸거나 삭제하세요."
+  },
+  "presets_none": {
+    "message": "아직 저장한 프리셋이 없습니다. 편집기의 내보내기 탭이나 동영상 페이지에서 저장하세요."
+  },
+  "keep_for_label": {
+    "message": "보관하지 않은 캡처 삭제 시점"
+  },
+  "keep_for_1": {
+    "message": "1일 후"
+  },
+  "keep_for_7": {
+    "message": "1주 후"
+  },
+  "keep_for_30": {
+    "message": "1개월 후"
+  },
+  "keep_for_0": {
+    "message": "삭제 안 함: 직접 삭제"
+  },
+  "storage_sort": {
+    "message": "정렬"
+  },
+  "storage_sort_new": {
+    "message": "최신순"
+  },
+  "storage_sort_big": {
+    "message": "큰 순서"
+  },
+  "storage_breakdown": {
+    "message": "스크린샷 $1 · 녹화 $2"
+  },
+  "fit_too_big_readable": {
+    "message": "이 한도로는 글자를 읽을 수 있게 유지할 수 없습니다. 읽을 수 있는 가장 작은 파일은 $1입니다."
+  },
+  "fit_near_lossless": {
+    "message": "보기에는 같은, 색을 줄인 PNG"
+  },
+  "fit_readable": {
+    "message": "글자는 그대로 읽을 수 있습니다."
+  },
+  "fit_forced": {
+    "message": "글자를 읽기 어려울 수 있습니다."
+  },
+  "fit_anyway": {
+    "message": "그래도 맞추기"
+  },
+  "fit_keep_readable": {
+    "message": "읽을 수 있게 유지"
+  },
+  "fit_anyway_tip": {
+    "message": "글자가 흐려지더라도 맞을 때까지 품질과 크기를 낮춥니다"
+  },
+  "resize_original": {
+    "message": "원래 크기"
+  },
+  "resize_original_tip": {
+    "message": "원래 픽셀 그대로 $1(으)로 되돌립니다"
+  },
+  "resized_original": {
+    "message": "원래 크기($1)로 되돌렸습니다"
+  },
+  "resize_keeps_original": {
+    "message": "크기를 바꿔도 원래 픽셀은 남아 있습니다. 원래 크기를 누르면 처음처럼 선명하게 돌아옵니다."
   }
 }

@@ -65,7 +65,7 @@ setTimeout(() => chrome.tabs.create({ url: chrome.runtime.getURL(${JSON.stringif
       ok(r.popup.cameraHidden && r.popup.sizeHidden && r.popup.inputsHidden && r.popup.share, `popup: ${JSON.stringify(r.popup)}`);
       ok(!r.capture.error, `capture: ${r.capture.error}`);
       near(r.capture.height / r.capture.dpr, r.page[0], 3, 'full page height');
-      ok(r.settings.shortcuts.length === 5 && r.settings.changeShortcuts, `settings: ${JSON.stringify(r.settings)}`);
+      ok(r.settings.shortcuts.length === 7 && r.settings.changeShortcuts, `settings: ${JSON.stringify(r.settings)}`);
       ok(r.editor.tools > 10, 'editor tools');
       return `${r.capture.width} × ${r.capture.height}; shortcuts ${r.settings.shortcuts.join(', ')}`;
     } finally {

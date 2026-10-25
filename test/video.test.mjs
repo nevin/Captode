@@ -422,6 +422,8 @@ export const tests = {
     }, src, COLOURS);
     const notes = [];
     for (const f of ['mp4', 'webm', 'gif', 'webp']) {
+      // The export bar stays at the bottom of the panel; bring the formats out from under it.
+      await page.$eval('#formats', (e) => e.scrollIntoView({ block: 'center' }));
       await page.click(`#formats [data-f="${f}"]`);
       await sleep(100);
       await page.click('#convert');
@@ -448,6 +450,7 @@ export const tests = {
     const page = await open(browser, url(`video/video.html?id=${clip}`), { width: 1440, height: 900 });
     const ready = () => page.waitForFunction(() => /fps/.test(document.querySelector('#dims').textContent) && document.querySelector('#formats .on'), { polling: 100 });
     await ready();
+    await page.$eval('#formats', (e) => e.scrollIntoView({ block: 'center' }));
     await page.click('#formats [data-f="gif"]');
     const res = await page.$eval('#res', (e) => [...e.options].map((o) => o.value).find((v) => v !== '0' && v !== e.value));
     await page.select('#res', res);
@@ -468,6 +471,7 @@ export const tests = {
     await page.waitForFunction(() => document.querySelector('#formats .on')?.dataset.f === 'gif', { polling: 100 });
     const got = await page.evaluate(() => [document.querySelector('#res').value, document.querySelector('#fps').value, document.querySelector('#g-lossy').value].join());
     ok(got === '480,15,20', `chat GIF: ${got}`);
+    await page.$eval('#formats', (e) => e.scrollIntoView({ block: 'center' }));
     await page.click('#formats [data-f="mp4"]');
     ok(await page.$eval('#presets .preset-select', (e) => e.value) === '', 'choosing a format by hand makes it custom');
     await page.evaluate(() => chrome.storage.local.remove('lastExport'));

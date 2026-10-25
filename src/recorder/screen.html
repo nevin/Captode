@@ -24,6 +24,10 @@
   .time { font: 600 40px/1 ui-monospace, "SF Mono", Menlo, monospace; margin: 14px 0 22px; font-variant-numeric: tabular-nums; }
   .err { color: var(--rec); margin: 16px 0 0; font-size: 12px; }
   .note { margin: -8px 0 18px; font-size: 12px; }
+  .actions { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+  .actions .btn { height: 40px; padding: 0 18px; }
+  .paused .dot { animation: none; background: var(--muted); }
+  .paused .time { color: var(--muted); }
 </style>
 </head>
 <body>
@@ -42,10 +46,13 @@
       <button class="btn" id="cancel" data-i18n="settings_cancel">Cancel</button>
     </div>
     <div id="live" class="hidden">
-      <h1 data-i18n="video_recording"><span class="dot"></span>Recording</h1>
+      <h1><span class="dot"></span><span id="live-title" data-i18n="video_recording">Recording</span></h1>
       <div class="time" id="time">0:00</div>
       <p class="note hidden" id="no-sound" data-i18n="screen_no_sound">No sound was shared, so the recording has none (except your microphone, if it's on).</p>
-      <button class="btn rec" id="stop" data-i18n="screen_stop_recording">Stop recording</button>
+      <div class="actions">
+        <button class="btn" id="pause" aria-pressed="false" data-i18n="rec_pause">Pause</button>
+        <button class="btn rec" id="stop" data-i18n="screen_stop_recording">Stop recording</button>
+      </div>
     </div>
     <div id="saving" class="hidden"><h1 data-i18n="screen_saving_your_recording">Saving your recording…</h1></div>
   </div>

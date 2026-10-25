@@ -214,6 +214,10 @@ export const tests = {
       await sleep(500);
       ok((await ed.evaluate(() => captodeEditor.objects())).length === 0, 'nothing blurred with the setting off');
       ok(!(await meta(ed)).private, 'nothing looked for with the setting off');
+      // The words, kept either way, for Copy text.
+      const words = (await meta(ed)).text || [];
+      ok(words.length > 5 && words.some((b) => b[4].includes('@')), `words kept for Copy text: ${words.length}`);
+      ok(await ed.evaluate(() => !document.querySelector('[data-tool="copytext"]').hidden), 'Copy text offered');
       await ed.close();
 
       await setBlur(true);

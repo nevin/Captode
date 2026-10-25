@@ -15,7 +15,12 @@
   <div class="sep"></div>
   <div class="doc"><b id="doc-name" data-i18n="video_recording">Recording</b><span id="info">—</span></div>
   <div class="spacer"></div>
+  <button class="btn ghost icon hidden" id="keep" aria-pressed="false" data-tip="Keep this: it won't be removed automatically" data-i18n-tip="keep_off_tip"><svg class="i" viewBox="0 0 24 24"><path d="M6 3h12v18l-6-4-6 4z"/></svg></button>
+  <button class="btn ghost icon hidden" id="save-project" data-tip="Save project: everything in one file, to open later or elsewhere" data-i18n-tip="project_save_tip"><svg class="i" viewBox="0 0 24 24"><path d="M3 7l9-4 9 4-9 4z"/><path d="M3 7v10l9 4 9-4V7M12 11v10"/></svg></button>
   <button class="btn ghost icon discard" id="discard" data-tip="Discard recording" data-i18n-tip="discard_recording"><svg class="i" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></svg></button>
+  <button class="btn ghost hidden" id="make-guide" title="A step for each click, with a picture and a note, to download as a page, PDF or Markdown" data-i18n-title="guide_make_title" data-i18n="guide_make">
+    <svg class="i" viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1.5"/><circle cx="4.5" cy="12" r="1.5"/><circle cx="4.5" cy="18" r="1.5"/></svg>Step-by-step guide
+  </button>
   <button class="btn ghost" id="frame-to-editor" title="Open the frame on screen in the editor, to annotate, copy or save it (F)" data-i18n-title="video_frame_to_editor_title" data-i18n="video_frame_to_editor">
     <svg class="i" viewBox="0 0 24 24"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3z"/><circle cx="12" cy="13" r="3"/></svg>Frame to editor
   </button>
@@ -63,7 +68,7 @@
     <div id="empty" class="empty hidden">
       <div class="empty-card">
         <h2 data-i18n="video_recording_not_found">Recording not found</h2>
-        <p class="muted" data-i18n="video_recordings_are_kept_for_a">Recordings are kept for a day. Start a new one with the Captode button in the toolbar.</p>
+        <p class="muted" data-i18n="video_recordings_are_kept_for_a">Recordings not kept are removed after the time set in Settings. Start a new one with the Captode button in the toolbar.</p>
       </div>
     </div>
   </main>
@@ -95,6 +100,7 @@
         <button type="button" class="btn" data-add="speeds" data-tip="Play a part faster  P" data-i18n-tip="edit_add_speed_tip"><svg class="i" viewBox="0 0 24 24"><path d="m13 19 9-7-9-7zM2 19l9-7-9-7z"/></svg><span data-i18n="edit_kind_speeds">Speed up</span></button>
         <button type="button" class="btn" data-add="zooms" data-tip="Zoom in on a part of the picture  Z" data-i18n-tip="edit_add_zoom_tip"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3M11 8v6M8 11h6"/></svg><span data-i18n="edit_kind_zooms">Zoom</span></button>
         <button type="button" class="btn" data-add="blurs" data-tip="Hide something private  B" data-i18n-tip="edit_add_blur_tip"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="14" y="3" width="7" height="7" opacity=".4"/><rect x="3" y="14" width="7" height="7" opacity=".4"/></svg><span data-i18n="edit_kind_blurs">Blur</span></button>
+        <button type="button" class="btn" data-add="captions" data-tip="Words along the bottom, also downloadable as subtitles  T" data-i18n-tip="edit_add_caption_tip"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 15h4M13 15h4M7 11h10"/></svg><span data-i18n="edit_kind_captions">Caption</span></button>
         <button type="button" class="btn" data-add="callouts" data-tip="An arrow, box, label or spotlight  C" data-tip-align="end" data-i18n-tip="edit_add_callout_tip"><svg class="i" viewBox="0 0 24 24"><path d="M5 19 19 5M19 5h-7M19 5v7"/></svg><span data-i18n="edit_kind_callouts">Callout</span></button>
         <button type="button" class="btn" id="ed-mark" data-tip="Press where a cut starts, then where it ends  ⇧X" data-tip-align="end" data-i18n-tip="edit_mark_tip"><svg class="i" viewBox="0 0 24 24"><path d="M8 4H5v16h3M16 4h3v16h-3M12 8v8"/></svg><span data-i18n="edit_mark">Mark cut</span></button>
       </div>
@@ -321,6 +327,7 @@
         <label class="field"><span data-i18n="popup_resolution">Resolution</span><select id="res"></select></label>
         <label class="field"><span data-i18n="popup_frame_rate">Frame rate</span><select id="fps"></select></label>
       </div>
+      <label class="toggle hidden" id="v-logo-row"><span data-i18n="brand_add_logo">Add my logo<small data-i18n="brand_add_logo_hint">The logo you chose in Settings, in a corner of the picture</small></span><input type="checkbox" id="v-logo"></label>
 
       <div data-for="mp4 webm">
         <label class="field"><span data-i18n="editor_quality">Quality</span>
@@ -391,6 +398,7 @@
         <div class="progress"><div id="progress"></div></div>
         <p class="muted small" id="status"></p>
       </div>
+      <ul class="jobs hidden" id="queue-list" aria-label="Export queue" data-i18n-aria-label="queue_title"></ul>
       <div id="result" class="result hidden" role="status">
         <svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg>
         <div><b id="r-size"></b><span class="muted small" id="r-detail"></span></div>
@@ -398,7 +406,9 @@
       <div class="row">
         <button class="btn hidden" id="cancel" disabled data-i18n="settings_cancel">Cancel</button>
         <button class="btn primary block download-big" id="convert"><span class="dl-label" data-i18n="editor_export">Export</span><span class="estimate" id="convert-size"></span></button>
+        <button class="btn icon hidden" id="queue-export" data-tip="Add to the queue: it carries on in the background, even if you close this page" data-i18n-tip="queue_add_tip" aria-label="Add to queue" data-i18n-aria-label="queue_add"><svg class="i" viewBox="0 0 24 24"><path d="M4 6h10M4 12h10M4 18h7M18 9v10M14 15l4 4 4-4"/></svg></button>
         <button class="btn hidden" id="redo-export" data-tip="Change settings and export again" data-i18n-tip="video_change_settings_and_export_again" data-i18n="video_edit">Edit</button>
+        <button class="btn icon hidden" id="share-result" data-tip="Share the file with another app" data-i18n-tip="share_file_tip" aria-label="Share" data-i18n-aria-label="share_file"><svg class="i" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg></button>
         <button class="btn primary block hidden" id="download" data-i18n="editor_download">
           <svg class="i" viewBox="0 0 24 24"><path d="M12 4v12M7 11l5 5 5-5M4 20h16"/></svg>Download
         </button>

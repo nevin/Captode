@@ -71,7 +71,7 @@ footer { text-align: center; padding: 0 16px 32px; color: var(--muted); font-siz
 <main>
   <figure id="fig" title="${esc(t('page_full_size'))}">
     <div class="shot">
-      <img src="${image}" width="${width}" height="${height}" alt="${esc(title)}">
+      <img src="${image}" width="${width}" height="${height}" alt="${esc(summary ? `${title}: ${summary.split('\n')[0].slice(0, 160)}` : title)}">
       ${markers}
     </div>
   </figure>

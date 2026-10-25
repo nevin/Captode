@@ -44,6 +44,11 @@ The capture opens in the editor, where you can:
   screenshot (in text or form fields) are blurred as it opens; each blur can be moved or
   removed, and Undo takes them all back. Dates, times, prices, years and order numbers are
   left alone. They are found on the page as it is captured; nothing is sent anywhere.
+- **Copy text** (**X**) from a screenshot of a web page: drag over words to copy them, or
+  click a line. The words are noted from the page as it's captured and kept with the
+  screenshot on this device; they follow a crop or resize.
+- **Your logo** in a corner, if you set one in Settings; turn it off for one screenshot in
+  the Export tab.
 - Select, move, resize (handles on every annotation), restyle and delete anything you
   added. **Select several** with Shift-click or by dragging a box, then move, restyle,
   duplicate, copy and paste (between editor tabs too), bring to front or send to back,
@@ -55,10 +60,22 @@ The capture opens in the editor, where you can:
 - **Large captures stay fast:** the editor draws only what's on screen.
 - **Pan** around a zoomed-in or long capture with the hand tool, by holding Space, or with
   the middle mouse button; ⌘/Ctrl + scroll zooms towards the pointer.
-- **Resize** to exact pixel sizes, with or without keeping the proportions.
+- **Resize** to exact pixel sizes, with or without keeping the proportions. Resizing keeps
+  the original pixels: each new size is made from them, and **Original size** brings them
+  back exactly, as sharp as they were.
 - **Frame** the shot with padding, a backdrop colour, rounded corners and a shadow.
-- **Set a size limit** (100 KB to 25 MB) and Captode finds the best quality that fits,
-  lowering quality or colours before it shrinks the image. **Auto** picks the fewest
+- **Smallest** saves the same pixels in the smallest file: Captode's optimised PNG or lossless
+  WebP, whichever wins (PNG, for most screenshots). WebP has a **Lossless** switch, and when
+  lossless WebP would be much smaller than the PNG you chose, the Export panel says so.
+- **1× — as on screen** saves a screenshot from a Retina or scaled display at the page's own
+  size. **Several sizes or formats** downloads each one ticked (say @1x and @2x, PNG and
+  WebP) in one zip.
+- **Set a size limit** (100 KB to 25 MB) and Captode keeps the text readable while it fits:
+  first every pixel (the smaller lossless format, then the size the screenshot was on
+  screen, for one from a high-resolution display), then a PNG with fewer colours that looks
+  the same, then lossy at 75% quality or better. It never makes the image smaller than it was
+  on screen. If no readable file fits, it says so and shows the smallest readable size;
+  **Fit anyway** lowers quality and size until it fits, and **Keep it readable** goes back. **Auto** picks the fewest
   colours for PNG-8 and GIF that still look right. GIF has **lossy compression** too.
 - **Export** as PNG, compressed 8-bit PNG, JPEG, WebP, GIF, BMP or PDF (one page, or A4 or
   Letter pages with long pages split across them). The quality and size controls compress the
@@ -79,7 +96,7 @@ The capture opens in the editor, where you can:
 - **Undo** for removing a capture, deleting annotations, clearing measurements, deleting a
   preset and resetting settings.
 - **Recent captures:** the popup shows the last three, and the editor every capture from the
-  last 24 hours, even after closing its tab.
+  time chosen in Settings (a day at first), even after closing its tab.
 - **Finding your way:** each tool's tooltip names its group and key and says what it does; a
   first image shows a short hint; and the editor opens with the tab and tool you used last
   (Crop and the hand excepted).
@@ -120,7 +137,12 @@ used only while recording.
 You can pick the frame rate (15, 24, 30 or 60 fps), include audio, show clicks and keyboard
 shortcuts in tab recordings (never ordinary typing, and nothing in password fields), and set a
 countdown of up to 30 seconds (or none) to get ready; press Esc, or Cancel for full-screen recordings, to
-call it off. Click the Captode icon (or press **Alt+Shift+R**) to stop. The recording then
+call it off. To pause, right-click the Captode icon and choose **Pause recording** (or use
+**Pause** on the screen recording page, or a shortcut you set for it); the video leaves the
+pause out. To point something out, choose **Draw on the page** in the same menu (or set a
+shortcut): draw with the mouse or a finger, and each stroke fades by itself; Esc stops. If
+the browser closes or crashes mid-recording, the popup offers what was recorded next time.
+Click the Captode icon (or press **Alt+Shift+R**) to stop. The recording then
 opens in the video page, where you can:
 
 - Trim on a timeline with thumbnails and the sound's waveform: drag across it to choose the
@@ -145,9 +167,23 @@ opens in the video page, where you can:
   - **Blur** (**B**) hides something private: blurred, pixelated or a black box, for a
     while or for the whole recording.
   - **Callout** (**C**): an arrow, box, label or spotlight, drawn on the picture.
+  - **Caption** (**T**): words along the bottom for a while, in every export. **Download
+    .srt** or **.vtt** saves all the captions as a subtitle file timed for the exported video.
+    **Translate all captions** puts them in another language, with the translator built
+    into the browser (recent Chrome), on the device; it isn't offered where there's none.
 
   Each is a bar above the timeline: drag it, or its ends; **Split** cuts the chosen one in two
   at the playhead. **⌘Z**/**Ctrl+Z** undoes, **Delete** removes the one chosen. Edits are kept with the recording.
+- **Step-by-step guide** (for tab recordings with clicks): a step for each click, with the
+  frame at that moment, a numbered ring where you clicked, and a note that starts as what you
+  clicked ("Click “Save”"). Edit, reorder or remove steps, then download a single web page, a
+  PDF, or Markdown with its pictures (a zip, for docs and wikis). **Copy** puts the whole
+  guide, pictures and all, on the clipboard to paste into Google Docs, Notion, Confluence,
+  Word or an email. Each picture's alternative text is its note, for screen readers.
+  **Translate into…** translates the title and notes on the device, where the browser has
+  a translator; Undo puts them back.
+- **Callouts** include circles and numbered steps, drawn as the screenshot editor draws them,
+  in the same colours.
 - **Crop** the picture to the part that matters (free, 16:9, 4:3, 1:1 or 9:16).
 - **Background:** the video on a colour or gradient, with padding, rounded corners and a
   shadow, at its own shape or 16:9, 4:3, 1:1 or 9:16 (a device frame, when on, takes its place).
@@ -210,8 +246,8 @@ Open **Settings** from the gear in the popup (or right-click the icon → Option
 - **Export background:** Transparent, White or a custom colour, used behind device frames
   and around padded screenshots. JPEG, BMP, PDF, MP4 and WebM can't be transparent, so
   they get white when Transparent is chosen.
-- **Default formats** for screenshots and recordings (or the last one used), and whether
-  device frames are on.
+- **Default formats** for screenshots and recordings (or the last one used, or **Smallest**
+  for screenshots), and whether device frames are on.
 - **Blur private details:** blur email addresses and phone and card numbers in new
   screenshots (off at first).
 - **Clicking Captode's icon:** opens the menu (at first), or takes a screenshot straight
@@ -228,6 +264,21 @@ Open **Settings** from the gear in the popup (or right-click the icon → Option
 - **Recording:** frame rate, video size, countdown, sound, microphone, camera bubble, clicks
   and keys, and the same options as the popup's; plus **Stop recording after** a set time and
   **Highlight the cursor** (a soft circle that follows the mouse in tab recordings).
+- **Captures and storage:** every capture on this device with its size, and whether it's
+  kept or how old it is, to keep, save as a project, or delete (or delete all not kept), and **Open project**.
+  Choose how long captures not kept stay (a day at first, or a week, a month, or until you
+  delete them). A bar shows the space screenshots and recordings take. Once there are a few,
+  search them by title, website or date, show only screenshots, recordings or those kept,
+  or sort the largest first.
+- **Export presets:** the presets saved in the editor, on the video page and in Slides, to
+  rename, reorder or delete.
+- **Back up settings:** save every setting, your logo and your presets in a file, and load it
+  on another computer or browser, or share it with your team (with Undo). Captures aren't in it.
+- **Find a setting:** links to each section at the top, and a search box that shows only the
+  settings that match.
+- **Your logo:** an image (PNG, JPEG, WebP or SVG) added to a corner of screenshots and
+  recordings: the corner, size and opacity, and whether it's added to new screenshots and
+  to recordings, with a preview. Each can still be turned off for one capture when saving it.
 
 Settings also lists every keyboard shortcut (with a button to change them), has links to
 help, problem reports and the privacy policy, a **Share Captode** button (the system's
@@ -279,12 +330,31 @@ colours and are tagged as sRGB, so QuickTime, browsers and chat apps show them t
 way, and image exports (PNG, JPEG, PDF) are tagged as sRGB too. Downloading the original
 recording (WebM) also writes its colours into the file.
 
+
+### Keeping your work
+
+Captures are kept on your device for a day, or a week, a month or until you delete them, as
+chosen in Settings → Captures and storage. **Keep** (the bookmark button in the editor, the
+video page and Recent captures) keeps one until you remove it. **Save project** (beside it)
+downloads a `.captode` file with the capture and everything made for it: annotations, a
+recording's edits, slides, guide and captions. Open it from Settings → **Captures and
+storage** (or the editor's Open) to carry on later, or on another computer or browser. That
+section of Settings lists every capture with its size, to keep, save or delete.
+
+### Exports in the background
+
+On Chrome and Edge, **Add to queue** (beside Export on the video page) makes the export in the
+background: close the page and it carries on, and several can wait their turn. The toolbar
+badge shows the progress, then ✓; the files are in the popup (and the video page) to download
+or **Share** to another app. Share is offered wherever the system's share sheet takes files.
+
 ## Supported platforms
 
 Captode runs on **Windows, macOS, Linux and ChromeOS**, in Chrome 116 or later and other
 Chromium browsers (Edge, Brave, Opera, Arc), and in **Firefox 140** or later. Firefox has
 no tab capture, so there it records the screen or a window but not a single tab, and
-offers no camera bubble or video sizes; everything else is the same. A Safari package is
+offers no camera bubble, video sizes, step-by-step guides (they're made from a tab
+recording's clicks), background export queue or translation (it has no built-in translator); everything else is the same. A Safari package is
 built too (see [store/README.md](store/README.md)) but not yet tested. The automated tests
 run in Chrome on Windows, macOS and Linux on every push, and in Firefox (a full-page
 screenshot, the popup and every page), including captures at 125%, 150% and 200% display scale, touch

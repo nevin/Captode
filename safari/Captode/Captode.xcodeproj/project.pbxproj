@@ -18,6 +18,7 @@
 		20453F6530857F5900BDD59A /* Captode Extension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 20453F6430857F5900BDD59A /* Captode Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		20453F6A30857F5900BDD59A /* SafariWebExtensionHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20453F6930857F5900BDD59A /* SafariWebExtensionHandler.swift */; };
 		20453F8430857F5900BDD59A /* settings in Resources */ = {isa = PBXBuildFile; fileRef = 20453F7630857F5900BDD59A /* settings */; };
+		C0DE6A1E30857F5900BDD59A /* guide in Resources */ = {isa = PBXBuildFile; fileRef = C0DE6A1D30857F5900BDD59A /* guide */; };
 		20453F8530857F5900BDD59A /* popup in Resources */ = {isa = PBXBuildFile; fileRef = 20453F7730857F5900BDD59A /* popup */; };
 		20453F8630857F5900BDD59A /* video in Resources */ = {isa = PBXBuildFile; fileRef = 20453F7830857F5900BDD59A /* video */; };
 		20453F8730857F5900BDD59A /* LICENSE in Resources */ = {isa = PBXBuildFile; fileRef = 20453F7930857F5900BDD59A /* LICENSE */; };
@@ -70,6 +71,7 @@
 		20453F6930857F5900BDD59A /* SafariWebExtensionHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafariWebExtensionHandler.swift; sourceTree = "<group>"; };
 		20453F6B30857F5900BDD59A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		20453F7630857F5900BDD59A /* settings */ = {isa = PBXFileReference; lastKnownFileType = folder; name = settings; path = Resources/settings; sourceTree = "<group>"; };
+		C0DE6A1D30857F5900BDD59A /* guide */ = {isa = PBXFileReference; lastKnownFileType = folder; name = guide; path = Resources/guide; sourceTree = "<group>"; };
 		20453F7730857F5900BDD59A /* popup */ = {isa = PBXFileReference; lastKnownFileType = folder; name = popup; path = Resources/popup; sourceTree = "<group>"; };
 		20453F7830857F5900BDD59A /* video */ = {isa = PBXFileReference; lastKnownFileType = folder; name = video; path = Resources/video; sourceTree = "<group>"; };
 		20453F7930857F5900BDD59A /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; name = LICENSE; path = Resources/LICENSE; sourceTree = "<group>"; };
@@ -155,6 +157,7 @@
 			isa = PBXGroup;
 			children = (
 				20453F7630857F5900BDD59A /* settings */,
+				C0DE6A1D30857F5900BDD59A /* guide */,
 				20453F7730857F5900BDD59A /* popup */,
 				20453F7830857F5900BDD59A /* video */,
 				20453F7930857F5900BDD59A /* LICENSE */,
@@ -269,6 +272,7 @@
 				20453F8E30857F5900BDD59A /* recorder in Resources */,
 				20453F8630857F5900BDD59A /* video in Resources */,
 				20453F8430857F5900BDD59A /* settings in Resources */,
+				C0DE6A1E30857F5900BDD59A /* guide in Resources */,
 				20453F8730857F5900BDD59A /* LICENSE in Resources */,
 				20453F8F30857F5900BDD59A /* _locales in Resources */,
 				20453F9130857F5900BDD59A /* vendor in Resources */,
@@ -461,7 +465,7 @@
 					"@executable_path/../../../../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 2.2.0;
+				MARKETING_VERSION = 2.3.0;
 				OTHER_LDFLAGS = (
 					"-framework",
 					SafariServices,
@@ -495,7 +499,7 @@
 					"@executable_path/../../../../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 2.2.0;
+				MARKETING_VERSION = 2.3.0;
 				OTHER_LDFLAGS = (
 					"-framework",
 					SafariServices,
@@ -534,7 +538,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 2.2.0;
+				MARKETING_VERSION = 2.3.0;
 				OTHER_LDFLAGS = (
 					"-framework",
 					SafariServices,
@@ -576,7 +580,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 2.2.0;
+				MARKETING_VERSION = 2.3.0;
 				OTHER_LDFLAGS = (
 					"-framework",
 					SafariServices,

@@ -12,6 +12,7 @@ export const DEFAULT_SETTINGS = {
   afterCapture: 'editor',    // after a screenshot: 'editor' | 'download' | 'copy'
   longPages: 'cut',          // full pages past the browser's image limit: 'cut' | 'scale' | 'split'
   fileName: '',              // a pattern for file names (see lib/filename.js); empty for the default
+  keepFor: 1,                // days captures not kept stay on the device: 1 | 7 | 30 | 0 (until removed)
 };
 
 export async function getSettings() {

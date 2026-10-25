@@ -101,6 +101,16 @@ async function pdfImage(c, quality, calibrate = true) {
   return { colorSpace: '/DeviceRGB', filter: '/DCTDecode', data: jpegData };
 }
 
+/** One page for each canvas, at its own size (as toPdf's 'fit'). */
+export async function pagesToPdf(canvases, { quality = 0.9 } = {}) {
+  const pages = [];
+  for (const c of canvases) {
+    const s = Math.min(0.75, 14400 / c.width, 14400 / c.height);
+    pages.push({ pw: c.width * s, ph: c.height * s, img: await pdfImage(flatten(c), quality), iw: c.width, ih: c.height, x: 0, y: 0, w: c.width * s, h: c.height * s });
+  }
+  return buildPdf(pages);
+}
+
 function buildPdf(pages) {
   const parts = [];
   const offsets = [];
@@ -310,18 +320,74 @@ export function toGif(src, { colors = 256, dither = true, lossy = 0 } = {}) {
   return g.finish();
 }
 
+// ---------- WebP ----------
+
+/** Whether a WebP file's image is stored losslessly (a VP8L chunk, after any VP8X, ICCP…). */
+async function isLosslessWebp(blob) {
+  const v = new DataView(await blob.slice(0, 1 << 16).arrayBuffer());
+  const id = (p) => String.fromCharCode(v.getUint8(p), v.getUint8(p + 1), v.getUint8(p + 2), v.getUint8(p + 3));
+  if (v.byteLength < 20 || id(0) !== 'RIFF' || id(8) !== 'WEBP') return false;
+  for (let p = 12; p + 8 <= v.byteLength;) {
+    const kind = id(p);
+    if (kind === 'VP8L') return true;
+    if (kind === 'VP8 ') return false;
+    const size = v.getUint32(p + 4, true);
+    p += 8 + size + (size & 1);
+  }
+  return false;
+}
+
+let losslessWebp = null;
+/** Whether this browser saves lossless WebP (Chrome does, for a canvas at quality 1). Checked once. */
+export function canWebpLossless() {
+  losslessWebp ||= (async () => {
+    try {
+      const c = new OffscreenCanvas(4, 4);
+      const g = c.getContext('2d');
+      g.fillStyle = '#123456'; g.fillRect(0, 0, 4, 4); g.fillStyle = '#fedcba'; g.fillRect(1, 1, 2, 1);
+      const b = await c.convertToBlob({ type: 'image/webp', quality: 1 });
+      return b.type === 'image/webp' && (await isLosslessWebp(b));
+    } catch { return false; }
+  })();
+  return losslessWebp;
+}
+
+/** Lossless WebP: the same pixels, usually far smaller than PNG for screenshots of text and UI. */
+async function toWebpLossless(src) {
+  const blob = await src.convertToBlob({ type: 'image/webp', quality: 1 });
+  if (blob.type !== 'image/webp' || !(await isLosslessWebp(blob))) throw new Error('This browser cannot save lossless WebP.');
+  return blob;
+}
+
+// ---------- the smallest lossless file ----------
+
+/**
+ * The smallest file with exactly the image's pixels: PNG (which oxipng makes a
+ * palette PNG when the colours allow) or lossless WebP where the browser can.
+ * Returns `{ blob, format ('png' | 'webp'), sizes: { png, webp? } }`.
+ */
+export async function smallestLossless(src) {
+  const tries = [toPng(src).then((blob) => ({ format: 'png', blob }))];
+  if (await canWebpLossless()) tries.push(toWebpLossless(src).then((blob) => ({ format: 'webp', blob }), () => null));
+  const all = (await Promise.all(tries)).filter(Boolean);
+  all.sort((a, b) => a.blob.size - b.blob.size);
+  return { ...all[0], sizes: Object.fromEntries(all.map((x) => [x.format, x.blob.size])) };
+}
+
 // ---------- any format ----------
 
 /**
  * Encodes `src` (an OffscreenCanvas) as `format`: png, png8, jpeg, webp, avif, gif,
- * bmp or pdf. `o`: `{ quality (0–1), colors, dither, page, split }`.
+ * bmp, pdf, or smallest (see smallestLossless). `o`: `{ quality (0–1), colors, dither,
+ * page, split, lossless (WebP) }`.
  */
-export async function encodeImage(src, format, { quality = 0.85, colors = 256, dither = true, lossy = 0, page = 'fit', split = true, calibrate = true } = {}) {
+export async function encodeImage(src, format, { quality = 0.85, colors = 256, dither = true, lossy = 0, page = 'fit', split = true, calibrate = true, lossless = false } = {}) {
   switch (format) {
     case 'png': return toPng(src);
     case 'png8': return toPng8(src, { colors, dither });
     case 'jpeg': return new Blob([tagJpeg(await jpegBytes(src, quality, { calibrate }))], { type: 'image/jpeg' });
-    case 'webp': return src.convertToBlob({ type: 'image/webp', quality });
+    case 'webp': return lossless ? toWebpLossless(src) : src.convertToBlob({ type: 'image/webp', quality });
+    case 'smallest': return (await smallestLossless(src)).blob;
     case 'avif': {
       // Browsers without an AVIF encoder quietly return PNG instead.
       const blob = await src.convertToBlob({ type: 'image/avif', quality });
@@ -352,9 +418,98 @@ function scaled(src, s) {
  * can: first quality (JPEG, WebP, AVIF, PDF), or lossy compression and colours
  * (GIF, PNG-8), and only then pixel size. PNG and BMP are lossless, so only their
  * size can change.
- * Returns `{ blob, width, height, fitted }`; `fitted` describes what changed.
+ * Returns `{ blob, width, height, fitted, picked }`; `fitted` describes what changed,
+ * and `picked` (for smallest) which format won, with each one's size.
  */
+// ---------- fitting a size limit, keeping text readable ----------
+
+const READABLE_QUALITY = 0.75; // below this, lossy formats smear the edges of text
+
+/**
+ * Like fitImage, but never at the cost of readability: it tries the ways that keep
+ * every pixel first, then ones that look the same, and only then high-quality lossy
+ * compression, and never makes the picture smaller than `minScale` (the size it was
+ * on screen, for a screenshot from a high-resolution display; 1 otherwise).
+ *   1. lossless, at full size, then at `minScale`
+ *   2. PNG with fewer colours, chosen so nothing visibly changes (screenshots rarely
+ *      have more than a few hundred), at full size, then at `minScale`
+ *   3. lossy, at quality 75% or more, at full size, then at `minScale`
+ * When nothing readable fits, it returns the smallest readable file it made, with
+ * `fitted.tooBig` and `fitted.readable` set, rather than one too blurred to read.
+ */
+export async function fitReadable(src, format, o, maxBytes, minScale = 1) {
+  const first = await fitImage(src, format, o, 0);
+  if (!maxBytes || first.blob.size <= maxBytes) return first;
+  const scales = minScale > 0 && minScale < 0.98 ? [1, minScale] : [1];
+  let best = { ...first, fitted: { tooBig: true, readable: true } };
+  const at = (k) => (k === 1 ? src : scaled(src, k));
+  const result = (blob, c, fitted) => ({ blob, width: c.width, height: c.height, fitted: { ...fitted, readable: true } });
+  const keep = (blob, c) => { if (blob.size < best.blob.size) best = result(blob, c, { tooBig: true }); };
+  const sized = (k, f) => (k < 1 ? { ...f, scale: k } : f);
+  const lossless = ['smallest', 'png', 'bmp'].includes(format) || (format === 'webp' && o.lossless);
+  const nearLossless = ['smallest', 'png', 'png8', 'bmp'].includes(format);
+  const lossyFormat = format === 'smallest' || (format === 'webp' && o.lossless) ? 'webp'
+    : ['jpeg', 'webp', 'avif', 'pdf'].includes(format) ? format : null;
+
+  // 1. Every pixel kept (smaller, where it was a high-resolution screenshot).
+  if (lossless) {
+    for (const k of scales.slice(1)) {
+      const c = at(k);
+      let blob, picked;
+      if (format === 'smallest') ({ blob, format: picked } = await smallestLossless(c));
+      else blob = await encodeImage(c, format, o);
+      keep(blob, c);
+      if (blob.size <= maxBytes) return { ...result(blob, c, sized(k, {})), ...(picked && { picked: { format: picked } }) };
+    }
+  }
+  // 2. Fewer colours, none of them visibly different.
+  if (nearLossless) {
+    for (const k of scales) {
+      const c = at(k);
+      const blob = await encodeImage(c, 'png8', { colors: 'auto', dither: false });
+      keep(blob, c);
+      if (blob.size <= maxBytes) return result(blob, c, sized(k, { format: 'png8' }));
+    }
+  }
+  // 3. Lossy, at a quality that keeps text crisp: the highest that fits.
+  if (lossyFormat) {
+    const top = Math.max(READABLE_QUALITY, Math.min(0.95, o.quality ?? 0.9));
+    for (const k of scales) {
+      const c = at(k);
+      const opts = { ...o, lossless: false, calibrate: false };
+      let blob = await encodeImage(c, lossyFormat, { ...opts, quality: READABLE_QUALITY });
+      if (lossyFormat === 'webp' && blob.type !== 'image/webp') break; // no WebP encoder here
+      keep(blob, c);
+      if (blob.size > maxBytes) continue;
+      let lo = READABLE_QUALITY, hi = top, fit = blob;
+      for (let i = 0; i < 4 && hi - lo > 0.02; i++) {
+        const q = (lo + hi) / 2;
+        const b = await encodeImage(c, lossyFormat, { ...opts, quality: q });
+        if (b.size <= maxBytes) { fit = b; lo = q; } else hi = q;
+      }
+      const fitted = sized(k, { quality: lo });
+      if (lossyFormat !== format) fitted.format = lossyFormat;
+      return result(fit, c, fitted);
+    }
+  }
+  return best;
+}
+
 export async function fitImage(src, format, o, maxBytes) {
+  // Readable: what the editor asks for (see fitReadable).
+  if (o?.readable) {
+    const { readable, minScale, ...rest } = o;
+    return fitReadable(src, format, rest, maxBytes, minScale);
+  }
+  if (format === 'smallest') {
+    const s = await smallestLossless(src);
+    const picked = { format: s.format, sizes: s.sizes };
+    if (!maxBytes || s.blob.size <= maxBytes) return { blob: s.blob, width: src.width, height: src.height, fitted: null, picked };
+    // No lossless file fits: lossy WebP (or JPEG where the browser has no WebP), as small as it must be.
+    const lossyFormat = (await src.convertToBlob({ type: 'image/webp', quality: 0.8 })).type === 'image/webp' ? 'webp' : 'jpeg';
+    const r = await fitImage(src, lossyFormat, { ...o, lossless: false }, maxBytes);
+    return { ...r, fitted: { ...(r.fitted || {}), format: lossyFormat }, picked: { format: lossyFormat, sizes: s.sizes } };
+  }
   const first = await encodeImage(src, format, o);
   if (!maxBytes || first.size <= maxBytes) return { blob: first, width: src.width, height: src.height, fitted: null };
 
@@ -363,6 +518,8 @@ export async function fitImage(src, format, o, maxBytes) {
   const keep = (blob, c, s) => { if (!best || blob.size < best.blob.size) best = { blob, width: c.width, height: c.height, settings: s }; };
   keep(first, src, settings);
 
+  // Lossless WebP that doesn't fit becomes lossy, at the best quality that does.
+  if (format === 'webp' && o.lossless) o = { ...o, lossless: false, quality: o.quality ?? 0.9 };
   if (['jpeg', 'webp', 'avif', 'pdf'].includes(format)) {
     // Binary search for the highest quality that fits.
     let lo = 0.2, hi = o.quality ?? 0.85, fit = null;

@@ -227,7 +227,7 @@
     "message": "Reset all settings?"
   },
   "settings_theme_export_background_default_formats": {
-    "message": "Theme, export background, default formats, the device frame and recording options go back to how they were when you installed Captode. Your captures aren't affected."
+    "message": "Theme, export background, default formats, the device frame, recording options, your logo and saved presets go back to how they were when you installed Captode. Your captures aren't affected."
   },
   "settings_cancel": {
     "message": "Cancel"
@@ -290,7 +290,7 @@
     "message": "Choose an image"
   },
   "editor_kept_on_this_device_for": {
-    "message": "Kept on this device for 24 hours"
+    "message": "Kept on this device for the time set in Settings, unless you keep them"
   },
   "editor_recent_captures": {
     "message": "Recent captures"
@@ -863,7 +863,7 @@
     "message": "Recording not found"
   },
   "video_recordings_are_kept_for_a": {
-    "message": "Recordings are kept for a day. Start a new one with the Captode button in the toolbar."
+    "message": "Recordings not kept are removed after the time set in Settings. Start a new one with the Captode button in the toolbar."
   },
   "video_trim": {
     "message": "Trim"
@@ -2030,7 +2030,7 @@
     "message": "Copy it to the clipboard"
   },
   "settings_after_hint": {
-    "message": "Downloaded or copied as the editor would, in your default format, with a device frame and blurs if they're on. Every screenshot is also kept in Recent captures for a day."
+    "message": "Downloaded or copied as the editor would, in your default format, with a device frame and blurs if they're on. Every screenshot is also kept in Recent captures."
   },
   "settings_long_pages": {
     "message": "Pages too long for one image"
@@ -2128,11 +2128,11 @@
   "part_of": {
     "message": "part $1 of $2"
   },
-  "popup_new_in_captode_2_1": {
-    "message": "New in Captode 2.1"
+  "popup_new_in_captode_2_3": {
+    "message": "New in Captode 2.3"
   },
-  "popup_whats_new_2_1": {
-    "message": "Edit your recordings: cut parts out, speed parts up, zoom in (also where you clicked), blur private details, add arrows and labels, crop, put the video on a background, and change the sound."
+  "popup_whats_new_2_3": {
+    "message": "Pause and draw on the page while recording, add captions, copy text from screenshots, add your logo, and keep captures or save them as project files."
   },
   "slides_title": {
     "message": "Slides"
@@ -2706,5 +2706,500 @@
   },
   "edit_default_sound_saved": {
     "message": "New recordings will start with this volume and these fades"
+  },
+  "rec_pause": {
+    "message": "Pause"
+  },
+  "rec_resume": {
+    "message": "Resume"
+  },
+  "screen_recording_paused": {
+    "message": "Paused"
+  },
+  "screen_title_paused": {
+    "message": "❚❚ Paused — Captode"
+  },
+  "menu_pause_recording": {
+    "message": "Pause recording"
+  },
+  "menu_resume_recording": {
+    "message": "Resume recording"
+  },
+  "action_paused_title": {
+    "message": "Captode — recording paused. Click to stop, or right-click to resume"
+  },
+  "command_pause": {
+    "message": "Pause or resume the recording"
+  },
+  "popup_recording_recovered": {
+    "message": "A recording was saved for you"
+  },
+  "popup_recording_recovered_hint": {
+    "message": "It stopped before it could be saved (the browser closed, or its page did), so Captode kept what it had."
+  },
+  "popup_open_recording": {
+    "message": "Open the recording"
+  },
+  "guide_heading": {
+    "message": "Step-by-step guide"
+  },
+  "guide_make": {
+    "message": "Step-by-step guide"
+  },
+  "guide_make_title": {
+    "message": "A step for each click, with a picture and a note, to download as a page, PDF or Markdown"
+  },
+  "guide_page_tip": {
+    "message": "One web page with every step; opens in any browser"
+  },
+  "guide_download_page": {
+    "message": "Web page"
+  },
+  "guide_download_pdf": {
+    "message": "PDF"
+  },
+  "guide_markdown_tip": {
+    "message": "A zip with a Markdown file and the pictures, for docs and wikis"
+  },
+  "guide_download_markdown": {
+    "message": "Markdown"
+  },
+  "guide_title_label": {
+    "message": "Title"
+  },
+  "guide_lead": {
+    "message": "A step for each click in the recording. Edit the notes, remove steps you don't need, then download."
+  },
+  "guide_loading": {
+    "message": "Making the steps…"
+  },
+  "guide_empty": {
+    "message": "This recording has no clicks to make steps from. Record a tab and click as you go."
+  },
+  "guide_step_click": {
+    "message": "Click here."
+  },
+  "guide_step_click_label": {
+    "message": "Click “$1”."
+  },
+  "guide_step_field": {
+    "message": "Click the “$1” field."
+  },
+  "guide_step_n": {
+    "message": "Step $1"
+  },
+  "guide_n_steps": {
+    "message": "Steps: $1"
+  },
+  "guide_move_up": {
+    "message": "Move up"
+  },
+  "guide_move_down": {
+    "message": "Move down"
+  },
+  "guide_remove_step": {
+    "message": "Remove step"
+  },
+  "guide_step_removed": {
+    "message": "Step removed"
+  },
+  "guide_working": {
+    "message": "Working…"
+  },
+  "menu_draw": {
+    "message": "Draw on the page (Esc to stop)"
+  },
+  "draw_hint": {
+    "message": "Draw to point things out; it fades by itself. Esc stops."
+  },
+  "command_draw": {
+    "message": "Draw on the page while recording"
+  },
+  "edit_kind_captions": {
+    "message": "Caption"
+  },
+  "edit_add_caption_tip": {
+    "message": "Words along the bottom, also downloadable as subtitles  T"
+  },
+  "edit_caption_placeholder": {
+    "message": "What is said or shown here"
+  },
+  "edit_caption_hint": {
+    "message": "Shown along the bottom in every export, and in the subtitle files below."
+  },
+  "edit_subtitles_srt": {
+    "message": "Download .srt"
+  },
+  "edit_subtitles_vtt": {
+    "message": "Download .vtt"
+  },
+  "edit_subtitles_tip": {
+    "message": "Every caption as a subtitle file, timed for the exported video"
+  },
+  "edit_no_captions": {
+    "message": "No captions with words in the part kept"
+  },
+  "keep_off_tip": {
+    "message": "Keep this: it won't be removed automatically"
+  },
+  "keep_on_tip": {
+    "message": "Kept until you remove it (click to let it be removed automatically)"
+  },
+  "keep_on": {
+    "message": "Kept until you remove it"
+  },
+  "keep_off": {
+    "message": "It will be removed automatically, after the time set in Settings"
+  },
+  "kept": {
+    "message": "Kept"
+  },
+  "project_save_tip": {
+    "message": "Save project: everything in one file, to open later or on another computer"
+  },
+  "project_save_failed": {
+    "message": "Couldn't save the project: $1"
+  },
+  "project_open": {
+    "message": "Open project…"
+  },
+  "project_not_project": {
+    "message": "That isn't a Captode project file"
+  },
+  "project_too_new": {
+    "message": "This project was saved by a newer Captode. Update Captode to open it."
+  },
+  "storage_title": {
+    "message": "Captures and storage"
+  },
+  "storage_hint": {
+    "message": "Captures you don't keep are removed automatically after the time chosen here. Save a project to keep one in a file, with everything you did to it."
+  },
+  "storage_used": {
+    "message": "Captures: $1 · $2 used."
+  },
+  "storage_delete_unkept": {
+    "message": "Delete all not kept"
+  },
+  "storage_delete_unkept_text": {
+    "message": "Captures not kept will be deleted, with their edits: $1."
+  },
+  "storage_deleted": {
+    "message": "Deleted: $1"
+  },
+  "share_file": {
+    "message": "Share"
+  },
+  "share_file_tip": {
+    "message": "Share the file with another app"
+  },
+  "share_file_cannot": {
+    "message": "This file can't be shared here; download it instead"
+  },
+  "share_file_failed": {
+    "message": "Couldn't share: $1"
+  },
+  "queue_add": {
+    "message": "Add to queue"
+  },
+  "queue_add_tip": {
+    "message": "Add to the queue: it carries on in the background, even if you close this page"
+  },
+  "queue_title": {
+    "message": "Exports"
+  },
+  "queue_waiting": {
+    "message": "Waiting"
+  },
+  "queue_running": {
+    "message": "Exporting… $1%"
+  },
+  "queue_ready": {
+    "message": "Ready · $1"
+  },
+  "queue_failed": {
+    "message": "Failed: $1"
+  },
+  "queue_failed_here": {
+    "message": "Can't be made in the background here; use Export on the video page"
+  },
+  "queue_cancel": {
+    "message": "Cancel"
+  },
+  "queue_added": {
+    "message": "Added to the queue: $1"
+  },
+  "edit_callout_ellipse": {
+    "message": "Circle"
+  },
+  "edit_callout_step": {
+    "message": "Step"
+  },
+  "edit_step_label": {
+    "message": "Number"
+  },
+  "format_smallest_name": {
+    "message": "Smallest"
+  },
+  "format_smallest": {
+    "message": "The same pixels in the smallest file: PNG or lossless WebP, whichever is smaller."
+  },
+  "format_webp_lossless_name": {
+    "message": "lossless WebP"
+  },
+  "editor_webp_lossless": {
+    "message": "Lossless"
+  },
+  "editor_webp_lossless_hint": {
+    "message": "Exactly the same pixels, with transparency; larger than lossy WebP"
+  },
+  "editor_scale_css": {
+    "message": "1× — as on screen"
+  },
+  "editor_scale_css_n": {
+    "message": "1× — as on screen ($1%)"
+  },
+  "editor_use_smallest": {
+    "message": "Use Smallest"
+  },
+  "fit_lossy_format": {
+    "message": "lossy $1"
+  },
+  "picked_only": {
+    "message": "Saved as $1."
+  },
+  "picked_note": {
+    "message": "Saved as $1: $2% smaller than the other lossless format."
+  },
+  "hint_smaller": {
+    "message": "Smallest would be $1% smaller, with no loss ($2)."
+  },
+  "editor_several": {
+    "message": "Several sizes or formats"
+  },
+  "editor_several_hint": {
+    "message": "Each one ticked, in one zip, with the settings above."
+  },
+  "editor_several_download": {
+    "message": "Download zip"
+  },
+  "editor_several_none": {
+    "message": "Tick at least one scale and one format"
+  },
+  "editor_several_working": {
+    "message": "Making $1 of $2…"
+  },
+  "brand_title": {
+    "message": "Your logo"
+  },
+  "brand_hint": {
+    "message": "Add your logo to a corner of screenshots and recordings. It stays on this device."
+  },
+  "brand_choose": {
+    "message": "Choose image…"
+  },
+  "brand_corner": {
+    "message": "Corner"
+  },
+  "brand_br": {
+    "message": "Bottom right"
+  },
+  "brand_bl": {
+    "message": "Bottom left"
+  },
+  "brand_tr": {
+    "message": "Top right"
+  },
+  "brand_tl": {
+    "message": "Top left"
+  },
+  "brand_small": {
+    "message": "Small"
+  },
+  "brand_medium": {
+    "message": "Medium"
+  },
+  "brand_large": {
+    "message": "Large"
+  },
+  "brand_images": {
+    "message": "Add to new screenshots"
+  },
+  "brand_images_hint": {
+    "message": "You can turn it off for one screenshot in the editor's Export tab"
+  },
+  "brand_videos": {
+    "message": "Add to recordings"
+  },
+  "brand_videos_hint": {
+    "message": "You can turn it off for one recording in its export settings"
+  },
+  "brand_add_logo": {
+    "message": "Add my logo"
+  },
+  "brand_add_logo_hint": {
+    "message": "The logo you chose in Settings, in a corner of the picture"
+  },
+  "brand_not_image": {
+    "message": "That file isn't an image Captode can read"
+  },
+  "storage_search": {
+    "message": "Search by title or website"
+  },
+  "storage_show": {
+    "message": "Show"
+  },
+  "storage_recordings": {
+    "message": "Recordings"
+  },
+  "storage_none_match": {
+    "message": "No captures match."
+  },
+  "guide_copy_tip": {
+    "message": "Every step with its picture, to paste into Google Docs, Notion, Confluence or an email"
+  },
+  "guide_copied": {
+    "message": "Guide copied. Paste it into your document."
+  },
+  "guide_copy_failed": {
+    "message": "The clipboard didn't respond. Try again."
+  },
+  "tool_copy_text": {
+    "message": "Copy text"
+  },
+  "tool_about_copytext": {
+    "message": "Drag over words in the screenshot to copy them, or click a line. Works on new screenshots of web pages."
+  },
+  "copy_text_none": {
+    "message": "No text there to copy"
+  },
+  "copy_text_done": {
+    "message": "Copied $1 words"
+  },
+  "translate_into": {
+    "message": "Translate into…"
+  },
+  "translate_captions": {
+    "message": "Translate all captions"
+  },
+  "translate_working": {
+    "message": "Translating on this device…"
+  },
+  "translate_download": {
+    "message": "The browser is getting its language model: $1%"
+  },
+  "translate_done": {
+    "message": "Translated into $1"
+  },
+  "translate_same": {
+    "message": "It's already in that language"
+  },
+  "translate_unavailable": {
+    "message": "This browser can't translate between those languages yet"
+  },
+  "translate_failed": {
+    "message": "Couldn't translate: $1"
+  },
+  "settings_sections": {
+    "message": "Sections"
+  },
+  "settings_search": {
+    "message": "Search settings"
+  },
+  "settings_no_match": {
+    "message": "No settings match."
+  },
+  "backup_title": {
+    "message": "Back up settings"
+  },
+  "backup_hint": {
+    "message": "Save your settings, logo and export presets in a file, to load on another computer or browser, or to share with your team. Captures aren't included."
+  },
+  "backup_save": {
+    "message": "Save settings file"
+  },
+  "backup_load": {
+    "message": "Load settings file…"
+  },
+  "backup_loaded": {
+    "message": "Settings loaded from the file"
+  },
+  "backup_not_file": {
+    "message": "That isn't a Captode settings file"
+  },
+  "backup_too_new": {
+    "message": "These settings were saved by a newer Captode. Update Captode to load them."
+  },
+  "brand_preview": {
+    "message": "Preview"
+  },
+  "presets_title": {
+    "message": "Export presets"
+  },
+  "presets_hint": {
+    "message": "Presets you saved in the editor and on the video page. Rename, reorder or delete them here."
+  },
+  "presets_none": {
+    "message": "No presets saved yet. Save one from the Export tab in the editor or on the video page."
+  },
+  "keep_for_label": {
+    "message": "Remove captures not kept after"
+  },
+  "keep_for_1": {
+    "message": "A day"
+  },
+  "keep_for_7": {
+    "message": "A week"
+  },
+  "keep_for_30": {
+    "message": "A month"
+  },
+  "keep_for_0": {
+    "message": "Never: I'll delete them"
+  },
+  "storage_sort": {
+    "message": "Sort"
+  },
+  "storage_sort_new": {
+    "message": "Newest first"
+  },
+  "storage_sort_big": {
+    "message": "Largest first"
+  },
+  "storage_breakdown": {
+    "message": "Screenshots $1 · Recordings $2"
+  },
+  "fit_too_big_readable": {
+    "message": "This limit is too small to keep the text readable. The smallest readable file is $1."
+  },
+  "fit_near_lossless": {
+    "message": "PNG with fewer colours, looking the same"
+  },
+  "fit_readable": {
+    "message": "Text stays readable."
+  },
+  "fit_forced": {
+    "message": "Text may be hard to read."
+  },
+  "fit_anyway": {
+    "message": "Fit anyway"
+  },
+  "fit_keep_readable": {
+    "message": "Keep it readable"
+  },
+  "fit_anyway_tip": {
+    "message": "Lower the quality and size until it fits, even if text blurs"
+  },
+  "resize_original": {
+    "message": "Original size"
+  },
+  "resize_original_tip": {
+    "message": "Back to $1, with the original pixels"
+  },
+  "resized_original": {
+    "message": "Back to the original size, $1"
+  },
+  "resize_keeps_original": {
+    "message": "Resizing keeps the original pixels: Original size brings them back, as sharp as they were."
   }
 }

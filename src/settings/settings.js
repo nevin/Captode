@@ -3,6 +3,11 @@ import { toast, enhance, openDialog, showShortcut, shareCaptode } from '../lib/u
 import { t, localize } from '../lib/i18n.js';
 import { openShortcutSettings, canChangeShortcuts, STORE_URL, canRecordTabs, canProcessVideo } from '../lib/platform.js';
 import { fileStem, DEFAULT_FILE_NAME, FILE_NAME_TOKENS } from '../lib/filename.js';
+import { listCaptures, setKept, deleteCapture, restoreCapture } from '../lib/db.js';
+import { openProject, pageFor } from '../lib/project.js';
+import { downloadProject } from '../lib/keep.js';
+import { fmtBytes, ago, confirmDialog } from '../lib/ui.js';
+import { getBrand, saveBrand, logoFromFile, loadLogo, drawLogo } from '../lib/brand.js';
 
 localize();
 
@@ -37,6 +42,7 @@ function render() {
   $('#icon-hint').classList.toggle('hidden', settings.iconAction === 'popup');
   $('#after-hint').classList.toggle('hidden', settings.afterCapture === 'editor');
   if (document.activeElement !== $('#fileName')) $('#fileName').value = settings.fileName || DEFAULT_FILE_NAME;
+  $('#keepFor').value = String(settings.keepFor ?? 1);
   showExample();
 }
 
@@ -187,14 +193,22 @@ $('#diagnostics').addEventListener('click', async () => {
     toast(e.message || String(e), { kind: 'error' });
   }
 });
-const RESET_KEYS = ['settings', 'device', 'fps', 'audio', 'countdown', 'countdownSeconds', 'videoSize', 'kind', 'deviceOpts', 'deviceRecent', 'editorDefaults', 'exportPresets', 'lastExport', 'inputs', 'cursor', 'camera', 'mic', 'delay', 'autoStop'];
+const RESET_KEYS = ['settings', 'device', 'fps', 'audio', 'countdown', 'countdownSeconds', 'videoSize', 'kind', 'deviceOpts', 'deviceRecent', 'editorDefaults', 'exportPresets', 'lastExport', 'inputs', 'cursor', 'camera', 'mic', 'delay', 'autoStop', 'brand'];
+/** Everything on this page after its settings change underneath it (reset, undo, loaded from a file). */
+async function renderAll() {
+  settings = await getSettings();
+  $('#device').checked = !!(await chrome.storage.local.get({ device: false })).device;
+  render();
+  renderRecording();
+  renderBrand();
+  renderPresets();
+  renderStorage();
+}
 $('#reset-yes').addEventListener('click', async () => {
   const before = await chrome.storage.local.get(RESET_KEYS);
   await chrome.storage.local.remove(RESET_KEYS);
   settings = await saveSettings(DEFAULT_SETTINGS);
-  $('#device').checked = false;
-  render();
-  renderRecording();
+  await renderAll();
   $('#reset-dialog').close();
   toast(t('settings_reset_done'), {
     kind: 'success', ms: 8000,
@@ -202,10 +216,7 @@ $('#reset-yes').addEventListener('click', async () => {
       label: t('editor_undo'),
       run: async () => {
         await chrome.storage.local.set(before);
-        settings = await getSettings();
-        $('#device').checked = !!before.device;
-        render();
-        renderRecording();
+        await renderAll();
         toast(t('settings_restored'), { kind: 'success' });
       },
     },
@@ -217,3 +228,287 @@ showShortcuts();
 // Pick up shortcuts changed in the browser's shortcut settings when coming back.
 document.addEventListener('visibilitychange', () => { if (!document.hidden) showShortcuts(); });
 render();
+
+// ---------- your logo ----------
+
+async function renderBrand() {
+  const b = await getBrand();
+  $('#brand-preview').classList.toggle('hidden', !b.image);
+  if (b.image) $('#brand-preview').src = b.image; else $('#brand-preview').removeAttribute('src');
+  $('#brand-remove').classList.toggle('hidden', !b.image);
+  $('#brand-options').classList.toggle('hidden', !b.image);
+  $('#brand-position').value = b.position;
+  $('#brand-size').value = String(b.size);
+  $('#brand-opacity').value = String(Math.round(b.opacity * 100));
+  $('#brand-images').checked = b.images;
+  $('#brand-videos').checked = b.videos;
+  drawBrandSample(b);
+}
+
+/** A made-up page with the logo where it will go, so a change shows at once. */
+async function drawBrandSample(b) {
+  const c = $('#brand-sample');
+  const ctx = c.getContext('2d');
+  const W = c.width, H = c.height;
+  ctx.fillStyle = '#f6f6f9'; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = '#5b4bff'; ctx.fillRect(0, 0, W, 30);
+  ctx.fillStyle = '#ffffff'; ctx.fillRect(24, 50, W - 48, H - 74);
+  ctx.fillStyle = '#d9d9e3';
+  for (let i = 0; i < 7; i++) ctx.fillRect(44, 72 + i * 24, (W - 120) * (i % 3 === 2 ? 0.55 : 0.9), 10);
+  const logo = await loadLogo(b);
+  if (logo) { drawLogo(ctx, logo, 0, 0, W, H); logo.bitmap.close(); }
+}
+const brandUpdate = async (patch) => { await saveBrand(patch); await renderBrand(); saved(); };
+$('#brand-file').addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  e.target.value = '';
+  if (!file) return;
+  let image;
+  try { image = await logoFromFile(file); } catch { toast(t('brand_not_image'), { kind: 'error' }); return; }
+  // Turned on for screenshots the first time a logo is chosen: that's why it was chosen.
+  const first = !(await getBrand()).image;
+  await brandUpdate({ image, ...(first && { images: true }) });
+});
+$('#brand-remove').addEventListener('click', () => brandUpdate({ image: '', images: false, videos: false }));
+$('#brand-position').addEventListener('change', (e) => brandUpdate({ position: e.target.value }));
+$('#brand-size').addEventListener('change', (e) => brandUpdate({ size: Number(e.target.value) }));
+$('#brand-opacity').addEventListener('change', (e) => brandUpdate({ opacity: Number(e.target.value) / 100 }));
+$('#brand-opacity').addEventListener('input', async (e) => drawBrandSample({ ...(await getBrand()), opacity: Number(e.target.value) / 100 }));
+$('#brand-images').addEventListener('change', (e) => brandUpdate({ images: e.target.checked }));
+$('#brand-videos').addEventListener('change', (e) => brandUpdate({ videos: e.target.checked }));
+renderBrand();
+
+// ---------- captures and storage ----------
+
+const ICON_KEEP = '<svg class="i" viewBox="0 0 24 24"><path d="M6 3h12v18l-6-4-6 4z"/></svg>';
+const ICON_PROJECT = '<svg class="i" viewBox="0 0 24 24"><path d="M3 7l9-4 9 4-9 4z"/><path d="M3 7v10l9 4 9-4V7M12 11v10"/></svg>';
+const ICON_DELETE = '<svg class="i" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></svg>';
+
+async function renderStorage() {
+  const list = document.getElementById('storage-list');
+  if (!list) return;
+  const items = await listCaptures(500);
+  const est = await navigator.storage?.estimate?.().catch(() => null);
+  const used = items.reduce((n, it) => n + it.size, 0);
+  document.getElementById('storage-usage').textContent = `${t('storage_hint')} ${t('storage_used', [String(items.length), fmtBytes(est?.usage ?? used)])}`;
+  document.getElementById('delete-unkept').disabled = !items.some((it) => !it.kept);
+  list.textContent = '';
+  // Search and show only some: offered once there are enough to look through.
+  $('#storage-filter').classList.toggle('hidden', items.length < 6);
+  const words = $('#storage-search').value.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  const kind = $('#storage-kind').value;
+  const shown = items.filter((it) => {
+    if (kind === 'kept' ? !it.kept : kind && it.kind !== kind) return false;
+    let host = '';
+    try { host = it.meta.url ? new URL(it.meta.url).hostname : ''; } catch {}
+    const hay = `${it.meta.title || ''} ${host} ${new Date(it.created).toLocaleDateString()}`.toLowerCase();
+    return words.every((w) => hay.includes(w));
+  });
+  $('#storage-none').classList.toggle('hidden', !items.length || shown.length > 0);
+  if ($('#storage-sort').value === 'big') shown.sort((a, b) => b.size - a.size);
+  // How the space is shared between screenshots and recordings.
+  const bytes = { image: 0, video: 0 };
+  for (const it of items) bytes[it.kind === 'video' ? 'video' : 'image'] += it.size;
+  const total = bytes.image + bytes.video;
+  $('#storage-meter').classList.toggle('hidden', !total);
+  $('#storage-breakdown').classList.toggle('hidden', !total);
+  if (total) {
+    $('#storage-meter .m-img').style.width = `${(bytes.image / total) * 100}%`;
+    $('#storage-meter .m-vid').style.width = `${(bytes.video / total) * 100}%`;
+    $('#storage-breakdown').textContent = t('storage_breakdown', [fmtBytes(bytes.image), fmtBytes(bytes.video)]);
+  }
+  for (const it of shown) {
+    const title = it.meta.title || (it.kind === 'video' ? t('video_recording') : t('popup_screenshot'));
+    const li = document.createElement('li');
+    li.innerHTML = `<a class="what" href="#"><b></b><small></small></a>
+      <button class="btn ghost icon keep">${ICON_KEEP}</button>
+      <button class="btn ghost icon project">${ICON_PROJECT}</button>
+      <button class="btn ghost icon delete">${ICON_DELETE}</button>`;
+    li.querySelector('b').textContent = title;
+    li.querySelector('small').textContent = [it.kind === 'video' ? t('badge_video') : t('popup_screenshot'), it.kept ? t('kept') : ago(it.created), fmtBytes(it.size)].join(' · ');
+    li.querySelector('.what').addEventListener('click', (e) => { e.preventDefault(); chrome.tabs.create({ url: chrome.runtime.getURL(pageFor(it)) }); });
+    const tips = [['.keep', t(it.kept ? 'keep_on_tip' : 'keep_off_tip')], ['.project', t('project_save_tip')], ['.delete', t('remove')]];
+    for (const [sel, tip] of tips) { const b = li.querySelector(sel); b.dataset.tip = tip; b.setAttribute('aria-label', `${tip}: ${title}`); }
+    const keep = li.querySelector('.keep');
+    keep.classList.toggle('on', it.kept);
+    keep.setAttribute('aria-pressed', String(it.kept));
+    keep.addEventListener('click', async () => { await setKept(it.id, !it.kept); await renderStorage(); });
+    li.querySelector('.project').addEventListener('click', async (e) => {
+      e.currentTarget.disabled = true;
+      try { await downloadProject(it.id, fileStem(settings?.fileName, { title, url: it.meta.url, when: new Date(it.created) })); } catch (err) { toast(t('project_save_failed', String(err?.message || err)), { kind: 'error' }); }
+      e.currentTarget.disabled = false;
+    });
+    li.querySelector('.delete').addEventListener('click', async () => {
+      const rec = await deleteCapture(it.id);
+      await renderStorage();
+      toast(t('removed_named', title), { ms: 6000, action: { label: t('editor_undo'), run: async () => { await restoreCapture(it.id, rec); renderStorage(); } } });
+    });
+    list.append(li);
+  }
+  enhance(list);
+}
+
+let searchTimer = 0;
+$('#storage-search').addEventListener('input', () => { clearTimeout(searchTimer); searchTimer = setTimeout(renderStorage, 150); });
+$('#storage-kind').addEventListener('change', renderStorage);
+$('#storage-sort').addEventListener('change', renderStorage);
+$('#keepFor').addEventListener('change', (e) => update({ keepFor: Number(e.target.value) }));
+
+document.getElementById('delete-unkept')?.addEventListener('click', async () => {
+  const items = (await listCaptures(500)).filter((it) => !it.kept);
+  if (!items.length) return;
+  if (!(await confirmDialog({ title: t('storage_delete_unkept'), text: t('storage_delete_unkept_text', String(items.length)), confirm: t('discard_confirm') }))) return;
+  for (const it of items) await deleteCapture(it.id);
+  await renderStorage();
+  toast(t('storage_deleted', String(items.length)), { kind: 'success' });
+});
+
+document.getElementById('open-project')?.addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  e.target.value = '';
+  if (!file) return;
+  try {
+    const opened = await openProject(file);
+    await renderStorage();
+    chrome.tabs.create({ url: chrome.runtime.getURL(pageFor(opened)) });
+  } catch (err) {
+    toast(t(err.message === 'too-new' ? 'project_too_new' : 'project_not_project'), { kind: 'error', ms: 6000 });
+  }
+});
+
+renderStorage();
+
+// ---------- export presets ----------
+// Saved in the editor, on the video page and in Slides; renamed, reordered or deleted here.
+
+const PRESET_KINDS = [['image', 'settings_screenshots'], ['video', 'storage_recordings'], ['slideKit', 'slides_kit']];
+const ICON_UP = '<svg class="i" viewBox="0 0 24 24"><path d="m6 15 6-6 6 6"/></svg>';
+const ICON_DOWN = '<svg class="i" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>';
+
+async function renderPresets() {
+  const { exportPresets: all = {} } = await chrome.storage.local.get('exportPresets');
+  const box = $('#preset-lists');
+  box.textContent = '';
+  const store = async (kind, list) => {
+    const cur = (await chrome.storage.local.get({ exportPresets: {} })).exportPresets;
+    cur[kind] = list;
+    await chrome.storage.local.set({ exportPresets: cur });
+    await renderPresets();
+  };
+  let any = false;
+  for (const [kind, label] of PRESET_KINDS) {
+    const list = Array.isArray(all[kind]) ? all[kind] : [];
+    if (!list.length) continue;
+    any = true;
+    const h = document.createElement('h3');
+    h.className = 'preset-kind';
+    h.textContent = t(label);
+    const ul = document.createElement('ul');
+    ul.className = 'preset-list';
+    list.forEach((p, i) => {
+      const li = document.createElement('li');
+      li.innerHTML = `<input type="text" maxlength="60"><span class="muted small"></span>
+        <button class="btn ghost icon up">${ICON_UP}</button><button class="btn ghost icon down">${ICON_DOWN}</button><button class="btn ghost icon delete">${ICON_DELETE}</button>`;
+      const name = li.querySelector('input');
+      name.value = p.name || '';
+      name.setAttribute('aria-label', t('preset_name'));
+      li.querySelector('span').textContent = p.format ? String(p.format).toUpperCase() : '';
+      name.addEventListener('change', () => {
+        const v = name.value.trim();
+        if (!v) { name.value = p.name || ''; return; }
+        store(kind, list.map((x, j) => (j === i ? { ...x, name: v } : x))).then(saved);
+      });
+      const tips = [['.up', t('guide_move_up')], ['.down', t('guide_move_down')], ['.delete', t('remove')]];
+      for (const [sel, tip] of tips) { const b = li.querySelector(sel); b.dataset.tip = tip; b.setAttribute('aria-label', `${tip}: ${p.name || ''}`); }
+      li.querySelector('.up').disabled = i === 0;
+      li.querySelector('.down').disabled = i === list.length - 1;
+      const move = (d) => { const next = [...list]; [next[i], next[i + d]] = [next[i + d], next[i]]; store(kind, next); };
+      li.querySelector('.up').addEventListener('click', () => move(-1));
+      li.querySelector('.down').addEventListener('click', () => move(1));
+      li.querySelector('.delete').addEventListener('click', async () => {
+        await store(kind, list.filter((_, j) => j !== i));
+        toast(t('removed_named', p.name || ''), { ms: 6000, action: { label: t('editor_undo'), run: () => store(kind, list) } });
+      });
+      ul.append(li);
+    });
+    box.append(h, ul);
+  }
+  $('#presets-none').classList.toggle('hidden', any);
+  enhance(box);
+}
+renderPresets();
+
+// ---------- back up and restore ----------
+// A file of this page's settings, the logo and saved presets: never captures.
+
+const BACKUP_FORMAT = 'captode-settings';
+const BACKUP_VERSION = 1;
+
+$('#backup-save').addEventListener('click', async () => {
+  const data = await chrome.storage.local.get(RESET_KEYS);
+  const file = { format: BACKUP_FORMAT, version: BACKUP_VERSION, app: chrome.runtime.getManifest().version, saved: new Date().toISOString(), data };
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(file, null, 2)], { type: 'application/json' }));
+  a.download = `captode-settings-${new Date().toISOString().slice(0, 10)}.json`;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 30000);
+  toast(t('saved_file', a.download), { kind: 'success' });
+});
+
+$('#backup-load').addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  e.target.value = '';
+  if (!file) return;
+  let json = null;
+  try { json = JSON.parse(await file.text()); } catch {}
+  if (json?.format !== BACKUP_FORMAT || !Number.isInteger(json.version) || !json.data || typeof json.data !== 'object') {
+    toast(t('backup_not_file'), { kind: 'error', ms: 6000 });
+    return;
+  }
+  if (json.version > BACKUP_VERSION) { toast(t('backup_too_new'), { kind: 'error', ms: 6000 }); return; }
+  // Only what this page saves; anything else in the file is left out.
+  const data = Object.fromEntries(RESET_KEYS.filter((k) => k in json.data).map((k) => [k, json.data[k]]));
+  if (data.settings && (typeof data.settings !== 'object' || Array.isArray(data.settings))) delete data.settings;
+  const before = await chrome.storage.local.get(RESET_KEYS);
+  await chrome.storage.local.remove(RESET_KEYS);
+  await chrome.storage.local.set(data);
+  await renderAll();
+  toast(t('backup_loaded'), {
+    kind: 'success', ms: 8000,
+    action: { label: t('editor_undo'), run: async () => { await chrome.storage.local.remove(RESET_KEYS); await chrome.storage.local.set(before); await renderAll(); toast(t('settings_restored'), { kind: 'success' }); } },
+  });
+});
+
+// ---------- sections and search ----------
+
+const cards = [...document.querySelectorAll('main > section.card[id]')];
+for (const card of cards) {
+  const a = document.createElement('a');
+  a.href = `#${card.id}`;
+  a.className = 'btn small';
+  a.textContent = card.querySelector('h2').textContent;
+  $('#settings-jump').append(a);
+}
+const ROWS = '.toggle, .field, .shortcut-list > div, .choices, p.hint, p.callout, .tokens, .name-example';
+let findTimer = 0;
+function find() {
+  const words = $('#settings-search').value.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  const has = (el) => { const text = el.textContent.toLowerCase(); return words.every((w) => text.includes(w)); };
+  let shown = 0;
+  for (const card of cards) {
+    const rows = [...card.querySelectorAll(ROWS)].filter((r) => !r.parentElement.closest(ROWS));
+    const whole = !words.length || has(card.querySelector('h2'));
+    let hits = 0;
+    for (const r of rows) {
+      const on = whole || has(r);
+      r.classList.toggle('s-hide', !on);
+      if (on) hits++;
+    }
+    const show = whole || hits > 0 || has(card);
+    card.classList.toggle('s-hide', !show);
+    if (show) shown++;
+  }
+  $('#settings-none').classList.toggle('hidden', shown > 0);
+  for (const a of $('#settings-jump').children) a.classList.toggle('s-hide', $(a.getAttribute('href')).classList.contains('s-hide'));
+}
+$('#settings-search').addEventListener('input', () => { clearTimeout(findTimer); findTimer = setTimeout(find, 120); });

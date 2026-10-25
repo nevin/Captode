@@ -225,7 +225,7 @@
     "message": "Alle Einstellungen zurücksetzen?"
   },
   "settings_theme_export_background_default_formats": {
-    "message": "Design, Hintergrund beim Export, Standardformate, Geräterahmen und Aufnahmeoptionen werden auf den Stand der Installation zurückgesetzt. Deine Aufnahmen bleiben erhalten."
+    "message": "Design, Exporthintergrund, Standardformate, Geräterahmen, Aufnahmeoptionen, Ihr Logo und gespeicherte Vorlagen werden auf den Stand bei der Installation von Captode zurückgesetzt. Ihre Aufnahmen bleiben unverändert."
   },
   "settings_cancel": {
     "message": "Abbrechen"
@@ -288,7 +288,7 @@
     "message": "Bild auswählen"
   },
   "editor_kept_on_this_device_for": {
-    "message": "24 Stunden auf diesem Gerät gespeichert"
+    "message": "Bleiben für die in den Einstellungen festgelegte Zeit auf diesem Gerät, außer Sie behalten sie"
   },
   "editor_recent_captures": {
     "message": "Letzte Aufnahmen"
@@ -861,7 +861,7 @@
     "message": "Aufzeichnung nicht gefunden"
   },
   "video_recordings_are_kept_for_a": {
-    "message": "Aufzeichnungen bleiben einen Tag gespeichert. Starte eine neue mit der Captode-Schaltfläche in der Symbolleiste."
+    "message": "Nicht behaltene Aufnahmen werden nach der in den Einstellungen festgelegten Zeit entfernt. Starten Sie eine neue mit der Captode-Schaltfläche in der Symbolleiste."
   },
   "video_trim": {
     "message": "Zuschneiden"
@@ -2028,7 +2028,7 @@
     "message": "In die Zwischenablage kopieren"
   },
   "settings_after_hint": {
-    "message": "Heruntergeladen oder kopiert wie im Editor: im Standardformat, mit Geräterahmen und Unschärfe, falls aktiviert. Jeder Screenshot bleibt außerdem einen Tag in den letzten Aufnahmen."
+    "message": "Heruntergeladen oder kopiert wie im Editor, im Standardformat, mit Geräterahmen und Unschärfen, falls aktiviert. Jeder Screenshot wird außerdem unter „Letzte Aufnahmen“ aufbewahrt."
   },
   "settings_long_pages": {
     "message": "Seiten, die für ein Bild zu lang sind"
@@ -2126,11 +2126,11 @@
   "part_of": {
     "message": "Teil $1 von $2"
   },
-  "popup_new_in_captode_2_1": {
-    "message": "Neu in Captode 2.1"
+  "popup_new_in_captode_2_3": {
+    "message": "Neu in Captode 2.3"
   },
-  "popup_whats_new_2_1": {
-    "message": "Aufnahmen bearbeiten: Teile herausschneiden oder beschleunigen, heranzoomen (auch dort, wo Sie geklickt haben), Privates unkenntlich machen, Pfeile und Beschriftungen hinzufügen, zuschneiden, das Video auf einen Hintergrund setzen und den Ton anpassen."
+  "popup_whats_new_2_3": {
+    "message": "Pausieren und auf der Seite zeichnen während der Aufnahme, Untertitel hinzufügen, Text aus Screenshots kopieren, Ihr Logo einfügen und Aufnahmen behalten oder als Projektdateien speichern."
   },
   "slides_title": {
     "message": "Folien"
@@ -2704,5 +2704,500 @@
   },
   "edit_default_sound_saved": {
     "message": "Neue Aufnahmen beginnen mit dieser Lautstärke und diesen Blenden"
+  },
+  "rec_pause": {
+    "message": "Pausieren"
+  },
+  "rec_resume": {
+    "message": "Fortsetzen"
+  },
+  "screen_recording_paused": {
+    "message": "Pausiert"
+  },
+  "screen_title_paused": {
+    "message": "❚❚ Pausiert — Captode"
+  },
+  "menu_pause_recording": {
+    "message": "Aufzeichnung pausieren"
+  },
+  "menu_resume_recording": {
+    "message": "Aufzeichnung fortsetzen"
+  },
+  "action_paused_title": {
+    "message": "Captode — Aufzeichnung pausiert. Klicken zum Beenden, Rechtsklick zum Fortsetzen"
+  },
+  "command_pause": {
+    "message": "Aufzeichnung pausieren oder fortsetzen"
+  },
+  "popup_recording_recovered": {
+    "message": "Eine Aufnahme wurde für dich gesichert"
+  },
+  "popup_recording_recovered_hint": {
+    "message": "Sie endete, bevor sie gespeichert werden konnte (der Browser oder ihre Seite wurde geschlossen), deshalb hat Captode behalten, was da war."
+  },
+  "popup_open_recording": {
+    "message": "Aufnahme öffnen"
+  },
+  "guide_heading": {
+    "message": "Schritt-für-Schritt-Anleitung"
+  },
+  "guide_make": {
+    "message": "Schritt-für-Schritt-Anleitung"
+  },
+  "guide_make_title": {
+    "message": "Ein Schritt pro Klick, mit Bild und Notiz, als Seite, PDF oder Markdown herunterladen"
+  },
+  "guide_page_tip": {
+    "message": "Eine Webseite mit allen Schritten; öffnet sich in jedem Browser"
+  },
+  "guide_download_page": {
+    "message": "Webseite"
+  },
+  "guide_download_pdf": {
+    "message": "PDF"
+  },
+  "guide_markdown_tip": {
+    "message": "Ein Zip mit einer Markdown-Datei und den Bildern, für Dokus und Wikis"
+  },
+  "guide_download_markdown": {
+    "message": "Markdown"
+  },
+  "guide_title_label": {
+    "message": "Titel"
+  },
+  "guide_lead": {
+    "message": "Ein Schritt pro Klick in der Aufnahme. Bearbeite die Notizen, entferne unnötige Schritte und lade dann herunter."
+  },
+  "guide_loading": {
+    "message": "Schritte werden erstellt…"
+  },
+  "guide_empty": {
+    "message": "Diese Aufnahme hat keine Klicks für Schritte. Nimm einen Tab auf und klicke dabei."
+  },
+  "guide_step_click": {
+    "message": "Hier klicken."
+  },
+  "guide_step_click_label": {
+    "message": "Auf „$1“ klicken."
+  },
+  "guide_step_field": {
+    "message": "In das Feld „$1“ klicken."
+  },
+  "guide_step_n": {
+    "message": "Schritt $1"
+  },
+  "guide_n_steps": {
+    "message": "Schritte: $1"
+  },
+  "guide_move_up": {
+    "message": "Nach oben"
+  },
+  "guide_move_down": {
+    "message": "Nach unten"
+  },
+  "guide_remove_step": {
+    "message": "Schritt entfernen"
+  },
+  "guide_step_removed": {
+    "message": "Schritt entfernt"
+  },
+  "guide_working": {
+    "message": "Wird erstellt…"
+  },
+  "menu_draw": {
+    "message": "Auf der Seite zeichnen (Esc zum Beenden)"
+  },
+  "draw_hint": {
+    "message": "Zeichne, um auf etwas hinzuweisen; es verblasst von selbst. Esc beendet."
+  },
+  "command_draw": {
+    "message": "Während der Aufnahme auf der Seite zeichnen"
+  },
+  "edit_kind_captions": {
+    "message": "Untertitel"
+  },
+  "edit_add_caption_tip": {
+    "message": "Text am unteren Rand, auch als Untertiteldatei  T"
+  },
+  "edit_caption_placeholder": {
+    "message": "Was hier gesagt oder gezeigt wird"
+  },
+  "edit_caption_hint": {
+    "message": "Wird in jedem Export unten angezeigt und steht in den Untertiteldateien unten."
+  },
+  "edit_subtitles_srt": {
+    "message": ".srt herunterladen"
+  },
+  "edit_subtitles_vtt": {
+    "message": ".vtt herunterladen"
+  },
+  "edit_subtitles_tip": {
+    "message": "Alle Untertitel als Datei, passend zum exportierten Video"
+  },
+  "edit_no_captions": {
+    "message": "Keine Untertitel mit Text im behaltenen Teil"
+  },
+  "keep_off_tip": {
+    "message": "Behalten: wird nicht automatisch entfernt"
+  },
+  "keep_on_tip": {
+    "message": "Behalten, bis Sie es entfernen (klicken, damit es automatisch entfernt wird)"
+  },
+  "keep_on": {
+    "message": "Behalten, bis du es entfernst"
+  },
+  "keep_off": {
+    "message": "Wird nach der in den Einstellungen festgelegten Zeit automatisch entfernt"
+  },
+  "kept": {
+    "message": "Behalten"
+  },
+  "project_save_tip": {
+    "message": "Projekt speichern: alles in einer Datei, für später oder einen anderen Computer"
+  },
+  "project_save_failed": {
+    "message": "Projekt konnte nicht gespeichert werden: $1"
+  },
+  "project_open": {
+    "message": "Projekt öffnen…"
+  },
+  "project_not_project": {
+    "message": "Das ist keine Captode-Projektdatei"
+  },
+  "project_too_new": {
+    "message": "Dieses Projekt stammt aus einem neueren Captode. Aktualisiere Captode, um es zu öffnen."
+  },
+  "storage_title": {
+    "message": "Aufnahmen und Speicher"
+  },
+  "storage_hint": {
+    "message": "Nicht behaltene Aufnahmen werden nach der hier gewählten Zeit automatisch entfernt. Speichern Sie ein Projekt, um eine mit allen Änderungen in einer Datei zu behalten."
+  },
+  "storage_used": {
+    "message": "Aufnahmen: $1 · $2 belegt."
+  },
+  "storage_delete_unkept": {
+    "message": "Alle nicht behaltenen löschen"
+  },
+  "storage_delete_unkept_text": {
+    "message": "Nicht behaltene Aufnahmen werden mit ihren Änderungen gelöscht: $1."
+  },
+  "storage_deleted": {
+    "message": "Gelöscht: $1"
+  },
+  "share_file": {
+    "message": "Teilen"
+  },
+  "share_file_tip": {
+    "message": "Datei mit einer anderen App teilen"
+  },
+  "share_file_cannot": {
+    "message": "Diese Datei kann hier nicht geteilt werden; lade sie stattdessen herunter"
+  },
+  "share_file_failed": {
+    "message": "Teilen fehlgeschlagen: $1"
+  },
+  "queue_add": {
+    "message": "Zur Warteschlange"
+  },
+  "queue_add_tip": {
+    "message": "Zur Warteschlange: läuft im Hintergrund weiter, auch wenn du diese Seite schließt"
+  },
+  "queue_title": {
+    "message": "Exporte"
+  },
+  "queue_waiting": {
+    "message": "Wartet"
+  },
+  "queue_running": {
+    "message": "Wird exportiert… $1 %"
+  },
+  "queue_ready": {
+    "message": "Fertig · $1"
+  },
+  "queue_failed": {
+    "message": "Fehlgeschlagen: $1"
+  },
+  "queue_failed_here": {
+    "message": "Geht hier nicht im Hintergrund; nutze Exportieren auf der Videoseite"
+  },
+  "queue_cancel": {
+    "message": "Abbrechen"
+  },
+  "queue_added": {
+    "message": "Zur Warteschlange hinzugefügt: $1"
+  },
+  "edit_callout_ellipse": {
+    "message": "Kreis"
+  },
+  "edit_callout_step": {
+    "message": "Schritt"
+  },
+  "edit_step_label": {
+    "message": "Nummer"
+  },
+  "format_smallest_name": {
+    "message": "Kleinste"
+  },
+  "format_smallest": {
+    "message": "Dieselben Pixel in der kleinsten Datei: PNG oder verlustfreies WebP, je nachdem, was kleiner ist."
+  },
+  "format_webp_lossless_name": {
+    "message": "verlustfreies WebP"
+  },
+  "editor_webp_lossless": {
+    "message": "Verlustfrei"
+  },
+  "editor_webp_lossless_hint": {
+    "message": "Genau dieselben Pixel, mit Transparenz; größer als verlustbehaftetes WebP"
+  },
+  "editor_scale_css": {
+    "message": "1× — wie auf dem Bildschirm"
+  },
+  "editor_scale_css_n": {
+    "message": "1× — wie auf dem Bildschirm ($1 %)"
+  },
+  "editor_use_smallest": {
+    "message": "Kleinste verwenden"
+  },
+  "fit_lossy_format": {
+    "message": "verlustbehaftetes $1"
+  },
+  "picked_only": {
+    "message": "Gespeichert als $1."
+  },
+  "picked_note": {
+    "message": "Gespeichert als $1: $2 % kleiner als das andere verlustfreie Format."
+  },
+  "hint_smaller": {
+    "message": "Kleinste wäre $1 % kleiner, ohne Verlust ($2)."
+  },
+  "editor_several": {
+    "message": "Mehrere Größen oder Formate"
+  },
+  "editor_several_hint": {
+    "message": "Jede angehakte Variante in einem Zip, mit den Einstellungen oben."
+  },
+  "editor_several_download": {
+    "message": "Zip herunterladen"
+  },
+  "editor_several_none": {
+    "message": "Hake mindestens eine Größe und ein Format an"
+  },
+  "editor_several_working": {
+    "message": "Erstelle $1 von $2…"
+  },
+  "brand_title": {
+    "message": "Ihr Logo"
+  },
+  "brand_hint": {
+    "message": "Fügen Sie Ihr Logo in eine Ecke von Screenshots und Aufnahmen ein. Es bleibt auf diesem Gerät."
+  },
+  "brand_choose": {
+    "message": "Bild auswählen…"
+  },
+  "brand_corner": {
+    "message": "Ecke"
+  },
+  "brand_br": {
+    "message": "Unten rechts"
+  },
+  "brand_bl": {
+    "message": "Unten links"
+  },
+  "brand_tr": {
+    "message": "Oben rechts"
+  },
+  "brand_tl": {
+    "message": "Oben links"
+  },
+  "brand_small": {
+    "message": "Klein"
+  },
+  "brand_medium": {
+    "message": "Mittel"
+  },
+  "brand_large": {
+    "message": "Groß"
+  },
+  "brand_images": {
+    "message": "Zu neuen Screenshots hinzufügen"
+  },
+  "brand_images_hint": {
+    "message": "Für einen einzelnen Screenshot können Sie es im Tab „Exportieren“ des Editors ausschalten"
+  },
+  "brand_videos": {
+    "message": "Zu Aufnahmen hinzufügen"
+  },
+  "brand_videos_hint": {
+    "message": "Für eine einzelne Aufnahme können Sie es in deren Exporteinstellungen ausschalten"
+  },
+  "brand_add_logo": {
+    "message": "Mein Logo hinzufügen"
+  },
+  "brand_add_logo_hint": {
+    "message": "Das in den Einstellungen gewählte Logo, in einer Ecke des Bildes"
+  },
+  "brand_not_image": {
+    "message": "Diese Datei ist kein Bild, das Captode lesen kann"
+  },
+  "storage_search": {
+    "message": "Nach Titel oder Website suchen"
+  },
+  "storage_show": {
+    "message": "Anzeigen"
+  },
+  "storage_recordings": {
+    "message": "Aufnahmen"
+  },
+  "storage_none_match": {
+    "message": "Keine passenden Aufnahmen."
+  },
+  "guide_copy_tip": {
+    "message": "Alle Schritte mit Bildern, zum Einfügen in Google Docs, Notion, Confluence oder eine E-Mail"
+  },
+  "guide_copied": {
+    "message": "Anleitung kopiert. Fügen Sie sie in Ihr Dokument ein."
+  },
+  "guide_copy_failed": {
+    "message": "Die Zwischenablage hat nicht reagiert. Versuchen Sie es erneut."
+  },
+  "tool_copy_text": {
+    "message": "Text kopieren"
+  },
+  "tool_about_copytext": {
+    "message": "Ziehen Sie über Wörter im Screenshot, um sie zu kopieren, oder klicken Sie auf eine Zeile. Funktioniert bei neuen Screenshots von Webseiten."
+  },
+  "copy_text_none": {
+    "message": "Dort ist kein Text zum Kopieren"
+  },
+  "copy_text_done": {
+    "message": "$1 Wörter kopiert"
+  },
+  "translate_into": {
+    "message": "Übersetzen in…"
+  },
+  "translate_captions": {
+    "message": "Alle Untertitel übersetzen"
+  },
+  "translate_working": {
+    "message": "Wird auf diesem Gerät übersetzt…"
+  },
+  "translate_download": {
+    "message": "Der Browser lädt sein Sprachmodell: $1 %"
+  },
+  "translate_done": {
+    "message": "Übersetzt in: $1"
+  },
+  "translate_same": {
+    "message": "Der Text ist bereits in dieser Sprache"
+  },
+  "translate_unavailable": {
+    "message": "Dieser Browser kann zwischen diesen Sprachen noch nicht übersetzen"
+  },
+  "translate_failed": {
+    "message": "Übersetzen nicht möglich: $1"
+  },
+  "settings_sections": {
+    "message": "Bereiche"
+  },
+  "settings_search": {
+    "message": "Einstellungen durchsuchen"
+  },
+  "settings_no_match": {
+    "message": "Keine passenden Einstellungen."
+  },
+  "backup_title": {
+    "message": "Einstellungen sichern"
+  },
+  "backup_hint": {
+    "message": "Speichern Sie Einstellungen, Logo und Exportvorlagen in einer Datei, um sie auf einem anderen Computer oder Browser zu laden oder mit Ihrem Team zu teilen. Aufnahmen sind nicht enthalten."
+  },
+  "backup_save": {
+    "message": "Einstellungsdatei speichern"
+  },
+  "backup_load": {
+    "message": "Einstellungsdatei laden…"
+  },
+  "backup_loaded": {
+    "message": "Einstellungen aus der Datei geladen"
+  },
+  "backup_not_file": {
+    "message": "Das ist keine Captode-Einstellungsdatei"
+  },
+  "backup_too_new": {
+    "message": "Diese Einstellungen stammen von einer neueren Captode-Version. Aktualisieren Sie Captode, um sie zu laden."
+  },
+  "brand_preview": {
+    "message": "Vorschau"
+  },
+  "presets_title": {
+    "message": "Exportvorlagen"
+  },
+  "presets_hint": {
+    "message": "Vorlagen, die Sie im Editor und auf der Videoseite gespeichert haben. Hier können Sie sie umbenennen, umsortieren oder löschen."
+  },
+  "presets_none": {
+    "message": "Noch keine Vorlagen gespeichert. Speichern Sie eine im Tab „Exportieren“ des Editors oder auf der Videoseite."
+  },
+  "keep_for_label": {
+    "message": "Nicht behaltene Aufnahmen entfernen nach"
+  },
+  "keep_for_1": {
+    "message": "Einem Tag"
+  },
+  "keep_for_7": {
+    "message": "Einer Woche"
+  },
+  "keep_for_30": {
+    "message": "Einem Monat"
+  },
+  "keep_for_0": {
+    "message": "Nie: Ich lösche sie selbst"
+  },
+  "storage_sort": {
+    "message": "Sortieren"
+  },
+  "storage_sort_new": {
+    "message": "Neueste zuerst"
+  },
+  "storage_sort_big": {
+    "message": "Größte zuerst"
+  },
+  "storage_breakdown": {
+    "message": "Screenshots $1 · Aufnahmen $2"
+  },
+  "fit_too_big_readable": {
+    "message": "Dieses Limit ist zu klein, um den Text lesbar zu halten. Die kleinste lesbare Datei hat $1."
+  },
+  "fit_near_lossless": {
+    "message": "PNG mit weniger Farben, sieht gleich aus"
+  },
+  "fit_readable": {
+    "message": "Der Text bleibt lesbar."
+  },
+  "fit_forced": {
+    "message": "Der Text ist eventuell schwer lesbar."
+  },
+  "fit_anyway": {
+    "message": "Trotzdem einpassen"
+  },
+  "fit_keep_readable": {
+    "message": "Lesbar halten"
+  },
+  "fit_anyway_tip": {
+    "message": "Qualität und Größe senken, bis es passt, auch wenn der Text unscharf wird"
+  },
+  "resize_original": {
+    "message": "Originalgröße"
+  },
+  "resize_original_tip": {
+    "message": "Zurück zu $1, mit den Originalpixeln"
+  },
+  "resized_original": {
+    "message": "Zurück auf Originalgröße, $1"
+  },
+  "resize_keeps_original": {
+    "message": "Beim Skalieren bleiben die Originalpixel erhalten: „Originalgröße“ stellt sie gestochen scharf wieder her."
   }
 }

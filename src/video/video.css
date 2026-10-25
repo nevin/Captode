@@ -39,6 +39,7 @@ body { display: flex; flex-direction: column; overflow: hidden; }
 .dither { align-self: end; margin-bottom: 14px; }
 .callout { margin: 6px 0 0; }
 #device-section summary { margin-bottom: 0; }
+.inspector { scroll-padding-bottom: var(--export-bar, 0px); } /* things scrolled to stay clear of the export bar */
 .export-bar { position: sticky; bottom: 0; margin-top: auto; display: grid; gap: 10px; padding: 14px 16px 16px; background: var(--panel); border-top: 1px solid var(--line); }
 #progress-wrap p { margin: 6px 0 0; }
 .result { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 9px; background: rgba(18, 163, 127, .1); }
@@ -259,3 +260,6 @@ div.ed-item:hover { border-color: var(--line); }
 .ed-rings { margin-bottom: 8px; }
 .ed-rings .swatches { margin-top: 6px; }
 .ed-default { width: 100%; margin-top: 8px; }
+
+#keep.on { color: var(--accent); }
+#keep.on .i { fill: currentColor; }

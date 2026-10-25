@@ -1,16 +1,22 @@
 import { recall, remember, rememberControls } from '../lib/remember.js';
 import { mountPresets } from '../lib/presets.js';
-import { getCapture, listCaptures, deleteCapture, restoreCapture, saveEdits } from '../lib/db.js';
+import { getCapture, listCaptures, deleteCapture, restoreCapture, saveEdits, setKept } from '../lib/db.js';
+import { mountCaptureTools } from '../lib/keep.js';
+import { PALETTE, roundRect, drawArrow, drawStroke, drawEllipse, drawStep } from '../lib/shapes.js';
+import { openProject, pageFor } from '../lib/project.js';
 import { encodeOffThread } from '../lib/encoder.js';
+import { canWebpLossless } from '../lib/formats.js';
+import { zip } from '../lib/zip.js';
 import { mountDevicePanel, renderInDevice } from '../lib/device.js';
 import { createLayers } from './layers.js';
 import { mountMultiExport } from './multi-export.js';
 import { mountShare } from './share.js';
 import { luminance, contrast, contrastHtml, hexOf, measureLabel, measureText as measureWords, edgeNear as edgeIn, measureFrom, drawMeasures } from '../lib/review.js';
 import { getSettings, backgroundColour } from '../lib/settings.js';
+import { getBrand, loadLogo, drawLogo } from '../lib/brand.js';
 import { fileStem } from '../lib/filename.js';
 import { copyImageHere } from '../content/page.js';
-import { toast, enhance, tablist, openDialog, fmtBytes, ago, confirmDialog } from '../lib/ui.js';
+import { toast, enhance, tablist, openDialog, fmtBytes, ago, confirmDialog, canShareFiles, shareFile } from '../lib/ui.js';
 import { t, localize } from '../lib/i18n.js';
 
 localize();
@@ -42,6 +48,7 @@ const TOOLS = [
   ['magnify', t('editor_magnifier'), 'z', svg('<circle cx="11" cy="11" r="7"/><path d="m20 20-4-4M8.5 11h5M11 8.5v5"/>')],
   ['step', t('editor_step_number'), 'n', svg('<circle cx="12" cy="12" r="9"/><path d="M10.5 9.5 12.5 8v8"/>')],
   ['measure', t('editor_measure'), 'u', svg('<path d="M3 17 17 3l4 4L7 21z"/><path d="m7 13 2 2M10 10l2 2M13 7l2 2"/>')],
+  ['copytext', t('tool_copy_text'), 'x', svg('<path d="M4 7V5h10v2M9 5v10"/><rect x="12" y="11" width="9" height="10" rx="1.5"/><path d="M15 15h3M15 18h3"/>')],
   ['pick', t('editor_colour_picker'), 'i', svg('<path d="m2 22 1-1h3l9-9"/><path d="M3 21v-3l9-9"/><path d="m15 6 3.4-3.4a2.1 2.1 0 1 1 3 3L18 9l.4.4a2.1 2.1 0 1 1-3 3l-3.8-3.8a2.1 2.1 0 1 1 3-3z"/>')],
   ['redact', t('editor_blur_or_pixelate'), 'b', svg('<rect x="3" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="14" y="3" width="7" height="7" opacity=".4"/><rect x="3" y="14" width="7" height="7" opacity=".4"/>')],
 ];
@@ -50,7 +57,7 @@ const FONTS = [
   'Georgia', 'Times New Roman', 'Palatino', 'Garamond', 'Courier New', 'Menlo', 'Monaco',
   'Impact', 'Comic Sans MS', 'Brush Script MT', 'monospace', 'serif', 'cursive',
 ];
-const SWATCHES = ['#e5484d', '#f76b15', '#ffc53d', '#30a46c', '#0090ff', '#5b4bff', '#17171c', '#ffffff'];
+const SWATCHES = PALETTE;
 const BACKDROPS = ['transparent', '#ffffff', '#ececf4', '#17171c', '#dbe4ff', '#ffe4e6', '#dcfce7', '#0f172a'];
 const GROUPS = {
   pen: ['stroke'], highlighter: ['stroke'], line: ['stroke'], arrow: ['stroke'],
@@ -80,6 +87,8 @@ const DASHABLE = new Set(['line', 'arrow', 'rect', 'ellipse']);
 const frame = { padding: 0, bg: 'transparent', radius: 0, shadow: false }; // bg: a colour or 'transparent'
 
 let base = null;     // OffscreenCanvas with the pixels being edited
+let logo = null;     // your logo from Settings, ready to draw (lib/brand.js), when one is set
+let logoOn = false;  // added to this picture's corner
 let objects = [];    // annotations, in image coordinates
 let selection = []; // selected annotations
 let selected = null; // the selected annotation when exactly one is: it gets handles and the style panel
@@ -170,6 +179,13 @@ const exportChanged = () => { if (document.body.dataset.pane === 'export') refre
 // reopening it from Recent captures or reloading the page brings them back.
 
 let captureId = null;  // the stored capture being edited, if any
+const captureTools = mountCaptureTools({
+  keep: document.getElementById('keep'),
+  project: document.getElementById('save-project'),
+  id: () => captureId,
+  beforeSave: () => persist(),
+  stem: () => ($('#x-name').value || 'captode').trim().replace(/[\\/:*?"<>|]+/g, '-'),
+});
 let loadedBase = null; // the image as stored, to tell whether it has been cropped or resized
 let savedImage = { base: null, blob: null };
 
@@ -185,7 +201,17 @@ async function persist() {
     if (savedImage.base !== base) savedImage = { base, blob: await base.convertToBlob({ type: 'image/png' }) };
     image = savedImage.blob;
   }
-  await saveEdits(id, { objects: objects.map(({ _editing, ...o }) => structuredClone(o)), frame: { ...frame }, base: image, saved: Date.now() });
+  let full = null;
+  if (image && base.full && base.full !== loadedBase) {
+    if (savedImage.full !== base.full) savedImage = { ...savedImage, full: base.full, fullBlob: await base.full.convertToBlob({ type: 'image/png' }) };
+    full = savedImage.fullBlob;
+  }
+  await saveEdits(id, {
+    objects: objects.map(({ _editing, ...o }) => structuredClone(o)), frame: { ...frame }, base: image,
+    ...(image && base.words?.length && { words: base.words }),
+    ...(image && base.full && { full, fullWords: base.full.words }),
+    saved: Date.now(),
+  });
 }
 const persistSoon = debounce(() => persist().catch(() => {}), 700);
 // Don't lose the last moments of work when the tab is hidden or closed.
@@ -199,6 +225,17 @@ async function restoreEdits(edits) {
     const c = canvas(bmp.width, bmp.height);
     c.getContext('2d').drawImage(bmp, 0, 0);
     bmp.close();
+    c.words = pageWords(edits.words);
+    // Resized before: the picture before resizing, saved with it or the capture itself.
+    if (edits.full instanceof Blob) {
+      const fb = await createImageBitmap(edits.full);
+      c.full = canvas(fb.width, fb.height);
+      c.full.getContext('2d').drawImage(fb, 0, 0);
+      fb.close();
+      c.full.words = pageWords(edits.fullWords);
+    } else if ('full' in edits && loadedBase && (loadedBase.width !== c.width || loadedBase.height !== c.height)) {
+      c.full = loadedBase;
+    }
     base = c;
   }
   objects = edits.objects || [];
@@ -249,10 +286,6 @@ function updateButtons() {
 
 // ---------- drawing ----------
 
-function roundRect(ctx, x, y, w, h, r) {
-  ctx.beginPath();
-  ctx.roundRect(x, y, w, h, Math.max(0, Math.min(r, w / 2, h / 2)));
-}
 
 const GENERIC = new Set(['system-ui', 'serif', 'sans-serif', 'monospace', 'cursive', 'fantasy']);
 
@@ -270,19 +303,7 @@ function textLayout(o) {
   return { lines, lh, w, pad, bw: w + pad * 2, bh: lines.length * lh + pad * 2 };
 }
 
-function arrowHead(ctx, x1, y1, x2, y2, width) {
-  const a = Math.atan2(y2 - y1, x2 - x1);
-  const size = Math.max(10, width * 3.2);
-  ctx.beginPath();
-  ctx.moveTo(x2, y2);
-  ctx.lineTo(x2 - size * Math.cos(a - 0.45), y2 - size * Math.sin(a - 0.45));
-  ctx.lineTo(x2 - size * Math.cos(a + 0.45), y2 - size * Math.sin(a + 0.45));
-  ctx.closePath();
-  ctx.fill();
-  return size;
-}
-
-const stepRing = (o) => Math.max(1.5, o.size * 0.06);
+const stepRing = (o) => Math.max(1.5, o.size * 0.06); // as lib/shapes.js draws it
 
 // Blurred or pixelated areas, worked out once and reused until they move or change:
 // recomputing them on every frame made dragging stutter on large captures.
@@ -376,20 +397,9 @@ function drawObject(ctx, o) {
 
   switch (o.type) {
     case 'pen':
-    case 'highlighter': {
-      const p = o.points;
-      ctx.beginPath();
-      ctx.moveTo(p[0][0], p[0][1]);
-      if (p.length === 1) ctx.lineTo(p[0][0] + 0.01, p[0][1]);
-      for (let i = 1; i < p.length - 1; i++) {
-        const mx = (p[i][0] + p[i + 1][0]) / 2;
-        const my = (p[i][1] + p[i + 1][1]) / 2;
-        ctx.quadraticCurveTo(p[i][0], p[i][1], mx, my);
-      }
-      if (p.length > 1) ctx.lineTo(p[p.length - 1][0], p[p.length - 1][1]);
-      ctx.stroke();
+    case 'highlighter':
+      drawStroke(ctx, o.points);
       break;
-    }
     case 'rect': {
       const r = norm(o);
       if (o.fill) { ctx.fillStyle = o.fill; ctx.fillRect(r.x, r.y, r.w, r.h); }
@@ -398,10 +408,7 @@ function drawObject(ctx, o) {
     }
     case 'ellipse': {
       const r = norm(o);
-      ctx.beginPath();
-      ctx.ellipse(r.x + r.w / 2, r.y + r.h / 2, r.w / 2, r.h / 2, 0, 0, Math.PI * 2);
-      if (o.fill) { ctx.fillStyle = o.fill; ctx.fill(); }
-      ctx.stroke();
+      drawEllipse(ctx, r.x, r.y, r.w, r.h, o.fill || null);
       break;
     }
     case 'line':
@@ -410,19 +417,9 @@ function drawObject(ctx, o) {
       ctx.lineTo(o.x2, o.y2);
       ctx.stroke();
       break;
-    case 'arrow': {
-      const len = Math.hypot(o.x2 - o.x1, o.y2 - o.y1);
-      const size = arrowHead(ctx, o.x1, o.y1, o.x2, o.y2, o.width);
-      if (o.heads === 2) arrowHead(ctx, o.x2, o.y2, o.x1, o.y1, o.width);
-      // The shaft stops inside the heads, so its end doesn't poke out of their points.
-      const k1 = len ? Math.max(0, len - size * 0.7) / len : 0;
-      const k0 = o.heads === 2 && len ? Math.min(k1, (size * 0.7) / len) : 0;
-      ctx.beginPath();
-      ctx.moveTo(o.x1 + (o.x2 - o.x1) * k0, o.y1 + (o.y2 - o.y1) * k0);
-      ctx.lineTo(o.x1 + (o.x2 - o.x1) * k1, o.y1 + (o.y2 - o.y1) * k1);
-      ctx.stroke();
+    case 'arrow':
+      drawArrow(ctx, o.x1, o.y1, o.x2, o.y2, o.width, o.heads);
       break;
-    }
     case 'magnify': {
       const r = norm(o);
       const rad = Math.min(r.w, r.h) / 2;
@@ -467,28 +464,10 @@ function drawObject(ctx, o) {
       L.lines.forEach((line, i) => ctx.fillText(line, o.x + L.pad, o.y + L.pad + i * L.lh + L.lh / 2));
       break;
     }
-    case 'step': {
-      const r = o.size / 2;
+    case 'step':
       ctx.globalAlpha = 1;
-      ctx.shadowColor = 'rgba(0,0,0,0.28)';
-      ctx.shadowBlur = r * 0.35;
-      ctx.shadowOffsetY = r * 0.1;
-      ctx.beginPath();
-      ctx.arc(o.x, o.y, r, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.shadowColor = 'transparent';
-      ctx.lineWidth = stepRing(o);
-      ctx.strokeStyle = '#fff';
-      ctx.stroke();
-      const label = String(o.n);
-      const fs = r * (label.length >= 3 ? 0.78 : label.length === 2 ? 0.95 : 1.1);
-      ctx.font = `700 ${fs}px system-ui, sans-serif`;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillStyle = luminance(o.color) > 0.55 ? '#17171c' : '#ffffff';
-      ctx.fillText(label, o.x, o.y + fs * 0.04);
+      drawStep(ctx, o.x, o.y, o.size, o.n, o.color);
       break;
-    }
     case 'redact': {
       const r = norm(o);
       const x = clamp(Math.round(r.x), 0, base.width);
@@ -565,6 +544,81 @@ function paintObjects(ctx, vis = null) {
     }
     drawObject(ctx, o);
   }
+  if (logoOn && logo && base) drawLogo(ctx, logo, 0, 0, base.width, base.height);
+  ctx.restore();
+}
+
+// ---------- copying text ----------
+// A screenshot of a web page keeps where each word was (see findText in
+// content/page.js), so its words can be copied: drag over them with Copy text, or
+// click a line. The words follow a crop or resize; rotated or flipped, there are none.
+
+/** Boxes [x, y, w, h, text] in image pixels, from the capture or saved edits. */
+function pageWords(list) {
+  if (!Array.isArray(list)) return undefined;
+  const ok = list.filter((b) => Array.isArray(b) && b.length === 5 && b.slice(0, 4).every(Number.isFinite) && typeof b[4] === 'string');
+  return ok.length ? ok : undefined;
+}
+
+function syncTextTool() {
+  const b = document.querySelector('#tools [data-tool="copytext"]');
+  if (b) b.hidden = !base?.words?.length;
+  if (tool === 'copytext' && !base?.words?.length) setTool('select');
+}
+
+const selBox = (a, b) => ({ x: Math.min(a.x, b.x), y: Math.min(a.y, b.y), w: Math.abs(a.x - b.x), h: Math.abs(a.y - b.y) });
+
+/** The words dragged over from `a` to `b`, or for a click, the run of text under it. */
+function wordsIn(a, b) {
+  const words = base?.words || [];
+  const r = selBox(a, b);
+  if (r.w < 3 / zoom && r.h < 3 / zoom) {
+    const hit = words.find((w) => a.x >= w[0] && a.x <= w[0] + w[2] && a.y >= w[1] && a.y <= w[1] + w[3]);
+    return hit ? [hit] : [];
+  }
+  return words.filter((w) => { const cx = w[0] + w[2] / 2, cy = w[1] + w[3] / 2; return cx >= r.x && cx <= r.x + r.w && cy >= r.y && cy <= r.y + r.h; });
+}
+
+/** The words as text, line by line: on a line, a space where there was a gap. */
+function wordsText(list) {
+  const sorted = [...list].sort((p, q) => (p[1] + p[3] / 2) - (q[1] + q[3] / 2));
+  const lines = [];
+  for (const w of sorted) {
+    const cy = w[1] + w[3] / 2;
+    const line = lines.find((l) => cy >= l.top && cy <= l.bottom);
+    if (line) { line.words.push(w); line.top = Math.min(line.top, w[1]); line.bottom = Math.max(line.bottom, w[1] + w[3]); } else lines.push({ top: w[1], bottom: w[1] + w[3], words: [w] });
+  }
+  return lines.sort((p, q) => p.top - q.top).map((l) => {
+    let out = '', end = -Infinity;
+    for (const w of l.words.sort((p, q) => p[0] - q[0])) {
+      if (out && w[0] - end > w[3] * 0.15) out += ' ';
+      out += w[4];
+      end = w[0] + w[2];
+    }
+    return out;
+  }).join('\n');
+}
+
+async function copyText(list) {
+  const text = wordsText(list);
+  if (!text.trim()) { toast(t('copy_text_none')); return; }
+  try {
+    await navigator.clipboard.writeText(text);
+    toast(t('copy_text_done', String(text.split(/\s+/).filter(Boolean).length)), { kind: 'success' });
+  } catch (e) {
+    toast(t('copy_failed', e.message), { kind: 'error', ms: 4000 });
+  }
+}
+
+function drawTextSelection(ctx, px) {
+  const r = selBox(drag.start, drag.end);
+  ctx.save();
+  ctx.fillStyle = 'rgba(91, 75, 255, 0.28)';
+  for (const w of wordsIn(drag.start, drag.end)) ctx.fillRect(w[0], w[1], w[2], w[3]);
+  ctx.strokeStyle = '#5b4bff';
+  ctx.lineWidth = px;
+  ctx.setLineDash([5 * px, 4 * px]);
+  ctx.strokeRect(r.x, r.y, r.w, r.h);
   ctx.restore();
 }
 
@@ -634,6 +688,7 @@ function renderFg() {
   fctx.translate(frame.padding, frame.padding);
   const px = 1 / zoom;
   drawReview(fctx, px);
+  if (drag?.kind === 'textsel') drawTextSelection(fctx, px);
 
   fctx.strokeStyle = '#5b4bff';
   for (const o of selection) {
@@ -703,6 +758,8 @@ function renderFg() {
 
 function layout() {
   if (!base) return;
+  syncTextTool();
+  syncOriginalSize();
   applyZoom();
   $('#rs-w').value = base.width;
   $('#rs-h').value = base.height;
@@ -1107,6 +1164,11 @@ fg.addEventListener('pointerdown', (e) => {
     drag = { kind: 'measure', start: { x, y }, m: { x1: x, y1: y, x2: x, y2: y } };
     return;
   }
+  if (tool === 'copytext') {
+    drag = { kind: 'textsel', start: pt, end: pt };
+    renderFg();
+    return;
+  }
   if (tool === 'pick') {
     pickColour(pt);
     return;
@@ -1173,6 +1235,11 @@ fg.addEventListener('pointermove', (e) => {
     return;
   }
   const pt = toImage(e);
+  if (drag.kind === 'textsel') {
+    drag.end = pt;
+    renderFg();
+    return;
+  }
   if (drag.kind === 'measure') {
     // Straightened when nearly straight, ends snapped to edges (Alt: neither).
     const m = drag.m;
@@ -1256,6 +1323,11 @@ function endDrag() {
   const d = drag;
   drag = null;
   guides = [];
+  if (d.kind === 'textsel') {
+    copyText(wordsIn(d.start, d.end));
+    renderFg();
+    return;
+  }
   if (d.kind === 'measure') {
     if (Math.hypot(d.m.x2 - d.m.x1, d.m.y2 - d.m.y1) >= 2) review.measures = [...review.measures, d.m].slice(-30);
     showMeasure(review.measures.at(-1) || null);
@@ -1351,8 +1423,8 @@ function showPane(name) {
   for (const p of document.querySelectorAll('.pane')) p.classList.toggle('hidden', p.dataset.pane !== name);
   selectTab(document.querySelector(`.tabs [data-pane="${name}"]`));
   document.body.dataset.pane = name;
+  previewSoon();
   if (name === 'export') refreshExport();
-  else updateDevicePreview();
 }
 document.querySelector('.tabs').addEventListener('click', (e) => {
   const b = e.target.closest('button[data-pane]');
@@ -1404,6 +1476,7 @@ function setTool(t) {
   if (t !== 'crop') crop = null;
   if (t !== 'select' && selection.length && GROUPS[t] && selection.some((o) => o.type !== t)) select([]);
   stage.dataset.tool = t;
+  $('#copy-text-help')?.classList.toggle('hidden', t !== 'copytext');
   if (REVIEW_TOOLS.has(t)) showPane('review');
   else if (t !== 'select') showPane('annotate');
   for (const b of document.querySelectorAll('#tools .btn')) b.classList.toggle('active', b.dataset.tool === t);
@@ -1419,9 +1492,9 @@ const TOOL_GROUPS = [
   ['group_shapes', ['arrow', 'line', 'rect', 'ellipse']],
   ['group_text_steps', ['text', 'callout', 'step']],
   ['group_focus_privacy', ['spotlight', 'magnify', 'redact']],
-  ['group_review', ['measure', 'pick']],
+  ['group_review', ['measure', 'pick', 'copytext']],
 ];
-const REVIEW_TOOLS = new Set(['measure', 'pick']);
+const REVIEW_TOOLS = new Set(['measure', 'pick', 'copytext']);
 $('#tools').innerHTML = TOOL_GROUPS.map(([group, ids]) => `<span class="tool-group" role="group" aria-label="${t(group)}">${ids.map((id) => {
   const [, title, key, icon] = TOOLS.find((x) => x[0] === id);
   return `<button class="btn ghost icon" data-tool="${id}" data-key="${key.toUpperCase()}" data-tool-group="${group}" aria-label="${title}" aria-keyshortcuts="${key}">${icon}</button>`;
@@ -1939,6 +2012,16 @@ function applyCrop() {
   const w = Math.round(crop.w), h = Math.round(crop.h);
   const c = canvas(w, h);
   c.getContext('2d').drawImage(base, x, y, w, h, 0, 0, w, h);
+  c.words = base.words?.filter((b) => { const cx = b[0] + b[2] / 2, cy = b[1] + b[3] / 2; return cx >= x && cy >= y && cx < x + w && cy < y + h; }).map((b) => [b[0] - x, b[1] - y, b[2], b[3], b[4]]);
+  if (base.full) {
+    // The same part of the picture before resizing, so Original size still works.
+    const f = base.full, kx = f.width / base.width, ky = f.height / base.height;
+    const fw = Math.max(1, Math.round(w * kx)), fh = Math.max(1, Math.round(h * ky));
+    const fc = canvas(fw, fh);
+    fc.getContext('2d').drawImage(f, Math.round(x * kx), Math.round(y * ky), fw, fh, 0, 0, fw, fh);
+    fc.words = f.words?.filter((b) => { const cx = b[0] + b[2] / 2, cy = b[1] + b[3] / 2; return cx >= x * kx && cy >= y * ky && cx < (x + w) * kx && cy < (y + h) * ky; }).map((b) => [b[0] - x * kx, b[1] - y * ky, b[2], b[3], b[4]]);
+    c.full = fc;
+  }
   base = c;
   for (const o of objects) moveObj(o, -x, -y);
   crop = null;
@@ -1972,23 +2055,42 @@ for (const b of document.querySelectorAll('[data-pct]')) {
     $('#rs-h').value = Math.max(1, Math.round(base.height * Number(b.dataset.pct)));
   });
 }
-$('#rs-apply').addEventListener('click', async () => {
+// Resizing keeps the picture as it was before any resize (`base.full`): every resize
+// starts from it, so sizes don't blur one after another, and Original size brings
+// back its exact pixels. A crop is made to it too; rotating or flipping starts afresh.
+async function resizeTo(w, h) {
   if (!base) return;
-  const w = clamp(Math.round(Number($('#rs-w').value)), 1, 16000);
-  const h = clamp(Math.round(Number($('#rs-h').value)), 1, 16000);
+  w = clamp(Math.round(w), 1, 16000);
+  h = clamp(Math.round(h), 1, 16000);
   if (w === base.width && h === base.height) return;
-  const bmp = await createImageBitmap(base, { resizeWidth: w, resizeHeight: h, resizeQuality: 'high' });
-  const c = canvas(w, h);
-  c.getContext('2d').drawImage(bmp, 0, 0);
-  bmp.close();
+  const full = base.full || base;
+  let c;
+  if (w === full.width && h === full.height) {
+    c = full;
+  } else {
+    const bmp = await createImageBitmap(full, { resizeWidth: w, resizeHeight: h, resizeQuality: 'high' });
+    c = canvas(w, h);
+    c.getContext('2d').drawImage(bmp, 0, 0);
+    bmp.close();
+    c.full = full;
+    const fx = w / full.width, fy = h / full.height;
+    c.words = full.words?.map((b) => [b[0] * fx, b[1] * fy, b[2] * fx, b[3] * fy, b[4]]);
+  }
   const sx = w / base.width, sy = h / base.height;
   for (const o of objects) scaleObj(o, sx, sy);
   base = c;
   layout();
   fitZoom();
   commit();
-  toast(t('resized_to', `${w} × ${h}`), { kind: 'success' });
-});
+  toast(c === full ? t('resized_original', `${w} × ${h}`) : t('resized_to', `${w} × ${h}`), { kind: 'success' });
+}
+$('#rs-apply').addEventListener('click', () => resizeTo(Number($('#rs-w').value), Number($('#rs-h').value)));
+$('#rs-original').addEventListener('click', () => { const f = base?.full; if (f) resizeTo(f.width, f.height); });
+function syncOriginalSize() {
+  const f = base?.full;
+  $('#rs-original').classList.toggle('hidden', !f);
+  if (f) $('#rs-original').dataset.tip = t('resize_original_tip', `${f.width} × ${f.height}`);
+}
 
 /**
  * Rotates the image a quarter turn (dir 1: clockwise, -1: anticlockwise) or flips it
@@ -2088,11 +2190,18 @@ $('#delete').addEventListener('click', deleteSelected);
 // ---------- export ----------
 
 /** The export options remembered between visits and kept in presets. */
-const EXPORT_CONTROLS = ['x-quality', 'x-colors', 'x-dither', 'x-lossy', 'x-page', 'x-split', 'x-scale', 'x-limit'];
+const EXPORT_CONTROLS = ['x-quality', 'x-colors', 'x-dither', 'x-lossy', 'x-page', 'x-split', 'x-scale', 'x-limit', 'x-lossless'];
 
 const EXT = { png: 'png', png8: 'png', jpeg: 'jpg', webp: 'webp', avif: 'avif', gif: 'gif', bmp: 'bmp', pdf: 'pdf' };
+// "Smallest" saves whichever format came out smallest; its file is named for that one.
+const EXT_OF_TYPE = { 'image/png': 'png', 'image/webp': 'webp', 'image/jpeg': 'jpg' };
+const extFor = (blob, f = $('#x-format').value) => (f === 'smallest' ? EXT_OF_TYPE[blob?.type] || 'png' : EXT[f]);
+
+let webpLossless = false; // whether this browser saves lossless WebP (known once the editor starts)
+let captureDpr = 1; // the screenshot's pixels per CSS pixel, for "1× — as on screen"
 
 const FORMAT_INFO = {
+  smallest: [t('format_smallest_name'), t('format_smallest')],
   png: ['PNG', t('format_png')],
   png8: ['PNG-8', t('format_png8')],
   jpeg: ['JPEG', t('format_jpeg')],
@@ -2119,13 +2228,15 @@ function syncExportUi() {
   const f = $('#x-format').value;
   for (const b of document.querySelectorAll('#formats button')) b.classList.toggle('on', b.dataset.f === f);
   $('#x-note').textContent = FORMAT_INFO[f][1];
-  document.querySelector('[data-x="quality"]').classList.toggle('hidden', !['jpeg', 'webp', 'avif', 'pdf'].includes(f));
+  const lossless = f === 'webp' && webpLossless && $('#x-lossless').checked;
+  document.querySelector('[data-x="lossless"]').classList.toggle('hidden', !(f === 'webp' && webpLossless));
+  document.querySelector('[data-x="quality"]').classList.toggle('hidden', !['jpeg', 'webp', 'avif', 'pdf'].includes(f) || lossless);
   document.querySelector('[data-x="colors"]').classList.toggle('hidden', !['png8', 'gif'].includes(f));
   document.querySelector('[data-x="pdf"]').classList.toggle('hidden', f !== 'pdf');
   document.querySelector('[data-x="lossy"]').classList.toggle('hidden', f !== 'gif');
   $('#x-lossy-v').textContent = Number($('#x-lossy').value) ? $('#x-lossy').value : t('video_off');
   $('#x-quality-v').textContent = $('#x-quality').value + '%';
-  const label = t('download_format', FORMAT_INFO[f][0]);
+  const label = f === 'smallest' ? t('editor_download') : t('download_format', FORMAT_INFO[f][0]);
   $('#download').lastChild.textContent = label;
   $('#download2 .dl-label').textContent = label;
 }
@@ -2141,13 +2252,13 @@ function smallPicture(width) {
   return c;
 }
 
-async function finalCanvas({ scaled = true, deviceOpts = device?.get() } = {}) {
+async function finalCanvas({ scaled = true, deviceOpts = device?.get(), scale = $('#x-scale').value } = {}) {
   let c = canvas(fullW(), fullH());
   const ctx = c.getContext('2d');
   paintImage(ctx);
   paintObjects(ctx);
   if (deviceOpts?.enabled) c = renderInDevice(deviceOpts, c);
-  const s = Number($('#x-scale').value);
+  const s = scaleFactor(scale);
   if (scaled && s !== 1) {
     const w = Math.max(1, Math.round(c.width * s));
     const h = Math.max(1, Math.round(c.height * s));
@@ -2159,8 +2270,24 @@ async function finalCanvas({ scaled = true, deviceOpts = device?.get() } = {}) {
   return c;
 }
 
+/** "1× — as on screen" is offered for screenshots taken on a display scaled above 100%. */
+function syncScaleOptions() {
+  const css = $('#x-scale').querySelector('[value="css"]');
+  css.hidden = !(captureDpr > 1.01);
+  css.textContent = t('editor_scale_css_n', String(Math.round(100 / captureDpr)));
+  if (css.hidden && $('#x-scale').value === 'css') $('#x-scale').value = '1';
+  if ($('#x-several')?.open) renderSeveral();
+}
+
+/** The Scale chosen, as a factor ("1× — as on screen" undoes the display's scale). */
+function scaleFactor(v = $('#x-scale').value) {
+  if (v === 'css') return captureDpr > 1.01 ? 1 / captureDpr : 1;
+  return Number(v) || 1;
+}
+
 function encodeOptions() {
   return {
+    lossless: webpLossless && $('#x-lossless').checked,
     quality: Number($('#x-quality').value) / 100,
     colors: $('#x-colors').value === 'auto' ? 'auto' : Number($('#x-colors').value),
     dither: $('#x-dither').checked,
@@ -2174,26 +2301,77 @@ function encodeOptions() {
  * Encodes in a worker, within the size limit if one is set. `lane` lets a newer
  * estimate cancel an older one. Resolves to `{ blob, width, height, fitted }`.
  */
+let forceFit = false; // "Fit anyway": a size limit may cost readability, for this capture
+
+/**
+ * Encoding options for a size limit: kept readable (see formats.fitReadable), never
+ * smaller than the screenshot was on screen, unless "Fit anyway" was chosen.
+ */
+function fitOptions(scale = $('#x-scale').value) {
+  if (forceFit) return encodeOptions();
+  return { ...encodeOptions(), readable: true, minScale: Math.min(1, 1 / captureDpr / scaleFactor(scale)) };
+}
+
 function encode(c, lane = 'export') {
-  return encodeOffThread(c, $('#x-format').value, encodeOptions(), lane, Number($('#x-limit').value) * 1024);
+  return encodeOffThread(c, $('#x-format').value, fitOptions(), lane, Number($('#x-limit').value) * 1024);
 }
 
 /** Says what was changed to fit the size limit, if anything. */
-function fittedNote(f) {
+function fittedNote(f, size) {
   if (!f) return '';
-  if (f.tooBig) return t('fit_too_big');
+  if (f.tooBig) return f.readable ? t('fit_too_big_readable', fmtBytes(size)) : t('fit_too_big');
   const parts = [];
   if (f.quality !== undefined) parts.push(t('fit_quality', Math.round(f.quality * 100)));
   if (f.lossy) parts.push(t('fit_lossy', f.lossy));
   if (f.colors) parts.push(t('fit_colours', f.colors));
   if (f.scale) parts.push(t('fit_size', Math.round(f.scale * 100)));
-  return t('fit_note', parts.join(', '));
+  if (f.format === 'png8') parts.unshift(t('fit_near_lossless'));
+  else if (f.format) parts.unshift(t('fit_lossy_format', f.format === 'webp' ? 'WebP' : 'JPEG'));
+  return t('fit_note', parts.join(', ')) + (f.readable ? ` ${t('fit_readable')}` : forceFit ? ` ${t('fit_forced')}` : '');
 }
+
+/** For Smallest: which format won, and by how much. */
+function pickedNote(p) {
+  if (!p?.sizes) return '';
+  const name = p.format === 'webp' ? t('format_webp_lossless_name') : p.format === 'png' ? 'PNG' : p.format.toUpperCase();
+  const other = Object.entries(p.sizes).filter(([k]) => k !== p.format).map(([, v]) => v);
+  if (!other.length || !p.sizes[p.format]) return t('picked_only', name);
+  const saved = Math.round((1 - p.sizes[p.format] / Math.max(...other)) * 100);
+  return saved > 0 ? t('picked_note', [name, String(saved)]) : t('picked_only', name);
+}
+
+// A hint when Smallest would make a much smaller file with no loss (worked out after the
+// estimate, for images of a manageable size).
+let hintRun = 0;
+async function refreshHint(c, size) {
+  const run = ++hintRun;
+  const f = $('#x-format').value;
+  $('#x-hint').classList.add('hidden');
+  // Only beside a lossless choice (a lossy file isn't compared like for like), and only
+  // the other lossless format is made, so the PNG isn't compressed twice.
+  if (!['png', 'bmp'].includes(f) || !webpLossless || c.width * c.height > 12e6 || Number($('#x-limit').value)) return;
+  try {
+    const r = await encodeOffThread(c, f === 'png' ? 'webp' : 'smallest', { lossless: true }, 'hint');
+    r.picked ||= { format: 'webp' };
+    if (run !== hintRun || $('#x-format').value !== f) return;
+    const saved = Math.round((1 - r.blob.size / size) * 100);
+    if (saved < 15) return;
+    $('#x-hint span').textContent = t('hint_smaller', [String(saved), r.picked?.format === 'webp' ? t('format_webp_lossless_name') : 'PNG']);
+    $('#x-hint').classList.remove('hidden');
+  } catch { /* superseded, or this browser can't */ }
+}
+$('#x-fit-anyway').addEventListener('click', () => { forceFit = !forceFit; refreshExport(); });
+$('#x-hint-use').addEventListener('click', () => {
+  $('#x-format').value = 'smallest';
+  $('#x-format').dispatchEvent(new Event('input', { bubbles: true }));
+  $('#x-format').dispatchEvent(new Event('change', { bubbles: true }));
+});
 
 let estimateRun = 0;
 const refreshExport = debounce(async () => {
   if (!base) return;
   const run = ++estimateRun;
+  previewSoon(); // the picture first: the file can take seconds to make
   $('#x-estimate').innerHTML = `<span class="working" title="${t('estimate_working')}">…</span>`;
   try {
     const c = await finalCanvas();
@@ -2201,19 +2379,32 @@ const refreshExport = debounce(async () => {
     if (run !== estimateRun) return;
     $('#x-estimate').textContent = fmtBytes(r.blob.size);
     $('#x-dims').textContent = t('export_will_be', `${r.width} × ${r.height} px`);
-    $('#x-fitted').textContent = fittedNote(r.fitted);
+    $('#x-fitted').textContent = fittedNote(r.fitted, r.blob.size);
     $('#x-fitted').classList.toggle('hidden', !r.fitted);
-    $('#x-fitted').classList.toggle('warn', !!r.fitted?.tooBig);
+    $('#x-fitted').classList.toggle('warn', !!r.fitted?.tooBig || (forceFit && !!r.fitted));
+    // Readable didn't fit: offer to fit anyway; once fitting anyway, offer to go back.
+    const fa = $('#x-fit-anyway');
+    fa.classList.toggle('hidden', !(r.fitted?.tooBig && r.fitted.readable) && !(forceFit && r.fitted));
+    fa.textContent = forceFit ? t('fit_keep_readable') : t('fit_anyway');
+    $('#x-picked').textContent = pickedNote(r.picked);
+    $('#x-picked').classList.toggle('hidden', !r.picked || !!r.fitted);
+    lastExport = r.blob;
+    refreshHint(c, r.blob.size);
   } catch (e) {
     if (e.superseded) return;
     if (run === estimateRun) $('#x-estimate').textContent = t('encode_failed', e.message);
   }
-  updateDevicePreview();
 }, 450);
 
 // With a device frame on, the Export tab shows the finished image on the stage
 // in place of the editable canvas, so what you see is what downloads.
 let previewRun = 0;
+let previewFrame = 0;
+/** Redraws the preview on the next frame, once however many changes come before it. */
+function previewSoon() {
+  cancelAnimationFrame(previewFrame);
+  previewFrame = requestAnimationFrame(() => updateDevicePreview());
+}
 async function updateDevicePreview() {
   const run = ++previewRun;
   const d = device?.get();
@@ -2257,10 +2448,84 @@ mountShare({
   commit: () => commit(),
 });
 
-function fileName() {
+let lastExport = null; // the estimate's file, which names Smallest's extension
+function fileName(blob = lastExport) {
   const n = ($('#x-name').value || 'captode').trim().replace(/[\\/:*?"<>|]+/g, '-');
-  return `${n}.${EXT[$('#x-format').value]}`;
+  return `${n}.${extFor(blob)}`;
 }
+
+// Hands the file, as Download would save it, to another app through the share sheet.
+async function shareImage() {
+  if (!base) return;
+  if (editing) finishText();
+  const b = $('#share-file');
+  b.disabled = true;
+  try {
+    const { blob } = await encode(await finalCanvas());
+    if (!(await shareFile(blob, fileName(blob)))) toast(t('share_file_cannot'));
+  } catch (e) {
+    toast(t('share_file_failed', String(e?.message || e)), { kind: 'error', ms: 5000 });
+  } finally {
+    b.disabled = false;
+  }
+}
+$('#share-file').classList.toggle('hidden', !canShareFiles);
+$('#share-file').addEventListener('click', shareImage);
+
+// ---------- several sizes or formats, in one zip ----------
+
+const SIZE_SUFFIX = { 1: '', css: '@1x', 2: '@2x', 0.75: '@0.75x', 0.5: '@0.5x', 0.25: '@0.25x' };
+
+function renderSeveral() {
+  const sizes = [...$('#x-scale').options].filter((o) => !o.hidden);
+  $('#x-sizes').innerHTML = sizes.map((o) => `<label><input type="checkbox" value="${o.value}" ${o.value === $('#x-scale').value ? 'checked' : ''}><span></span></label>`).join('');
+  $('#x-sizes').querySelectorAll('span').forEach((s, i) => { s.textContent = sizes[i].textContent; });
+  const formats = [...$('#x-format').options].filter((o) => !o.hidden);
+  $('#x-formats').innerHTML = formats.map((o) => `<label><input type="checkbox" value="${o.value}" ${o.value === $('#x-format').value ? 'checked' : ''}><span></span></label>`).join('');
+  $('#x-formats').querySelectorAll('span').forEach((s, i) => { s.textContent = FORMAT_INFO[formats[i].value][0]; });
+}
+$('#x-several').addEventListener('toggle', () => { if ($('#x-several').open) renderSeveral(); });
+
+async function downloadSeveral() {
+  if (!base) return;
+  if (editing) finishText();
+  const sizes = [...$('#x-sizes').querySelectorAll('input:checked')].map((i) => i.value);
+  const formats = [...$('#x-formats').querySelectorAll('input:checked')].map((i) => i.value);
+  if (!sizes.length || !formats.length) { toast(t('editor_several_none')); return; }
+  const go = $('#x-several-go');
+  go.disabled = true;
+  try {
+    const stem = ($('#x-name').value || 'captode').trim().replace(/[\\/:*?"<>|]+/g, '-');
+    const files = [];
+    const used = new Set();
+    for (const size of sizes) {
+      const c = await finalCanvas({ scale: size });
+      for (const f of formats) {
+        go.textContent = t('editor_several_working', [String(files.length + 1), String(sizes.length * formats.length)]);
+        const { blob } = await encodeOffThread(c, f, fitOptions(size), 'several', Number($('#x-limit').value) * 1024);
+        let name = `${stem}${SIZE_SUFFIX[size] ?? `@${size}x`}.${extFor(blob, f)}`;
+        // PNG and PNG-8 (or Smallest) can share an extension: keep both.
+        if (used.has(name)) name = name.replace(/(\.[^.]+)$/, `-${f}$1`);
+        used.add(name);
+        files.push({ name, data: new Uint8Array(await blob.arrayBuffer()) });
+      }
+    }
+    const blob = zip(files);
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `${stem}.zip`;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 30000);
+    dirty = false;
+    toast(t('saved_file_size', [a.download, fmtBytes(blob.size)]), { kind: 'success' });
+  } catch (e) {
+    if (!e.superseded) toast(t('export_failed', e.message), { kind: 'error', ms: 5000 });
+  } finally {
+    go.disabled = false;
+    go.textContent = t('editor_several_download');
+  }
+}
+$('#x-several-go').addEventListener('click', downloadSeveral);
 
 async function download() {
   if (!base) return false;
@@ -2271,7 +2536,7 @@ async function download() {
     const { blob } = await encode(await finalCanvas());
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = fileName();
+    a.download = fileName(blob);
     a.click();
     setTimeout(() => URL.revokeObjectURL(a.href), 30000);
     dirty = false;
@@ -2350,7 +2615,7 @@ async function finishInBackground(then, tabId) {
   await show();
   autoCopy();
 }
-for (const id of ['x-format', 'x-scale', 'x-limit', 'x-quality', 'x-colors', 'x-dither', 'x-lossy', 'x-page', 'x-split']) {
+for (const id of ['x-format', 'x-scale', 'x-limit', 'x-quality', 'x-colors', 'x-dither', 'x-lossy', 'x-page', 'x-split', 'x-lossless']) {
   $('#' + id).addEventListener('input', () => { syncExportUi(); refreshExport(); });
 }
 
@@ -2359,14 +2624,18 @@ for (const id of ['x-format', 'x-scale', 'x-limit', 'x-quality', 'x-colors', 'x-
 let namePattern = ''; // Settings → File names; empty for the default
 
 async function loadBlob(blob, info = {}) {
+  captureDpr = Number(info.dpr) > 0 ? Number(info.dpr) : 1;
+  syncScaleOptions();
   const bmp = await createImageBitmap(blob);
   const c = canvas(bmp.width, bmp.height);
   c.getContext('2d').drawImage(bmp, 0, 0);
   bmp.close(); // the decoded image, as big as the canvas: not needed once drawn
+  c.words = pageWords(info.text);
   base = c;
   objects = [];
   select([]);
   crop = null;
+  forceFit = false;
   meta = info;
   history.length = 0;
   hIndex = -1;
@@ -2381,6 +2650,7 @@ async function loadBlob(blob, info = {}) {
   $('#doc-name').title = info.url || info.title || '';
   captureId = null;
   syncDiscard();
+  captureTools.sync();
   layout();
   fitZoom();
   commit();
@@ -2422,13 +2692,25 @@ async function renderRecent() {
     thumb.alt = '';
     const title = it.meta.title || (it.kind === 'video' ? t('video_recording') : t('popup_screenshot'));
     a.innerHTML = `<span class="thumb"></span><span class="meta"><b></b><small></small></span>
+      <button class="btn ghost icon keep" aria-pressed="${it.kept}"><svg class="i" viewBox="0 0 24 24"><path d="M6 3h12v18l-6-4-6 4z"/></svg></button>
       <button class="btn ghost icon remove" data-tip="${t('remove')}"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>`;
     a.querySelector('.thumb').append(thumb);
     if (it.kind === 'video') a.querySelector('.thumb').insertAdjacentHTML('beforeend', `<span class="badge">${t('badge_video')}</span>`);
     else if (it.edited) a.querySelector('.thumb').insertAdjacentHTML('beforeend', `<span class="badge">${t('badge_edited')}</span>`);
     a.querySelector('b').textContent = title;
     a.querySelector('.remove').setAttribute('aria-label', t('remove_named', title)); // the page's title, as text
-    a.querySelector('small').textContent = `${ago(it.created)} · ${fmtBytes(it.size)}`;
+    a.querySelector('small').textContent = `${it.kept ? `${t('kept')} · ` : ''}${ago(it.created)} · ${fmtBytes(it.size)}`;
+    const keep = a.querySelector('.keep');
+    keep.classList.toggle('on', it.kept);
+    keep.dataset.tip = t(it.kept ? 'keep_on_tip' : 'keep_off_tip');
+    keep.setAttribute('aria-label', `${keep.dataset.tip}: ${title}`);
+    keep.addEventListener('click', async (e) => {
+      e.preventDefault();
+      await setKept(it.id, !it.kept);
+      toast(t(it.kept ? 'keep_off' : 'keep_on'), { kind: it.kept ? 'info' : 'success' });
+      if (it.id === captureId) captureTools.sync();
+      await renderRecent();
+    });
     a.querySelector('.remove').addEventListener('click', async (e) => {
       e.preventDefault();
       const rec = await deleteCapture(it.id);
@@ -2440,6 +2722,15 @@ async function renderRecent() {
 }
 
 async function openFile(file) {
+  if (file && /\.captode$/i.test(file.name)) {
+    try {
+      const opened = await openProject(file);
+      location.href = chrome.runtime.getURL(pageFor(opened));
+    } catch (e) {
+      toast(t(e.message === 'too-new' ? 'project_too_new' : 'project_not_project'), { kind: 'error', ms: 6000 });
+    }
+    return;
+  }
   if (file && file.type.startsWith('image/')) await loadBlob(file, { title: file.name.replace(/\.[^.]+$/, '') });
 }
 $('#open').addEventListener('change', (e) => openFile(e.target.files[0]));
@@ -2491,6 +2782,7 @@ document.addEventListener('keydown', (e) => {
   if (await new OffscreenCanvas(1, 1).convertToBlob({ type: 'image/avif' }).then((b) => b.type === 'image/avif', () => false)) {
     $('#x-format').querySelector('[value="avif"]').hidden = false;
   }
+  webpLossless = await canWebpLossless();
   renderFormatTiles();
   let settings = {};
   if (globalThis.chrome?.storage) {
@@ -2507,7 +2799,7 @@ document.addEventListener('keydown', (e) => {
     if (fmt && !fmt.hidden) $('#x-format').value = wanted;
     rememberControls('image', EXPORT_CONTROLS, last.controls);
     $('#x-format').addEventListener('change', () => remember('image', { format: $('#x-format').value }));
-    device = await mountDevicePanel($('#device-panel'), () => refreshExport(), {
+    device = await mountDevicePanel($('#device-panel'), () => { previewSoon(); refreshExport(); }, {
       source: () => (base ? [fullW(), fullH()] : null),
       picture: async (width) => (base ? smallPicture(width) : null),
     });
@@ -2544,10 +2836,20 @@ document.addEventListener('keydown', (e) => {
 
   const id = new URLSearchParams(location.search).get('id');
   const rec = id && globalThis.chrome?.runtime ? await getCapture(id) : null;
+  if (globalThis.chrome?.storage) {
+    // Before the picture is drawn or saved in the background: your logo, if it's on.
+    const brand = await getBrand();
+    logo = await loadLogo(brand);
+    logoOn = !!logo && brand.images;
+    $('#x-logo-row').classList.toggle('hidden', !logo);
+    $('#x-logo').checked = logoOn;
+  }
+  $('#x-logo').addEventListener('change', (e) => { logoOn = e.target.checked; requestRender(); previewSoon(); refreshExport(); });
   if (rec) {
     await loadBlob(rec.blob, { ...rec.meta, created: rec.created });
     captureId = id;
     syncDiscard();
+    captureTools.sync();
     if (rec.edits) await restoreEdits(rec.edits);
     const params = new URLSearchParams(location.search);
     const fresh = !params.has('reopen'); // just taken, not reopened from Recent captures
@@ -2593,4 +2895,6 @@ globalThis.captodeEditor = {
   review: () => ({ measures: review.measures.map((m) => ({ ...m })), colours: [...review.colours], text: $('#m-readout').textContent, contrast: $('#c-readout').textContent }),
   zoom: () => zoom,
   render: async () => { const c = await finalCanvas({ scaled: false }); return c.getContext('2d').getImageData(0, 0, c.width, c.height); },
+  /** The text Copy text would copy for a drag from (x1, y1) to (x2, y2), in image pixels. */
+  words: (x1, y1, x2, y2) => wordsText(wordsIn({ x: x1, y: y1 }, { x: x2, y: y2 })),
 };

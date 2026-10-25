@@ -12,16 +12,22 @@
 //   blurs:    [{ id, from, to, whole, x, y, w, h, mode ('blur' | 'pixelate' | 'box'), strength (1–10) }]
 //   crop:     { x, y, w, h } | null                    the part of the picture kept
 //   zooms:    [{ id, from, to, x, y, scale }]          x, y: the centre, in the crop
-//   callouts: [{ id, from, to, whole, kind ('arrow' | 'box' | 'text' | 'spot'), x1, y1, x2, y2, text, color, size (1–3) }]
+//   callouts: [{ id, from, to, whole, kind ('arrow' | 'box' | 'ellipse' | 'step' | 'text' | 'spot'), x1, y1, x2, y2, text, color, size (1–3) }]
+//             (a step's text is its number or letter)
 //   background: { on, kind ('solid' | 'gradient'), c1, c2, padding (%), radius (%), shadow, aspect ('auto' | '16:9' | '1:1' | '9:16' | '4:3') }
 //   audio:    { volume (0–2), fadeIn (s), fadeOut (s), mutes: [{ id, from, to }] }
 //   rings:    { on, color, size (1–3) }                 a ring where each recorded click was
+//   captions: [{ id, from, to, text, size (1–3) }]     words along the bottom (also as subtitles)
 // }
+
+import { PALETTE, roundRect, drawArrow, drawEllipse, drawStep } from './shapes.js';
+import { drawLogo } from './brand.js';
 
 export const RATES = [1.5, 2, 4, 8];
 export const ZOOMS = [1.25, 1.5, 2, 3];
 export const ASPECTS = { '16:9': 16 / 9, '4:3': 4 / 3, '1:1': 1, '9:16': 9 / 16 };
-export const CALLOUT_COLOURS = ['#e5484d', '#f5a524', '#30a46c', '#0090ff', '#8e4ec6', '#ffffff', '#111111'];
+export const CALLOUT_COLOURS = PALETTE; // the editor's, so both offer the same colours
+export const CALLOUT_KINDS = ['arrow', 'box', 'ellipse', 'step', 'text', 'spot'];
 
 const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
 const num = (v, d) => (Number.isFinite(Number(v)) ? Number(v) : d);
@@ -35,7 +41,7 @@ export const DEFAULT_AUDIO = { volume: 1, fadeIn: 0, fadeOut: 0, mutes: [] };
 export const DEFAULT_RINGS = { on: false, color: '#f5a524', size: 2 };
 
 /** Empty edits. */
-export const noEdits = () => ({ cuts: [], speeds: [], blurs: [], crop: null, zooms: [], callouts: [], background: { ...DEFAULT_BACKGROUND }, audio: { ...DEFAULT_AUDIO, mutes: [] }, rings: { ...DEFAULT_RINGS } });
+export const noEdits = () => ({ cuts: [], speeds: [], blurs: [], crop: null, zooms: [], callouts: [], background: { ...DEFAULT_BACKGROUND }, audio: { ...DEFAULT_AUDIO, mutes: [] }, rings: { ...DEFAULT_RINGS }, captions: [] });
 
 function range(r, i = 0) {
   const from = Math.max(0, num(r?.from, 0));
@@ -62,7 +68,7 @@ export function normaliseEdits(raw = {}) {
   e.zooms = list(raw.zooms).map((r, i) => ({ ...range(r, i), x: frac(r.x, 0.5), y: frac(r.y, 0.5), scale: clamp(num(r.scale, 2), 1.1, 4), auto: !!r.auto }));
   e.callouts = list(raw.callouts).map((r, i) => ({
     ...range(r, i), whole: !!r.whole,
-    kind: ['arrow', 'box', 'text', 'spot'].includes(r.kind) ? r.kind : 'arrow',
+    kind: CALLOUT_KINDS.includes(r.kind) ? r.kind : 'arrow',
     x1: frac(r.x1, 0.3), y1: frac(r.y1, 0.3), x2: frac(r.x2, 0.5), y2: frac(r.y2, 0.5),
     text: String(r.text ?? '').slice(0, 200), color: colour(r.color, CALLOUT_COLOURS[0]), size: clamp(Math.round(num(r.size, 2)), 1, 3),
   }));
@@ -80,6 +86,7 @@ export function normaliseEdits(raw = {}) {
   };
   const g = raw.rings || {};
   e.rings = { on: !!g.on, color: colour(g.color, DEFAULT_RINGS.color), size: clamp(Math.round(num(g.size, 2)), 1, 3) };
+  e.captions = list(raw.captions).map((r, i) => ({ ...range(r, i), text: String(r?.text ?? '').slice(0, 300), size: clamp(Math.round(num(r?.size, 2)), 1, 3) }));
   return e;
 }
 
@@ -155,7 +162,7 @@ export const clipFrames = (map, fps) => Math.max(1, Math.round(map.length * fps)
 
 /** Whether the edits change the picture. */
 export function hasSpatial(e) {
-  return !!(e && (e.crop || e.blurs.length || e.zooms.length || e.callouts.length || e.background.on || e.rings?.on));
+  return !!(e && (e.crop || e.blurs.length || e.zooms.length || e.callouts.length || e.background.on || e.rings?.on || e.captions?.some((c) => c.text.trim())));
 }
 
 /** The size of the picture after the crop. */
@@ -195,17 +202,6 @@ function calloutAlpha(c, map, o) {
   const f = Math.min(0.2, (o1 - o0) / 3);
   if (f <= 0) return 1;
   return clamp(Math.min((o - o0) / f, (o1 - o) / f), 0, 1);
-}
-
-function roundRect(ctx, x, y, w, h, r) {
-  r = Math.max(0, Math.min(r, w / 2, h / 2));
-  ctx.beginPath();
-  ctx.moveTo(x + r, y);
-  ctx.arcTo(x + w, y, x + w, y + h, r);
-  ctx.arcTo(x + w, y + h, x, y + h, r);
-  ctx.arcTo(x, y + h, x, y, r);
-  ctx.arcTo(x, y, x + w, y, r);
-  ctx.closePath();
 }
 
 let scratch = null;
@@ -269,22 +265,15 @@ export function drawCallout(ctx, c, p, unit) {
     shadow();
     roundRect(ctx, Math.min(p.x1, p.x2), Math.min(p.y1, p.y2), Math.abs(p.x2 - p.x1), Math.abs(p.y2 - p.y1), lw * 2);
     ctx.stroke();
+  } else if (c.kind === 'ellipse') {
+    shadow();
+    drawEllipse(ctx, Math.min(p.x1, p.x2), Math.min(p.y1, p.y2), Math.abs(p.x2 - p.x1), Math.abs(p.y2 - p.y1));
+  } else if (c.kind === 'step') {
+    // A numbered step at the first point, as the editor draws them.
+    drawStep(ctx, p.x1, p.y1, unit * (18 + c.size * 8), c.text.trim().slice(0, 3) || '1', c.color);
   } else if (c.kind === 'arrow') {
     shadow();
-    const a = Math.atan2(p.y2 - p.y1, p.x2 - p.x1);
-    const head = lw * 4.5;
-    const len = Math.hypot(p.x2 - p.x1, p.y2 - p.y1);
-    const back = Math.max(0, len - head * 0.8);
-    ctx.beginPath();
-    ctx.moveTo(p.x1, p.y1);
-    ctx.lineTo(p.x1 + Math.cos(a) * back, p.y1 + Math.sin(a) * back);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(p.x2, p.y2);
-    ctx.lineTo(p.x2 - head * Math.cos(a - 0.45), p.y2 - head * Math.sin(a - 0.45));
-    ctx.lineTo(p.x2 - head * Math.cos(a + 0.45), p.y2 - head * Math.sin(a + 0.45));
-    ctx.closePath();
-    ctx.fill();
+    drawArrow(ctx, p.x1, p.y1, p.x2, p.y2, lw);
   } else {
     // A label: the words on a rounded bubble of the colour, at the first point.
     const text = c.text.trim() || ' ';
@@ -310,6 +299,70 @@ export function drawCallout(ctx, c, p, unit) {
 /** A callout's box in recording fractions (for hit tests and handles). */
 export function calloutBox(c) {
   return { x: Math.min(c.x1, c.x2), y: Math.min(c.y1, c.y2), w: Math.abs(c.x2 - c.x1), h: Math.abs(c.y2 - c.y1) };
+}
+
+/**
+ * Draws a caption along the bottom of the picture: white words on a dark band, at
+ * most three lines, the same size whatever the zoom.
+ */
+export function drawCaption(ctx, c, unit) {
+  const text = c.text.trim();
+  if (!text) return;
+  const W = ctx.canvas.width, H = ctx.canvas.height;
+  const fs = unit * (8 + c.size * 3);
+  ctx.save();
+  ctx.font = `600 ${fs}px system-ui, -apple-system, "Segoe UI", Roboto, sans-serif`;
+  const max = W * 0.84;
+  const lines = [];
+  for (const para of text.split('\n')) {
+    let line = '';
+    const words = /\s/.test(para) ? para.split(/(\s+)/) : [...para]; // languages without spaces wrap anywhere
+    for (const w of words) {
+      const next = line + w;
+      if (line.trim() && ctx.measureText(next).width > max) { lines.push(line.trim()); line = w.trimStart(); } else line = next;
+    }
+    lines.push(line.trim());
+  }
+  const shown = lines.filter(Boolean).slice(-3);
+  const lh = fs * 1.3, padX = fs * 0.6, padY = fs * 0.35;
+  const width = Math.min(W, Math.max(...shown.map((l) => ctx.measureText(l).width)) + padX * 2);
+  const height = shown.length * lh + padY * 2;
+  const x = (W - width) / 2, y = H - H * 0.06 - height;
+  ctx.fillStyle = 'rgba(0,0,0,0.72)';
+  roundRect(ctx, x, y, width, height, fs * 0.3);
+  ctx.fill();
+  ctx.fillStyle = '#fff';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  shown.forEach((l, i) => ctx.fillText(l, W / 2, y + padY + lh * (i + 0.5)));
+  ctx.restore();
+}
+
+/**
+ * The captions as subtitle cues in the exported video's time: [{ start, end, text }],
+ * leaving out those in cut parts. `extra(t)`: seconds of slides played before
+ * recording time t.
+ */
+export function captionCues(e, map, extra = () => 0) {
+  return e.captions
+    .filter((c) => c.text.trim())
+    .map((c) => {
+      const a = Math.max(c.from, map.start), b = Math.min(c.to, map.end);
+      return { start: map.outOf(a) + extra(a), end: map.outOf(b) + extra(a), text: c.text.trim() };
+    })
+    .filter((c) => c.end - c.start > 0.05)
+    .sort((x, y) => x.start - y.start);
+}
+
+const stamp = (s, sep) => {
+  const ms = Math.max(0, Math.round(s * 1000));
+  const p = (n, w = 2) => String(n).padStart(w, '0');
+  return `${p(Math.floor(ms / 3600000))}:${p(Math.floor(ms / 60000) % 60)}:${p(Math.floor(ms / 1000) % 60)}${sep}${p(ms % 1000, 3)}`;
+};
+/** Cues as an SRT or WebVTT file's text. */
+export function subtitles(cues, format = 'srt') {
+  if (format === 'vtt') return `WEBVTT\n\n${cues.map((c) => `${stamp(c.start, '.')} --> ${stamp(c.end, '.')}\n${c.text}\n`).join('\n')}`;
+  return cues.map((c, i) => `${i + 1}\n${stamp(c.start, ',')} --> ${stamp(c.end, ',')}\n${c.text}\n`).join('\n');
 }
 
 const RING_TIME = 0.7; // seconds a click's ring shows
@@ -341,7 +394,7 @@ export function drawRing(ctx, rings, x, y, p, unit) {
  * cropped size). The background, if on, is drawn by `backgroundRenderer` around
  * it. `clicks`: [{ t, x, y }] where the recording was clicked (recording fractions).
  */
-export function composer(edits, map, srcW, srcH, clicks = []) {
+export function composer(edits, map, srcW, srcH, clicks = [], logo = null) {
   const e = edits;
   const crop = e.crop || { x: 0, y: 0, w: 1, h: 1 };
   const [width, height] = croppedSize(e, srcW, srcH);
@@ -371,6 +424,15 @@ export function composer(edits, map, srcW, srcH, clicks = []) {
       const p = (o - r.o) / RING_TIME;
       if (p >= 0 && p < 1) drawRing(ctx, e.rings, X(r.x), Y(r.y), p, unit * zoom);
     }
+    for (const c of e.captions || []) {
+      if (!active(c, t)) continue;
+      const a = calloutAlpha(c, map, o);
+      if (a <= 0) continue;
+      ctx.globalAlpha = a;
+      drawCaption(ctx, c, unit);
+      ctx.globalAlpha = 1;
+    }
+    if (logo) drawLogo(ctx, logo, 0, 0, width, height);
   };
   return { width, height, draw };
 }

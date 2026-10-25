@@ -2,9 +2,12 @@ import { enhance, tablist, showShortcut, shareCaptode } from '../lib/ui.js';
 import { outputSize } from '../lib/recorder.js';
 import { t, localize } from '../lib/i18n.js';
 import { listCaptures } from '../lib/db.js';
-import { PROTECTED, STORE_URL, canRecordTabs, canProcessVideo } from '../lib/platform.js';
+import { PROTECTED, STORE_URL, canRecordTabs, canProcessVideo, canQueueExports } from '../lib/platform.js';
+import { mountJobs } from '../lib/export-queue.js';
 
 localize();
+// Asked first: saving a cut-off recording can take a moment (see the banner below).
+const recovering = chrome.runtime.sendMessage({ type: 'recover' }).catch(() => {});
 // The service worker sees the popup close, to put back what a click on the icon does.
 chrome.runtime.connect({ name: 'popup' });
 
@@ -88,6 +91,31 @@ if (lastError) {
   await chrome.action.setBadgeText({ text: '' });
 }
 $('#error-close').addEventListener('click', () => $('#error').classList.add('hidden'));
+
+// A recording cut off before it was saved, now saved from the copy kept while recording
+// (in the background: saving a long one takes a moment).
+(async () => {
+  await recovering;
+  const { recovered = [] } = await chrome.storage.local.get('recovered');
+  if (!recovered.length) return;
+  $('#whats-new').classList.add('hidden');
+  $('#recovered').classList.remove('hidden');
+  if (!lastError) await chrome.action.setBadgeText({ text: '' });
+  const forget = () => { $('#recovered').classList.add('hidden'); return chrome.storage.local.remove('recovered'); };
+  $('#recovered-open').addEventListener('click', async () => {
+    await forget();
+    await chrome.tabs.create({ url: chrome.runtime.getURL(`video/video.html?id=${recovered[recovered.length - 1]}`) });
+    window.close();
+  });
+  $('#recovered-close').addEventListener('click', forget);
+})();
+
+// Exports queued in the background, with their progress, and their files once made.
+if (canQueueExports) {
+  mountJobs($('#exports-list'), { onEmpty: (empty) => $('#exports').classList.toggle('hidden', empty) });
+  // The ✓ on the toolbar said an export was ready; it is listed here now.
+  if ((await chrome.action.getBadgeText({})) === '✓') chrome.action.setBadgeText({ text: '' });
+}
 
 // Once, after an update with new features.
 const { whatsNew } = await chrome.storage.local.get('whatsNew');

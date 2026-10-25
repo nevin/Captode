@@ -7,7 +7,7 @@ import { recall, remember, rememberControls } from '../lib/remember.js';
 import { mountPresets } from '../lib/presets.js';
 import { WebpAnimEncoder } from '../lib/webp.js';
 import { mountDevicePanel, deviceRenderer, frameDrawer } from '../lib/device.js';
-import { toast, enhance, fmtBytes, confirmDialog } from '../lib/ui.js';
+import { toast, enhance, fmtBytes, confirmDialog, canShareFiles, shareFile } from '../lib/ui.js';
 import { demuxWebm, muxWebm } from '../lib/webm.js';
 import { sourceColourSpace, outputColour } from '../lib/video-colour.js';
 import { contrastHtml, hexOf, measureLabel, measureText, edgeNear, measureFrom, drawMeasures } from '../lib/review.js';
@@ -15,8 +15,12 @@ import { t, localize } from '../lib/i18n.js';
 import { slideSchedule, overlaySchedule, paintOverlays, slideSeconds, frameOrder, slideAlpha, renderSlides } from '../lib/slides.js';
 import { mountSlides } from './slides-panel.js';
 import { mountEdits } from './edits-panel.js';
-import { noEdits, normaliseEdits, clipMap, clipFrames, composer, backgroundRenderer, croppedSize, hasSpatial, audioGain } from '../lib/video-edits.js';
+import { noEdits, normaliseEdits, clipMap, clipFrames, composer, backgroundRenderer, croppedSize, hasSpatial, audioGain, captionCues, subtitles } from '../lib/video-edits.js';
 import { audioLevels } from '../lib/audio-levels.js';
+import { mountCaptureTools } from '../lib/keep.js';
+import { queueExport, mountJobs } from '../lib/export-queue.js';
+import { canQueueExports } from '../lib/platform.js';
+import { getBrand, loadLogo, dataUrlBlob } from '../lib/brand.js';
 
 localize();
 
@@ -38,6 +42,10 @@ let slides = null; // the Slides panel, once the recording is open
 let editor = null; // the Edit sections, once the recording is open
 let levels = null; // how loud the sound is over time (lib/audio-levels.js), once worked out
 const ed = () => editor?.get() || noEdits();
+let brand = null;  // your logo's settings (lib/brand.js), once read
+let logoArt = null; // and the logo, ready to draw, when one is set
+/** The logo to add to this export, or null. */
+const useLogo = () => (logoArt && $('#v-logo').checked ? logoArt : null);
 const clip = () => editor?.map() || clipMap(null, trim().start, trim().end);
 
 const RES = [2160, 1440, 1080, 720, 480, 360, 240];
@@ -171,6 +179,7 @@ function stale() {
   dropResult();
   $('#result').classList.add('hidden');
   $('#download').classList.add('hidden');
+  $('#share-result').classList.add('hidden');
   $('#redo-export').classList.add('hidden');
   $('#convert').classList.remove('hidden');
   showPreview('player');
@@ -392,12 +401,12 @@ function drawFx() {
   const e = ed();
   const d = device?.get();
   const on = !!player.videoWidth && !busy && !$('#player').classList.contains('hidden') && !editor?.editing() && rv.tool === 'off' &&
-    (hasSpatial(e) || !!d?.enabled);
+    (hasSpatial(e) || !!d?.enabled || !!useLogo());
   fxView.classList.toggle('hidden', !on);
   player.style.opacity = on ? '0' : '';
   if (!on) { fx = null; return; }
   const { audio, ...look } = e;
-  const key = JSON.stringify([look, d, $('#res').value, trim(), player.videoWidth, player.videoHeight]);
+  const key = JSON.stringify([look, d, $('#res').value, trim(), player.videoWidth, player.videoHeight, !!useLogo()]);
   if (!fx || fx.key !== key) {
     const p = plan();
     const k = Math.min(1, 1280 / Math.max(p.width, p.height));
@@ -405,7 +414,7 @@ function drawFx() {
     fxView.width = W;
     fxView.height = H;
     const map = clip();
-    const comp = hasSpatial(e) ? composer(e, map, player.videoWidth, player.videoHeight, meta.clicks) : null;
+    const comp = hasSpatial(e) || useLogo() ? composer(e, map, player.videoWidth, player.videoHeight, meta.clicks, useLogo()) : null;
     fx = { key, map, comp, content: comp && new OffscreenCanvas(comp.width, comp.height), draw: frameDrawer({ width: W, height: H }, p.renderer, false), at: -1 };
   }
   const t = player.currentTime;
@@ -605,7 +614,7 @@ async function convertFrames(p, { start, end }) {
     const overlays = overlaySchedule(slides.all(), start, end, p.fps, map);
     const overlayArt = await renderSlides(overlays, p.width, p.height);
     const e = ed();
-    const comp = hasSpatial(e) ? composer(e, map, v.videoWidth, v.videoHeight, meta.clicks) : null;
+    const comp = hasSpatial(e) || useLogo() ? composer(e, map, v.videoWidth, v.videoHeight, meta.clicks, useLogo()) : null;
     const content = comp && new OffscreenCanvas(comp.width, comp.height);
     const paint = async (o) => {
       const a = o.slide ? slideAlpha(o.slide, o.j, p.fps) : 0;
@@ -730,7 +739,7 @@ async function convertRealtime(p, { start, end }) {
     // Parts cut are skipped and sped-up parts played faster (and silent).
     const map = clip();
     const e = ed();
-    const comp = hasSpatial(e) ? composer(e, map, v.videoWidth, v.videoHeight, meta.clicks) : null;
+    const comp = hasSpatial(e) || useLogo() ? composer(e, map, v.videoWidth, v.videoHeight, meta.clicks, useLogo()) : null;
     const content = comp && new OffscreenCanvas(comp.width, comp.height);
     // Slides: the clip waits, silent, while each is drawn for its time.
     const schedule = slideSchedule(slides.all(), start, end, p.fps, map);
@@ -844,19 +853,16 @@ let abortWorker = null;
  * thread. Rejects with `fallback: true` when this browser can't, so the slower
  * paths above can take over.
  */
-function convertInWorker(p, { start, end }) {
-  const live = $('#live');
-  live.width = p.width;
-  live.height = p.height;
-  const lctx = live.getContext('2d');
-  showPreview('live');
+/** What the export worker is told to make, without the recording itself. */
+function jobSpec(p, { start, end }) {
   const d = device?.get();
-  const job = {
-    blob: source, format, width: p.width, height: p.height, fps: p.fps, start, end,
+  return {
+    format, width: p.width, height: p.height, fps: p.fps, start, end,
     device: d?.enabled ? { ...d } : null,
     slides: slides.all().map((s) => ({ ...s })),
     edits: JSON.parse(JSON.stringify(ed())),
     clicks: meta.clicks || [],
+    logo: useLogo() && { blob: dataUrlBlob(brand.image), position: brand.position, size: brand.size, opacity: brand.opacity },
     video: { bitsPerPixel: Number($('#v-quality').value), audio: $('#v-audio').checked && !!meta.hasAudio },
     gif: { colors: Number($('#g-colors').value), dither: $('#g-dither').checked, lossy: Number($('#g-lossy').value) },
     webp: { quality: Number($('#w-quality').value) / 100, lossless: $('#w-lossless').checked },
@@ -864,6 +870,15 @@ function convertInWorker(p, { start, end }) {
     tolerance: $('#denoise').checked ? undefined : 0,
     loop: $('#loop').checked ? 0 : 1,
   };
+}
+
+function convertInWorker(p, range) {
+  const live = $('#live');
+  live.width = p.width;
+  live.height = p.height;
+  const lctx = live.getContext('2d');
+  showPreview('live');
+  const job = { ...jobSpec(p, range), blob: source };
   return new Promise((resolve, reject) => {
     worker = new Worker(new URL('./export-worker.js', import.meta.url), { type: 'module' });
     abortWorker = () => reject(new Error('cancelled'));
@@ -910,7 +925,7 @@ async function convert() {
         blob = await convertRealtime(p, range);
       }
     }
-    const name = fileStem((await getSettings()).fileName, { title: meta.title || 'recording', url: meta.url, when: new Date(created || Date.now()) });
+    const name = await exportStem();
 
     dropResult();
     result = { blob, name: `${name}.${EXT[format]}` };
@@ -932,6 +947,7 @@ async function convert() {
     $('#result').classList.remove('hidden');
     $('#convert').classList.add('hidden');
     $('#download').classList.remove('hidden');
+    $('#share-result').classList.toggle('hidden', !canShareFiles);
     $('#redo-export').classList.remove('hidden');
     $('#download').focus();
   } catch (e) {
@@ -948,6 +964,40 @@ async function convert() {
   }
 }
 
+const exportStem = async () => fileStem((await getSettings()).fileName, { title: meta.title || 'recording', url: meta.url, when: new Date(created || Date.now()) });
+
+/**
+ * Queues an export with the current settings to finish in the background, so it carries
+ * on when this page is closed and several can wait their turn.
+ */
+async function queueCurrent() {
+  if (!source) return;
+  const id = new URLSearchParams(location.search).get('id');
+  const button = $('#queue-export');
+  button.disabled = true;
+  try {
+    const name = `${await exportStem()}.${EXT[format]}`;
+    await queueExport({ capture: id, name, format, job: jobSpec(plan(), trim()) });
+    toast(t('queue_added', name), { kind: 'success' });
+    jobs?.refresh();
+  } catch (e) {
+    toast(t('queue_failed', String(e?.message || e)), { kind: 'error', ms: 5000 });
+  } finally {
+    button.disabled = false;
+  }
+}
+let jobs = null;
+
+/** The captions as a subtitle file for the exported video (SRT or WebVTT). */
+async function downloadSubtitles(format) {
+  const { start, end } = trim();
+  const put = (slides?.all() || []).filter((s) => s.mode !== 'overlay' && s.at >= start - 1e-3 && s.at <= end + 1e-3);
+  const cues = captionCues(ed(), clip(), (t) => put.filter((s) => s.at <= t).reduce((n, s) => n + s.duration, 0));
+  if (!cues.length) { toast(t('edit_no_captions')); return; }
+  const name = fileStem((await getSettings()).fileName, { title: meta.title || 'recording', url: meta.url, when: new Date(created || Date.now()) });
+  save(new Blob([subtitles(cues, format)], { type: format === 'vtt' ? 'text/vtt' : 'application/x-subrip' }), `${name}.${format}`);
+}
+
 function save(blob, name) {
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
@@ -957,6 +1007,7 @@ function save(blob, name) {
 }
 
 $('#convert').addEventListener('click', convert);
+$('#queue-export').addEventListener('click', queueCurrent);
 $('#cancel').addEventListener('click', () => {
   cancelled = true;
   abortWorker?.();
@@ -967,6 +1018,12 @@ $('#download').addEventListener('click', () => {
   toast(t('saved_file_size', [result.name, fmtBytes(result.blob.size)]), { kind: 'success' });
 });
 $('#redo-export').addEventListener('click', () => stale());
+$('#share-result').addEventListener('click', async () => {
+  if (!result) return;
+  try {
+    if (!(await shareFile(result.blob, result.name))) toast(t('share_file_cannot'));
+  } catch (e) { toast(t('share_file_failed', String(e?.message || e)), { kind: 'error' }); }
+});
 window.addEventListener('beforeunload', (e) => { if (busy) e.preventDefault(); });
 
 /**
@@ -1165,6 +1222,22 @@ addEventListener('resize', () => { if (rv.tool !== 'off') placeOverlay(); });
   $('#t-start').max = $('#t-end').max = duration.toFixed(1);
   $('#info').textContent = `${player.videoWidth} × ${player.videoHeight} · ${fmtTime(duration)} · ${fmtBytes(source.size)}`;
   if (meta.title) { $('#doc-name').textContent = meta.title; document.title = `${meta.title} — Captode`; }
+  $('#make-guide').classList.toggle('hidden', !meta.clicks?.length);
+  brand = await getBrand();
+  logoArt = await loadLogo(brand);
+  $('#v-logo-row').classList.toggle('hidden', !logoArt);
+  $('#v-logo').checked = !!logoArt && brand.videos;
+  if (canQueueExports) {
+    $('#queue-export').classList.remove('hidden');
+    jobs = mountJobs($('#queue-list'), { capture: id, onEmpty: (empty) => $('#queue-list').classList.toggle('hidden', empty) });
+  }
+  mountCaptureTools({
+    keep: $('#keep'),
+    project: $('#save-project'),
+    id: () => id,
+    // Edits and slides are saved as they change, so the project has them already.
+    stem: async () => fileStem((await getSettings()).fileName, { title: meta.title || 'recording', url: meta.url, when: new Date(created || Date.now()) }),
+  }).sync();
   // A recording not edited yet starts with the background and sound chosen for new
   // recordings (if they were chosen before it was made).
   let edits = rec.videoEdits;
@@ -1192,6 +1265,7 @@ addEventListener('resize', () => { if (rv.tool !== 'off') placeOverlay(); });
     save: (e) => saveVideoEdits(id, e).catch(() => {}),
     busy: () => busy,
     seek: (at) => { player.currentTime = Math.max(0, Math.min(duration, at)); },
+    downloadSubtitles,
   });
   slides = mountSlides({
     player,
@@ -1294,3 +1368,6 @@ async function frameToEditor() {
   await chrome.tabs.create({ url: chrome.runtime.getURL(`editor/editor.html?id=${id}&reopen=1`) });
 }
 $('#frame-to-editor').addEventListener('click', frameToEditor);
+// Keyboard focus and scrolling keep panel controls clear of the export bar over them.
+new ResizeObserver(([e]) => $('.inspector')?.style.setProperty('--export-bar', `${Math.ceil(e.target.offsetHeight) + 8}px`)).observe($('.export-bar'));
+$('#make-guide').addEventListener('click', () => chrome.tabs.create({ url: chrome.runtime.getURL(`guide/guide.html?id=${new URLSearchParams(location.search).get('id')}`) }));

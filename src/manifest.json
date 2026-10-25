@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "__MSG_extName__",
   "short_name": "Captode",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "description": "__MSG_extDescription__",
   "default_locale": "en",
   "homepage_url": "https://github.com/nevin/Captode",
@@ -55,6 +55,12 @@
     },
     "capture-element": {
       "description": "__MSG_menu_element__"
+    },
+    "pause-recording": {
+      "description": "__MSG_command_pause__"
+    },
+    "draw-on-page": {
+      "description": "__MSG_command_draw__"
     }
   },
   "options_page": "settings/settings.html",

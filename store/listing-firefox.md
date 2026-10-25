@@ -32,12 +32,20 @@ replaced by:
 ```
 Record
 Record your whole screen or a window, with sound and your voice if you like. A countdown
-of up to 30 seconds gives you time to get ready, and one click on the toolbar button
-stops the recording.
+of up to 30 seconds gives you time to get ready, you can pause and carry on, and one click
+on the toolbar button stops the recording. If the browser closes mid-recording, what was
+recorded is kept. Add captions, burned in or as subtitle files.
 ```
 
-(Firefox has no tab capture, so tab recording, the camera bubble and video sizes aren't
-offered there.)
+and the Edit recordings paragraph's last sentence replaced by:
+
+```
+Then save it as a video or an animated GIF, in seconds rather than the length of the
+recording.
+```
+
+(Firefox has no tab capture, so tab recording, the camera bubble, video sizes, step-by-step
+guides and the background export queue aren't offered there.)
 
 **Categories:** Photos, Music & Videos; Productivity
 
