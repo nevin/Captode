@@ -15,9 +15,9 @@
   <div class="sep"></div>
   <div class="doc"><b id="doc-name" data-i18n="video_recording">Recording</b><span id="info">—</span></div>
   <div class="spacer"></div>
-  <button class="btn ghost icon hidden" id="keep" aria-pressed="false" data-tip="Keep this: it won't be removed automatically" data-i18n-tip="keep_off_tip"><svg class="i" viewBox="0 0 24 24"><path d="M6 3h12v18l-6-4-6 4z"/></svg></button>
-  <button class="btn ghost icon hidden" id="save-project" data-tip="Save project: everything in one file, to open later or elsewhere" data-i18n-tip="project_save_tip"><svg class="i" viewBox="0 0 24 24"><path d="M3 7l9-4 9 4-9 4z"/><path d="M3 7v10l9 4 9-4V7M12 11v10"/></svg></button>
-  <button class="btn ghost icon discard" id="discard" data-tip="Discard recording" data-i18n-tip="discard_recording"><svg class="i" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></svg></button>
+  <button class="btn ghost icon hidden" id="keep" aria-pressed="false" data-tip-align="end" data-tip="Keep this: it won't be removed automatically" data-i18n-tip="keep_off_tip"><svg class="i" viewBox="0 0 24 24"><path d="M6 3h12v18l-6-4-6 4z"/></svg></button>
+  <button class="btn ghost icon hidden" id="save-project" data-tip-align="end" data-tip="Save project: everything in one file, to open later or elsewhere" data-i18n-tip="project_save_tip"><svg class="i" viewBox="0 0 24 24"><path d="M3 7l9-4 9 4-9 4z"/><path d="M3 7v10l9 4 9-4V7M12 11v10"/></svg></button>
+  <button class="btn ghost icon discard" id="discard" data-tip-align="end" data-tip="Discard recording" data-i18n-tip="discard_recording"><svg class="i" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></svg></button>
   <button class="btn ghost hidden" id="make-guide" title="A step for each click, with a picture and a note, to download as a page, PDF or Markdown" data-i18n-title="guide_make_title" data-i18n="guide_make">
     <svg class="i" viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1.5"/><circle cx="4.5" cy="12" r="1.5"/><circle cx="4.5" cy="18" r="1.5"/></svg>Step-by-step guide
   </button>
@@ -33,7 +33,7 @@
   <main class="stage">
     <div class="preview">
       <video id="player" playsinline></video>
-      <canvas id="fx-view" class="hidden" aria-label="Preview with your edits" data-i18n-aria-label="edit_preview"></canvas>
+      <canvas id="fx-view" class="hidden" tabindex="0" aria-label="Preview with your edits. With a layer chosen, arrow keys move it and + and − resize it." data-i18n-aria-label="edit_preview_keys"></canvas>
       <canvas id="fx-edit" class="hidden" aria-label="Drawing layer over the picture" data-i18n-aria-label="edit_layer"></canvas>
       <canvas id="live" class="hidden"></canvas>
       <img id="out-img" class="hidden" alt="Exported animation" data-i18n-alt="video_exported_animation">
@@ -48,8 +48,10 @@
         <svg class="i pause hidden" viewBox="0 0 24 24"><path d="M7 4v16M17 4v16"/></svg>
       </button>
       <span class="tc" id="tc-now">0:00.0</span>
+      <div class="track-view" id="track-view">
       <div class="track" id="track">
         <div class="film" id="film"></div>
+        <div class="clip-marks" id="clip-marks" aria-hidden="true"></div>
         <canvas class="wave hidden" id="wave" aria-hidden="true"></canvas>
         <div class="shade left" id="shade-l"></div>
         <div class="shade right" id="shade-r"></div>
@@ -63,7 +65,12 @@
         <div class="playhead" id="playhead" title="Drag to scrub" data-i18n-title="video_drag_to_scrub"></div>
         <div class="peek hidden" id="peek" aria-hidden="true"><canvas></canvas><span></span></div>
       </div>
+      </div>
       <span class="tc muted" id="tc-len">0:00.0</span>
+      <span class="tl-zoom">
+        <button type="button" class="btn ghost icon" id="tl-out" disabled data-tip="Zoom out of the timeline  −" data-tip-align="end" data-i18n-tip="tl_zoom_out_tip"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3M8 11h6"/></svg></button>
+        <button type="button" class="btn ghost icon" id="tl-in" data-tip="Zoom into the timeline  +  (or ⌘/Ctrl + scroll)" data-tip-align="end" data-i18n-tip="tl_zoom_in_tip"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3M11 8v6M8 11h6"/></svg></button>
+      </span>
     </div>
     <div id="empty" class="empty hidden">
       <div class="empty-card">
@@ -73,7 +80,54 @@
     </div>
   </main>
 
+  <!-- Which part of a recording or file to add (Clips). -->
+  <dialog class="modal clip-trim" id="clip-trim" aria-labelledby="clip-trim-title">
+    <form method="dialog" class="modal-body" novalidate>
+      <h2 id="clip-trim-title" data-i18n="clips_trim_title">Which part to add</h2>
+      <p class="muted small clip-trim-name" id="clip-trim-name"></p>
+      <video id="clip-trim-video" controls muted playsinline></video>
+      <div class="grid2">
+        <label class="field"><span data-i18n="video_start">Start</span>
+          <div class="with-btn"><input type="number" id="clip-trim-start" min="0" step="0.1" value="0"><button type="button" class="btn ghost icon" data-set="start" data-tip="Start where the video above is" data-i18n-tip="clips_trim_here"><svg class="i" viewBox="0 0 24 24"><path d="M4 4v16M8 12h12M14 6l6 6-6 6"/></svg></button></div>
+        </label>
+        <label class="field"><span data-i18n="video_end">End</span>
+          <div class="with-btn"><input type="number" id="clip-trim-end" min="0" step="0.1"><button type="button" class="btn ghost icon" data-set="end" data-tip="End where the video above is" data-tip-align="end" data-i18n-tip="clips_trim_here_end"><svg class="i" viewBox="0 0 24 24"><path d="M20 4v16M16 12H4M10 6l-6 6 6 6"/></svg></button></div>
+        </label>
+      </div>
+      <p class="muted small" id="clip-trim-note"></p>
+      <div class="confirm-actions">
+        <button type="button" class="btn" data-close="no" data-i18n="clips_cancel">Cancel</button>
+        <button type="button" class="btn primary" data-close="yes" id="clip-trim-ok" data-i18n="clips_add">Add</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- A thumbnail: this frame, with a title. -->
+  <dialog class="modal thumb" id="thumb" aria-labelledby="thumb-title-h">
+    <form method="dialog" class="modal-body" novalidate>
+      <h2 id="thumb-title-h" data-i18n="thumb_title">Thumbnail</h2>
+      <canvas id="thumb-view"></canvas>
+      <label class="field"><span data-i18n="thumb_text">Title</span><input type="text" id="thumb-text" maxlength="80"></label>
+      <div class="grid2">
+        <label class="field"><span data-i18n="thumb_place">Where</span><select id="thumb-place"><option value="bottom" data-i18n="thumb_bottom">Bottom</option><option value="top" data-i18n="thumb_top">Top</option><option value="middle" data-i18n="thumb_middle">Middle</option></select></label>
+        <label class="field"><span data-i18n="edit_size">Size</span><select id="thumb-size"><option value="0.08">S</option><option value="0.11" selected>M</option><option value="0.15">L</option></select></label>
+      </div>
+      <div class="confirm-actions">
+        <button type="button" class="btn" data-close="no" data-i18n="clips_cancel">Cancel</button>
+        <button type="button" class="btn primary" data-close="yes" id="thumb-save" data-i18n="thumb_save">Save PNG</button>
+      </div>
+    </form>
+  </dialog>
+
   <aside class="inspector">
+    <!-- Simple shows trimming, cutting, captions, sound and export; All tools shows everything. -->
+    <div class="ui-mode-row">
+      <div class="seg" id="ui-mode" role="radiogroup" aria-label="Tools shown" data-i18n-aria-label="ui_mode">
+        <button type="button" data-v="simple" role="radio" aria-checked="true" class="on" data-tip="Just trimming, cuts, captions, sound and export" data-i18n-tip="ui_mode_simple_tip" data-i18n="ui_mode_simple">Simple</button>
+        <button type="button" data-v="advanced" role="radio" aria-checked="false" data-tip="Every tool: layers, music, slides, chapters, backgrounds and more" data-i18n-tip="ui_mode_advanced_tip" data-i18n="ui_mode_advanced">All tools</button>
+      </div>
+      <button type="button" class="btn ghost small" id="tour-start" data-tip="A short tour of this page" data-tip-align="end" data-i18n-tip="tour_start_tip" data-i18n="tour_start">Tour</button>
+    </div>
     <section class="section">
       <h3 class="section-title" data-i18n="video_trim">Trim</h3>
       <div class="trim">
@@ -87,26 +141,56 @@
       <p class="muted small" style="margin:0" data-i18n-html="video_trim_hint">Drag across the timeline to choose the part to keep, or drag its edges. While playing, <kbd>I</kbd> sets the start and <kbd>O</kbd> the end.</p>
     </section>
 
+    <!-- Clips: other recordings and video files joined after this one (lib/join.js). -->
+    <details class="section adv" id="clips-section">
+      <summary class="section-title"><span data-i18n="clips_title">Clips</span><span class="slide-count" id="clip-count"></span></summary>
+      <div class="clip-list hidden" id="clip-list" aria-label="Clips" data-i18n-aria-label="clips_title"></div>
+      <div class="seg clip-mode" id="clip-mode" role="radiogroup" aria-label="Where to add" data-i18n-aria-label="clips_where">
+        <button type="button" data-v="after" role="radio" aria-checked="true" class="on" data-i18n="clips_after">At the end</button>
+        <button type="button" data-v="here" role="radio" aria-checked="false" data-i18n="clips_here">At the playhead</button>
+        <button type="button" data-v="top" role="radio" aria-checked="false" data-i18n="clips_top">On top</button>
+      </div>
+      <p class="muted small clips-hint" id="clip-mode-hint"></p>
+      <div class="clip-add hidden" id="clip-add-row">
+        <select id="clip-pick" aria-label="A recording to add" data-i18n-aria-label="clips_pick"></select>
+        <button type="button" class="btn" id="clip-add" data-tip="Add this recording at the end" data-tip-align="end" data-i18n-tip="clips_add_tip"><span data-i18n="clips_add">Add</span></button>
+      </div>
+      <button type="button" class="btn ghost" id="clip-file" data-tip="Add a video from your computer at the end" data-i18n-tip="clips_add_file_tip"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span data-i18n="clips_add_file">Add a video file</span></button>
+      <input type="file" id="clip-file-input" class="hidden" accept="video/*,.webm,.mp4,.mov,.mkv">
+      <p class="muted small clip-storage" id="clip-storage"></p>
+      <button type="button" class="btn ghost small hidden" id="clip-forget" data-tip="Remove the copy kept to undo the last change to clips, to free its room" data-i18n-tip="clips_forget_tip"><span data-i18n="clips_forget">Free the undo copy</span></button>
+      <button type="button" class="btn ghost hidden" id="clip-undo" data-tip="Go back to the recording as it was before the last clip was added, moved or removed" data-i18n-tip="clips_undo_tip"><svg class="i" viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></svg><span data-i18n="clips_undo">Undo last change</span></button>
+    </details>
+
     <!-- Edits: parts cut out or sped up, zooms, blurred areas, callouts and muted parts (lib/video-edits.js). -->
     <details class="section" id="edit-section" open>
       <summary class="section-title"><span data-i18n="edit_title">Edit</span><span class="slide-count" id="ed-count"></span>
         <span class="ed-history">
           <button type="button" class="btn ghost icon" id="ed-undo" disabled data-tip="Undo  ⌘Z" data-i18n-tip="edit_undo_tip"><svg class="i" viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></svg></button>
           <button type="button" class="btn ghost icon" id="ed-redo" disabled data-tip="Redo  ⇧⌘Z" data-tip-align="end" data-i18n-tip="edit_redo_tip"><svg class="i" viewBox="0 0 24 24"><path d="m15 14 5-5-5-5"/><path d="M20 9H10a6 6 0 0 0 0 12h3"/></svg></button>
+          <button type="button" class="btn ghost icon" id="ed-hist-open" disabled aria-expanded="false" aria-controls="ed-hist" data-tip="History: every change, to go back several at once" data-tip-align="end" data-i18n-tip="hist_tip"><svg class="i" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 3"/></svg></button>
         </span>
       </summary>
+      <div class="ed-hist hidden" id="ed-hist" role="group" aria-label="History" data-i18n-aria-label="hist_title">
+        <p class="muted small hist-empty" data-i18n="hist_empty">No changes yet.</p>
+        <div class="hist-list"></div>
+      </div>
       <p class="muted small hint hidden" id="ed-picked"></p>
       <div class="ed-add" id="ed-add">
         <button type="button" class="btn" data-add="cuts" data-tip="Leave out a part  X" data-i18n-tip="edit_add_cut_tip"><svg class="i" viewBox="0 0 24 24"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4 8.1 15.9M14.5 14.5 20 20M8.1 8.1 12 12"/></svg><span data-i18n="edit_kind_cuts">Cut</span></button>
-        <button type="button" class="btn" data-add="speeds" data-tip="Play a part faster  P" data-i18n-tip="edit_add_speed_tip"><svg class="i" viewBox="0 0 24 24"><path d="m13 19 9-7-9-7zM2 19l9-7-9-7z"/></svg><span data-i18n="edit_kind_speeds">Speed up</span></button>
-        <button type="button" class="btn" data-add="zooms" data-tip="Zoom in on a part of the picture  Z" data-i18n-tip="edit_add_zoom_tip"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3M11 8v6M8 11h6"/></svg><span data-i18n="edit_kind_zooms">Zoom</span></button>
-        <button type="button" class="btn" data-add="blurs" data-tip="Hide something private  B" data-i18n-tip="edit_add_blur_tip"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="14" y="3" width="7" height="7" opacity=".4"/><rect x="3" y="14" width="7" height="7" opacity=".4"/></svg><span data-i18n="edit_kind_blurs">Blur</span></button>
+        <button type="button" class="btn adv" data-add="speeds" data-tip="Play a part faster  P" data-i18n-tip="edit_add_speed_tip"><svg class="i" viewBox="0 0 24 24"><path d="m13 19 9-7-9-7zM2 19l9-7-9-7z"/></svg><span data-i18n="edit_kind_speeds">Speed up</span></button>
+        <button type="button" class="btn adv" data-add="zooms" data-tip="Zoom in on a part of the picture  Z" data-i18n-tip="edit_add_zoom_tip"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3M11 8v6M8 11h6"/></svg><span data-i18n="edit_kind_zooms">Zoom</span></button>
+        <button type="button" class="btn adv" data-add="blurs" data-tip="Hide something private  B" data-i18n-tip="edit_add_blur_tip"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="14" y="3" width="7" height="7" opacity=".4"/><rect x="3" y="14" width="7" height="7" opacity=".4"/></svg><span data-i18n="edit_kind_blurs">Blur</span></button>
         <button type="button" class="btn" data-add="captions" data-tip="Words along the bottom, also downloadable as subtitles  T" data-i18n-tip="edit_add_caption_tip"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 15h4M13 15h4M7 11h10"/></svg><span data-i18n="edit_kind_captions">Caption</span></button>
-        <button type="button" class="btn" data-add="callouts" data-tip="An arrow, box, label or spotlight  C" data-tip-align="end" data-i18n-tip="edit_add_callout_tip"><svg class="i" viewBox="0 0 24 24"><path d="M5 19 19 5M19 5h-7M19 5v7"/></svg><span data-i18n="edit_kind_callouts">Callout</span></button>
+        <button type="button" class="btn adv" data-add="callouts" data-tip="An arrow, box, label or spotlight  C" data-tip-align="end" data-i18n-tip="edit_add_callout_tip"><svg class="i" viewBox="0 0 24 24"><path d="M5 19 19 5M19 5h-7M19 5v7"/></svg><span data-i18n="edit_kind_callouts">Callout</span></button>
+        <button type="button" class="btn adv" data-add="layers" data-tip="Another video over the picture, such as a webcam" data-i18n-tip="edit_add_layer_tip"><svg class="i" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><rect x="12" y="11" width="7" height="6" rx="1"/></svg><span data-i18n="vlayer_video_or_picture">Video or picture layer</span></button>
+        <button type="button" class="btn adv" data-add="textlayer" data-tip="Words over the picture, placed and styled like a layer" data-tip-align="end" data-i18n-tip="edit_add_text_layer_tip"><svg class="i" viewBox="0 0 24 24"><path d="M4 7V5h16v2M9 19h6M12 5v14"/></svg><span data-i18n="vlayer_text">Text layer</span></button>
         <button type="button" class="btn" id="ed-mark" data-tip="Press where a cut starts, then where it ends  ⇧X" data-tip-align="end" data-i18n-tip="edit_mark_tip"><svg class="i" viewBox="0 0 24 24"><path d="M8 4H5v16h3M16 4h3v16h-3M12 8v8"/></svg><span data-i18n="edit_mark">Mark cut</span></button>
       </div>
-      <button type="button" class="btn ed-autozoom hidden" id="ed-autozoom" data-tip="Zoom in where you clicked while recording" data-i18n-tip="edit_autozoom_tip"><svg class="i" viewBox="0 0 24 24"><path d="M9 9l5 12 1.8-5.2L21 14z"/><path d="M7.2 2.2 8 5.1M5.1 8l-2.9-.8M14 4.1 12 6.2M6.2 12l-2.1 2"/></svg><span data-i18n="edit_autozoom">Zoom in on clicks</span></button>
-      <div class="ed-rings hidden" id="rings-row">
+      <button type="button" class="btn ed-autozoom adv hidden" id="ed-autozoom" data-tip="Zoom in where you clicked while recording" data-i18n-tip="edit_autozoom_tip"><svg class="i" viewBox="0 0 24 24"><path d="M9 9l5 12 1.8-5.2L21 14z"/><path d="M7.2 2.2 8 5.1M5.1 8l-2.9-.8M14 4.1 12 6.2M6.2 12l-2.1 2"/></svg><span data-i18n="edit_autozoom">Zoom in on clicks</span></button>
+      <button type="button" class="btn ed-autozoom adv hidden" id="ed-follow" data-tip="One zoom over the whole video that follows where the pointer goes" data-i18n-tip="zoom_follow_tip"><svg class="i" viewBox="0 0 24 24"><path d="M4 4l7 16 2.5-6.5L20 11z"/><circle cx="18" cy="18" r="3"/></svg><span data-i18n="zoom_follow_button">Zoom that follows the pointer</span></button>
+      <button type="button" class="btn ed-apply-cuts adv hidden" id="ed-apply-cuts" data-tip="Take the cut parts out of the recording itself, so it takes less room. Undo last change in Clips puts them back." data-i18n-tip="edit_apply_cuts_tip"><svg class="i" viewBox="0 0 24 24"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4 8.1 15.9M14.5 14.5 20 20M8.1 8.1 12 12"/></svg><span data-i18n="edit_apply_cuts">Remove cut parts for good</span></button>
+      <div class="ed-rings adv hidden" id="rings-row">
         <label class="toggle"><span data-i18n="edit_rings">Show clicks<small data-i18n="edit_rings_hint">A ring where each click was</small></span><input type="checkbox" id="rings-on"></label>
         <div class="swatches ed-colours hidden" id="rings-colours" aria-label="Colour" data-i18n-aria-label="edit_colour"></div>
       </div>
@@ -114,7 +198,7 @@
       <div class="ed-item hidden" id="ed-item"></div>
     </details>
 
-    <details class="section" id="crop-section">
+    <details class="section adv" id="crop-section">
       <summary class="section-title"><span data-i18n="edit_crop">Crop</span><span class="muted small crop-size" id="crop-size"></span></summary>
       <label class="toggle"><span data-i18n="edit_crop_on">Crop the picture<small data-i18n="edit_crop_hint">Drag on the picture to choose the part to keep</small></span><input type="checkbox" id="crop-on"></label>
       <div id="crop-opts" class="hidden">
@@ -131,7 +215,7 @@
       </div>
     </details>
 
-    <details class="section" id="bg-section">
+    <details class="section adv" id="bg-section">
       <summary class="section-title" data-i18n="edit_background">Background</summary>
       <label class="toggle"><span data-i18n="edit_background_on">Put the video on a background<small data-i18n="edit_background_hint">With padding, rounded corners and a shadow. A device frame, when on, takes its place.</small></span><input type="checkbox" id="bg-on"></label>
       <div id="bg-opts" class="hidden">
@@ -178,18 +262,39 @@
         </label>
       </div>
       <button type="button" class="btn" id="au-mute" data-tip="Silence a part  M" data-i18n-tip="edit_add_mute_tip"><svg class="i" viewBox="0 0 24 24"><path d="M11 5 6 9H2v6h4l5 4zM23 9l-6 6M17 9l6 6"/></svg><span data-i18n="edit_add_mute">Mute a part</span></button>
+      <button type="button" class="btn" id="vo-rec" data-tip="Talk over the video while it plays from the playhead; your voice is added as a voiceover" data-i18n-tip="vo_tip"><svg class="i" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3M8 21h8"/></svg><span data-i18n="vo_record">Record voiceover</span></button>
+      <label class="toggle hidden" id="au-clean-row"><span data-i18n="au_clean">Lower background noise<small data-i18n="au_clean_hint">Quieter between words, where only the room is heard</small></span><input type="checkbox" id="au-clean"></label>
+      <label class="toggle hidden" id="au-level-row"><span data-i18n="au_level">Even out the volume<small data-i18n="au_level_hint">Loud and quiet speech brought closer together</small></span><input type="checkbox" id="au-level"></label>
       <button type="button" class="btn ed-silence hidden" id="ed-silence" disabled data-tip="Leave out the parts where nothing is heard" data-i18n-tip="edit_silence_tip"><svg class="i" viewBox="0 0 24 24"><path d="M2 12h3M19 12h3M8 8v8M11 5v14M14 9v6M17 12h0"/></svg><span data-i18n="edit_silence">Cut silent parts</span></button>
+      <div class="music adv" id="music">
+        <h4 class="music-title" data-i18n="music_title">Background music</h4>
+        <button type="button" class="btn" id="music-add" data-tip="A song or sound under the whole video, quieter while someone speaks" data-i18n-tip="music_add_tip"><svg class="i" viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg><span data-i18n="music_add">Add music…</span></button>
+        <input type="file" id="music-file" class="hidden" accept="audio/*,video/*">
+        <div class="music-on hidden" id="music-on">
+          <p class="music-name"><span id="music-name"></span> <button type="button" class="btn ghost small" id="music-remove" data-i18n="music_remove">Remove</button></p>
+          <label class="field"><span><span data-i18n="music_volume">Volume</span> <b id="music-volume-v"></b></span><input type="range" id="music-volume" min="0" max="2" step="0.05"></label>
+          <div class="field"><span><span data-i18n="music_start">Starts from</span> <b id="music-offset-v"></b></span><canvas id="music-wave" class="music-wave" tabindex="0" role="slider" aria-valuemin="0" aria-label="Where in the music the video starts. Click, drag or use the arrow keys." data-i18n-aria-label="music_start_aria"></canvas></div>
+          <div class="grid2">
+            <label class="field"><span data-i18n="music_fade_in">Fade in</span><select id="music-fade-in"><option value="0">0 s</option><option value="1">1 s</option><option value="2">2 s</option><option value="3">3 s</option><option value="5">5 s</option></select></label>
+            <label class="field"><span data-i18n="music_fade_out">Fade out</span><select id="music-fade-out"><option value="0">0 s</option><option value="1">1 s</option><option value="2">2 s</option><option value="3">3 s</option><option value="5">5 s</option></select></label>
+          </div>
+          <label class="toggle"><span data-i18n="music_duck">Quieter while someone speaks</span><input type="checkbox" id="music-duck"></label>
+          <label class="toggle"><span data-i18n="music_loop">Start again if it ends first</span><input type="checkbox" id="music-loop"></label>
+        </div>
+      </div>
       <button type="button" class="btn ghost ed-default" id="au-default" data-tip="Recordings made from now on start with this volume and these fades" data-i18n-tip="edit_default_sound_tip"><span data-i18n="edit_default">Use for new recordings</span></button>
     </details>
 
     <!-- Slides: title cards put into the recording (it waits while one is on screen), or drawn over it as it plays. -->
-    <details class="section" id="slides-section">
+    <details class="section adv" id="slides-section">
       <summary class="section-title"><span data-i18n="slides_title">Slides</span><span class="slide-count" id="slide-count"></span></summary>
       <p class="muted small slides-hint" data-i18n="slides_hint">Title cards at a moment in the recording. An inserted slide pauses the recording while it is on screen; an overlay is drawn over the recording as it plays.</p>
       <div class="slide-list" id="slide-list" role="listbox" aria-label="Slides" data-i18n-aria-label="slides_title"></div>
       <button class="btn slide-add" id="slide-add" data-tip="Add a slide at the playhead  S" data-i18n-tip="slides_add_tip" aria-keyshortcuts="s">
         <svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span data-i18n="slides_add">Add slide</span>
       </button>
+      <button type="button" class="btn slide-add" id="freeze-add" data-tip="Hold the frame at the playhead on screen for a few seconds (a slide made from it)" data-i18n-tip="freeze_tip"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M10 9v6M14 9v6"/></svg><span data-i18n="freeze_add">Freeze this frame</span></button>
+      <button type="button" class="btn slide-add" id="slide-bookends" data-tip="A title slide at the start and a closing slide at the end, in your slide style" data-i18n-tip="slides_bookends_tip"><svg class="i" viewBox="0 0 24 24"><path d="M4 5h4v14H4zM16 5h4v14h-4zM10 12h4"/></svg><span data-i18n="slides_bookends">Add intro and outro</span></button>
       <button class="slide-forget hidden" id="slide-forget" title="Your last slide style and logo are kept for new slides in later recordings. This clears them; editing a slide's style keeps it again." data-i18n-title="slides_forget_title" data-i18n="slides_forget">Forget saved style</button>
       <div class="slide-files">
         <button class="btn ghost" id="slide-import" data-tip="Add slides from a file exported here" data-i18n-tip="slides_import_tip"><svg class="i" viewBox="0 0 24 24"><path d="M12 15V3M7 10l5 5 5-5M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/></svg><span data-i18n="slides_import">Import</span></button>
@@ -316,7 +421,20 @@
     </details>
 
     <section class="section">
-      <div id="presets"></div>
+      <div class="quick" id="quick">
+        <span class="muted small" data-i18n="quick_title">Made for</span>
+        <button type="button" class="btn ghost small" data-quick="youtube" data-tip="MP4, 16:9, 1080p" data-i18n-tip="quick_youtube_tip">YouTube</button>
+        <button type="button" class="btn ghost small" data-quick="shorts" data-tip="MP4, 9:16 upright, 1080 × 1920, zoomed in where you clicked" data-i18n-tip="quick_shorts_tip">Shorts / Reels</button>
+        <button type="button" class="btn ghost small" data-quick="square" data-tip="MP4, 1:1, 1080 × 1080" data-tip-align="end" data-i18n-tip="quick_square_tip"><span data-i18n="quick_square">Square</span></button>
+        <button type="button" class="btn ghost small" id="thumb-open" data-tip="This frame with a title, as a picture to upload with the video" data-tip-align="end" data-i18n-tip="thumb_tip"><span data-i18n="thumb_open">Thumbnail…</span></button>
+      </div>
+      <div class="quick" id="templates">
+        <span class="muted small" data-i18n="template_title">Start as</span>
+        <button type="button" class="btn ghost small" data-template="bug" data-tip="A GIF with your clicks shown, to show a problem" data-i18n-tip="template_bug_tip" data-i18n="template_bug">Bug report</button>
+        <button type="button" class="btn ghost small" data-template="tutorial" data-tip="An MP4 with intro and outro slides, a first chapter and subtitles" data-i18n-tip="template_tutorial_tip" data-i18n="template_tutorial">Tutorial</button>
+        <button type="button" class="btn ghost small" data-template="social" data-tip="Upright MP4 with big captions in the middle, word by word" data-tip-align="end" data-i18n-tip="template_social_tip" data-i18n="template_social">Social clip</button>
+      </div>
+      <div id="presets" class="adv"></div>
       <h3 class="section-title" data-i18n="editor_format">Format</h3>
       <div class="formats" id="formats">
         <button data-f="mp4" class="on"><b>MP4</b><small data-i18n="video_video">Video</small></button>
@@ -367,13 +485,25 @@
       </div>
     </section>
 
-    <details class="section" id="device-section">
+    <!-- Chapters: sections of the video, in the exported file and as a list for YouTube. -->
+    <details class="section adv" id="chapters-section">
+      <summary class="section-title"><span data-i18n="chapters_title">Chapters</span><span class="slide-count" id="chapter-count"></span></summary>
+      <p class="muted small chapters-hint" data-i18n="chapters_hint">Name the sections of the video. They go into MP4 and WebM exports, and can be copied as a list for a YouTube description.</p>
+      <div class="chapter-list" id="chapter-list"></div>
+      <button type="button" class="btn" id="chapter-add" data-tip="A chapter starting at the playhead" data-i18n-tip="chapters_add_tip"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span data-i18n="chapters_add">Add chapter</span></button>
+      <div class="row chapter-files hidden" id="chapter-files">
+        <button type="button" class="btn ghost" id="chapter-copy" data-tip="Times and names, as YouTube reads them from a description" data-i18n-tip="chapters_copy_tip"><span data-i18n="chapters_copy">Copy for YouTube</span></button>
+        <button type="button" class="btn ghost" id="chapter-vtt" data-tip="A WebVTT chapters file, for players that take one" data-tip-align="end" data-i18n-tip="chapters_vtt_tip"><span data-i18n="chapters_vtt">Download .vtt</span></button>
+      </div>
+    </details>
+
+    <details class="section adv" id="device-section">
       <summary class="section-title" data-i18n="popup_device_frame">Device frame</summary>
       <div id="device-panel"></div>
     </details>
 
     <!-- Review: measuring and colours on a paused frame. Nothing here is exported. -->
-    <details class="section" id="review-section">
+    <details class="section adv" id="review-section">
       <summary class="section-title" data-i18n="video_review_a_frame">Review a frame</summary>
       <p class="muted small" data-i18n="video_measure_or_pick_colours_on">Measure or pick colours on the frame showing. The video pauses; nothing here is exported.</p>
       <div class="seg" id="rv-tools" role="radiogroup" aria-label="Review tool" data-i18n-aria-label="video_review_tool">
@@ -406,10 +536,12 @@
         <svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg>
         <div><b id="r-size"></b><span class="muted small" id="r-detail"></span></div>
       </div>
+      <p class="rate hidden" id="rate"><span data-i18n="rate_ask">Enjoying Captode?</span> <a id="rate-link" target="_blank" rel="noopener" data-i18n="rate_link">Rate it</a> <button type="button" class="btn ghost small" id="rate-no" data-i18n="rate_no">No thanks</button></p>
       <div class="row">
         <button class="btn hidden" id="cancel" disabled data-i18n="settings_cancel">Cancel</button>
         <button class="btn primary block download-big" id="convert"><span class="dl-label" data-i18n="editor_export">Export</span><span class="estimate" id="convert-size"></span></button>
         <button class="btn icon hidden" id="queue-export" data-tip="Add to the queue: it carries on in the background, even if you close this page" data-i18n-tip="queue_add_tip" aria-label="Add to queue" data-i18n-aria-label="queue_add"><svg class="i" viewBox="0 0 24 24"><path d="M4 6h10M4 12h10M4 18h7M18 9v10M14 15l4 4 4-4"/></svg></button>
+        <button class="btn icon hidden" id="export-several" data-tip="Several files from these edits at once: other formats and shapes, made in the background" data-i18n-tip="several_tip" aria-label="Export several" data-i18n-aria-label="several_title"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="7" width="12" height="12" rx="2"/><path d="M8 3h11a2 2 0 0 1 2 2v11"/></svg></button>
         <button class="btn hidden" id="redo-export" data-tip="Change settings and export again" data-i18n-tip="video_change_settings_and_export_again" data-i18n="video_edit">Edit</button>
         <button class="btn icon hidden" id="share-result" data-tip="Share the file with another app" data-i18n-tip="share_file_tip" aria-label="Share" data-i18n-aria-label="share_file"><svg class="i" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg></button>
         <button class="btn primary block hidden" id="download" data-i18n="editor_download">

@@ -250,6 +250,7 @@ div.ed-item:hover { border-color: var(--line); }
 #crop-aspect button { flex: 1; padding: 0 4px; font-size: 12px; }
 #au-mute, .ed-silence { width: 100%; }
 .ed-silence { margin-top: 8px; }
+.ed-speech { width: 100%; margin-top: 8px; }
 /* The sound's waveform, along the bottom of the timeline */
 .wave { position: absolute; left: 0; right: 0; bottom: 0; width: 100%; height: 45%; pointer-events: none; border-radius: 0 0 7px 7px; background: linear-gradient(transparent, rgba(0, 0, 0, .5)); }
 /* The frame at the moment pointed at */
@@ -264,3 +265,120 @@ div.ed-item:hover { border-color: var(--line); }
 
 #keep.on { color: var(--accent); }
 #keep.on .i { fill: currentColor; }
+
+/* Clips joined one after another: the list, and where each starts on the timeline. */
+.clip-mode { margin-bottom: 6px; }
+.clips-hint { margin: 0 0 8px; }
+.clip-list { display: grid; gap: 4px; margin-bottom: 8px; }
+.clip-item { display: flex; align-items: center; gap: 6px; padding: 3px 4px 3px 8px; border-radius: 8px; border: 1px solid var(--line); cursor: pointer; min-width: 0; font-size: 12px; }
+.clip-item:hover { border-color: var(--line-strong); }
+.clip-item:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.clip-n { flex: none; min-width: 16px; font-weight: 600; color: var(--accent); }
+.clip-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.clip-len { flex: none; color: var(--muted); font-variant-numeric: tabular-nums; }
+.clip-item .btn.icon { flex: none; width: 26px; height: 26px; padding: 0; }
+.clip-add { display: flex; gap: 6px; margin-bottom: 6px; }
+.clip-add select { flex: 1; min-width: 0; }
+.clip-marks { position: absolute; inset: 0; pointer-events: none; z-index: 1; }
+.clip-mark { position: absolute; top: 0; bottom: 0; border-left: 2px solid var(--accent); }
+.clip-mark:first-child { border-left-color: transparent; }
+.clip-mark span {
+  position: absolute; top: 2px; left: 2px; padding: 0 4px; border-radius: 4px;
+  background: var(--accent); color: #fff; font-size: 10px; line-height: 14px; font-weight: 600;
+}
+.clip-mode > button { flex: 1; min-width: 0; padding: 0 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.clip-trans { display: flex; align-items: center; gap: 6px; margin: -1px 0 1px 26px; font-size: 11px; color: var(--muted); }
+.clip-trans select { height: 24px; font-size: 11px; padding: 0 24px 0 6px; }
+.clip-mark span { pointer-events: auto; cursor: default; }
+.clip-trim .modal-body { display: grid; gap: 10px; width: min(560px, calc(100vw - 32px)); }
+.clip-trim h2 { margin: 0; }
+.clip-trim-name { margin: -6px 0 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.clip-trim video { width: 100%; max-height: 300px; border-radius: 8px; background: #000; }
+#clip-undo { margin-top: 6px; }
+.ed-swatches > button { display: grid; place-items: center; }
+.ed-swatch { display: block; width: 14px; height: 14px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(127,127,127,.5); }
+
+/* The timeline zoomed in: the track is wider than its view, which shows part of it. */
+.track-view { flex: 1; min-width: 0; overflow-x: clip; overflow-y: visible; align-self: stretch; display: flex; align-items: center; }
+.track-view > .track { flex: none; width: 100%; }
+.tl-zoom { display: flex; gap: 2px; }
+.tl-zoom .btn.icon { width: 28px; height: 28px; }
+.music { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line); }
+.music-title { margin: 0 0 6px; font-size: 12px; font-weight: 600; }
+.music-name { display: flex; align-items: center; justify-content: space-between; gap: 6px; margin: 0 0 6px; font-size: 12px; }
+.music-name span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chapter-list { display: grid; gap: 4px; margin-bottom: 8px; }
+.chapter-item { display: flex; align-items: center; gap: 6px; }
+.chapter-item .tc { flex: none; min-width: 44px; font-size: 12px; cursor: pointer; color: var(--accent); }
+.chapter-item input { flex: 1; min-width: 0; height: 28px; }
+.chapter-item .btn.icon { flex: none; width: 26px; height: 26px; padding: 0; }
+.chapter-files { margin-top: 6px; gap: 6px; }
+.quick { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; margin-bottom: 10px; }
+.quick .btn.small { height: 26px; padding: 0 8px; font-size: 12px; }
+.thumb .modal-body { display: grid; gap: 10px; }
+.thumb canvas { width: 100%; height: auto; border-radius: 8px; background: #000; }
+.clip-storage { margin: 8px 0 0; }
+.clip-storage:empty { display: none; }
+.ed-apply-cuts { margin-top: 6px; width: 100%; }
+.chapter-mark { position: absolute; top: -3px; bottom: -3px; width: 0; border-left: 2px dashed #8b5cf6; pointer-events: none; z-index: 2; }
+/* Caption style (for all captions), in the caption's form. */
+.ed-cap-style { margin: 10px 0 6px; padding-top: 8px; border-top: 1px solid var(--line); }
+.ed-cap-style > b { display: block; margin-bottom: 6px; font-size: 12px; }
+/* Reviewing captions. */
+.cap-review .modal-body { display: grid; gap: 10px; }
+.cap-review h2 { margin: 0; }
+.cap-review p { margin: -4px 0 0; }
+.cap-review video { width: 100%; max-height: 220px; border-radius: 8px; background: #000; }
+.cap-review-list { display: grid; gap: 6px; max-height: 40vh; overflow: auto; padding-right: 2px; }
+.cap-review-row { display: flex; gap: 6px; align-items: flex-start; }
+.cap-review-row .tc { flex: none; min-width: 56px; height: 30px; font-variant-numeric: tabular-nums; }
+.cap-review-row textarea { flex: 1; min-width: 0; resize: vertical; min-height: 30px; }
+
+.music-wave { display: block; width: 100%; height: 44px; border-radius: 6px; background: var(--panel-2); color: var(--muted); cursor: pointer; touch-action: none; }
+.music-wave:focus-visible { outline: 2px solid var(--accent, #5b4bff); outline-offset: 2px; }
+.sub-track { align-items: center; gap: 8px; }
+.sub-track select { flex: 1; min-width: 0; }
+
+/* Simple: the advanced tools are out of the way until All tools is chosen. */
+body.simple .adv { display: none !important; }
+.ui-mode-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 0 0 10px; }
+/* The tour: a card beside the part it is about. */
+.tour { position: fixed; z-index: 1000; width: min(320px, calc(100vw - 16px)); padding: 14px 16px; border-radius: 12px; background: var(--panel); color: var(--text); box-shadow: 0 12px 40px rgba(0, 0, 0, 0.28); border: 1px solid var(--line-strong); }
+.tour h3 { margin: 2px 0 6px; font-size: 15px; }
+.tour p { margin: 0 0 10px; }
+.tour-n { margin: 0 !important; }
+.tour-actions { display: flex; align-items: center; gap: 6px; }
+.tour-actions span { flex: 1; }
+.tour-target { outline: 3px solid var(--accent, #5b4bff) !important; outline-offset: 3px; border-radius: 8px; }
+
+.rate { margin: 8px 0 0; font-size: 13px; color: var(--muted); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.rate a { color: var(--accent); font-weight: 600; }
+.several { display: grid; gap: 2px; margin: 8px 0 4px; }
+#vo-rec.recording { background: #e5484d; border-color: #e5484d; color: #fff; }
+#vo-rec.recording .i { animation: vo-pulse 1s ease-in-out infinite; }
+@keyframes vo-pulse { 50% { opacity: 0.35; } }
+@media (prefers-reduced-motion: reduce) { #vo-rec.recording .i { animation: none; } }
+.cap-review-row input[type="checkbox"] { margin: 0 4px 0 0; }
+/* The Simple / All tools switch on one line, clear of the header. */
+.ui-mode-row { padding-top: 12px; }
+.ui-mode-row .seg button { white-space: nowrap; }
+#vo-rec { width: 100%; justify-content: center; }
+.ed-item .ed-actions, .ed-actions { flex-wrap: wrap; }
+/* Phones: the header's buttons as icons alone (their names stay for screen readers). */
+@media (max-width: 600px) {
+  .topbar #make-guide, .topbar #frame-to-editor, .topbar #dl-original { font-size: 0; gap: 0; padding-inline: 8px; }
+  .topbar .brand { font-size: 0; gap: 0; }
+  .topbar #info, .topbar .sep { display: none; }
+  .topbar .doc { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+}
+
+/* History: every change, newest first. */
+.ed-hist { margin: 0 0 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel-2); max-height: 260px; overflow-y: auto; }
+.hist-empty { margin: 10px 12px; }
+.hist-list { display: flex; flex-direction: column; }
+.hist-row { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; padding: 7px 12px; border: 0; background: none; color: var(--text); font: inherit; font-size: 13px; text-align: left; cursor: pointer; }
+.hist-row:hover:not(:disabled) { background: var(--hover); }
+.hist-row:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.hist-row.now { cursor: default; font-weight: 600; box-shadow: inset 3px 0 0 var(--accent); }
+.hist-row.future { color: var(--muted); }
+.hist-row small { flex: none; }

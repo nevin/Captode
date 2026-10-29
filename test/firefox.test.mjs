@@ -67,6 +67,9 @@ setTimeout(() => chrome.tabs.create({ url: chrome.runtime.getURL(${JSON.stringif
       near(r.capture.height / r.capture.dpr, r.page[0], 3, 'full page height');
       ok(r.settings.shortcuts.length === 7 && r.settings.changeShortcuts, `settings: ${JSON.stringify(r.settings)}`);
       ok(r.editor.tools > 10, 'editor tools');
+      ok(!r.clips.error, `clips: ${r.clips.error}`);
+      near(r.clips.joined, r.clips.sum, 0.25, 'joined clips');
+      ok(r.clips.out.size > 0 || r.clips.out.fallback, `export with a text layer, a fade and chapters: ${JSON.stringify(r.clips.out)}`);
       return `${r.capture.width} × ${r.capture.height}; shortcuts ${r.settings.shortcuts.join(', ')}`;
     } finally {
       await browser.close();

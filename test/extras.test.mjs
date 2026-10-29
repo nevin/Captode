@@ -1,6 +1,6 @@
 // Your logo, Copy text, searching captures, copying a guide, and translating where
 // the browser can.
-import { open, ok } from './helpers.mjs';
+import { open, ok, sleep } from './helpers.mjs';
 
 /** A plain white screenshot, saved as a capture with `meta`. */
 const shot = (page, meta) => page.evaluate(async (meta) => {
@@ -126,6 +126,13 @@ export const tests = {
     ok(r.clip.text === 'My <guide>\n\n1. Open the menu\n   then pick one\n', `text ${JSON.stringify(r.clip.text)}`);
     ok(/alt="Press Go"/.test(r.page), 'the page uses the note as alt text');
     ok(r.canTranslate === r.has, 'translate follows the browser');
+    // The guide page offers the menu, or says it can't: never neither.
+    const page = await open(browser, url('guide/guide.html'));
+    await page.waitForFunction(() => document.readyState === 'complete', { polling: 100 });
+    await sleep(300);
+    const shown = await page.evaluate(() => ['#translate', '#translate-note'].filter((s) => !document.querySelector(s).classList.contains('hidden')));
+    ok(shown.length === 1 && shown[0] === (r.has ? '#translate' : '#translate-note'), `guide page: ${JSON.stringify(shown)}`);
+    await page.close();
     await lab.close();
     return r.has ? 'this browser can translate' : 'no translator in this browser: not offered';
   },

@@ -17,6 +17,8 @@ for (const lang of readdirSync(dir).filter((l) => l !== 'en').sort()) {
   for (const [key, { message }] of Object.entries(en)) {
     if (!m[key]) { report(`${lang}: missing ${key}`); continue; }
     if (marks(m[key].message) !== marks(message)) report(`${lang}: ${key} has "${marks(m[key].message)}", English has "${marks(message)}"`);
+    // "$1$2" reads to Chrome as a named placeholder "$1$", and the extension won't load.
+    if (/\$\d+\$/.test(m[key].message)) report(`${lang}: ${key} has placeholders run together ("$1$2"); Chrome can't load that`);
   }
   for (const key of Object.keys(m)) if (!en[key]) report(`${lang}: ${key} is not an English message`);
   if (m.extName.message.length > 75) report(`${lang}: extName is over 75 characters`);

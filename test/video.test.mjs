@@ -23,6 +23,8 @@ export async function setup({ browser, url }) {
   /** Exports in `format` and returns details of the result. */
   const exportAs = async (format) => {
     await page.evaluate(() => { window.__fallback = null; });
+    // Out from under the export bar, which stays at the bottom of the panel.
+    await page.$eval(`#formats [data-f="${format}"]`, (e) => e.scrollIntoView({ block: 'center' }));
     await page.click(`#formats [data-f="${format}"]`);
     await sleep(100);
     const t0 = Date.now();
@@ -1145,7 +1147,10 @@ export const tests = {
   async 'edits: crop, a blurred box drawn on the picture, and a background'({ video, exportAs }) {
     try {
       await video.evaluate(() => { document.querySelector('#crop-section').open = true; document.querySelector('#bg-section').open = true; });
+      // Out from under the export bar, which stays at the bottom of the panel.
+      await video.$eval('#crop-on', (e) => e.scrollIntoView({ block: 'center' }));
       await video.click('#crop-on');
+      await video.$eval('#bg-on', (e) => e.scrollIntoView({ block: 'center' }));
       await video.click('#bg-on');
       await addEdit(video, 'blurs', 0, 8);
       await video.click('#ed-item [data-seg="mode"] [data-v="box"]');
@@ -1246,7 +1251,7 @@ export const tests = {
   async 'edits in the in-page exports, without the worker'({ video, exportAs, set }) {
     try {
       await addEdit(video, 'cuts', 2, 4);
-      await video.evaluate(() => { document.querySelector('#crop-section').open = true; });
+      await video.evaluate(() => { document.querySelector('#crop-section').open = true; document.querySelector('#crop-on').scrollIntoView({ block: 'center' }); });
       await video.click('#crop-on');
       await video.keyboard.press('Escape');
       await breakWorker(video);
@@ -1576,6 +1581,7 @@ export const tests = {
   async 'edits: typing a caption is undone in one step, and Undo after removing brings that edit back'({ video }) {
     try {
       await addEdit(video, 'captions', 1, 3);
+      await video.$eval('#ed-item textarea', (e) => e.scrollIntoView({ block: 'center' })); // out from under the export bar
       await video.click('#ed-item textarea');
       await video.keyboard.type('Hello there', { delay: 20 });
       await video.evaluate(() => document.activeElement?.blur());

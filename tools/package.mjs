@@ -140,7 +140,8 @@ if (failed) {
 
 // The source zip comes from the repository; a copy made from that zip has no git to ask.
 if (!only && existsSync(join(root, '.git'))) {
-  // The source: the files git tracks, as committed or changed, nothing downloaded or built.
-  const tracked = execFileSync('git', ['ls-files', '-z'], { cwd: root, encoding: 'utf8' }).split('\0').filter((f) => f && existsSync(join(root, f)));
+  // The source: the files git tracks, as committed or changed, and new ones not yet
+  // committed (a release builds before it commits); nothing ignored, downloaded or built.
+  const tracked = execFileSync('git', ['ls-files', '-z', '--cached', '--others', '--exclude-standard'], { cwd: root, encoding: 'utf8' }).split('\0').filter((f) => f && existsSync(join(root, f)));
   writeZip(`captode-${version}-source.zip`, tracked.sort().map((f) => [f, readFileSync(join(root, f))]));
 }

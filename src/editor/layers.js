@@ -3,9 +3,9 @@
 // Changes elsewhere in the editor are announced through `announce`.
 
 import { t } from '../lib/i18n.js';
+import { esc } from '../lib/util.js';
 
 const $ = (s) => document.querySelector(s);
-const escHtml = (t) => String(t).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
 /**
  * `ed`: the editor's side: `objects()`, `selection()` and `selected()` (current
@@ -59,7 +59,7 @@ export function createLayers(ed) {
     const ul = $('#layers');
     ul.innerHTML = rows.map((row, i) =>
       `<li role="option" id="layer-${i}" data-i="${i}" aria-selected="${row.on}" class="${i === active ? 'active' : ''}">` +
-      `<span class="sw" style="background:${escHtml(row.color)}"></span><span>${escHtml(row.text)}</span></li>`).join('');
+      `<span class="sw" style="background:${esc(row.color)}"></span><span>${esc(row.text)}</span></li>`).join('');
     if (all.length) ul.setAttribute('aria-activedescendant', `layer-${active}`);
     else ul.removeAttribute('aria-activedescendant');
     $('#layers-count').textContent = all.length ? `(${all.length})` : '';

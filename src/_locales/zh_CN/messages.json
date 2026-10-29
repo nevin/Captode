@@ -3223,5 +3223,905 @@
   },
   "edit_no_sound": {
     "message": "此录制没有可静音的声音。"
+  },
+  "clips_title": {
+    "message": "片段"
+  },
+  "clips_pick": {
+    "message": "要添加的录制"
+  },
+  "clips_add": {
+    "message": "添加"
+  },
+  "clips_add_tip": {
+    "message": "将此录制添加到末尾"
+  },
+  "clips_add_file": {
+    "message": "添加视频文件"
+  },
+  "clips_add_file_tip": {
+    "message": "将电脑中的视频添加到末尾"
+  },
+  "clips_untitled": {
+    "message": "未命名录制"
+  },
+  "clips_recording": {
+    "message": "此录制"
+  },
+  "clips_go": {
+    "message": "跳到此片段"
+  },
+  "clips_earlier": {
+    "message": "前移"
+  },
+  "clips_later": {
+    "message": "后移"
+  },
+  "clips_remove": {
+    "message": "移除片段"
+  },
+  "clips_remove_title": {
+    "message": "移除此片段？"
+  },
+  "clips_remove_text": {
+    "message": "“$1”及其中的编辑和幻灯片将从此录制中移除。"
+  },
+  "clips_joining": {
+    "message": "正在合并片段…"
+  },
+  "clips_added": {
+    "message": "已将片段添加到末尾"
+  },
+  "clips_moved": {
+    "message": "已重新排列片段"
+  },
+  "clips_removed": {
+    "message": "已移除片段"
+  },
+  "clips_unplayable": {
+    "message": "此浏览器无法播放该视频，因此无法添加。"
+  },
+  "clips_unsupported": {
+    "message": "此浏览器无法编码视频，因此无法在此合并片段。"
+  },
+  "clips_failed": {
+    "message": "无法合并片段。录制未更改。"
+  },
+  "clips_sound_lost": {
+    "message": "已添加片段，但此浏览器无法编码其声音，因此将无声播放。"
+  },
+  "clips_after_hint": {
+    "message": "在末尾添加其他录制或视频文件。它们依次播放，并导出为一个视频。"
+  },
+  "clips_top_hint": {
+    "message": "从播放头处在画面上叠加另一个视频，或截图、徽标等图片。可在画面上拖动它，或在“编辑”中设置位置、大小、外观和音量。"
+  },
+  "clips_where": {
+    "message": "添加位置"
+  },
+  "clips_after": {
+    "message": "在末尾"
+  },
+  "clips_top": {
+    "message": "叠加在上"
+  },
+  "clips_add_top_tip": {
+    "message": "从播放头处将此录制叠加在画面上"
+  },
+  "clips_add_file_top_tip": {
+    "message": "从播放头处将电脑中的视频叠加在画面上"
+  },
+  "edit_kind_layers": {
+    "message": "视频图层"
+  },
+  "edit_add_layer_tip": {
+    "message": "叠加在画面上的另一个视频或图片，例如摄像头画面或徽标"
+  },
+  "vlayer_position": {
+    "message": "位置"
+  },
+  "vlayer_pos_tl": {
+    "message": "左上"
+  },
+  "vlayer_pos_tr": {
+    "message": "右上"
+  },
+  "vlayer_pos_c": {
+    "message": "居中"
+  },
+  "vlayer_pos_bl": {
+    "message": "左下"
+  },
+  "vlayer_pos_br": {
+    "message": "右下"
+  },
+  "vlayer_shape": {
+    "message": "形状"
+  },
+  "vlayer_shape_rect": {
+    "message": "矩形"
+  },
+  "vlayer_shape_circle": {
+    "message": "圆形"
+  },
+  "vlayer_offset": {
+    "message": "从其视频的此处开始（秒）"
+  },
+  "vlayer_hint": {
+    "message": "在暂停的画面上拖动图层可移动它，拖动其右下角可调整大小。拖动其条可在时间上移动。"
+  },
+  "vlayer_preparing": {
+    "message": "正在准备视频…"
+  },
+  "vlayer_failed": {
+    "message": "无法将该视频叠加到画面上。"
+  },
+  "vlayer_added": {
+    "message": "已在播放头处添加视频图层"
+  },
+  "clips_here": {
+    "message": "在播放头处"
+  },
+  "clips_here_hint": {
+    "message": "在播放头处插入录制或视频文件，后面的内容随之后移。只有到下一个关键帧（一两秒）为止的部分会重新编码，其余部分直接复制。"
+  },
+  "clips_add_here_tip": {
+    "message": "在播放头处插入此录制"
+  },
+  "clips_add_file_here_tip": {
+    "message": "在播放头处插入电脑中的视频"
+  },
+  "vlayer_volume": {
+    "message": "音量"
+  },
+  "vlayer_pos_free": {
+    "message": "手动放置"
+  },
+  "clips_cancel": {
+    "message": "取消"
+  },
+  "clips_trim_title": {
+    "message": "要添加的部分"
+  },
+  "clips_trim_here": {
+    "message": "从上方视频的当前位置开始"
+  },
+  "clips_trim_here_end": {
+    "message": "在上方视频的当前位置结束"
+  },
+  "clips_trim_len": {
+    "message": "将添加 $1。"
+  },
+  "clips_trim_slow": {
+    "message": "需要编码以适配，大约需要 $1 分钟。"
+  },
+  "clips_trans": {
+    "message": "转场："
+  },
+  "clips_trans_none": {
+    "message": "直接切换"
+  },
+  "clips_trans_fade": {
+    "message": "经黑场淡入淡出"
+  },
+  "clips_trans_cross": {
+    "message": "交叉淡化"
+  },
+  "clips_undo": {
+    "message": "撤销上次更改"
+  },
+  "clips_undo_tip": {
+    "message": "恢复到上次添加、移动或移除片段之前的录制"
+  },
+  "clips_undone": {
+    "message": "已恢复片段"
+  },
+  "vlayer_opacity": {
+    "message": "不透明度"
+  },
+  "vlayer_fade": {
+    "message": "淡入淡出"
+  },
+  "vlayer_border": {
+    "message": "边框"
+  },
+  "vlayer_border_none": {
+    "message": "无边框"
+  },
+  "vlayer_shadow": {
+    "message": "阴影"
+  },
+  "tl_zoom_out_tip": {
+    "message": "缩小时间线  −"
+  },
+  "tl_zoom_in_tip": {
+    "message": "放大时间线  +（或 ⌘/Ctrl + 滚动）"
+  },
+  "edit_add_text_layer_tip": {
+    "message": "叠加在画面上的文字，可像图层一样放置和设置样式"
+  },
+  "vlayer_text": {
+    "message": "文字图层"
+  },
+  "vlayer_video_or_picture": {
+    "message": "视频或图片图层"
+  },
+  "vlayer_text_default": {
+    "message": "你的标题"
+  },
+  "vlayer_text_colour": {
+    "message": "颜色"
+  },
+  "vlayer_text_bg": {
+    "message": "背景"
+  },
+  "vlayer_bg_dark": {
+    "message": "深色"
+  },
+  "vlayer_bg_light": {
+    "message": "浅色"
+  },
+  "vlayer_bg_none": {
+    "message": "无"
+  },
+  "vlayer_picture": {
+    "message": "图片"
+  },
+  "vlayer_picture_added": {
+    "message": "已将“$1”叠加到画面上"
+  },
+  "clips_image_top": {
+    "message": "图片只能叠加在上方：请先选择“叠加在上”。"
+  },
+  "edit_speed_ease": {
+    "message": "逐渐加速和减速"
+  },
+  "music_title": {
+    "message": "背景音乐"
+  },
+  "music_add": {
+    "message": "添加音乐…"
+  },
+  "music_add_tip": {
+    "message": "整个视频的背景歌曲或声音，有人说话时会变小"
+  },
+  "music_remove": {
+    "message": "移除"
+  },
+  "music_volume": {
+    "message": "音量"
+  },
+  "music_fade_in": {
+    "message": "淡入"
+  },
+  "music_fade_out": {
+    "message": "淡出"
+  },
+  "music_duck": {
+    "message": "有人说话时变小"
+  },
+  "music_loop": {
+    "message": "若提前结束则从头播放"
+  },
+  "music_preparing": {
+    "message": "正在准备音乐…"
+  },
+  "music_added": {
+    "message": "已为整个视频添加音乐"
+  },
+  "music_unplayable": {
+    "message": "此浏览器无法播放该文件，因此不能用作音乐。"
+  },
+  "music_failed": {
+    "message": "无法在此浏览器中添加音乐。"
+  },
+  "edit_apply_cuts": {
+    "message": "永久删除剪掉的部分"
+  },
+  "edit_apply_cuts_tip": {
+    "message": "从录制本身中去掉剪掉的部分，以节省空间。可用“片段”中的“撤销上次更改”恢复。"
+  },
+  "edit_apply_cuts_title": {
+    "message": "永久删除剪掉的部分？"
+  },
+  "edit_apply_cuts_text": {
+    "message": "录制将去掉这些部分并变小；编辑会保留在剩余部分上。可用“片段”中的“撤销上次更改”恢复。"
+  },
+  "edit_cuts_applied": {
+    "message": "已永久删除剪掉的部分"
+  },
+  "freeze_add": {
+    "message": "定格此帧"
+  },
+  "freeze_tip": {
+    "message": "将播放头处的画面定格几秒（用该画面制作的幻灯片）"
+  },
+  "freeze_added": {
+    "message": "已定格 2 秒：可在“幻灯片”中更改时长"
+  },
+  "chapters_title": {
+    "message": "章节"
+  },
+  "chapters_hint": {
+    "message": "为视频的各个部分命名。章节会写入 MP4 和 WebM 导出文件，也可复制为 YouTube 简介中的列表。"
+  },
+  "chapters_add": {
+    "message": "添加章节"
+  },
+  "chapters_add_tip": {
+    "message": "从播放头处开始的章节"
+  },
+  "chapters_copy": {
+    "message": "复制用于 YouTube"
+  },
+  "chapters_copy_tip": {
+    "message": "YouTube 从简介中读取的时间和名称格式"
+  },
+  "chapters_vtt": {
+    "message": "下载 .vtt"
+  },
+  "chapters_vtt_tip": {
+    "message": "供支持的播放器使用的 WebVTT 章节文件"
+  },
+  "chapters_untitled": {
+    "message": "章节"
+  },
+  "chapters_start": {
+    "message": "开始"
+  },
+  "chapters_go": {
+    "message": "跳到此章节"
+  },
+  "chapters_name": {
+    "message": "章节名称"
+  },
+  "chapters_default": {
+    "message": "第 $1 章"
+  },
+  "chapters_copied": {
+    "message": "已复制章节：请粘贴到视频简介中"
+  },
+  "chapters_copy_failed": {
+    "message": "无法在此复制章节。"
+  },
+  "quick_title": {
+    "message": "适用于"
+  },
+  "quick_youtube_tip": {
+    "message": "MP4、16:9、1080p"
+  },
+  "quick_shorts_tip": {
+    "message": "MP4、竖屏 9:16、1080 × 1920，在点击处放大"
+  },
+  "quick_square": {
+    "message": "方形"
+  },
+  "quick_square_tip": {
+    "message": "MP4、1:1、1080 × 1080"
+  },
+  "quick_done": {
+    "message": "已按 $1 设置"
+  },
+  "thumb_open": {
+    "message": "缩略图…"
+  },
+  "thumb_tip": {
+    "message": "带标题的此帧画面，可与视频一起上传"
+  },
+  "thumb_title": {
+    "message": "缩略图"
+  },
+  "thumb_text": {
+    "message": "标题"
+  },
+  "thumb_place": {
+    "message": "位置"
+  },
+  "thumb_bottom": {
+    "message": "底部"
+  },
+  "thumb_top": {
+    "message": "顶部"
+  },
+  "thumb_middle": {
+    "message": "中间"
+  },
+  "thumb_save": {
+    "message": "保存 PNG"
+  },
+  "clips_storage": {
+    "message": "此录制在浏览器中占用 $1。$2"
+  },
+  "clips_storage_undo": {
+    "message": "（其中 $1 用于撤销上次片段更改）"
+  },
+  "clips_forget": {
+    "message": "释放撤销副本"
+  },
+  "clips_forget_tip": {
+    "message": "删除为撤销上次片段更改而保留的副本，以释放空间"
+  },
+  "clips_freed": {
+    "message": "已释放 $1"
+  },
+  "speech_button": {
+    "message": "根据语音生成字幕"
+  },
+  "speech_tip": {
+    "message": "由浏览器自带的语音识别在此设备上为所说内容生成字幕"
+  },
+  "speech_title": {
+    "message": "根据语音生成字幕"
+  },
+  "speech_text": {
+    "message": "录制的声音在此设备上识别，绝不会发送到任何地方。首次使用时浏览器可能会下载语言包。所需时间与说话时长相当。"
+  },
+  "speech_language": {
+    "message": "所说语言"
+  },
+  "speech_go": {
+    "message": "生成字幕"
+  },
+  "speech_unavailable": {
+    "message": "此浏览器无法在此设备上识别该语言。"
+  },
+  "speech_downloading": {
+    "message": "浏览器正在准备语言包…"
+  },
+  "speech_none": {
+    "message": "未找到可生成字幕的语音。"
+  },
+  "speech_working": {
+    "message": "正在识别以生成字幕…"
+  },
+  "speech_done": {
+    "message": "已添加 $1 条字幕：请通读并在“编辑”中修改字词"
+  },
+  "speech_failed": {
+    "message": "无法生成字幕。未做任何更改。"
+  },
+  "cap_style": {
+    "message": "所有字幕的外观"
+  },
+  "cap_font": {
+    "message": "字体"
+  },
+  "cap_font_sans": {
+    "message": "普通"
+  },
+  "cap_font_rounded": {
+    "message": "圆体"
+  },
+  "cap_font_serif": {
+    "message": "衬线"
+  },
+  "cap_font_mono": {
+    "message": "等宽"
+  },
+  "cap_band": {
+    "message": "文字背景"
+  },
+  "cap_band_dark": {
+    "message": "深色条"
+  },
+  "cap_band_light": {
+    "message": "浅色条"
+  },
+  "cap_band_outline": {
+    "message": "描边"
+  },
+  "cap_band_none": {
+    "message": "仅阴影"
+  },
+  "cap_place": {
+    "message": "位置"
+  },
+  "cap_highlight": {
+    "message": "说到哪个词就高亮哪个词"
+  },
+  "cap_highlight_hint": {
+    "message": "正在说的词显示为黄色"
+  },
+  "cap_join": {
+    "message": "与下一条合并"
+  },
+  "cap_join_tip": {
+    "message": "将此条和下一条合并为一条字幕"
+  },
+  "cap_review": {
+    "message": "检查字幕"
+  },
+  "cap_review_tip": {
+    "message": "在一个列表中通读并修改所有字幕"
+  },
+  "cap_review_hint": {
+    "message": "点击时间可收听该部分。按 Enter 跳到下一条字幕。"
+  },
+  "cap_review_done": {
+    "message": "完成"
+  },
+  "cap_review_play": {
+    "message": "播放此字幕对应的部分"
+  },
+  "edit_preview_keys": {
+    "message": "包含编辑的预览。选中图层后，方向键移动它，+ 和 − 调整大小。"
+  },
+  "vlayer_moved": {
+    "message": "图层：横向 $1%，纵向 $2%，宽 $3%"
+  },
+  "vlayer_move": {
+    "message": "移动"
+  },
+  "vlayer_move_hint": {
+    "message": "从起点平滑移动到终点。在接近结尾处拖动它来设置终点。"
+  },
+  "vlayer_go_start": {
+    "message": "转到开头"
+  },
+  "vlayer_go_end": {
+    "message": "转到结尾"
+  },
+  "vlayer_move_now": {
+    "message": "现在把图层拖到它应结束的位置。"
+  },
+  "subs_title": {
+    "message": "字幕轨道"
+  },
+  "subs_burn": {
+    "message": "显示在画面上"
+  },
+  "subs_burn_hint": {
+    "message": "关闭：字幕仅作为轨道，GIF 和 WebP 将没有字幕"
+  },
+  "subs_embed": {
+    "message": "作为字幕加入 MP4 和 WebM"
+  },
+  "subs_embed_hint": {
+    "message": "观看者可以按下方各语言开关字幕"
+  },
+  "subs_lang": {
+    "message": "字幕语言"
+  },
+  "subs_lang_none": {
+    "message": "未设置"
+  },
+  "subs_track_lang": {
+    "message": "轨道语言"
+  },
+  "subs_track_count": {
+    "message": "$2 条中的 $1 条"
+  },
+  "subs_track_remove": {
+    "message": "移除此语言"
+  },
+  "subs_add_file": {
+    "message": "从文件添加语言…"
+  },
+  "subs_add_file_tip": {
+    "message": "这些字幕的其他语言 SRT 或 WebVTT 文件（例如在此保存后翻译的文件）"
+  },
+  "subs_add_translation": {
+    "message": "添加翻译"
+  },
+  "subs_file_failed": {
+    "message": "该文件中没有与这些字幕对应的字幕。"
+  },
+  "subs_file_added": {
+    "message": "已为 $1 条字幕添加语言。请在上方选择是哪种语言。"
+  },
+  "subs_translated": {
+    "message": "已添加$1字幕。"
+  },
+  "storage_full": {
+    "message": "此浏览器没有足够空间再保存 $1。请在资料库中删除一些旧录制，然后重试。"
+  },
+  "music_start": {
+    "message": "起始位置"
+  },
+  "music_start_aria": {
+    "message": "视频从音乐的哪个位置开始。点击、拖动或使用方向键。"
+  },
+  "slides_outro_default": {
+    "message": "感谢观看"
+  },
+  "slides_bookends": {
+    "message": "添加片头和片尾"
+  },
+  "slides_bookends_tip": {
+    "message": "在开头添加标题幻灯片、在结尾添加结束幻灯片，使用你的样式"
+  },
+  "slides_bookends_added": {
+    "message": "已添加片头和片尾幻灯片。"
+  },
+  "ui_mode": {
+    "message": "显示的工具"
+  },
+  "ui_mode_simple": {
+    "message": "简洁"
+  },
+  "ui_mode_simple_tip": {
+    "message": "仅修剪、剪切、字幕、声音和导出"
+  },
+  "ui_mode_advanced": {
+    "message": "全部工具"
+  },
+  "ui_mode_advanced_tip": {
+    "message": "全部：图层、音乐、幻灯片、章节、背景等"
+  },
+  "ui_mode_switched": {
+    "message": "此视频用到了部分工具，因此显示全部工具。"
+  },
+  "tour_start": {
+    "message": "导览"
+  },
+  "tour_start_tip": {
+    "message": "本页面的简短导览"
+  },
+  "tour_skip": {
+    "message": "跳过"
+  },
+  "tour_back": {
+    "message": "上一步"
+  },
+  "tour_next": {
+    "message": "下一步"
+  },
+  "tour_done": {
+    "message": "知道了"
+  },
+  "tour_step": {
+    "message": "第 $1 步，共 $2 步"
+  },
+  "tour_play_title": {
+    "message": "你的录制"
+  },
+  "tour_play": {
+    "message": "在这里播放，所见即导出效果。按空格键播放或暂停。"
+  },
+  "tour_trim_title": {
+    "message": "保留想要的部分"
+  },
+  "tour_trim": {
+    "message": "在时间轴上拖动，或拖动其边缘。播放时按 I 设起点，按 O 设终点。"
+  },
+  "tour_edit_title": {
+    "message": "剪切和字幕"
+  },
+  "tour_edit": {
+    "message": "剪切去掉一段；字幕把文字放到画面上。选中编辑即可修改。随时可以撤销。"
+  },
+  "tour_sound_title": {
+    "message": "声音"
+  },
+  "tour_sound": {
+    "message": "调整音量、剪掉静音部分，浏览器支持时还能根据说话内容生成字幕。"
+  },
+  "tour_mode_title": {
+    "message": "更多工具"
+  },
+  "tour_mode": {
+    "message": "“全部工具”提供图层、音乐、幻灯片、章节、缩放、模糊、背景等。"
+  },
+  "tour_export_title": {
+    "message": "导出"
+  },
+  "tour_export": {
+    "message": "选择格式并导出。一切都在你的设备上完成，不会上传任何内容。"
+  },
+  "speech_not_here": {
+    "message": "此浏览器不支持根据语音生成字幕。你仍可以用“字幕”手动输入。"
+  },
+  "translate_not_here": {
+    "message": "此浏览器不支持翻译字幕。你可以在下方从字幕文件添加其他语言。"
+  },
+  "guide_translate_not_here": {
+    "message": "此浏览器不支持翻译"
+  },
+  "template_title": {
+    "message": "起始模板"
+  },
+  "template_bug": {
+    "message": "问题报告"
+  },
+  "template_bug_tip": {
+    "message": "显示点击的 GIF，用来展示问题"
+  },
+  "template_tutorial": {
+    "message": "教程"
+  },
+  "template_tutorial_tip": {
+    "message": "带片头片尾、第一个章节和字幕的 MP4"
+  },
+  "template_social": {
+    "message": "社交短片"
+  },
+  "template_social_tip": {
+    "message": "竖屏 MP4，中间大字幕逐词高亮"
+  },
+  "template_chapter": {
+    "message": "简介"
+  },
+  "template_bug_done": {
+    "message": "已设为问题报告：显示点击的 GIF。按 B 可模糊隐私内容。"
+  },
+  "template_tutorial_done": {
+    "message": "已设为教程：MP4、片头片尾、第一个章节和字幕。可按 T 或根据语音添加字幕。"
+  },
+  "template_social_done": {
+    "message": "已设为社交短片：竖屏 MP4、逐词大字幕。背景音乐在“声音”中。"
+  },
+  "check_title": {
+    "message": "导出之前"
+  },
+  "check_go": {
+    "message": "仍然导出"
+  },
+  "check_captions_animation": {
+    "message": "字幕仅设为轨道，而 GIF 和 WebP 没有轨道，所以这次导出不会有字幕。"
+  },
+  "check_subs_off": {
+    "message": "其他字幕语言不会加入：请打开“作为字幕加入 MP4 和 WebM”。"
+  },
+  "check_music_loud": {
+    "message": "音乐音量较大，且说话时不会降低，可能盖过人声。"
+  },
+  "check_muted": {
+    "message": "本次导出已关闭声音。"
+  },
+  "check_big": {
+    "message": "文件可能最大达到 $1。"
+  },
+  "recover_export": {
+    "message": "此录制上次的导出没有完成。"
+  },
+  "recover_export_go": {
+    "message": "重新导出"
+  },
+  "recover_join": {
+    "message": "上次合并片段没有完成。"
+  },
+  "recover_join_go": {
+    "message": "恢复原样"
+  },
+  "rate_ask": {
+    "message": "喜欢 Captode 吗？"
+  },
+  "rate_link": {
+    "message": "去评分"
+  },
+  "rate_no": {
+    "message": "不用了"
+  },
+  "vo_record": {
+    "message": "录制旁白"
+  },
+  "vo_stop": {
+    "message": "停止旁白"
+  },
+  "vo_tip": {
+    "message": "从播放头开始播放时对着视频讲话，你的声音会作为旁白加入"
+  },
+  "vo_started": {
+    "message": "正在录制你的声音。停止或暂停视频即可结束。"
+  },
+  "vo_preparing": {
+    "message": "正在保存旁白…"
+  },
+  "vo_added": {
+    "message": "已添加旁白。可在编辑列表中单独调节音量。"
+  },
+  "vo_failed": {
+    "message": "无法保存旁白。"
+  },
+  "vo_no_mic": {
+    "message": "无法使用麦克风。请在浏览器的网站设置中允许 Captode 使用，然后重试。"
+  },
+  "vo_label": {
+    "message": "旁白"
+  },
+  "vo_hint": {
+    "message": "拖动其条可移动，拖动两端可缩短。在播放头处拆分可删除一部分。"
+  },
+  "au_clean": {
+    "message": "降低背景噪音"
+  },
+  "au_clean_hint": {
+    "message": "在说话间隙（只有环境声的地方）降低音量"
+  },
+  "au_level": {
+    "message": "均衡音量"
+  },
+  "au_level_hint": {
+    "message": "缩小说话声音大小的差距"
+  },
+  "zoom_follow": {
+    "message": "跟随指针"
+  },
+  "zoom_follow_hint": {
+    "message": "随录制时的指针位置移动"
+  },
+  "zoom_follow_button": {
+    "message": "跟随指针的缩放"
+  },
+  "zoom_follow_tip": {
+    "message": "在整个视频中跟随指针的缩放"
+  },
+  "zoom_follow_added": {
+    "message": "已添加跟随指针的缩放。可在其设置中调整缩放程度。"
+  },
+  "fillers_find": {
+    "message": "口头禅"
+  },
+  "fillers_tip": {
+    "message": "在字幕中查找“嗯”“呃”，逐个试听并剪掉选中的"
+  },
+  "fillers_none": {
+    "message": "字幕中没有找到口头禅。"
+  },
+  "fillers_title": {
+    "message": "$1 个口头禅"
+  },
+  "fillers_hint": {
+    "message": "位置根据字幕估算，请先试听，取消勾选不准确的。"
+  },
+  "fillers_cut": {
+    "message": "剪掉 $1 个"
+  },
+  "fillers_done": {
+    "message": "已剪掉 $1 个口头禅。撤销可恢复。"
+  },
+  "several_title": {
+    "message": "批量导出"
+  },
+  "several_tip": {
+    "message": "一次导出多个文件：其他格式和比例，在后台生成"
+  },
+  "several_hint": {
+    "message": "每个文件都会用这些编辑在后台依次生成。"
+  },
+  "several_upright": {
+    "message": "竖屏副本（9:16）"
+  },
+  "several_square": {
+    "message": "方形副本（1:1）"
+  },
+  "several_go": {
+    "message": "开始生成"
+  },
+  "several_queued": {
+    "message": "已将 $1 个导出加入队列。"
+  },
+  "hist_tip": {
+    "message": "历史记录：每次更改，可一次回退多步"
+  },
+  "hist_title": {
+    "message": "历史记录"
+  },
+  "hist_empty": {
+    "message": "还没有更改。"
+  },
+  "hist_added": {
+    "message": "已添加$1"
+  },
+  "hist_removed": {
+    "message": "已删除$1"
+  },
+  "hist_changed": {
+    "message": "已更改$1"
+  },
+  "hist_several": {
+    "message": "多项更改"
+  },
+  "hist_edit": {
+    "message": "编辑"
+  },
+  "hist_start": {
+    "message": "原始录制"
+  },
+  "hist_seconds": {
+    "message": "$1 秒前"
+  },
+  "hist_minutes": {
+    "message": "$1 分钟前"
   }
 }

@@ -1,8 +1,8 @@
 // Opus packets: what an export needs beyond copying them as they are.
 
 /** 20 ms of silence: a CELT-only, mono Opus packet (decoders turn it into as many channels as the stream has). */
-const SILENCE = new Uint8Array([0xf8, 0xff, 0xfe]);
-const SILENCE_US = 20000;
+export const SILENCE = new Uint8Array([0xf8, 0xff, 0xfe]);
+export const SILENCE_US = 20000;
 
 /**
  * Fills gaps between Opus packets (`{ timestamp, duration }`, µs), such as the one an

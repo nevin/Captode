@@ -59,6 +59,50 @@ try {
   seen.editor = await visit('editor/editor.html', (d) => d.querySelector('#tools button'), (d) => ({ tools: d.querySelectorAll('#tools button').length }));
   seen.video = await visit('video/video.html', (d) => d.body.childElementCount, () => true);
   seen.compare = await visit('compare/compare.html', (d) => d.querySelector('#sel-a option'), () => true);
+
+  // The video page's newer parts, in Firefox: two clips joined (copied as they are),
+  // then exported in the worker with a text layer, a fade where they meet and chapters.
+  seen.clips = await (async () => {
+    const { muxWebm } = await import(chrome.runtime.getURL('lib/webm.js'));
+    const { joinPieces, probeVideo } = await import(chrome.runtime.getURL('lib/join.js'));
+    const makeClip = async (color, n = 20) => {
+      const frames = [];
+      let err = null;
+      const enc = new VideoEncoder({ output: (c) => { const d = new Uint8Array(c.byteLength); c.copyTo(d); frames.push({ timestamp: c.timestamp, key: c.type === 'key', data: d }); }, error: (e) => { err = e; } });
+      enc.configure({ codec: 'vp8', width: 320, height: 240, bitrate: 500000, framerate: 10 });
+      const cv = new OffscreenCanvas(320, 240);
+      const g = cv.getContext('2d');
+      for (let i = 0; i < n; i++) {
+        g.fillStyle = color; g.fillRect(0, 0, 320, 240); g.fillStyle = '#fff'; g.fillRect(i * 10, 10, 20, 20);
+        const f = new VideoFrame(cv, { timestamp: i * 100000, duration: 100000 });
+        enc.encode(f, { keyFrame: i % 10 === 0 });
+        f.close();
+      }
+      await enc.flush();
+      if (err) throw err;
+      return muxWebm({ video: { codecId: 'V_VP8', width: 320, height: 240, frames } });
+    };
+    const a = await makeClip('#0a0'), b = await makeClip('#00a');
+    const pa = await probeVideo(a), pb = await probeVideo(b);
+    const { blob } = await joinPieces([{ blob: a, from: 0, len: pa.duration }, { blob: b, from: 0, len: pb.duration }]);
+    const joined = await probeVideo(blob);
+    const job = {
+      blob, format: 'webm', width: 320, height: 240, fps: 10, start: 0, end: joined.duration, device: null, slides: [], clicks: [], logo: null,
+      edits: { layers: [{ id: 't1', kind: 'text', text: 'Hi', color: '#ffffff', bg: 'dark', from: 0, to: 1, pos: 'c', size: 0.4, shape: 'rect' }] },
+      video: { bitsPerPixel: 0.1, audio: false }, gif: {}, webp: {}, optimize: false, loop: 0,
+      transitions: [{ at: pa.duration, kind: 'fade' }], chapters: [{ at: 0, title: 'One' }, { at: 1, title: 'Two' }], layerSources: {},
+    };
+    const out = await new Promise((resolve) => {
+      const w = new Worker(chrome.runtime.getURL('video/export-worker.js'), { type: 'module' });
+      w.onmessage = ({ data }) => {
+        if (data.type === 'done') { w.terminate(); resolve({ size: data.blob.size, type: data.blob.type }); }
+        if (data.type === 'error') { w.terminate(); resolve({ error: data.message, fallback: data.fallback }); }
+      };
+      w.onerror = (e) => resolve({ error: e.message || 'worker failed' });
+      w.postMessage({ type: 'start', job });
+    });
+    return { joined: joined.duration, sum: pa.duration + pb.duration, out };
+  })().catch((e) => ({ error: e.message }));
 } catch (e) {
   seen.errors.push(`check: ${e.message}`);
 }

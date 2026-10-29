@@ -3223,5 +3223,905 @@
   },
   "edit_no_sound": {
     "message": "この録画にはミュートする音声がありません。"
+  },
+  "clips_title": {
+    "message": "クリップ"
+  },
+  "clips_pick": {
+    "message": "追加する録画"
+  },
+  "clips_add": {
+    "message": "追加"
+  },
+  "clips_add_tip": {
+    "message": "この録画を最後に追加"
+  },
+  "clips_add_file": {
+    "message": "動画ファイルを追加"
+  },
+  "clips_add_file_tip": {
+    "message": "パソコンの動画を最後に追加"
+  },
+  "clips_untitled": {
+    "message": "無題の録画"
+  },
+  "clips_recording": {
+    "message": "この録画"
+  },
+  "clips_go": {
+    "message": "このクリップへ移動"
+  },
+  "clips_earlier": {
+    "message": "前へ移動"
+  },
+  "clips_later": {
+    "message": "後ろへ移動"
+  },
+  "clips_remove": {
+    "message": "クリップを削除"
+  },
+  "clips_remove_title": {
+    "message": "このクリップを削除しますか？"
+  },
+  "clips_remove_text": {
+    "message": "「$1」と、その中の編集とスライドがこの録画から取り除かれます。"
+  },
+  "clips_joining": {
+    "message": "クリップを結合しています…"
+  },
+  "clips_added": {
+    "message": "クリップを最後に追加しました"
+  },
+  "clips_moved": {
+    "message": "クリップを並べ替えました"
+  },
+  "clips_removed": {
+    "message": "クリップを削除しました"
+  },
+  "clips_unplayable": {
+    "message": "このブラウザではその動画を再生できないため、追加できません。"
+  },
+  "clips_unsupported": {
+    "message": "このブラウザは動画をエンコードできないため、ここではクリップを結合できません。"
+  },
+  "clips_failed": {
+    "message": "クリップを結合できませんでした。録画は変更されていません。"
+  },
+  "clips_sound_lost": {
+    "message": "クリップを追加しましたが、このブラウザでは音声をエンコードできないため、無音で再生されます。"
+  },
+  "clips_after_hint": {
+    "message": "ほかの録画や動画ファイルを最後に追加します。順番に再生され、1本の動画として書き出されます。"
+  },
+  "clips_top_hint": {
+    "message": "再生位置から、別の動画やスクリーンショット・ロゴなどの画像を映像に重ねます。映像上でドラッグするか、「編集」で位置・サイズ・見た目・音量を設定します。"
+  },
+  "clips_where": {
+    "message": "追加する場所"
+  },
+  "clips_after": {
+    "message": "最後に"
+  },
+  "clips_top": {
+    "message": "上に重ねる"
+  },
+  "clips_add_top_tip": {
+    "message": "再生位置からこの録画を映像に重ねる"
+  },
+  "clips_add_file_top_tip": {
+    "message": "再生位置からパソコンの動画を映像に重ねる"
+  },
+  "edit_kind_layers": {
+    "message": "動画レイヤー"
+  },
+  "edit_add_layer_tip": {
+    "message": "ウェブカメラやロゴなど、映像に重ねる別の動画や画像"
+  },
+  "vlayer_position": {
+    "message": "位置"
+  },
+  "vlayer_pos_tl": {
+    "message": "左上"
+  },
+  "vlayer_pos_tr": {
+    "message": "右上"
+  },
+  "vlayer_pos_c": {
+    "message": "中央"
+  },
+  "vlayer_pos_bl": {
+    "message": "左下"
+  },
+  "vlayer_pos_br": {
+    "message": "右下"
+  },
+  "vlayer_shape": {
+    "message": "形"
+  },
+  "vlayer_shape_rect": {
+    "message": "四角"
+  },
+  "vlayer_shape_circle": {
+    "message": "円"
+  },
+  "vlayer_offset": {
+    "message": "元の動画のこの位置から開始（秒）"
+  },
+  "vlayer_hint": {
+    "message": "一時停止中の映像でレイヤーをドラッグすると移動、右下の角をドラッグするとサイズ変更できます。バーをドラッグすると時間を移動できます。"
+  },
+  "vlayer_preparing": {
+    "message": "動画を準備しています…"
+  },
+  "vlayer_failed": {
+    "message": "その動画を映像に重ねられませんでした。"
+  },
+  "vlayer_added": {
+    "message": "再生位置に動画レイヤーを追加しました"
+  },
+  "clips_here": {
+    "message": "再生位置に"
+  },
+  "clips_here_hint": {
+    "message": "再生位置に録画や動画ファイルを挿入します。後ろの部分は後ろへずれます。再エンコードされるのは次のキーフレームまで（1〜2秒）だけで、残りはそのままコピーされます。"
+  },
+  "clips_add_here_tip": {
+    "message": "この録画を再生位置に挿入"
+  },
+  "clips_add_file_here_tip": {
+    "message": "パソコンの動画を再生位置に挿入"
+  },
+  "vlayer_volume": {
+    "message": "音量"
+  },
+  "vlayer_pos_free": {
+    "message": "手動で配置"
+  },
+  "clips_cancel": {
+    "message": "キャンセル"
+  },
+  "clips_trim_title": {
+    "message": "追加する部分"
+  },
+  "clips_trim_here": {
+    "message": "上の動画の位置から開始"
+  },
+  "clips_trim_here_end": {
+    "message": "上の動画の位置で終了"
+  },
+  "clips_trim_len": {
+    "message": "$1 を追加します。"
+  },
+  "clips_trim_slow": {
+    "message": "合わせるためにエンコードが必要で、約 $1 分かかります。"
+  },
+  "clips_trans": {
+    "message": "切り替え:"
+  },
+  "clips_trans_none": {
+    "message": "そのまま切り替え"
+  },
+  "clips_trans_fade": {
+    "message": "黒を挟んでフェード"
+  },
+  "clips_trans_cross": {
+    "message": "クロスフェード"
+  },
+  "clips_undo": {
+    "message": "最後の変更を取り消す"
+  },
+  "clips_undo_tip": {
+    "message": "最後にクリップを追加・移動・削除する前の録画に戻す"
+  },
+  "clips_undone": {
+    "message": "クリップを元に戻しました"
+  },
+  "vlayer_opacity": {
+    "message": "不透明度"
+  },
+  "vlayer_fade": {
+    "message": "フェードイン・アウト"
+  },
+  "vlayer_border": {
+    "message": "枠"
+  },
+  "vlayer_border_none": {
+    "message": "枠なし"
+  },
+  "vlayer_shadow": {
+    "message": "影"
+  },
+  "tl_zoom_out_tip": {
+    "message": "タイムラインを縮小  −"
+  },
+  "tl_zoom_in_tip": {
+    "message": "タイムラインを拡大  +（または ⌘/Ctrl + スクロール）"
+  },
+  "edit_add_text_layer_tip": {
+    "message": "レイヤーと同じように配置・装飾できる、映像に重ねる文字"
+  },
+  "vlayer_text": {
+    "message": "テキストレイヤー"
+  },
+  "vlayer_video_or_picture": {
+    "message": "動画・画像レイヤー"
+  },
+  "vlayer_text_default": {
+    "message": "タイトル"
+  },
+  "vlayer_text_colour": {
+    "message": "色"
+  },
+  "vlayer_text_bg": {
+    "message": "背景"
+  },
+  "vlayer_bg_dark": {
+    "message": "暗い"
+  },
+  "vlayer_bg_light": {
+    "message": "明るい"
+  },
+  "vlayer_bg_none": {
+    "message": "なし"
+  },
+  "vlayer_picture": {
+    "message": "画像"
+  },
+  "vlayer_picture_added": {
+    "message": "「$1」を映像に重ねました"
+  },
+  "clips_image_top": {
+    "message": "画像は重ねることしかできません。先に「上に重ねる」を選んでください。"
+  },
+  "edit_speed_ease": {
+    "message": "徐々に速く・遅くする"
+  },
+  "music_title": {
+    "message": "BGM"
+  },
+  "music_add": {
+    "message": "音楽を追加…"
+  },
+  "music_add_tip": {
+    "message": "動画全体に流す曲や音。話している間は小さくなります"
+  },
+  "music_remove": {
+    "message": "削除"
+  },
+  "music_volume": {
+    "message": "音量"
+  },
+  "music_fade_in": {
+    "message": "フェードイン"
+  },
+  "music_fade_out": {
+    "message": "フェードアウト"
+  },
+  "music_duck": {
+    "message": "話している間は小さく"
+  },
+  "music_loop": {
+    "message": "先に終わったら最初から"
+  },
+  "music_preparing": {
+    "message": "音楽を準備しています…"
+  },
+  "music_added": {
+    "message": "動画全体に音楽を追加しました"
+  },
+  "music_unplayable": {
+    "message": "このブラウザではそのファイルを再生できないため、音楽として使えません。"
+  },
+  "music_failed": {
+    "message": "このブラウザでは音楽を追加できませんでした。"
+  },
+  "edit_apply_cuts": {
+    "message": "カットした部分を完全に削除"
+  },
+  "edit_apply_cuts_tip": {
+    "message": "カットした部分を録画そのものから取り除き、容量を減らします。「クリップ」の「最後の変更を取り消す」で戻せます。"
+  },
+  "edit_apply_cuts_title": {
+    "message": "カットした部分を完全に削除しますか？"
+  },
+  "edit_apply_cuts_text": {
+    "message": "録画からその部分がなくなり、容量が小さくなります。編集は残った部分に付いたままです。「クリップ」の「最後の変更を取り消す」で戻せます。"
+  },
+  "edit_cuts_applied": {
+    "message": "カットした部分を完全に削除しました"
+  },
+  "freeze_add": {
+    "message": "このフレームで静止"
+  },
+  "freeze_tip": {
+    "message": "再生位置のフレームを数秒間表示し続けます（そのフレームから作るスライド）"
+  },
+  "freeze_added": {
+    "message": "2 秒間静止しました。長さは「スライド」で変更できます"
+  },
+  "chapters_title": {
+    "message": "チャプター"
+  },
+  "chapters_hint": {
+    "message": "動画の区切りに名前を付けます。MP4・WebM の書き出しに含まれ、YouTube の説明欄用の一覧としてコピーできます。"
+  },
+  "chapters_add": {
+    "message": "チャプターを追加"
+  },
+  "chapters_add_tip": {
+    "message": "再生位置から始まるチャプター"
+  },
+  "chapters_copy": {
+    "message": "YouTube 用にコピー"
+  },
+  "chapters_copy_tip": {
+    "message": "YouTube が説明欄から読み取る形式の時刻と名前"
+  },
+  "chapters_vtt": {
+    "message": ".vtt をダウンロード"
+  },
+  "chapters_vtt_tip": {
+    "message": "対応プレーヤー用の WebVTT チャプターファイル"
+  },
+  "chapters_untitled": {
+    "message": "チャプター"
+  },
+  "chapters_start": {
+    "message": "はじめに"
+  },
+  "chapters_go": {
+    "message": "このチャプターへ移動"
+  },
+  "chapters_name": {
+    "message": "チャプター名"
+  },
+  "chapters_default": {
+    "message": "チャプター $1"
+  },
+  "chapters_copied": {
+    "message": "チャプターをコピーしました。動画の説明欄に貼り付けてください"
+  },
+  "chapters_copy_failed": {
+    "message": "ここではチャプターをコピーできませんでした。"
+  },
+  "quick_title": {
+    "message": "用途"
+  },
+  "quick_youtube_tip": {
+    "message": "MP4・16:9・1080p"
+  },
+  "quick_shorts_tip": {
+    "message": "MP4・縦 9:16・1080 × 1920・クリックした場所をズーム"
+  },
+  "quick_square": {
+    "message": "正方形"
+  },
+  "quick_square_tip": {
+    "message": "MP4・1:1・1080 × 1080"
+  },
+  "quick_done": {
+    "message": "$1 用に設定しました"
+  },
+  "thumb_open": {
+    "message": "サムネイル…"
+  },
+  "thumb_tip": {
+    "message": "このフレームにタイトルを付けた、動画と一緒にアップロードする画像"
+  },
+  "thumb_title": {
+    "message": "サムネイル"
+  },
+  "thumb_text": {
+    "message": "タイトル"
+  },
+  "thumb_place": {
+    "message": "位置"
+  },
+  "thumb_bottom": {
+    "message": "下"
+  },
+  "thumb_top": {
+    "message": "上"
+  },
+  "thumb_middle": {
+    "message": "中央"
+  },
+  "thumb_save": {
+    "message": "PNG を保存"
+  },
+  "clips_storage": {
+    "message": "この録画はブラウザ内で $1 を使っています$2。"
+  },
+  "clips_storage_undo": {
+    "message": "（うち $1 はクリップの最後の変更を取り消すためのもの）"
+  },
+  "clips_forget": {
+    "message": "取り消し用のコピーを削除"
+  },
+  "clips_forget_tip": {
+    "message": "クリップの最後の変更を取り消すためのコピーを削除して、容量を空けます"
+  },
+  "clips_freed": {
+    "message": "$1 を空けました"
+  },
+  "speech_button": {
+    "message": "音声から字幕を作成"
+  },
+  "speech_tip": {
+    "message": "話した内容の字幕を、ブラウザ内蔵の音声認識でこの端末上で作成します"
+  },
+  "speech_title": {
+    "message": "音声から字幕を作成"
+  },
+  "speech_text": {
+    "message": "録画の音声はこの端末上で聞き取られ、どこにも送られません。初回はブラウザが言語パックをダウンロードすることがあります。話している時間と同じくらいかかります。"
+  },
+  "speech_language": {
+    "message": "話している言語"
+  },
+  "speech_go": {
+    "message": "字幕を作成"
+  },
+  "speech_unavailable": {
+    "message": "このブラウザはこの端末でその言語を認識できません。"
+  },
+  "speech_downloading": {
+    "message": "ブラウザが言語パックを準備しています…"
+  },
+  "speech_none": {
+    "message": "字幕にする音声が見つかりませんでした。"
+  },
+  "speech_working": {
+    "message": "字幕のために聞き取っています…"
+  },
+  "speech_done": {
+    "message": "字幕を $1 件追加しました。読み返して、「編集」で語句を直してください"
+  },
+  "speech_failed": {
+    "message": "字幕を作成できませんでした。何も変更していません。"
+  },
+  "cap_style": {
+    "message": "すべての字幕の見た目"
+  },
+  "cap_font": {
+    "message": "フォント"
+  },
+  "cap_font_sans": {
+    "message": "標準"
+  },
+  "cap_font_rounded": {
+    "message": "丸ゴシック"
+  },
+  "cap_font_serif": {
+    "message": "明朝体"
+  },
+  "cap_font_mono": {
+    "message": "等幅"
+  },
+  "cap_band": {
+    "message": "文字の背景"
+  },
+  "cap_band_dark": {
+    "message": "暗い帯"
+  },
+  "cap_band_light": {
+    "message": "明るい帯"
+  },
+  "cap_band_outline": {
+    "message": "縁取り"
+  },
+  "cap_band_none": {
+    "message": "影のみ"
+  },
+  "cap_place": {
+    "message": "位置"
+  },
+  "cap_highlight": {
+    "message": "話している単語を強調"
+  },
+  "cap_highlight_hint": {
+    "message": "話している単語が黄色で表示されます"
+  },
+  "cap_join": {
+    "message": "次とつなぐ"
+  },
+  "cap_join_tip": {
+    "message": "この字幕と次の字幕をひとつにまとめます"
+  },
+  "cap_review": {
+    "message": "字幕を見直す"
+  },
+  "cap_review_tip": {
+    "message": "すべての字幕を一覧で読み直して修正"
+  },
+  "cap_review_hint": {
+    "message": "時刻をクリックするとその部分を再生します。Enter で次の字幕へ移動します。"
+  },
+  "cap_review_done": {
+    "message": "完了"
+  },
+  "cap_review_play": {
+    "message": "この字幕の部分を再生"
+  },
+  "edit_preview_keys": {
+    "message": "編集を反映したプレビュー。レイヤーを選ぶと、矢印キーで移動し、+ と − で大きさを変えられます。"
+  },
+  "vlayer_moved": {
+    "message": "レイヤー：横 $1%、縦 $2%、幅 $3%"
+  },
+  "vlayer_move": {
+    "message": "動かす"
+  },
+  "vlayer_move_hint": {
+    "message": "始まりの位置から終わりの位置へ動きます。終わり近くでドラッグして行き先を決めます。"
+  },
+  "vlayer_go_start": {
+    "message": "始まりへ"
+  },
+  "vlayer_go_end": {
+    "message": "終わりへ"
+  },
+  "vlayer_move_now": {
+    "message": "レイヤーを終わりの位置へドラッグしてください。"
+  },
+  "subs_title": {
+    "message": "字幕トラック"
+  },
+  "subs_burn": {
+    "message": "映像に表示"
+  },
+  "subs_burn_hint": {
+    "message": "オフ：字幕はトラックのみになり、GIF と WebP には入りません"
+  },
+  "subs_embed": {
+    "message": "MP4 と WebM に字幕として追加"
+  },
+  "subs_embed_hint": {
+    "message": "視聴者が下の各言語でオン・オフできます"
+  },
+  "subs_lang": {
+    "message": "字幕の言語"
+  },
+  "subs_lang_none": {
+    "message": "未設定"
+  },
+  "subs_track_lang": {
+    "message": "トラックの言語"
+  },
+  "subs_track_count": {
+    "message": "$2 件中 $1 件"
+  },
+  "subs_track_remove": {
+    "message": "この言語を削除"
+  },
+  "subs_add_file": {
+    "message": "ファイルから言語を追加…"
+  },
+  "subs_add_file_tip": {
+    "message": "この字幕の別の言語の SRT または WebVTT ファイル（ここで保存して翻訳したものなど）"
+  },
+  "subs_add_translation": {
+    "message": "翻訳を追加"
+  },
+  "subs_file_failed": {
+    "message": "このファイルには、この字幕に合う字幕がありません。"
+  },
+  "subs_file_added": {
+    "message": "$1 件の字幕に言語を追加しました。上でどの言語か選んでください。"
+  },
+  "subs_translated": {
+    "message": "$1 の字幕を追加しました。"
+  },
+  "storage_full": {
+    "message": "このブラウザーにはあと $1 を保存する空きがありません。ライブラリーで古い録画を削除してから、もう一度お試しください。"
+  },
+  "music_start": {
+    "message": "開始位置"
+  },
+  "music_start_aria": {
+    "message": "動画が音楽のどこから始まるか。クリック、ドラッグ、または矢印キーで設定します。"
+  },
+  "slides_outro_default": {
+    "message": "ご視聴ありがとうございました"
+  },
+  "slides_bookends": {
+    "message": "イントロとエンディングを追加"
+  },
+  "slides_bookends_tip": {
+    "message": "最初にタイトル、最後に締めのスライドを、あなたのスタイルで追加"
+  },
+  "slides_bookends_added": {
+    "message": "イントロとエンディングのスライドを追加しました。"
+  },
+  "ui_mode": {
+    "message": "表示するツール"
+  },
+  "ui_mode_simple": {
+    "message": "シンプル"
+  },
+  "ui_mode_simple_tip": {
+    "message": "トリミング、カット、字幕、音声、書き出しだけ"
+  },
+  "ui_mode_advanced": {
+    "message": "すべてのツール"
+  },
+  "ui_mode_advanced_tip": {
+    "message": "レイヤー、音楽、スライド、チャプター、背景などすべて"
+  },
+  "ui_mode_switched": {
+    "message": "この動画で使われているため、すべてのツールを表示しています。"
+  },
+  "tour_start": {
+    "message": "ツアー"
+  },
+  "tour_start_tip": {
+    "message": "このページの簡単なツアー"
+  },
+  "tour_skip": {
+    "message": "スキップ"
+  },
+  "tour_back": {
+    "message": "戻る"
+  },
+  "tour_next": {
+    "message": "次へ"
+  },
+  "tour_done": {
+    "message": "わかった"
+  },
+  "tour_step": {
+    "message": "$1 / $2"
+  },
+  "tour_play_title": {
+    "message": "録画"
+  },
+  "tour_play": {
+    "message": "書き出しと同じ編集結果でここで再生できます。スペースキーで再生・一時停止。"
+  },
+  "tour_trim_title": {
+    "message": "残す部分を選ぶ"
+  },
+  "tour_trim": {
+    "message": "タイムライン上や端をドラッグします。再生中は I で開始、O で終了を設定します。"
+  },
+  "tour_edit_title": {
+    "message": "カットと字幕"
+  },
+  "tour_edit": {
+    "message": "カットで部分を省き、字幕で映像に文字を入れます。編集を選ぶと変更できます。いつでも元に戻せます。"
+  },
+  "tour_sound_title": {
+    "message": "音声"
+  },
+  "tour_sound": {
+    "message": "音量の変更や無音部分のカット、ブラウザーが対応していれば話した内容から字幕を作成できます。"
+  },
+  "tour_mode_title": {
+    "message": "その他のツール"
+  },
+  "tour_mode": {
+    "message": "すべてのツールで、レイヤー、音楽、スライド、チャプター、ズーム、ぼかし、背景などが使えます。"
+  },
+  "tour_export_title": {
+    "message": "書き出し"
+  },
+  "tour_export": {
+    "message": "形式を選んで書き出します。すべて端末内で処理され、何もアップロードされません。"
+  },
+  "speech_not_here": {
+    "message": "このブラウザーでは音声からの字幕は使えません。字幕から手入力はできます。"
+  },
+  "translate_not_here": {
+    "message": "このブラウザーでは字幕の翻訳は使えません。下で字幕ファイルから別の言語を追加できます。"
+  },
+  "guide_translate_not_here": {
+    "message": "このブラウザーでは翻訳を使えません"
+  },
+  "template_title": {
+    "message": "テンプレート"
+  },
+  "template_bug": {
+    "message": "不具合報告"
+  },
+  "template_bug_tip": {
+    "message": "クリックを表示した GIF で問題を見せます"
+  },
+  "template_tutorial": {
+    "message": "チュートリアル"
+  },
+  "template_tutorial_tip": {
+    "message": "イントロとエンディング、最初のチャプター、字幕付きの MP4"
+  },
+  "template_social": {
+    "message": "SNS 用クリップ"
+  },
+  "template_social_tip": {
+    "message": "中央に大きな字幕が一語ずつ出る縦長 MP4"
+  },
+  "template_chapter": {
+    "message": "はじめに"
+  },
+  "template_bug_done": {
+    "message": "不具合報告用に設定しました：クリック表示付きの GIF。B で個人情報をぼかせます。"
+  },
+  "template_tutorial_done": {
+    "message": "チュートリアル用に設定しました：MP4、イントロとエンディング、最初のチャプター、字幕。字幕は T か音声から追加できます。"
+  },
+  "template_social_done": {
+    "message": "SNS 用に設定しました：縦長 MP4、一語ずつの大きな字幕。BGM は「音声」にあります。"
+  },
+  "check_title": {
+    "message": "書き出す前に"
+  },
+  "check_go": {
+    "message": "このまま書き出す"
+  },
+  "check_captions_animation": {
+    "message": "字幕はトラックのみの設定で、GIF と WebP にはトラックがないため、字幕は入りません。"
+  },
+  "check_subs_off": {
+    "message": "ほかの字幕言語は入りません。「MP4 と WebM に字幕として追加」をオンにしてください。"
+  },
+  "check_music_loud": {
+    "message": "音楽が大きく、話している間も小さくならないため、声が聞こえにくくなるかもしれません。"
+  },
+  "check_muted": {
+    "message": "この書き出しでは音声がオフです。"
+  },
+  "check_big": {
+    "message": "ファイルは最大 $1 になる可能性があります。"
+  },
+  "recover_export": {
+    "message": "この録画の前回の書き出しは完了しませんでした。"
+  },
+  "recover_export_go": {
+    "message": "もう一度書き出す"
+  },
+  "recover_join": {
+    "message": "前回のクリップの結合は完了しませんでした。"
+  },
+  "recover_join_go": {
+    "message": "元に戻す"
+  },
+  "rate_ask": {
+    "message": "Captode はいかがですか？"
+  },
+  "rate_link": {
+    "message": "評価する"
+  },
+  "rate_no": {
+    "message": "結構です"
+  },
+  "vo_record": {
+    "message": "ナレーションを録音"
+  },
+  "vo_stop": {
+    "message": "録音を停止"
+  },
+  "vo_tip": {
+    "message": "再生位置から再生しながら話すと、声がナレーションとして追加されます"
+  },
+  "vo_started": {
+    "message": "声を録音中です。停止するか動画を一時停止すると終わります。"
+  },
+  "vo_preparing": {
+    "message": "ナレーションを保存中…"
+  },
+  "vo_added": {
+    "message": "ナレーションを追加しました。編集一覧で音量を変えられます。"
+  },
+  "vo_failed": {
+    "message": "ナレーションを保存できませんでした。"
+  },
+  "vo_no_mic": {
+    "message": "マイクを使えません。ブラウザーのサイト設定で Captode に許可してから、もう一度お試しください。"
+  },
+  "vo_label": {
+    "message": "ナレーション"
+  },
+  "vo_hint": {
+    "message": "バーをドラッグして移動、端をドラッグして短くします。再生位置で分割すると一部を削除できます。"
+  },
+  "au_clean": {
+    "message": "背景ノイズを下げる"
+  },
+  "au_clean_hint": {
+    "message": "話していない間の、部屋の音だけの部分を小さくします"
+  },
+  "au_level": {
+    "message": "音量をそろえる"
+  },
+  "au_level_hint": {
+    "message": "大きな声と小さな声の差を縮めます"
+  },
+  "zoom_follow": {
+    "message": "ポインターを追う"
+  },
+  "zoom_follow_hint": {
+    "message": "録画中のポインターの動きに合わせて動きます"
+  },
+  "zoom_follow_button": {
+    "message": "ポインターを追うズーム"
+  },
+  "zoom_follow_tip": {
+    "message": "動画全体で、ポインターの動きを追うズーム"
+  },
+  "zoom_follow_added": {
+    "message": "ポインターを追うズームを追加しました。倍率は設定で変えられます。"
+  },
+  "fillers_find": {
+    "message": "フィラー"
+  },
+  "fillers_tip": {
+    "message": "字幕の「えー」「あの」を探して聞き、選んだものをカット"
+  },
+  "fillers_none": {
+    "message": "字幕にフィラーは見つかりませんでした。"
+  },
+  "fillers_title": {
+    "message": "フィラー $1 件"
+  },
+  "fillers_hint": {
+    "message": "位置は字幕から推定しています。先に聞いて、違うものはチェックを外してください。"
+  },
+  "fillers_cut": {
+    "message": "$1 件をカット"
+  },
+  "fillers_done": {
+    "message": "フィラーを $1 件カットしました。元に戻すこともできます。"
+  },
+  "several_title": {
+    "message": "まとめて書き出し"
+  },
+  "several_tip": {
+    "message": "複数のファイルを一度に：ほかの形式や縦横比を、バックグラウンドで作成"
+  },
+  "several_hint": {
+    "message": "それぞれ、この編集内容でバックグラウンドで順に作成されます。"
+  },
+  "several_upright": {
+    "message": "縦長コピー（9:16）"
+  },
+  "several_square": {
+    "message": "正方形コピー（1:1）"
+  },
+  "several_go": {
+    "message": "作成"
+  },
+  "several_queued": {
+    "message": "$1 件の書き出しをキューに追加しました。"
+  },
+  "hist_tip": {
+    "message": "履歴：すべての変更。まとめて戻れます"
+  },
+  "hist_title": {
+    "message": "履歴"
+  },
+  "hist_empty": {
+    "message": "まだ変更はありません。"
+  },
+  "hist_added": {
+    "message": "$1 を追加"
+  },
+  "hist_removed": {
+    "message": "$1 を削除"
+  },
+  "hist_changed": {
+    "message": "$1 を変更"
+  },
+  "hist_several": {
+    "message": "複数の変更"
+  },
+  "hist_edit": {
+    "message": "編集"
+  },
+  "hist_start": {
+    "message": "録画したまま"
+  },
+  "hist_seconds": {
+    "message": "$1 秒前"
+  },
+  "hist_minutes": {
+    "message": "$1 分前"
   }
 }

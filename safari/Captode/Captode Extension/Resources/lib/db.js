@@ -326,3 +326,9 @@ export async function changeJob(id, fn) {
 }
 
 export const removeJob = (id) => jobsTx('readwrite', (s) => { s.delete(id); });
+
+/** Puts `blob` in place of a capture's recording (clips joined to it); its extras stay. */
+export const replaceBlob = (id, blob) => tx('readwrite', (s) => {
+  const r = s.get(id);
+  r.onsuccess = () => { if (r.result) s.put({ ...r.result, blob }, id); };
+});

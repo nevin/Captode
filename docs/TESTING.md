@@ -123,6 +123,29 @@ or install the zip from `npm run package`.
    playback stops where the cut starts. Set a start and end, close the page and open the
    recording again: the same part is kept. Cut everything: the timeline says so and Export
    explains instead of starting.
+   **Clips:** under Clips, with **After this one**, add another recording, then an MP4 from
+   the computer: both play after it, with a numbered mark on the timeline at each start, and
+   the MP4 fits inside the picture with bars. Move the first clip later: its captions and cuts
+   go with it. Remove a clip. With **On top**, add a recording: a Video layer appears in the
+   lower right from the playhead; change its corner, size and shape, and export MP4 and GIF:
+   it is there in both, and gone after its end. Pause and drag the layer to the upper left,
+   and its corner to make it bigger. Add a layer with sound over a quiet part: the export has
+   its sound there, at the volume chosen. With **At the playhead**, put a clip in the middle
+   of the recording: it plays there, and the recording carries on after it. Add only part of
+   a clip with the dialog's Start and End; then **Undo last change**. Set a clip's
+   transition to a fade and to a crossfade, and play across the join. Give a layer an edge
+   colour, a shadow, half opacity and a 1 s fade; drag it near the middle: it snaps, with a
+   guide line. Add a Text layer and a screenshot as a picture layer (On top). Zoom the
+   timeline in and play: it follows the playhead. Add music in Sound, export, and listen: it
+   gets quieter when you speak. Add two chapters and export an MP4: a player shows them; Copy
+   for YouTube pastes a 0:00 list. Freeze a frame. Cut a second and Remove cut parts for good:
+   the recording is a second shorter. Try Made for → Shorts, then Thumbnail….
+   In Chrome only: record a tab while talking, then Sound → **Captions from speech**: after
+   the language pack is ready, captions appear where you spoke, and one Undo removes them.
+   In the Edge, Firefox and Safari packages the button isn't there.
+   Choose a caption: set a light band at the top, a serif font and Light up each word; play
+   and export: it looks the same in both. Join it with the next, press Enter mid-way to split
+   it, and fix a word in Review captions.
 24. **Pause:** record a tab, right-click the Captode icon and choose **Pause recording** (the badge
    shows ❚❚), click the page, wait 5 seconds, choose **Resume recording**, then stop. The video
    leaves the pause out, and **Show clicks** has no ring for the click made while paused. Record

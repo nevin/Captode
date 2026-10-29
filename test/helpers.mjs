@@ -68,7 +68,7 @@ export async function launch({ scheme = 'light', args = [], env, patch } = {}) {
   const browser = await puppeteer.launch({
     executablePath: process.env.CHROME_PATH || undefined,
     ...(env && { env: { ...process.env, ...env } }),
-    headless: true,
+    headless: !process.env.HEADFUL, // HEADFUL=1: a visible window, which tab capture needs in some browsers
     pipe: true,
     enableExtensions: true,
     userDataDir: profile,
@@ -127,6 +127,16 @@ export async function open(browser, url, { width = 1280, height = 900 } = {}) {
   const page = await prepare(await browser.newPage());
   page.on('pageerror', (e) => console.log(`    page error (${url}): ${e.message}`));
   await page.setViewport({ width, height });
+  // The video page as before simple mode and its tour, once per profile; tests of those clear it.
+  await page.evaluateOnNewDocument(() => {
+    try {
+      if (location.protocol === 'chrome-extension:' && !localStorage.getItem('captode-test-seeded')) {
+        localStorage.setItem('captode-test-seeded', '1');
+        localStorage.setItem('captode-video-mode', 'advanced');
+        localStorage.setItem('captode-video-tour', 'done');
+      }
+    } catch { /* no storage here */ }
+  });
   await page.goto(url);
   return page;
 }

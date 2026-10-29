@@ -110,6 +110,7 @@ export const tests = {
     await page.waitForFunction(() => /fps/.test(document.querySelector('#dims').textContent), { polling: 100 });
     let asked = null;
     page.on('dialog', (d) => { asked = d.type(); d.dismiss(); });
+    await page.$eval('#formats', (e) => e.scrollIntoView({ block: 'center' })); // out from under the export bar
     await page.click('#formats [data-f="gif"]');
     await page.click('#convert');
     await page.click('#discard');

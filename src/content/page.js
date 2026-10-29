@@ -589,7 +589,8 @@ export function showInputs(on, { clicks = true, cursor = false } = {}) {
 
 /**
  * While the tab is recorded: tells the background where each click lands (as
- * fractions of the view, with the time), so the video page can zoom in on clicks.
+ * fractions of the view, with the time), so the video page can zoom in on clicks,
+ * and where the pointer is a few times a second, for a zoom that follows it.
  * Nothing else about the page is sent. `on` false stops it.
  */
 export function trackClicks(on) {
@@ -618,8 +619,30 @@ export function trackClicks(on) {
     if (e.target?.closest?.('#__captode_draw')) return;
     chrome.runtime.sendMessage({ type: 'rec-click', x: e.clientX / innerWidth, y: e.clientY / innerHeight, at: Date.now(), ...labelOf(e.target) }).catch(() => {});
   };
+  // The pointer: at most ten times a second, when it has moved, sent once a second.
+  let points = [], last = null;
+  const move = (e) => {
+    if (e.pointerType && e.pointerType !== 'mouse') return;
+    const now = Date.now(), x = e.clientX / innerWidth, y = e.clientY / innerHeight;
+    if (last && (now - last.at < 100 || Math.hypot(x - last.x, y - last.y) < 0.005)) return;
+    last = { x, y, at: now };
+    points.push(last);
+  };
+  const send = () => {
+    if (!points.length) return;
+    chrome.runtime.sendMessage({ type: 'rec-moves', points }).catch(() => {});
+    points = [];
+  };
+  const timer = setInterval(send, 1000);
   addEventListener('pointerdown', down, true);
-  window.__captodeClicks = () => { removeEventListener('pointerdown', down, true); window.__captodeClicks = null; };
+  addEventListener('pointermove', move, { capture: true, passive: true });
+  window.__captodeClicks = () => {
+    removeEventListener('pointerdown', down, true);
+    removeEventListener('pointermove', move, { capture: true });
+    clearInterval(timer);
+    send();
+    window.__captodeClicks = null;
+  };
 }
 
 /** Draws a dashed outline just outside the recorded area, so it is never recorded. */

@@ -4,15 +4,10 @@ import { buildReviewPage } from './review-page.js';
 import { encodeOffThread } from '../lib/encoder.js';
 import { toast, openDialog } from '../lib/ui.js';
 import { t } from '../lib/i18n.js';
+import { blobToDataUrl } from '../lib/util.js';
 
 const $ = (s) => document.querySelector(s);
 
-const blobToDataUrl = (blob) => new Promise((resolve, reject) => {
-  const r = new FileReader();
-  r.onload = () => resolve(r.result);
-  r.onerror = () => reject(r.error);
-  r.readAsDataURL(blob);
-});
 
 /**
  * `ed`: `hasImage()`, `finishEditing()`, `objects()`, `meta()`, `padding()`,

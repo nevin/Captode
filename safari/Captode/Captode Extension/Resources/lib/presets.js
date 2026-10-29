@@ -4,6 +4,7 @@
 
 import { t } from './i18n.js';
 import { toast } from './ui.js';
+import { esc } from './util.js';
 
 const KEY = 'exportPresets';
 
@@ -25,7 +26,6 @@ export const BUILTIN = {
   ],
 };
 
-const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
 async function saved(kind) {
   try { return (await chrome.storage.local.get({ [KEY]: {} }))[KEY][kind] || []; } catch { return []; }

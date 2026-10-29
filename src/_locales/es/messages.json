@@ -3223,5 +3223,905 @@
   },
   "edit_no_sound": {
     "message": "Esta grabación no tiene sonido que silenciar."
+  },
+  "clips_title": {
+    "message": "Clips"
+  },
+  "clips_pick": {
+    "message": "Grabación para añadir"
+  },
+  "clips_add": {
+    "message": "Añadir"
+  },
+  "clips_add_tip": {
+    "message": "Añadir esta grabación al final"
+  },
+  "clips_add_file": {
+    "message": "Añadir un archivo de vídeo"
+  },
+  "clips_add_file_tip": {
+    "message": "Añadir al final un vídeo de tu ordenador"
+  },
+  "clips_untitled": {
+    "message": "Grabación sin título"
+  },
+  "clips_recording": {
+    "message": "Esta grabación"
+  },
+  "clips_go": {
+    "message": "Ir a este clip"
+  },
+  "clips_earlier": {
+    "message": "Mover antes"
+  },
+  "clips_later": {
+    "message": "Mover después"
+  },
+  "clips_remove": {
+    "message": "Quitar clip"
+  },
+  "clips_remove_title": {
+    "message": "¿Quitar este clip?"
+  },
+  "clips_remove_text": {
+    "message": "«$1» y las ediciones y diapositivas que contiene se quitan de esta grabación."
+  },
+  "clips_joining": {
+    "message": "Uniendo clips…"
+  },
+  "clips_added": {
+    "message": "Clip añadido al final"
+  },
+  "clips_moved": {
+    "message": "Clips reordenados"
+  },
+  "clips_removed": {
+    "message": "Clip quitado"
+  },
+  "clips_unplayable": {
+    "message": "Este navegador no puede reproducir ese vídeo, así que no se puede añadir."
+  },
+  "clips_unsupported": {
+    "message": "Este navegador no puede codificar vídeo, así que aquí no se pueden unir clips."
+  },
+  "clips_failed": {
+    "message": "No se pudieron unir los clips. La grabación no ha cambiado."
+  },
+  "clips_sound_lost": {
+    "message": "Clip añadido, pero este navegador no puede codificar su sonido, así que se reproduce sin sonido."
+  },
+  "clips_after_hint": {
+    "message": "Añade otras grabaciones o archivos de vídeo al final. Se reproducen uno tras otro y se exportan como un solo vídeo."
+  },
+  "clips_top_hint": {
+    "message": "Coloca otro vídeo, o una imagen como una captura o un logotipo, sobre la imagen desde el cabezal. Arrástralo sobre la imagen o ajusta su esquina, tamaño, aspecto y volumen en Editar."
+  },
+  "clips_where": {
+    "message": "Dónde añadir"
+  },
+  "clips_after": {
+    "message": "Al final"
+  },
+  "clips_top": {
+    "message": "Encima"
+  },
+  "clips_add_top_tip": {
+    "message": "Colocar esta grabación sobre la imagen desde el cabezal"
+  },
+  "clips_add_file_top_tip": {
+    "message": "Colocar un vídeo de tu ordenador sobre la imagen desde el cabezal"
+  },
+  "edit_kind_layers": {
+    "message": "Capa de vídeo"
+  },
+  "edit_add_layer_tip": {
+    "message": "Otro vídeo o una imagen sobre la imagen, como una webcam o un logotipo"
+  },
+  "vlayer_position": {
+    "message": "Posición"
+  },
+  "vlayer_pos_tl": {
+    "message": "Arriba a la izquierda"
+  },
+  "vlayer_pos_tr": {
+    "message": "Arriba a la derecha"
+  },
+  "vlayer_pos_c": {
+    "message": "Centro"
+  },
+  "vlayer_pos_bl": {
+    "message": "Abajo a la izquierda"
+  },
+  "vlayer_pos_br": {
+    "message": "Abajo a la derecha"
+  },
+  "vlayer_shape": {
+    "message": "Forma"
+  },
+  "vlayer_shape_rect": {
+    "message": "Rectángulo"
+  },
+  "vlayer_shape_circle": {
+    "message": "Círculo"
+  },
+  "vlayer_offset": {
+    "message": "Empieza en este punto de su vídeo (s)"
+  },
+  "vlayer_hint": {
+    "message": "Arrastra la capa sobre la imagen en pausa para moverla, o su esquina inferior derecha para cambiar su tamaño. Arrastra su barra para moverla en el tiempo."
+  },
+  "vlayer_preparing": {
+    "message": "Preparando el vídeo…"
+  },
+  "vlayer_failed": {
+    "message": "No se pudo colocar ese vídeo sobre la imagen."
+  },
+  "vlayer_added": {
+    "message": "Capa de vídeo añadida en el cabezal"
+  },
+  "clips_here": {
+    "message": "En el cabezal"
+  },
+  "clips_here_hint": {
+    "message": "Inserta una grabación o un archivo de vídeo en el cabezal: lo que viene después se retrasa. Solo se vuelve a codificar hasta el siguiente fotograma clave (uno o dos segundos); el resto se copia."
+  },
+  "clips_add_here_tip": {
+    "message": "Insertar esta grabación en el cabezal"
+  },
+  "clips_add_file_here_tip": {
+    "message": "Insertar en el cabezal un vídeo de tu ordenador"
+  },
+  "vlayer_volume": {
+    "message": "Volumen"
+  },
+  "vlayer_pos_free": {
+    "message": "Colocada a mano"
+  },
+  "clips_cancel": {
+    "message": "Cancelar"
+  },
+  "clips_trim_title": {
+    "message": "Qué parte añadir"
+  },
+  "clips_trim_here": {
+    "message": "Empezar donde está el vídeo de arriba"
+  },
+  "clips_trim_here_end": {
+    "message": "Terminar donde está el vídeo de arriba"
+  },
+  "clips_trim_len": {
+    "message": "Se añadirán $1."
+  },
+  "clips_trim_slow": {
+    "message": "Hay que codificarlo para que encaje, lo que tarda unos $1 min."
+  },
+  "clips_trans": {
+    "message": "Transición:"
+  },
+  "clips_trans_none": {
+    "message": "Corte directo"
+  },
+  "clips_trans_fade": {
+    "message": "Fundido a negro"
+  },
+  "clips_trans_cross": {
+    "message": "Fundido cruzado"
+  },
+  "clips_undo": {
+    "message": "Deshacer el último cambio"
+  },
+  "clips_undo_tip": {
+    "message": "Volver a la grabación tal como estaba antes de añadir, mover o quitar el último clip"
+  },
+  "clips_undone": {
+    "message": "Clips restaurados"
+  },
+  "vlayer_opacity": {
+    "message": "Opacidad"
+  },
+  "vlayer_fade": {
+    "message": "Aparecer y desaparecer"
+  },
+  "vlayer_border": {
+    "message": "Borde"
+  },
+  "vlayer_border_none": {
+    "message": "Sin borde"
+  },
+  "vlayer_shadow": {
+    "message": "Sombra"
+  },
+  "tl_zoom_out_tip": {
+    "message": "Alejar la línea de tiempo  −"
+  },
+  "tl_zoom_in_tip": {
+    "message": "Acercar la línea de tiempo  +  (o ⌘/Ctrl + desplazar)"
+  },
+  "edit_add_text_layer_tip": {
+    "message": "Texto sobre la imagen, colocado y con estilo como una capa"
+  },
+  "vlayer_text": {
+    "message": "Capa de texto"
+  },
+  "vlayer_video_or_picture": {
+    "message": "Capa de vídeo o imagen"
+  },
+  "vlayer_text_default": {
+    "message": "Tu título"
+  },
+  "vlayer_text_colour": {
+    "message": "Color"
+  },
+  "vlayer_text_bg": {
+    "message": "Fondo"
+  },
+  "vlayer_bg_dark": {
+    "message": "Oscuro"
+  },
+  "vlayer_bg_light": {
+    "message": "Claro"
+  },
+  "vlayer_bg_none": {
+    "message": "Nada"
+  },
+  "vlayer_picture": {
+    "message": "Imagen"
+  },
+  "vlayer_picture_added": {
+    "message": "«$1» colocada sobre la imagen"
+  },
+  "clips_image_top": {
+    "message": "Una imagen solo puede ir encima: elige primero Encima."
+  },
+  "edit_speed_ease": {
+    "message": "Acelerar y frenar poco a poco"
+  },
+  "music_title": {
+    "message": "Música de fondo"
+  },
+  "music_add": {
+    "message": "Añadir música…"
+  },
+  "music_add_tip": {
+    "message": "Una canción o sonido bajo todo el vídeo, más bajo mientras alguien habla"
+  },
+  "music_remove": {
+    "message": "Quitar"
+  },
+  "music_volume": {
+    "message": "Volumen"
+  },
+  "music_fade_in": {
+    "message": "Aparecer"
+  },
+  "music_fade_out": {
+    "message": "Desaparecer"
+  },
+  "music_duck": {
+    "message": "Más bajo mientras alguien habla"
+  },
+  "music_loop": {
+    "message": "Volver a empezar si termina antes"
+  },
+  "music_preparing": {
+    "message": "Preparando la música…"
+  },
+  "music_added": {
+    "message": "Música añadida bajo todo el vídeo"
+  },
+  "music_unplayable": {
+    "message": "Este navegador no puede reproducir ese archivo, así que no se puede usar como música."
+  },
+  "music_failed": {
+    "message": "No se pudo añadir la música en este navegador."
+  },
+  "edit_apply_cuts": {
+    "message": "Quitar las partes cortadas para siempre"
+  },
+  "edit_apply_cuts_tip": {
+    "message": "Quita las partes cortadas de la propia grabación para que ocupe menos. «Deshacer el último cambio» en Clips las recupera."
+  },
+  "edit_apply_cuts_title": {
+    "message": "¿Quitar las partes cortadas para siempre?"
+  },
+  "edit_apply_cuts_text": {
+    "message": "La grabación las pierde y ocupa menos; tus ediciones se quedan con lo que queda. «Deshacer el último cambio» (en Clips) las recupera."
+  },
+  "edit_cuts_applied": {
+    "message": "Partes cortadas quitadas para siempre"
+  },
+  "freeze_add": {
+    "message": "Congelar este fotograma"
+  },
+  "freeze_tip": {
+    "message": "Mantener el fotograma del cabezal unos segundos en pantalla (una diapositiva hecha con él)"
+  },
+  "freeze_added": {
+    "message": "Fotograma congelado 2 s: cambia la duración en Diapositivas"
+  },
+  "chapters_title": {
+    "message": "Capítulos"
+  },
+  "chapters_hint": {
+    "message": "Pon nombre a las secciones del vídeo. Se incluyen en las exportaciones MP4 y WebM y se pueden copiar como lista para una descripción de YouTube."
+  },
+  "chapters_add": {
+    "message": "Añadir capítulo"
+  },
+  "chapters_add_tip": {
+    "message": "Un capítulo que empieza en el cabezal"
+  },
+  "chapters_copy": {
+    "message": "Copiar para YouTube"
+  },
+  "chapters_copy_tip": {
+    "message": "Tiempos y nombres, como YouTube los lee de una descripción"
+  },
+  "chapters_vtt": {
+    "message": "Descargar .vtt"
+  },
+  "chapters_vtt_tip": {
+    "message": "Un archivo de capítulos WebVTT, para los reproductores que lo admiten"
+  },
+  "chapters_untitled": {
+    "message": "Capítulo"
+  },
+  "chapters_start": {
+    "message": "Inicio"
+  },
+  "chapters_go": {
+    "message": "Ir a este capítulo"
+  },
+  "chapters_name": {
+    "message": "Nombre del capítulo"
+  },
+  "chapters_default": {
+    "message": "Capítulo $1"
+  },
+  "chapters_copied": {
+    "message": "Capítulos copiados: pégalos en la descripción del vídeo"
+  },
+  "chapters_copy_failed": {
+    "message": "No se pudieron copiar los capítulos aquí."
+  },
+  "quick_title": {
+    "message": "Para"
+  },
+  "quick_youtube_tip": {
+    "message": "MP4, 16:9, 1080p"
+  },
+  "quick_shorts_tip": {
+    "message": "MP4, 9:16 vertical, 1080 × 1920, con zoom donde hiciste clic"
+  },
+  "quick_square": {
+    "message": "Cuadrado"
+  },
+  "quick_square_tip": {
+    "message": "MP4, 1:1, 1080 × 1080"
+  },
+  "quick_done": {
+    "message": "Configurado para $1"
+  },
+  "thumb_open": {
+    "message": "Miniatura…"
+  },
+  "thumb_tip": {
+    "message": "Este fotograma con un título, como imagen para subir con el vídeo"
+  },
+  "thumb_title": {
+    "message": "Miniatura"
+  },
+  "thumb_text": {
+    "message": "Título"
+  },
+  "thumb_place": {
+    "message": "Dónde"
+  },
+  "thumb_bottom": {
+    "message": "Abajo"
+  },
+  "thumb_top": {
+    "message": "Arriba"
+  },
+  "thumb_middle": {
+    "message": "Centro"
+  },
+  "thumb_save": {
+    "message": "Guardar PNG"
+  },
+  "clips_storage": {
+    "message": "Esta grabación ocupa $1 en el navegador$2."
+  },
+  "clips_storage_undo": {
+    "message": ", $1 de ellos para deshacer el último cambio de clips"
+  },
+  "clips_forget": {
+    "message": "Liberar la copia para deshacer"
+  },
+  "clips_forget_tip": {
+    "message": "Quitar la copia guardada para deshacer el último cambio de clips y liberar su espacio"
+  },
+  "clips_freed": {
+    "message": "$1 liberados"
+  },
+  "speech_button": {
+    "message": "Subtítulos a partir del habla"
+  },
+  "speech_tip": {
+    "message": "Subtítulos de lo que se dice, creados en este dispositivo por el reconocimiento de voz del navegador"
+  },
+  "speech_title": {
+    "message": "Subtítulos a partir del habla"
+  },
+  "speech_text": {
+    "message": "El sonido de la grabación se escucha en este dispositivo y nunca se envía a ningún sitio. La primera vez, el navegador puede descargar su paquete de idioma. Tarda más o menos lo que dura lo hablado."
+  },
+  "speech_language": {
+    "message": "Idioma hablado"
+  },
+  "speech_go": {
+    "message": "Crear subtítulos"
+  },
+  "speech_unavailable": {
+    "message": "Este navegador no puede reconocer ese idioma en este dispositivo."
+  },
+  "speech_downloading": {
+    "message": "El navegador está preparando su paquete de idioma…"
+  },
+  "speech_none": {
+    "message": "No se encontró habla para subtitular."
+  },
+  "speech_working": {
+    "message": "Escuchando para los subtítulos…"
+  },
+  "speech_done": {
+    "message": "$1 subtítulos añadidos: revísalos y corrige palabras en Editar"
+  },
+  "speech_failed": {
+    "message": "No se pudieron crear los subtítulos. No se cambió nada."
+  },
+  "cap_style": {
+    "message": "Aspecto de todos los subtítulos"
+  },
+  "cap_font": {
+    "message": "Fuente"
+  },
+  "cap_font_sans": {
+    "message": "Sencilla"
+  },
+  "cap_font_rounded": {
+    "message": "Redondeada"
+  },
+  "cap_font_serif": {
+    "message": "Con serifa"
+  },
+  "cap_font_mono": {
+    "message": "Máquina de escribir"
+  },
+  "cap_band": {
+    "message": "Detrás del texto"
+  },
+  "cap_band_dark": {
+    "message": "Banda oscura"
+  },
+  "cap_band_light": {
+    "message": "Banda clara"
+  },
+  "cap_band_outline": {
+    "message": "Contorno"
+  },
+  "cap_band_none": {
+    "message": "Solo sombra"
+  },
+  "cap_place": {
+    "message": "Dónde"
+  },
+  "cap_highlight": {
+    "message": "Resaltar cada palabra al decirla"
+  },
+  "cap_highlight_hint": {
+    "message": "La palabra que se dice aparece en amarillo"
+  },
+  "cap_join": {
+    "message": "Unir con el siguiente"
+  },
+  "cap_join_tip": {
+    "message": "Un subtítulo sobre este y el siguiente, con el texto de ambos"
+  },
+  "cap_review": {
+    "message": "Revisar subtítulos"
+  },
+  "cap_review_tip": {
+    "message": "Todos los subtítulos en una lista, para revisarlos y corregirlos"
+  },
+  "cap_review_hint": {
+    "message": "Haz clic en un tiempo para oír esa parte. Intro pasa al siguiente subtítulo."
+  },
+  "cap_review_done": {
+    "message": "Hecho"
+  },
+  "cap_review_play": {
+    "message": "Reproducir la parte de este subtítulo"
+  },
+  "edit_preview_keys": {
+    "message": "Vista previa con tus ediciones. Con una capa elegida, las flechas la mueven y + y − cambian su tamaño."
+  },
+  "vlayer_moved": {
+    "message": "Capa al $1 % horizontal, $2 % vertical, $3 % de ancho"
+  },
+  "vlayer_move": {
+    "message": "Se mueve"
+  },
+  "vlayer_move_hint": {
+    "message": "Se desliza de donde empieza a donde termina. Arrástrala cerca de su final para elegir adónde va."
+  },
+  "vlayer_go_start": {
+    "message": "Ir al inicio"
+  },
+  "vlayer_go_end": {
+    "message": "Ir al final"
+  },
+  "vlayer_move_now": {
+    "message": "Ahora arrastra la capa a donde debe terminar."
+  },
+  "subs_title": {
+    "message": "Pistas de subtítulos"
+  },
+  "subs_burn": {
+    "message": "Mostrar en la imagen"
+  },
+  "subs_burn_hint": {
+    "message": "Desactivado: los subtítulos solo van como pista, así que GIF y WebP no tienen"
+  },
+  "subs_embed": {
+    "message": "Añadir a MP4 y WebM como subtítulos"
+  },
+  "subs_embed_hint": {
+    "message": "Quien lo vea puede activarlos y desactivarlos, en cada idioma de abajo"
+  },
+  "subs_lang": {
+    "message": "Idioma de los subtítulos"
+  },
+  "subs_lang_none": {
+    "message": "Sin indicar"
+  },
+  "subs_track_lang": {
+    "message": "Idioma de la pista"
+  },
+  "subs_track_count": {
+    "message": "$1 de $2 subtítulos"
+  },
+  "subs_track_remove": {
+    "message": "Quitar este idioma"
+  },
+  "subs_add_file": {
+    "message": "Añadir un idioma desde un archivo…"
+  },
+  "subs_add_file_tip": {
+    "message": "Un archivo SRT o WebVTT de estos subtítulos en otro idioma (por ejemplo, guardado aquí y traducido)"
+  },
+  "subs_add_translation": {
+    "message": "Añadir una traducción"
+  },
+  "subs_file_failed": {
+    "message": "Ese archivo no tiene subtítulos que coincidan con estos."
+  },
+  "subs_file_added": {
+    "message": "Idioma añadido para $1 subtítulos. Elige arriba qué idioma es."
+  },
+  "subs_translated": {
+    "message": "Subtítulos en $1 añadidos."
+  },
+  "storage_full": {
+    "message": "No hay espacio en este navegador para $1 más. Borra grabaciones antiguas en la biblioteca y vuelve a intentarlo."
+  },
+  "music_start": {
+    "message": "Empieza en"
+  },
+  "music_start_aria": {
+    "message": "Dónde de la música empieza el vídeo. Haz clic, arrastra o usa las flechas."
+  },
+  "slides_outro_default": {
+    "message": "Gracias por ver"
+  },
+  "slides_bookends": {
+    "message": "Añadir intro y cierre"
+  },
+  "slides_bookends_tip": {
+    "message": "Una diapositiva de título al principio y otra de cierre al final, con tu estilo"
+  },
+  "slides_bookends_added": {
+    "message": "Diapositivas de intro y cierre añadidas."
+  },
+  "ui_mode": {
+    "message": "Herramientas visibles"
+  },
+  "ui_mode_simple": {
+    "message": "Sencillo"
+  },
+  "ui_mode_simple_tip": {
+    "message": "Solo recortar, cortes, subtítulos, sonido y exportar"
+  },
+  "ui_mode_advanced": {
+    "message": "Todas las herramientas"
+  },
+  "ui_mode_advanced_tip": {
+    "message": "Todas: capas, música, diapositivas, capítulos, fondos y más"
+  },
+  "ui_mode_switched": {
+    "message": "Se muestran todas las herramientas, porque este vídeo usa algunas."
+  },
+  "tour_start": {
+    "message": "Recorrido"
+  },
+  "tour_start_tip": {
+    "message": "Un breve recorrido por esta página"
+  },
+  "tour_skip": {
+    "message": "Omitir"
+  },
+  "tour_back": {
+    "message": "Atrás"
+  },
+  "tour_next": {
+    "message": "Siguiente"
+  },
+  "tour_done": {
+    "message": "Entendido"
+  },
+  "tour_step": {
+    "message": "$1 de $2"
+  },
+  "tour_play_title": {
+    "message": "Tu grabación"
+  },
+  "tour_play": {
+    "message": "Reprodúcela aquí, con cada edición tal como se exportará. Espacio reproduce y pausa."
+  },
+  "tour_trim_title": {
+    "message": "Quédate con la parte que quieres"
+  },
+  "tour_trim": {
+    "message": "Arrastra sobre la línea de tiempo o sus bordes. Al reproducir, I marca el inicio y O el final."
+  },
+  "tour_edit_title": {
+    "message": "Cortar y subtitular"
+  },
+  "tour_edit": {
+    "message": "Cortar quita una parte; Subtítulo pone texto en la imagen. Elige una edición para cambiarla. Siempre puedes deshacer."
+  },
+  "tour_sound_title": {
+    "message": "Sonido"
+  },
+  "tour_sound": {
+    "message": "Cambia el volumen, corta los silencios y, donde el navegador puede, crea subtítulos de lo que se dice."
+  },
+  "tour_mode_title": {
+    "message": "Más herramientas"
+  },
+  "tour_mode": {
+    "message": "Todas las herramientas añade capas, música, diapositivas, capítulos, zoom, desenfoque, fondos y más."
+  },
+  "tour_export_title": {
+    "message": "Exportar"
+  },
+  "tour_export": {
+    "message": "Elige un formato y exporta. Todo se hace en tu dispositivo; no se sube nada."
+  },
+  "speech_not_here": {
+    "message": "Los subtítulos a partir de la voz no están disponibles en este navegador. Puedes escribirlos con Subtítulo."
+  },
+  "translate_not_here": {
+    "message": "Traducir subtítulos no está disponible en este navegador. Abajo puedes añadir otro idioma desde un archivo de subtítulos."
+  },
+  "guide_translate_not_here": {
+    "message": "Traducir no está disponible en este navegador"
+  },
+  "template_title": {
+    "message": "Empezar como"
+  },
+  "template_bug": {
+    "message": "Informe de error"
+  },
+  "template_bug_tip": {
+    "message": "Un GIF con tus clics, para mostrar un problema"
+  },
+  "template_tutorial": {
+    "message": "Tutorial"
+  },
+  "template_tutorial_tip": {
+    "message": "Un MP4 con intro y cierre, un primer capítulo y subtítulos"
+  },
+  "template_social": {
+    "message": "Clip para redes"
+  },
+  "template_social_tip": {
+    "message": "MP4 vertical con subtítulos grandes en el centro, palabra a palabra"
+  },
+  "template_chapter": {
+    "message": "Introducción"
+  },
+  "template_bug_done": {
+    "message": "Preparado como informe de error: un GIF con tus clics. Pulsa B para difuminar lo privado."
+  },
+  "template_tutorial_done": {
+    "message": "Preparado como tutorial: MP4, intro y cierre, un primer capítulo y subtítulos. Añade subtítulos con T o desde la voz."
+  },
+  "template_social_done": {
+    "message": "Preparado como clip para redes: MP4 vertical, subtítulos grandes palabra a palabra. La música de fondo está en Sonido."
+  },
+  "check_title": {
+    "message": "Antes de exportar"
+  },
+  "check_go": {
+    "message": "Exportar igualmente"
+  },
+  "check_captions_animation": {
+    "message": "Los subtítulos están solo como pista, y GIF y WebP no tienen pistas: este no tendrá subtítulos."
+  },
+  "check_subs_off": {
+    "message": "Tus otros idiomas de subtítulos no se añaden: activa Añadir a MP4 y WebM como subtítulos."
+  },
+  "check_music_loud": {
+    "message": "La música está alta y no baja cuando alguien habla: puede tapar la voz."
+  },
+  "check_muted": {
+    "message": "El sonido está desactivado en esta exportación."
+  },
+  "check_big": {
+    "message": "El archivo puede llegar a $1."
+  },
+  "recover_export": {
+    "message": "Tu última exportación de esta grabación no terminó."
+  },
+  "recover_export_go": {
+    "message": "Exportar de nuevo"
+  },
+  "recover_join": {
+    "message": "La unión de clips no terminó la última vez."
+  },
+  "recover_join_go": {
+    "message": "Dejarla como estaba"
+  },
+  "rate_ask": {
+    "message": "¿Te gusta Captode?"
+  },
+  "rate_link": {
+    "message": "Valóralo"
+  },
+  "rate_no": {
+    "message": "No, gracias"
+  },
+  "vo_record": {
+    "message": "Grabar voz en off"
+  },
+  "vo_stop": {
+    "message": "Detener voz en off"
+  },
+  "vo_tip": {
+    "message": "Habla sobre el vídeo mientras se reproduce desde el cursor; tu voz se añade como voz en off"
+  },
+  "vo_started": {
+    "message": "Grabando tu voz. Detén o pausa el vídeo para terminar."
+  },
+  "vo_preparing": {
+    "message": "Guardando tu voz en off…"
+  },
+  "vo_added": {
+    "message": "Voz en off añadida. Está en las ediciones, con su propio volumen."
+  },
+  "vo_failed": {
+    "message": "No se pudo guardar la voz en off."
+  },
+  "vo_no_mic": {
+    "message": "El micrófono no está disponible. Permítelo para Captode en los ajustes de sitio del navegador y vuelve a intentarlo."
+  },
+  "vo_label": {
+    "message": "Voz en off"
+  },
+  "vo_hint": {
+    "message": "Arrastra su barra para moverla o sus extremos para acortarla. Divídela en el cursor para quitar una parte."
+  },
+  "au_clean": {
+    "message": "Reducir el ruido de fondo"
+  },
+  "au_clean_hint": {
+    "message": "Más bajo entre palabras, donde solo se oye la sala"
+  },
+  "au_level": {
+    "message": "Igualar el volumen"
+  },
+  "au_level_hint": {
+    "message": "Las partes altas y bajas de la voz se acercan"
+  },
+  "zoom_follow": {
+    "message": "Seguir al puntero"
+  },
+  "zoom_follow_hint": {
+    "message": "Se mueve con el puntero tal como estaba al grabar"
+  },
+  "zoom_follow_button": {
+    "message": "Zoom que sigue al puntero"
+  },
+  "zoom_follow_tip": {
+    "message": "Un zoom en todo el vídeo que sigue al puntero"
+  },
+  "zoom_follow_added": {
+    "message": "Zoom que sigue al puntero añadido. Cambia cuánto acerca en sus ajustes."
+  },
+  "fillers_find": {
+    "message": "Muletillas"
+  },
+  "fillers_tip": {
+    "message": "Busca «eh» y «em» en los subtítulos, escúchalos y corta los que elijas"
+  },
+  "fillers_none": {
+    "message": "No hay muletillas en los subtítulos."
+  },
+  "fillers_title": {
+    "message": "$1 muletillas"
+  },
+  "fillers_hint": {
+    "message": "El momento se estima desde su subtítulo: escucha primero y desmarca los que no encajen."
+  },
+  "fillers_cut": {
+    "message": "Cortar $1"
+  },
+  "fillers_done": {
+    "message": "$1 muletillas cortadas. Deshacer las recupera."
+  },
+  "several_title": {
+    "message": "Exportar varios"
+  },
+  "several_tip": {
+    "message": "Varios archivos a la vez: otros formatos y formas, hechos en segundo plano"
+  },
+  "several_hint": {
+    "message": "Cada uno se hace en segundo plano, uno tras otro, con estas ediciones."
+  },
+  "several_upright": {
+    "message": "Copia vertical (9:16)"
+  },
+  "several_square": {
+    "message": "Copia cuadrada (1:1)"
+  },
+  "several_go": {
+    "message": "Crearlos"
+  },
+  "several_queued": {
+    "message": "$1 exportaciones añadidas a la cola."
+  },
+  "hist_tip": {
+    "message": "Historial: cada cambio, para volver varios a la vez"
+  },
+  "hist_title": {
+    "message": "Historial"
+  },
+  "hist_empty": {
+    "message": "Aún no hay cambios."
+  },
+  "hist_added": {
+    "message": "$1 añadido"
+  },
+  "hist_removed": {
+    "message": "$1 quitado"
+  },
+  "hist_changed": {
+    "message": "$1 cambiado"
+  },
+  "hist_several": {
+    "message": "Varios cambios"
+  },
+  "hist_edit": {
+    "message": "Edición"
+  },
+  "hist_start": {
+    "message": "Como se grabó"
+  },
+  "hist_seconds": {
+    "message": "hace $1 s"
+  },
+  "hist_minutes": {
+    "message": "hace $1 min"
   }
 }

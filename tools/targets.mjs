@@ -12,10 +12,14 @@ export const GECKO_ID = 'captode@thecodersworld.com';
 // (src/lib/platform.js), and other browsers' validators reject permissions they don't know.
 const CHROMIUM_ONLY_PERMISSIONS = ['tabCapture', 'offscreen'];
 
+// Captions from speech (on-device recognition) are offered in Chrome's package alone;
+// every other package gets a lib/speech.js that offers none and holds none of its code.
+const WITHOUT_SPEECH = { 'lib/speech.js': 'tools/speech-none.js' };
+
 // Browsers without tab capture get a lib/tab-capture.js that offers none, and no offscreen
 // recorder: their packages hold no code for APIs they don't have.
 const WITHOUT_TAB_CAPTURE = {
-  replace: { 'lib/tab-capture.js': 'tools/tab-capture-none.js' },
+  replace: { 'lib/tab-capture.js': 'tools/tab-capture-none.js', ...WITHOUT_SPEECH },
   drop: ['recorder/offscreen.html', 'recorder/offscreen.js', 'recorder/exports.js'],
 };
 
@@ -44,6 +48,7 @@ export const TARGETS = {
   },
   edge: {
     name: 'Microsoft Edge Add-ons',
+    files: { replace: WITHOUT_SPEECH },
     file: (v) => `captode-${v}-edge.zip`,
     manifest: (m) => m, // Edge reads Chromium's manifest, minimum_chrome_version included
     runtime: {

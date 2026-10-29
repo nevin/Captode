@@ -148,6 +148,57 @@ opens in the video page, where you can:
 - Trim on a timeline with thumbnails and the sound's waveform: drag across it to choose the
   part to keep, drag its edges, or play to a point and press **I** (start) or **O** (end).
   Pointing at it shows that moment's frame; a click moves the playhead and its knob scrubs. **Space** plays only the trimmed part (skipping what's cut, up to the last part kept); the arrow keys step frame by frame. The part kept is saved with the recording, and a start or end typed the wrong way round is put right.
+- **Clips**: add other recordings, or video files from your computer, **at the end** or
+  **at the playhead** (only the second or two up to the next key frame is encoded again).
+  First choose the part to add, with a preview; a long file that has to be encoded says
+  about how long that takes. They play one after another and export as one video; each
+  clip's start is marked on the timeline (point at it for its name). Where two clips meet:
+  a straight cut, a fade through black or a crossfade. **Undo last change** puts the
+  recording back as it was before the last clip was added, moved or removed. A recording made the same way is joined as it is; anything else is encoded once
+  to fit inside the picture. Move clips earlier or later, or remove one: the edits, slides and
+  clicks in a clip go with it, and the video is copied, not encoded again. Everything happens
+  on your device.
+- **Start as** Bug report (a GIF with clicks shown), Tutorial (MP4 with intro and outro
+  slides, a first chapter and subtitles) or Social clip (upright, big word-by-word captions)
+  sets a video up in one click. Before exporting, Captode says if something will come out
+  unexpectedly (captions a GIF can't show, music louder than the voice, sound off, a very
+  large file). An export or a join of clips cut short (the tab closed, the browser crashed)
+  is offered again the next time the recording opens. Long or very large recordings are
+  previewed a little smaller while they play, so playing stays smooth. After a few exports,
+  a small link offers to rate Captode in this browser's store, once.
+- **Record voiceover** (in Sound): talk over the video while it plays from the playhead;
+  your voice becomes a voiceover with its own volume, split where parts are cut.
+  **Lower background noise** quietens the room between words, and **Even out the volume**
+  brings loud and quiet speech closer together, in the preview and the export.
+- **Filler words** (with a caption chosen): finds "um" and "uh" in the captions, lets you
+  hear each one, and cuts those you tick from the video and the captions in one step.
+- **Zoom that follows the pointer**: in tab recordings, Captode notes where the pointer
+  is a few times a second; a zoom can then follow it smoothly, like a camera.
+- **Export several** (next to the queue): other formats, and upright or square copies,
+  made in the background from the same edits.
+- **Simple or All tools**: the video page starts with just trimming, cuts, captions, sound
+  and export; **All tools** shows everything below (and is remembered). A recording that
+  already uses more tools shows them all. A short **Tour** explains the page the first time.
+  Where this browser can't do something (captions from speech, translating), the page says so.
+- **Timeline zoom**: **+** and **−** (or ⌘/Ctrl + scroll) for exact cuts in long recordings;
+  scroll sideways to move along, and playing keeps the playhead in view.
+- **Captions from speech** (in Sound; Chrome only): captions for what is said, made on the
+  device by Chrome's own speech recognition, timed to each stretch of speech, and undone in
+  one step. Nothing is sent anywhere; the first time, Chrome may download its language pack.
+  Other browsers' packages don't include it.
+- **Background music** (in Sound): a song or sound file under the whole video, with volume,
+  fades, looping, and quieter while someone speaks. Its waveform shows where it starts: click
+  or drag along it (or use the arrow keys) to start the video further into the song.
+- **Chapters**: name the video's sections at the playhead. They go into MP4 and WebM exports
+  (players show them), and **Copy for YouTube** or a .vtt file gives them as a list.
+- **Freeze this frame** (in Slides) holds the frame at the playhead for a few seconds.
+- **Remove cut parts for good** takes the cut parts out of the recording itself, so it takes
+  less room (Undo last change in Clips puts them back). Before joining clips or adding a
+  layer or music, Captode checks the browser has room to keep it. Clips also shows how much room the
+  recording takes, and can free the copy kept for undoing.
+- **Made for** YouTube, Shorts / Reels or Square sets the format, shape and size in one click
+  (Shorts also zooms in where you clicked). **Thumbnail…** saves this frame with a title as
+  a PNG to upload with the video.
 - **Slides** (or **S** at the playhead): title cards put into the recording at a moment you
   choose. The recording waits while a slide is on screen, then carries on from the same frame,
   with the sound kept in step. Each slide has a title, subtitle and description (a line each;
@@ -156,13 +207,16 @@ opens in the video page, where you can:
   and a logo in any corner. New slides take the last one's style, and your logo is
   remembered for the next recording. Drag a slide's marker under the timeline to move it;
   playback shows slides as the export will. Slides are kept with the recording.
+  **Add intro and outro** puts a title slide at the start and a closing one at the end.
+  A **brand kit** keeps a slide style with how captions look and the background, to put on
+  another recording in one click.
 - **Edit** the recording; playback and the preview show every change as the export will:
   - **Cut** (**X**) leaves a part out, picture and sound; playback jumps over it. Or press
     **⇧X** where a cut should start and again where it should end. Or drag across the
     timeline and press **Cut**: the cut covers the part dragged across (this works for every
     edit below too), and the trim stays as it was.
   - **Speed up** (**P**) plays a part 1.5×, 2×, 4× or 8× as fast, silent (a page loading,
-    a form being filled in).
+    a form being filled in), and can speed up and slow down gradually.
   - **Zoom** (**Z**) moves in on part of the picture and back out, smoothly. **Zoom in on
     clicks** adds one wherever you clicked in a tab recording (Captode notes where and when
     you click while it records a tab). **Show clicks** draws a ring at each of those clicks.
@@ -173,6 +227,26 @@ opens in the video page, where you can:
     .srt** or **.vtt** saves all the captions as a subtitle file timed for the exported video.
     **Translate all captions** puts them in another language, with the translator built
     into the browser (recent Chrome), on the device; it isn't offered where there's none.
+    **How all captions look**: plain, rounded, serif or typewriter letters, any colour, on a
+    dark or light band, outlined, or with a shadow alone, at the bottom, middle or top; and
+    **Light up each word as it's said**. **Join with next** makes two captions one;
+    **Enter** splits the chosen edit at the playhead. **Review captions** lists them all,
+    with a small player for each one's part, to read through and fix.
+    **Subtitles**: add the captions to MP4 and WebM exports as subtitles viewers can turn on
+    and off, in their language and in more: **Add a translation** (where the browser can
+    translate) or **Add a language from a file** (an .srt or .vtt of these captions translated
+    elsewhere, matched to them by time). Turn off **Show on the picture** to have them only as
+    subtitles.
+  - **Text layer**: words over the picture, on a dark or light band or none, placed and
+    styled like a video layer.
+  - **Video layer**: another recording, a video file, or a picture (a screenshot, a logo) **on top** of the picture from the
+    playhead, such as a webcam, in a corner or the middle, or dragged anywhere on the paused
+    picture (drag its lower-right corner to resize it; it snaps to the middle and the edges),
+    as a rectangle or circle, with an edge colour or none, a shadow, opacity, and a fade in
+    and out. **Moves** glides it from where it starts to where it ends (drag it near its
+    end to set where it goes). With a layer chosen, the arrow keys move it on the preview
+    (Shift: further) and **+** and **−** resize it. Its sound is mixed in at the volume you choose, fading with it. Trimming its bar's start, or splitting it, keeps it in
+    step with its own video.
 
   Each is a bar above the timeline: drag it, or its ends; **Split** cuts the chosen one in two
   at the playhead. **⌘Z**/**Ctrl+Z** undoes, **Delete** removes the one chosen. Typing or moving a slider is undone in one step, and the **Undo** shown after removing an edit always brings that edit back. Edits are kept with the recording, saved as you make them. With everything cut, the timeline says so instead of exporting an empty clip.

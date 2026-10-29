@@ -43,6 +43,8 @@ export function newSlide(at, style = {}) {
     textAt: null, textSize: 100, fontFile: null, fontName: '',
     ...style,
   };
+  // Ids go into the page's markup and selectors: only plain ones are kept (a file may hold anything).
+  if (typeof s.id !== 'string' || !/^[\w-]{1,64}$/.test(s.id)) s.id = Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
   // The band is in the background colour unless chosen otherwise.
   s.bandColor ??= s.bg1;
   s.bandOpacity ??= 82;

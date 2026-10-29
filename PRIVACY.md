@@ -22,6 +22,12 @@ them. It does not collect, transmit, sell or share any personal or sensitive dat
   in Captode's storage on your device, kept until you remove it.
 - **Exports added to the queue** are made in the background on your device and kept in that
   storage until you remove them, or for a day.
+- **Video, picture and music files you add** to a recording (as a clip, a layer or music) are
+  read on your device and kept with that recording in the browser's storage; they're never
+  uploaded.
+- **Captions from speech**, where offered, use the speech recognition built into the browser,
+  set to work on your device only, so the recording's sound is never sent anywhere. The first
+  time, the browser may download its own language pack.
 - **Translating captions** uses the translator built into your browser, on your device; Captode
   sends the text nowhere. The first time, the browser may download its own language model.
   Where the browser has no translator, the option isn't shown.
@@ -61,6 +67,11 @@ them. It does not collect, transmit, sell or share any personal or sensitive dat
   recording on your device, so the video page can offer **Zoom in on clicks**, **Show
   clicks** and **Step-by-step guide**. What you type is never kept, and nothing is kept
   about password fields. It is deleted with the recording.
+- **Where the pointer is** while Captode records a tab (its position on the page, a few
+  times a second, with the time; nothing else) is kept with the recording on your device,
+  for **Zoom that follows the pointer**. It is deleted with the recording.
+- **Voiceovers** you record on the video page use your microphone only while you record,
+  and are kept with the recording on your device.
 - **Step-by-step guides** and **subtitle files** are files you download; Captode doesn't
   upload them. A guide holds the pictures and notes of its steps.
 - **Drawing on the page** while recording happens on that page only, and is part of the

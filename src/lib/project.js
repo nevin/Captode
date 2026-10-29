@@ -54,7 +54,7 @@ function unpack(value, files) {
 export async function saveProject(id) {
   const rec = await getCapture(id);
   if (!rec?.blob) throw new Error('capture not found');
-  const { kept, ...capture } = rec; // keeping is this device's choice
+  const { kept, undoJoin, ...capture } = rec; // keeping is this device's choice; the undo of joining clips is only for here
   const files = [];
   const json = {
     format: FORMAT,

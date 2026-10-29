@@ -1,6 +1,8 @@
 // MP4 writer for WebCodecs output: H.264 video and, optionally, AAC or Opus audio.
 // The index (moov) goes before the media data, so players can start straight away.
 
+import { iso639 } from './langs.js';
+
 const enc = new TextEncoder();
 
 const concat = (parts) => {
@@ -17,6 +19,20 @@ const u32 = (v) => [(v >>> 24) & 255, (v >> 16) & 255, (v >> 8) & 255, v & 255];
 const s32 = (v) => u32(v >>> 0);
 const str = (s) => [...enc.encode(s)];
 const zeros = (n) => new Array(n).fill(0);
+
+/**
+ * Chapters as players read them from MP4s (the "Nero" list, in udta): `[{ at (s), title }]`,
+ * at most 255, each title at most 255 bytes.
+ */
+function chpl(chapters) {
+  const enc = new TextEncoder();
+  const list = chapters.slice(0, 255).flatMap((c) => {
+    const title = enc.encode(String(c.title || '')).slice(0, 255);
+    const t = Math.round(c.at * 1e7); // 100 ns units
+    return [...u32(Math.floor(t / 2 ** 32)), ...u32(t % 2 ** 32), title.length, ...title];
+  });
+  return box('udta', box('chpl', [1, 0, 0, 0], u32(0), [Math.min(255, chapters.length)], list));
+}
 
 function box(type, ...parts) {
   const body = concat(parts.map((p) => (p instanceof Uint8Array ? p : new Uint8Array(p))));
@@ -144,19 +160,69 @@ function trak(id, kind, { width = 0, height = 0, timescale, stbl, mediaDuration,
         stbl)));
 }
 
+/** A language as mdhd packs it: three letters, five bits each. */
+const packLang = (tag) => {
+  const c = iso639(tag);
+  return ((c.charCodeAt(0) - 0x60) << 10) | ((c.charCodeAt(1) - 0x60) << 5) | (c.charCodeAt(2) - 0x60);
+};
+
+/** 3GPP timed text samples for `cues` ([{ start, end, text }] in s), with empty ones between. */
+function textSamples(cues) {
+  const out = [];
+  let at = 0; // ms
+  const sample = (from, to, text) => {
+    const words = enc.encode(text);
+    out.push({ timestamp: from * 1000, duration: (to - from) * 1000, key: true, data: new Uint8Array([...u16(words.length), ...words]) });
+  };
+  for (const c of [...cues].sort((a, b) => a.start - b.start)) {
+    const from = Math.max(at, Math.round(c.start * 1000)), to = Math.round(c.end * 1000);
+    if (to <= from) continue;
+    if (from > at) sample(at, from, '');
+    sample(from, to, c.text);
+    at = to;
+  }
+  return out;
+}
+
+/** The tx3g sample entry: centred along the bottom, white sans serif. */
+const tx3gEntry = () => box('tx3g',
+  zeros(6), u16(1),
+  u32(0), [1, 0xff], [0, 0, 0, 0], // display flags; centred, at the bottom; no background
+  zeros(8), // the text box: the whole track
+  u16(0), u16(0), u16(1), [0, 18], [255, 255, 255, 255], // style: font 1, 18 px, white
+  box('ftab', u16(1), u16(1), [10], str('Sans-Serif')));
+
+/** A subtitle track: off until chosen in the player, one of a group of alternatives. */
+function textTrak(id, { lang, stbl, mediaDuration, movieDuration }) {
+  return box('trak',
+    full('tkhd', 0, 2, u32(0), u32(0), u32(id), u32(0), u32(movieDuration), zeros(8),
+      u16(0), u16(2), u16(0), u16(0), MATRIX, u32(0), u32(0)),
+    box('mdia',
+      full('mdhd', 0, 0, u32(0), u32(0), u32(1000), u32(mediaDuration), u16(packLang(lang)), u16(0)),
+      full('hdlr', 0, 0, u32(0), str('sbtl'), zeros(12), str('SubtitleHandler'), [0]),
+      box('minf',
+        full('nmhd', 0, 0),
+        box('dinf', full('dref', 0, 0, u32(1), full('url ', 0, 1))),
+        stbl)));
+}
+
 /**
  * Builds an MP4 from encoded chunks.
  * `video`: `{ width, height, avcC, frames, colour? }` (avcC is the encoder's decoder
  * description); `audio` (optional): AAC `{ sampleRate, channels, asc, bitrate, frames }`
- * or Opus `{ codec: 'opus', channels, opusHead, frames }`.
+ * or Opus `{ codec: 'opus', channels, opusHead, frames }`. `subtitles` (optional):
+ * `[{ lang, cues: [{ start, end, text }] }]`, each a subtitle track (3GPP timed text).
  */
-export function muxMp4({ video, audio = null }) {
+export function muxMp4({ video, audio = null, chapters = null, subtitles = null }) {
   // The frames go into the file as they are (a Blob copies its parts once), rather
   // than joined into one array first, which would hold the whole video twice more.
   const vData = video.frames.map((f) => f.data);
   const aData = audio ? audio.frames.map((f) => f.data) : [];
   const vLen = vData.reduce((n, d) => n + d.length, 0);
   const aLen = aData.reduce((n, d) => n + d.length, 0);
+  const subs = (subtitles || []).map((s) => ({ lang: s.lang, samples: textSamples(s.cues) })).filter((s) => s.samples.length);
+  const sData = subs.flatMap((s) => s.samples.map((x) => x.data));
+  const sLens = subs.map((s) => s.samples.reduce((n, x) => n + x.data.length, 0));
   const ftyp = box('ftyp', str('isom'), u32(0x200), str('isom'), str('iso2'), str('avc1'), str('mp41'));
   const VTS = 90000;
 
@@ -173,13 +239,20 @@ export function muxMp4({ video, audio = null }) {
     const movieMs = Math.max(Math.round((v.duration / VTS) * 1000), a ? Math.round((a.duration / audio.sampleRate) * 1000) + aDelay : 0);
     const traks = [trak(1, 'video', { width: video.width, height: video.height, timescale: VTS, stbl: v.stbl, mediaDuration: v.duration, movieDuration: Math.round((v.duration / VTS) * 1000) })];
     if (a) traks.push(trak(2, 'audio', { timescale: audio.sampleRate, stbl: a.stbl, mediaDuration: a.duration, movieDuration: Math.round((a.duration / audio.sampleRate) * 1000), delay: aDelay }));
+    let sOffset = aOffset + aLen;
+    subs.forEach((s, i) => {
+      const t = sampleTables(s.samples, 1000, sOffset, tx3gEntry(), false);
+      sOffset += sLens[i];
+      traks.push(textTrak(traks.length + 1, { lang: s.lang, stbl: t.stbl, mediaDuration: t.duration, movieDuration: t.duration }));
+    });
     return box('moov',
-      full('mvhd', 0, 0, u32(0), u32(0), u32(1000), u32(movieMs), u32(0x00010000), u16(0x0100), zeros(10), MATRIX, zeros(24), u32(audio ? 3 : 2)),
-      ...traks);
+      full('mvhd', 0, 0, u32(0), u32(0), u32(1000), u32(movieMs), u32(0x00010000), u16(0x0100), zeros(10), MATRIX, zeros(24), u32(traks.length + 1)),
+      ...traks, ...(chapters?.length ? [chpl(chapters)] : []));
   };
   const moovLen = build(0, 0).length;
   const mdatStart = ftyp.length + moovLen + 8;
   const moov = build(mdatStart, mdatStart + vLen);
-  const mdatHead = new Uint8Array([...u32(8 + vLen + aLen), ...str('mdat')]);
-  return new Blob([ftyp, moov, mdatHead, ...vData, ...aData], { type: 'video/mp4' });
+  const sLen = sLens.reduce((n, x) => n + x, 0);
+  const mdatHead = new Uint8Array([...u32(8 + vLen + aLen + sLen), ...str('mdat')]);
+  return new Blob([ftyp, moov, mdatHead, ...vData, ...aData, ...sData], { type: 'video/mp4' });
 }

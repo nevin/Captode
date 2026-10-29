@@ -3225,5 +3225,905 @@
   },
   "edit_no_sound": {
     "message": "This recording has no sound to mute."
+  },
+  "clips_title": {
+    "message": "Clips"
+  },
+  "clips_pick": {
+    "message": "A recording to add"
+  },
+  "clips_add": {
+    "message": "Add"
+  },
+  "clips_add_tip": {
+    "message": "Add this recording at the end"
+  },
+  "clips_add_file": {
+    "message": "Add a video file"
+  },
+  "clips_add_file_tip": {
+    "message": "Add a video from your computer at the end"
+  },
+  "clips_untitled": {
+    "message": "Untitled recording"
+  },
+  "clips_recording": {
+    "message": "This recording"
+  },
+  "clips_go": {
+    "message": "Go to this clip"
+  },
+  "clips_earlier": {
+    "message": "Move earlier"
+  },
+  "clips_later": {
+    "message": "Move later"
+  },
+  "clips_remove": {
+    "message": "Remove clip"
+  },
+  "clips_remove_title": {
+    "message": "Remove this clip?"
+  },
+  "clips_remove_text": {
+    "message": "“$1” and the edits and slides in it are taken out of this recording."
+  },
+  "clips_joining": {
+    "message": "Joining clips…"
+  },
+  "clips_added": {
+    "message": "Clip added at the end"
+  },
+  "clips_moved": {
+    "message": "Clips reordered"
+  },
+  "clips_removed": {
+    "message": "Clip removed"
+  },
+  "clips_unplayable": {
+    "message": "This browser can't play that video, so it can't be added."
+  },
+  "clips_unsupported": {
+    "message": "This browser can't encode video, so clips can't be joined here."
+  },
+  "clips_failed": {
+    "message": "The clips couldn't be joined. The recording is unchanged."
+  },
+  "clips_sound_lost": {
+    "message": "Clip added, but this browser can't encode its sound, so it plays silently."
+  },
+  "clips_after_hint": {
+    "message": "Add other recordings or video files at the end. They play one after another and export as one video."
+  },
+  "clips_top_hint": {
+    "message": "Lay another video, or a picture such as a screenshot or logo, over the picture from the playhead. Drag it on the picture, or set its corner, size, look and volume under Edit."
+  },
+  "clips_where": {
+    "message": "Where to add"
+  },
+  "clips_after": {
+    "message": "At the end"
+  },
+  "clips_top": {
+    "message": "On top"
+  },
+  "clips_add_top_tip": {
+    "message": "Lay this recording over the picture from the playhead"
+  },
+  "clips_add_file_top_tip": {
+    "message": "Lay a video from your computer over the picture from the playhead"
+  },
+  "edit_kind_layers": {
+    "message": "Video layer"
+  },
+  "edit_add_layer_tip": {
+    "message": "Another video or a picture over the picture, such as a webcam or a logo"
+  },
+  "vlayer_position": {
+    "message": "Position"
+  },
+  "vlayer_pos_tl": {
+    "message": "Top left"
+  },
+  "vlayer_pos_tr": {
+    "message": "Top right"
+  },
+  "vlayer_pos_c": {
+    "message": "Middle"
+  },
+  "vlayer_pos_bl": {
+    "message": "Bottom left"
+  },
+  "vlayer_pos_br": {
+    "message": "Bottom right"
+  },
+  "vlayer_shape": {
+    "message": "Shape"
+  },
+  "vlayer_shape_rect": {
+    "message": "Rectangle"
+  },
+  "vlayer_shape_circle": {
+    "message": "Circle"
+  },
+  "vlayer_offset": {
+    "message": "Starts this far into its video (s)"
+  },
+  "vlayer_hint": {
+    "message": "Drag the layer on the paused picture to move it, or its lower-right corner to resize it. Drag its bar to move it in time."
+  },
+  "vlayer_preparing": {
+    "message": "Getting the video ready…"
+  },
+  "vlayer_failed": {
+    "message": "That video couldn't be laid over the picture."
+  },
+  "vlayer_added": {
+    "message": "Video layer added at the playhead"
+  },
+  "clips_here": {
+    "message": "At the playhead"
+  },
+  "clips_here_hint": {
+    "message": "Put a recording or video file in at the playhead: what's after it moves later. Only up to the next key frame (a second or two) is encoded again; the rest is copied."
+  },
+  "clips_add_here_tip": {
+    "message": "Put this recording in at the playhead"
+  },
+  "clips_add_file_here_tip": {
+    "message": "Put a video from your computer in at the playhead"
+  },
+  "vlayer_volume": {
+    "message": "Volume"
+  },
+  "vlayer_pos_free": {
+    "message": "Placed by hand"
+  },
+  "clips_cancel": {
+    "message": "Cancel"
+  },
+  "clips_trim_title": {
+    "message": "Which part to add"
+  },
+  "clips_trim_here": {
+    "message": "Start where the video above is"
+  },
+  "clips_trim_here_end": {
+    "message": "End where the video above is"
+  },
+  "clips_trim_len": {
+    "message": "$1 will be added."
+  },
+  "clips_trim_slow": {
+    "message": "It has to be encoded to fit, which takes about $1 min."
+  },
+  "clips_trans": {
+    "message": "Into it:"
+  },
+  "clips_trans_none": {
+    "message": "Cut straight in"
+  },
+  "clips_trans_fade": {
+    "message": "Fade through black"
+  },
+  "clips_trans_cross": {
+    "message": "Crossfade"
+  },
+  "clips_undo": {
+    "message": "Undo last change"
+  },
+  "clips_undo_tip": {
+    "message": "Go back to the recording as it was before the last clip was added, moved or removed"
+  },
+  "clips_undone": {
+    "message": "Clips put back as they were"
+  },
+  "vlayer_opacity": {
+    "message": "Opacity"
+  },
+  "vlayer_fade": {
+    "message": "Fade in and out"
+  },
+  "vlayer_border": {
+    "message": "Edge"
+  },
+  "vlayer_border_none": {
+    "message": "No edge"
+  },
+  "vlayer_shadow": {
+    "message": "Shadow"
+  },
+  "tl_zoom_out_tip": {
+    "message": "Zoom out of the timeline  −"
+  },
+  "tl_zoom_in_tip": {
+    "message": "Zoom into the timeline  +  (or ⌘/Ctrl + scroll)"
+  },
+  "edit_add_text_layer_tip": {
+    "message": "Words over the picture, placed and styled like a layer"
+  },
+  "vlayer_text": {
+    "message": "Text layer"
+  },
+  "vlayer_video_or_picture": {
+    "message": "Video or picture layer"
+  },
+  "vlayer_text_default": {
+    "message": "Your title"
+  },
+  "vlayer_text_colour": {
+    "message": "Colour"
+  },
+  "vlayer_text_bg": {
+    "message": "Behind it"
+  },
+  "vlayer_bg_dark": {
+    "message": "Dark"
+  },
+  "vlayer_bg_light": {
+    "message": "Light"
+  },
+  "vlayer_bg_none": {
+    "message": "None"
+  },
+  "vlayer_picture": {
+    "message": "Picture"
+  },
+  "vlayer_picture_added": {
+    "message": "“$1” laid over the picture"
+  },
+  "clips_image_top": {
+    "message": "A picture can only go on top: choose On top first."
+  },
+  "edit_speed_ease": {
+    "message": "Speed up and slow down gradually"
+  },
+  "music_title": {
+    "message": "Background music"
+  },
+  "music_add": {
+    "message": "Add music…"
+  },
+  "music_add_tip": {
+    "message": "A song or sound under the whole video, quieter while someone speaks"
+  },
+  "music_remove": {
+    "message": "Remove"
+  },
+  "music_volume": {
+    "message": "Volume"
+  },
+  "music_fade_in": {
+    "message": "Fade in"
+  },
+  "music_fade_out": {
+    "message": "Fade out"
+  },
+  "music_duck": {
+    "message": "Quieter while someone speaks"
+  },
+  "music_loop": {
+    "message": "Start again if it ends first"
+  },
+  "music_preparing": {
+    "message": "Getting the music ready…"
+  },
+  "music_added": {
+    "message": "Music added under the whole video"
+  },
+  "music_unplayable": {
+    "message": "This browser can't play that file, so it can't be used as music."
+  },
+  "music_failed": {
+    "message": "The music couldn't be added in this browser."
+  },
+  "edit_apply_cuts": {
+    "message": "Remove cut parts for good"
+  },
+  "edit_apply_cuts_tip": {
+    "message": "Take the cut parts out of the recording itself, so it takes less room. Undo last change in Clips puts them back."
+  },
+  "edit_apply_cuts_title": {
+    "message": "Remove the cut parts for good?"
+  },
+  "edit_apply_cuts_text": {
+    "message": "The recording loses them and gets smaller; your edits stay with what's left. Undo last change (in Clips) puts them back."
+  },
+  "edit_cuts_applied": {
+    "message": "Cut parts removed for good"
+  },
+  "freeze_add": {
+    "message": "Freeze this frame"
+  },
+  "freeze_tip": {
+    "message": "Hold the frame at the playhead on screen for a few seconds (a slide made from it)"
+  },
+  "freeze_added": {
+    "message": "Frame held for 2 s: change how long under Slides"
+  },
+  "chapters_title": {
+    "message": "Chapters"
+  },
+  "chapters_hint": {
+    "message": "Name the sections of the video. They go into MP4 and WebM exports, and can be copied as a list for a YouTube description."
+  },
+  "chapters_add": {
+    "message": "Add chapter"
+  },
+  "chapters_add_tip": {
+    "message": "A chapter starting at the playhead"
+  },
+  "chapters_copy": {
+    "message": "Copy for YouTube"
+  },
+  "chapters_copy_tip": {
+    "message": "Times and names, as YouTube reads them from a description"
+  },
+  "chapters_vtt": {
+    "message": "Download .vtt"
+  },
+  "chapters_vtt_tip": {
+    "message": "A WebVTT chapters file, for players that take one"
+  },
+  "chapters_untitled": {
+    "message": "Chapter"
+  },
+  "chapters_start": {
+    "message": "Start"
+  },
+  "chapters_go": {
+    "message": "Go to this chapter"
+  },
+  "chapters_name": {
+    "message": "Chapter name"
+  },
+  "chapters_default": {
+    "message": "Chapter $1"
+  },
+  "chapters_copied": {
+    "message": "Chapters copied: paste them into the video's description"
+  },
+  "chapters_copy_failed": {
+    "message": "The chapters couldn't be copied here."
+  },
+  "quick_title": {
+    "message": "Made for"
+  },
+  "quick_youtube_tip": {
+    "message": "MP4, 16:9, 1080p"
+  },
+  "quick_shorts_tip": {
+    "message": "MP4, 9:16 upright, 1080 × 1920, zoomed in where you clicked"
+  },
+  "quick_square": {
+    "message": "Square"
+  },
+  "quick_square_tip": {
+    "message": "MP4, 1:1, 1080 × 1080"
+  },
+  "quick_done": {
+    "message": "Set up for $1"
+  },
+  "thumb_open": {
+    "message": "Thumbnail…"
+  },
+  "thumb_tip": {
+    "message": "This frame with a title, as a picture to upload with the video"
+  },
+  "thumb_title": {
+    "message": "Thumbnail"
+  },
+  "thumb_text": {
+    "message": "Title"
+  },
+  "thumb_place": {
+    "message": "Where"
+  },
+  "thumb_bottom": {
+    "message": "Bottom"
+  },
+  "thumb_top": {
+    "message": "Top"
+  },
+  "thumb_middle": {
+    "message": "Middle"
+  },
+  "thumb_save": {
+    "message": "Save PNG"
+  },
+  "clips_storage": {
+    "message": "This recording takes $1 in the browser$2."
+  },
+  "clips_storage_undo": {
+    "message": ", $1 of it to undo the last change to clips"
+  },
+  "clips_forget": {
+    "message": "Free the undo copy"
+  },
+  "clips_forget_tip": {
+    "message": "Remove the copy kept to undo the last change to clips, to free its room"
+  },
+  "clips_freed": {
+    "message": "$1 freed"
+  },
+  "speech_button": {
+    "message": "Captions from speech"
+  },
+  "speech_tip": {
+    "message": "Captions for what is said, made on this device by the browser's own speech recognition"
+  },
+  "speech_title": {
+    "message": "Captions from speech"
+  },
+  "speech_text": {
+    "message": "The recording's sound is listened to on this device and never sent anywhere. The first time, the browser may download its language pack. It takes about as long as the speaking does."
+  },
+  "speech_language": {
+    "message": "Language spoken"
+  },
+  "speech_go": {
+    "message": "Make captions"
+  },
+  "speech_unavailable": {
+    "message": "This browser can't recognise that language on this device."
+  },
+  "speech_downloading": {
+    "message": "The browser is getting its language pack ready…"
+  },
+  "speech_none": {
+    "message": "No speech was found to caption."
+  },
+  "speech_working": {
+    "message": "Listening for captions…"
+  },
+  "speech_done": {
+    "message": "$1 captions added: read them through, and fix any word under Edit"
+  },
+  "speech_failed": {
+    "message": "The captions couldn't be made. Nothing was changed."
+  },
+  "cap_style": {
+    "message": "How all captions look"
+  },
+  "cap_font": {
+    "message": "Font"
+  },
+  "cap_font_sans": {
+    "message": "Plain"
+  },
+  "cap_font_rounded": {
+    "message": "Rounded"
+  },
+  "cap_font_serif": {
+    "message": "Serif"
+  },
+  "cap_font_mono": {
+    "message": "Typewriter"
+  },
+  "cap_band": {
+    "message": "Behind the words"
+  },
+  "cap_band_dark": {
+    "message": "Dark band"
+  },
+  "cap_band_light": {
+    "message": "Light band"
+  },
+  "cap_band_outline": {
+    "message": "Outline"
+  },
+  "cap_band_none": {
+    "message": "Shadow only"
+  },
+  "cap_place": {
+    "message": "Where"
+  },
+  "cap_highlight": {
+    "message": "Light up each word as it's said"
+  },
+  "cap_highlight_hint": {
+    "message": "The word being said shows in yellow"
+  },
+  "cap_join": {
+    "message": "Join with next"
+  },
+  "cap_join_tip": {
+    "message": "One caption over this one and the next, with both their words"
+  },
+  "cap_review": {
+    "message": "Review captions"
+  },
+  "cap_review_tip": {
+    "message": "All captions in one list, to read through and fix"
+  },
+  "cap_review_hint": {
+    "message": "Click a time to hear that part. Enter goes to the next caption."
+  },
+  "cap_review_done": {
+    "message": "Done"
+  },
+  "cap_review_play": {
+    "message": "Play this caption's part"
+  },
+  "edit_preview_keys": {
+    "message": "Preview with your edits. With a layer chosen, arrow keys move it and + and − resize it."
+  },
+  "vlayer_moved": {
+    "message": "Layer $1% across, $2% down, $3% wide"
+  },
+  "vlayer_move": {
+    "message": "Moves"
+  },
+  "vlayer_move_hint": {
+    "message": "Glides from where it starts to where it ends. Drag it near its end to set where it goes."
+  },
+  "vlayer_go_start": {
+    "message": "Go to its start"
+  },
+  "vlayer_go_end": {
+    "message": "Go to its end"
+  },
+  "vlayer_move_now": {
+    "message": "Now drag the layer to where it should end."
+  },
+  "subs_title": {
+    "message": "Subtitles"
+  },
+  "subs_burn": {
+    "message": "Show on the picture"
+  },
+  "subs_burn_hint": {
+    "message": "Off: the captions are only subtitles, so GIF and WebP have none"
+  },
+  "subs_embed": {
+    "message": "Add to MP4 and WebM as subtitles"
+  },
+  "subs_embed_hint": {
+    "message": "Viewers can turn them on and off, in each language below"
+  },
+  "subs_lang": {
+    "message": "Language of the captions"
+  },
+  "subs_lang_none": {
+    "message": "Not set"
+  },
+  "subs_track_lang": {
+    "message": "Subtitle language"
+  },
+  "subs_track_count": {
+    "message": "$1 of $2 captions"
+  },
+  "subs_track_remove": {
+    "message": "Remove this language"
+  },
+  "subs_add_file": {
+    "message": "Add a language from a file…"
+  },
+  "subs_add_file_tip": {
+    "message": "An SRT or WebVTT file of these captions in another language (one saved here and translated, say)"
+  },
+  "subs_add_translation": {
+    "message": "Add a translation"
+  },
+  "subs_file_failed": {
+    "message": "That file has no subtitles that line up with these captions."
+  },
+  "subs_file_added": {
+    "message": "Added a language for $1 captions. Choose which language it is above."
+  },
+  "subs_translated": {
+    "message": "Added $1 subtitles."
+  },
+  "storage_full": {
+    "message": "Not enough room in this browser to keep $1 more. Delete some old recordings in the library, then try again."
+  },
+  "music_start": {
+    "message": "Starts from"
+  },
+  "music_start_aria": {
+    "message": "Where in the music the video starts. Click, drag or use the arrow keys."
+  },
+  "slides_outro_default": {
+    "message": "Thanks for watching"
+  },
+  "slides_bookends": {
+    "message": "Add intro and outro"
+  },
+  "slides_bookends_tip": {
+    "message": "A title slide at the start and a closing slide at the end, in your slide style"
+  },
+  "slides_bookends_added": {
+    "message": "Added an intro and an outro slide."
+  },
+  "ui_mode": {
+    "message": "Tools shown"
+  },
+  "ui_mode_simple": {
+    "message": "Simple"
+  },
+  "ui_mode_simple_tip": {
+    "message": "Just trimming, cuts, captions, sound and export"
+  },
+  "ui_mode_advanced": {
+    "message": "All tools"
+  },
+  "ui_mode_advanced_tip": {
+    "message": "Every tool: layers, music, slides, chapters, backgrounds and more"
+  },
+  "ui_mode_switched": {
+    "message": "Showing all tools, since this video uses some of them."
+  },
+  "tour_start": {
+    "message": "Tour"
+  },
+  "tour_start_tip": {
+    "message": "A short tour of this page"
+  },
+  "tour_skip": {
+    "message": "Skip tour"
+  },
+  "tour_back": {
+    "message": "Back"
+  },
+  "tour_next": {
+    "message": "Next"
+  },
+  "tour_done": {
+    "message": "Got it"
+  },
+  "tour_step": {
+    "message": "$1 of $2"
+  },
+  "tour_play_title": {
+    "message": "Your recording"
+  },
+  "tour_play": {
+    "message": "Play it here, with every edit as it will be exported. Space plays and pauses."
+  },
+  "tour_trim_title": {
+    "message": "Keep the part you want"
+  },
+  "tour_trim": {
+    "message": "Drag across the timeline, or drag its edges. While playing, I sets the start and O the end."
+  },
+  "tour_edit_title": {
+    "message": "Cut and caption"
+  },
+  "tour_edit": {
+    "message": "Cut leaves a part out; Caption puts words on the picture. Choose an edit to change it. Undo is always there."
+  },
+  "tour_sound_title": {
+    "message": "Sound"
+  },
+  "tour_sound": {
+    "message": "Change the volume, cut the silent parts, and, where the browser can, make captions from what is said."
+  },
+  "tour_mode_title": {
+    "message": "More tools"
+  },
+  "tour_mode": {
+    "message": "All tools adds layers, music, slides, chapters, zooms, blur, backgrounds and more."
+  },
+  "tour_export_title": {
+    "message": "Export"
+  },
+  "tour_export": {
+    "message": "Choose a format and export. Everything is made on your device; nothing is uploaded."
+  },
+  "speech_not_here": {
+    "message": "Captions from speech aren't available in this browser. You can still type captions with Caption."
+  },
+  "translate_not_here": {
+    "message": "Translating captions isn't available in this browser. You can add another language from a subtitle file below."
+  },
+  "guide_translate_not_here": {
+    "message": "Translating isn't available in this browser"
+  },
+  "template_title": {
+    "message": "Start as"
+  },
+  "template_bug": {
+    "message": "Bug report"
+  },
+  "template_bug_tip": {
+    "message": "A GIF with your clicks shown, to show a problem"
+  },
+  "template_tutorial": {
+    "message": "Tutorial"
+  },
+  "template_tutorial_tip": {
+    "message": "An MP4 with intro and outro slides, a first chapter and subtitles"
+  },
+  "template_social": {
+    "message": "Social clip"
+  },
+  "template_social_tip": {
+    "message": "Upright MP4 with big captions in the middle, word by word"
+  },
+  "template_chapter": {
+    "message": "Introduction"
+  },
+  "template_bug_done": {
+    "message": "Set up as a bug report: a GIF, with your clicks shown. Press B to blur anything private."
+  },
+  "template_tutorial_done": {
+    "message": "Set up as a tutorial: MP4, intro and outro slides, a first chapter and subtitles. Add captions with T, or from speech."
+  },
+  "template_social_done": {
+    "message": "Set up as a social clip: upright MP4, big captions word by word. Background music is in Sound."
+  },
+  "check_title": {
+    "message": "Before you export"
+  },
+  "check_go": {
+    "message": "Export anyway"
+  },
+  "check_captions_animation": {
+    "message": "Captions are set to subtitles only, and GIF and WebP have no subtitles, so this one will have no captions."
+  },
+  "check_subs_off": {
+    "message": "Your other subtitle languages aren't added: turn on Add to MP4 and WebM as subtitles to include them."
+  },
+  "check_music_loud": {
+    "message": "The music is loud and doesn't get quieter when someone speaks, so it may drown out the voice."
+  },
+  "check_muted": {
+    "message": "Sound is turned off for this export."
+  },
+  "check_big": {
+    "message": "The file may be as large as $1."
+  },
+  "recover_export": {
+    "message": "Your last export of this recording didn't finish."
+  },
+  "recover_export_go": {
+    "message": "Export again"
+  },
+  "recover_join": {
+    "message": "Joining clips didn't finish last time."
+  },
+  "recover_join_go": {
+    "message": "Put it back as it was"
+  },
+  "rate_ask": {
+    "message": "Enjoying Captode?"
+  },
+  "rate_link": {
+    "message": "Rate it"
+  },
+  "rate_no": {
+    "message": "No thanks"
+  },
+  "vo_record": {
+    "message": "Record voiceover"
+  },
+  "vo_stop": {
+    "message": "Stop voiceover"
+  },
+  "vo_tip": {
+    "message": "Talk over the video while it plays from the playhead; your voice is added as a voiceover"
+  },
+  "vo_started": {
+    "message": "Recording your voice. Stop, or pause the video, to finish."
+  },
+  "vo_preparing": {
+    "message": "Keeping your voiceover…"
+  },
+  "vo_added": {
+    "message": "Voiceover added. It's in the edits, with its own volume."
+  },
+  "vo_failed": {
+    "message": "The voiceover couldn't be kept."
+  },
+  "vo_no_mic": {
+    "message": "The microphone isn't available. Allow it for Captode in the browser's site settings, then try again."
+  },
+  "vo_label": {
+    "message": "Voiceover"
+  },
+  "vo_hint": {
+    "message": "Drag its bar to move it, or its ends to shorten it. Split it at the playhead to remove a part."
+  },
+  "au_clean": {
+    "message": "Lower background noise"
+  },
+  "au_clean_hint": {
+    "message": "Quieter between words, where only the room is heard"
+  },
+  "au_level": {
+    "message": "Even out the volume"
+  },
+  "au_level_hint": {
+    "message": "Loud and quiet speech brought closer together"
+  },
+  "zoom_follow": {
+    "message": "Follow the pointer"
+  },
+  "zoom_follow_hint": {
+    "message": "Moves with where the pointer was while recording"
+  },
+  "zoom_follow_button": {
+    "message": "Zoom that follows the pointer"
+  },
+  "zoom_follow_tip": {
+    "message": "One zoom over the whole video that follows where the pointer goes"
+  },
+  "zoom_follow_added": {
+    "message": "Added a zoom that follows the pointer. Change how far it zooms in its settings."
+  },
+  "fillers_find": {
+    "message": "Filler words"
+  },
+  "fillers_tip": {
+    "message": "Find “um” and “uh” in the captions, hear each one, and cut those you choose"
+  },
+  "fillers_none": {
+    "message": "No filler words found in the captions."
+  },
+  "fillers_title": {
+    "message": "$1 filler words"
+  },
+  "fillers_hint": {
+    "message": "Where each is said is estimated from its caption, so listen first and untick any that aren't right."
+  },
+  "fillers_cut": {
+    "message": "Cut $1"
+  },
+  "fillers_done": {
+    "message": "Cut $1 filler words. Undo brings them back."
+  },
+  "several_title": {
+    "message": "Export several"
+  },
+  "several_tip": {
+    "message": "Several files from these edits at once: other formats and shapes, made in the background"
+  },
+  "several_hint": {
+    "message": "Each is made in the background, one after another, with these edits."
+  },
+  "several_upright": {
+    "message": "Upright copy (9:16)"
+  },
+  "several_square": {
+    "message": "Square copy (1:1)"
+  },
+  "several_go": {
+    "message": "Make them"
+  },
+  "several_queued": {
+    "message": "$1 exports added to the queue."
+  },
+  "hist_tip": {
+    "message": "History: every change, to go back several at once"
+  },
+  "hist_title": {
+    "message": "History"
+  },
+  "hist_empty": {
+    "message": "No changes yet."
+  },
+  "hist_added": {
+    "message": "$1 added"
+  },
+  "hist_removed": {
+    "message": "$1 removed"
+  },
+  "hist_changed": {
+    "message": "$1 changed"
+  },
+  "hist_several": {
+    "message": "Several changes"
+  },
+  "hist_edit": {
+    "message": "Edit"
+  },
+  "hist_start": {
+    "message": "As recorded"
+  },
+  "hist_seconds": {
+    "message": "$1 s ago"
+  },
+  "hist_minutes": {
+    "message": "$1 min ago"
   }
 }

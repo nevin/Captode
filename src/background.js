@@ -469,7 +469,7 @@ async function startRecording({ mode, fps, audio, size = 'page', countdown: want
     await run(tab.id, hideOutline).catch(() => {});
     throw new Error(res?.error || t('error_recording_start'));
   }
-  await chrome.storage.session.set({ recClicks: [] });
+  await chrome.storage.session.set({ recClicks: [], recMoves: [] });
   await setRec({ state: 'recording', kind: 'offscreen', tabId: tab.id, outline: !!crop, inputs: !!inputs, cursor: !!cursor, startedAt: Date.now(), crop });
   if (inputs || cursor) await run(tab.id, showInputs, true, { clicks: !!inputs, cursor: !!cursor }).catch(() => {});
   await run(tab.id, trackClicks, true).catch(() => {});
@@ -504,6 +504,24 @@ function keepClick(msg, tabId) {
       ...(label && { label }), ...(label && msg.field && { field: true }),
     });
     await chrome.storage.session.set({ recClicks });
+  }).catch(() => {});
+  return clickQueue;
+}
+
+// Where the pointer was in the recorded tab, for a zoom that follows it: timed like the clicks.
+function keepMoves(msg, tabId) {
+  clickQueue = clickQueue.then(async () => {
+    const rec = await getRec();
+    if (rec?.state !== 'recording' || rec.kind !== 'offscreen' || rec.tabId !== tabId || !rec.startedAt || rec.pausedAt) return;
+    const { recMoves = [] } = await chrome.storage.session.get('recMoves');
+    for (const p of Array.isArray(msg.points) ? msg.points.slice(0, 20) : []) {
+      if (recMoves.length >= 30000) break; // about 50 minutes of moving
+      let { x, y } = p;
+      if (!Number.isFinite(x) || !Number.isFinite(y) || !Number.isFinite(p.at)) continue;
+      if (rec.crop) { x = (x - rec.crop.x) / rec.crop.w; y = (y - rec.crop.y) / rec.crop.h; }
+      recMoves.push({ t: Math.round(Math.max(0, p.at - rec.startedAt - (rec.pausedMs || 0))) / 1000, x: Math.round(Math.min(1, Math.max(0, x)) * 1e3) / 1e3, y: Math.round(Math.min(1, Math.max(0, y)) * 1e3) / 1e3 });
+    }
+    await chrome.storage.session.set({ recMoves });
   }).catch(() => {});
   return clickQueue;
 }
@@ -639,9 +657,9 @@ async function finishRecording(id, kind) {
   if (kind === 'offscreen') {
     if (rec) await run(rec.tabId, trackClicks, false).catch(() => {});
     await clickQueue;
-    const { recClicks = [] } = await chrome.storage.session.get('recClicks');
-    await chrome.storage.session.remove('recClicks');
-    if (recClicks.length && id) await updateMeta(id, { clicks: recClicks }).catch(() => {});
+    const { recClicks = [], recMoves = [] } = await chrome.storage.session.get(['recClicks', 'recMoves']);
+    await chrome.storage.session.remove(['recClicks', 'recMoves']);
+    if ((recClicks.length || recMoves.length) && id) await updateMeta(id, { ...(recClicks.length && { clicks: recClicks }), ...(recMoves.length && { moves: recMoves }) }).catch(() => {});
     await endTabCapture();
     const tab = rec ? await chrome.tabs.get(rec.tabId).catch(() => null) : null;
     await openPage(`video/video.html?id=${id}`, tab);
@@ -759,6 +777,11 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 
   if (msg.type === 'rec-click') {
     if (sender.tab?.id) keepClick(msg, sender.tab.id);
+    return;
+  }
+
+  if (msg.type === 'rec-moves') {
+    if (sender.tab?.id) keepMoves(msg, sender.tab.id);
     return;
   }
 

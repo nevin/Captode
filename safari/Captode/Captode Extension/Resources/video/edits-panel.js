@@ -3,12 +3,13 @@
 // timeline and an item in the list; boxes and arrows are drawn on the picture. The
 // drawing and timing live in lib/video-edits.js, shared with the export.
 import {
-  normaliseEdits, editId, clipMap, composer, calloutBox, RATES, CALLOUT_COLOURS, CALLOUT_KINDS, ASPECTS,
+  normaliseEdits, editId, clipMap, composer, calloutBox, RATES, CALLOUT_COLOURS, CALLOUT_KINDS, ASPECTS, LAYER_POSITIONS, CAPTION_FONTS, layerBox,
+  parseSubtitles, matchSubtitles, withoutWords,
 } from '../lib/video-edits.js';
 import { findSilences } from '../lib/audio-levels.js';
 import { toast } from '../lib/ui.js';
 import { t } from '../lib/i18n.js';
-import { canTranslate, languageOptions, translateAll, translateError, languageName } from '../lib/translate.js';
+import { canTranslate, languageOptions, languageChoices, translateAll, translateError, languageName } from '../lib/translate.js';
 
 const $ = (s) => document.querySelector(s);
 const EDGE_PX = 7; // how near a bar's ends a press resizes it
@@ -23,6 +24,7 @@ const KINDS = {
   callouts: { colour: '#30a46c', key: 'c', len: 3 },
   mutes: { colour: '#64748b', key: 'm', len: 2 },
   captions: { colour: '#0ea5e9', key: 't', len: 3 },
+  layers: { colour: '#d6409f', key: null, len: 5 }, // added from the Clips section, with its video
 };
 const SPATIAL = new Set(['zooms', 'blurs', 'callouts']);
 const name = (kind) => t(`edit_kind_${kind}`);
@@ -32,7 +34,8 @@ const name = (kind) => t(`edit_kind_${kind}`);
  *   player, edits (as saved, or none), meta, duration(), trim() → { start, end },
  *   fmtTime(s), changed() after any change, save(edits), busy(), seek(t),
  *   levels() → the sound's loudness (lib/audio-levels.js) or null,
- *   saveDefault(part, value): new recordings start with this background or sound
+ *   saveDefault(part, value): new recordings start with this background or sound,
+ *   addLayer(): asks for a video to lay over the picture
  * }
  */
 export function mountEdits(opts) {
@@ -52,10 +55,11 @@ export function mountEdits(opts) {
   /** Makes a change: `fn` changes the edits; it can be undone. */
   // Changes in a row to the same thing (typing a caption, moving a slider) are undone
   // together, rather than a letter or a step at a time.
+  // Each step kept is { s (the edits before it, as JSON), label (what it changed), at }.
   let group = null, groupAt = 0;
-  function pushUndo(before, key = null) {
+  function pushUndo(before, key = null, label = '') {
     const now = Date.now();
-    if (!(key && key === group && now - groupAt < 1500)) { undo.push(before); if (undo.length > 100) undo.shift(); }
+    if (!(key && key === group && now - groupAt < 1500)) { undo.push({ s: before, label, at: now }); if (undo.length > 100) undo.shift(); }
     redo.length = 0;
     group = key;
     groupAt = now;
@@ -65,7 +69,7 @@ export function mountEdits(opts) {
     const before = snapshot();
     fn(edits);
     if (snapshot() === before) return;
-    if (history) pushUndo(before, key);
+    if (history) pushUndo(before, key, describeChange(JSON.parse(before), edits));
     after(quiet);
   }
   let saveTimer = 0;
@@ -85,19 +89,97 @@ export function mountEdits(opts) {
   }
   addEventListener('pagehide', flush);
   document.addEventListener('visibilitychange', () => { if (document.hidden) flush(); });
-  function restore(from, to) {
+  function restore(from, to, steps = 1) {
     if (!from.length || opts.busy()) return;
     group = null;
-    to.push(snapshot());
-    edits = normaliseEdits(JSON.parse(from.pop()));
+    for (let i = 0; i < steps && from.length; i++) {
+      const step = from.pop();
+      to.push({ s: snapshot(), label: step.label, at: step.at });
+      edits = normaliseEdits(JSON.parse(step.s));
+    }
     after();
   }
 
+  // ---------- history: every step, to go back (or forward) several at once ----------
+
+  const NAMES = {
+    cuts: 'edit_kind_cuts', speeds: 'edit_kind_speeds', zooms: 'edit_kind_zooms', blurs: 'edit_kind_blurs', callouts: 'edit_kind_callouts',
+    captions: 'edit_kind_captions', layers: 'edit_kind_layers', chapters: 'chapters_title',
+  };
+  /** What a change did, in a few words: "Cut added", "Zoom changed", "Several changes". */
+  function describeChange(a, b) {
+    const said = [];
+    const lists = { ...NAMES, mutes: 'edit_kind_mutes' };
+    for (const [kind, key] of Object.entries(lists)) {
+      const x = kind === 'mutes' ? a.audio?.mutes || [] : a[kind] || [], y = kind === 'mutes' ? b.audio.mutes : b[kind] || [];
+      const before = new Map(x.map((e) => [e.id, JSON.stringify(e)])), after = new Map(y.map((e) => [e.id, JSON.stringify(e)]));
+      let name = t(key);
+      if (kind === 'layers') {
+        const all = [...x, ...y];
+        if (all.length && all.every((l) => l.kind === 'sound')) name = t('vo_label');
+      }
+      const added = [...after.keys()].filter((id) => !before.has(id)).length;
+      const removed = [...before.keys()].filter((id) => !after.has(id)).length;
+      const changed = [...after.keys()].filter((id) => before.has(id) && before.get(id) !== after.get(id)).length;
+      const n = (k) => (k > 1 ? ` (${k})` : '');
+      if (added) said.push(t('hist_added', name + n(added)));
+      if (removed) said.push(t('hist_removed', name + n(removed)));
+      if (changed && !added && !removed) said.push(t('hist_changed', name + n(changed)));
+    }
+    const { mutes: m1, ...audioA } = a.audio || {}, { mutes: m2, ...audioB } = b.audio;
+    const parts = [['crop', 'edit_crop'], ['background', 'edit_background'], ['captionStyle', 'cap_style'], ['music', 'music_title'], ['rings', 'edit_rings'], ['subtitleTracks', 'subs_title']];
+    for (const [k, key] of parts) if (JSON.stringify(a[k] ?? null) !== JSON.stringify(b[k] ?? null)) said.push(t('hist_changed', t(key)));
+    if (JSON.stringify(audioA) !== JSON.stringify(audioB)) said.push(t('hist_changed', t('edit_sound')));
+    if (!said.length) return t('hist_edit');
+    return said.length > 2 ? t('hist_several') : said.join(' · ');
+  }
+
+  const ago = (at) => {
+    const s = Math.round((Date.now() - at) / 1000);
+    return s < 60 ? t('hist_seconds', String(Math.max(1, s))) : t('hist_minutes', String(Math.round(s / 60)));
+  };
+  /**
+   * The history, newest first: steps undone (faded, to redo), the steps made (the newest
+   * is where things are now), and the start. Choosing one goes to just after it.
+   */
+  function renderHistory() {
+    const el = $('#ed-hist');
+    if (!el || el.classList.contains('hidden')) return;
+    const rows = [];
+    redo.forEach((step, i) => rows.push({ label: step.label, at: step.at, go: () => restore(redo, undo, redo.length - i), future: true }));
+    for (let i = undo.length - 1; i >= 0; i--) {
+      const step = undo[i], back = undo.length - 1 - i;
+      rows.push({ label: step.label, at: step.at, now: back === 0, go: back ? () => restore(undo, redo, back) : null });
+    }
+    rows.push({ label: t('hist_start'), now: !undo.length, go: undo.length ? () => restore(undo, redo, undo.length) : null });
+    const list = el.querySelector('.hist-list');
+    list.replaceChildren(...rows.map((r) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = `hist-row${r.now ? ' now' : ''}${r.future ? ' future' : ''}`;
+      b.disabled = !!r.now;
+      if (r.now) b.setAttribute('aria-current', 'step');
+      b.innerHTML = '<span></span><small class="muted"></small>';
+      b.firstChild.textContent = r.label;
+      if (r.at) b.lastChild.textContent = ago(r.at);
+      if (r.go) b.addEventListener('click', () => { r.go(); renderHistory(); });
+      return b;
+    }));
+    el.querySelector('.hist-empty').classList.toggle('hidden', undo.length + redo.length > 0);
+  }
+  $('#ed-hist-open').addEventListener('click', () => {
+    const el = $('#ed-hist');
+    const open = el.classList.toggle('hidden') === false;
+    $('#ed-hist-open').setAttribute('aria-expanded', String(open));
+    if (open) { $('#edit-section').open = true; renderHistory(); el.querySelector('.hist-row:not(:disabled)')?.focus(); }
+  });
+
   // ---------- adding ----------
 
-  function add(kind, fields = {}) {
+  function add(kind, { len: wanted, ...fields } = {}) {
     if (kind === 'mutes' && !opts.meta.hasAudio) { toast(t('edit_no_sound')); return null; }
-    const len = KINDS[kind].len;
+    if (kind === 'layers' && !fields.src && fields.kind !== 'text') { opts.addLayer?.(); return null; }
+    const len = wanted || KINDS[kind].len;
     // Right after a drag across the timeline, the edit covers the part dragged across
     // (and the trim goes back to what it was); otherwise it starts at the playhead.
     const picked = opts.takePicked?.();
@@ -212,12 +294,28 @@ export function mountEdits(opts) {
     if (!x || x.whole || at < x.from + 0.1 || at > x.to - 0.1) return;
     const kind = selected.kind;
     const copy = { ...JSON.parse(JSON.stringify(x)), id: editId(), from: at };
+    if (kind === 'layers') copy.offset = x.offset + at - x.from; // carries on in its video
     change((e) => {
       const l = list(kind, e);
       l.find((y) => y.id === x.id).to = at;
       l.push(copy);
     });
     select(kind, copy.id);
+  }
+
+  /** The caption right after `x` (starting where it ends, or later), if any. */
+  const nextCaption = (x) => edits.captions.filter((c) => c.id !== x.id && c.from >= x.to - 0.05).sort((a, b) => a.from - b.from)[0] || null;
+  /** Joins the chosen caption with the next: one caption over both, its words then theirs. */
+  function joinCaption() {
+    const x = item();
+    const n = x && nextCaption(x);
+    if (!n) return;
+    change((e) => {
+      const a = e.captions.find((c) => c.id === x.id);
+      a.to = n.to;
+      a.text = `${a.text.trim()} ${n.text.trim()}`.trim().slice(0, 300);
+      e.captions = e.captions.filter((c) => c.id !== n.id);
+    });
   }
 
   // ---------- the list and the item's form ----------
@@ -232,6 +330,7 @@ export function mountEdits(opts) {
       blurs: () => t(`edit_blur_${x.mode}`),
       callouts: () => (x.kind === 'text' && x.text.trim() ? `“${x.text.trim().slice(0, 24)}”` : x.kind === 'step' ? `${t('edit_callout_step')} ${x.text.trim() || '1'}` : t(`edit_callout_${x.kind}`)),
       captions: () => (x.text.trim() ? `“${x.text.trim().slice(0, 24)}”` : ''),
+      layers: () => (x.kind === 'sound' ? t('vo_label') : x.kind === 'text' ? `“${(x.text || '').trim().slice(0, 24)}”` : `${x.kind === 'image' ? t('vlayer_picture') : ''}${x.kind === 'image' ? ' · ' : ''}${t(`vlayer_pos_${x.pos}`)}`),
     }[kind]?.() || '';
     return { when, what };
   }
@@ -278,9 +377,14 @@ export function mountEdits(opts) {
     let html = `<div class="ed-head"><span class="ed-dot" style="background:${KINDS[kind].colour}"></span><b>${name(kind)}</b></div>`;
     if (!x.whole) html += `<div class="grid2">${timeField('from', t('edit_from'), x.from)}${timeField('to', t('edit_to'), x.to)}</div>`;
     if (kind === 'blurs' || kind === 'callouts') html += `<label class="toggle"><span>${t('edit_whole_toggle')}</span><input type="checkbox" data-k="whole" ${x.whole ? 'checked' : ''}></label>`;
-    if (kind === 'speeds') html += field(t('edit_speed'), seg('rate', RATES.map((r) => [r, `${r}×`]), x.rate)) + `<p class="muted small">${t('edit_speed_hint')}</p>`;
+    if (kind === 'speeds') {
+      html += field(t('edit_speed'), seg('rate', RATES.map((r) => [r, `${r}×`]), x.rate));
+      html += `<label class="toggle"><span>${t('edit_speed_ease')}</span><input type="checkbox" data-k="ease" ${x.ease ? 'checked' : ''}></label>`;
+      html += `<p class="muted small">${t('edit_speed_hint')}</p>`;
+    }
     if (kind === 'zooms') {
       html += field(`${t('edit_zoom')} <b>${Math.round(x.scale * 10) / 10}×</b>`, `<input type="range" data-k="scale" min="1.1" max="4" step="0.1" value="${x.scale}">`);
+      if (opts.meta.moves?.length || x.follow) html += `<label class="toggle"><span>${t('zoom_follow')}<small>${t('zoom_follow_hint')}</small></span><input type="checkbox" data-k="follow" ${x.follow ? 'checked' : ''}></label>`;
       html += `<p class="muted small">${t('edit_zoom_hint')}</p>`;
     }
     if (kind === 'blurs') {
@@ -302,8 +406,60 @@ export function mountEdits(opts) {
       html += `<label class="field"><span>${t('edit_text')}</span><textarea rows="2" data-k="text" placeholder="${t('edit_caption_placeholder')}"></textarea></label>`;
       html += field(t('edit_size'), seg('size', [[1, 'S'], [2, 'M'], [3, 'L']], x.size));
       html += `<p class="muted small">${t('edit_caption_hint')}</p>`;
+      // How every caption looks.
+      const cs = edits.captionStyle;
+      const on = (k, v) => `role="radio" aria-checked="${String(cs[k]) === String(v)}" class="${String(cs[k]) === String(v) ? 'on' : ''}"`;
+      html += `<div class="ed-cap-style"><b>${t('cap_style')}</b>`;
+      html += field(t('cap_font'), `<div class="seg" data-seg="cs-font" role="radiogroup">${Object.keys(CAPTION_FONTS).map((f) => `<button type="button" data-v="${f}" ${on('font', f)} title="${t(`cap_font_${f}`)}" aria-label="${t(`cap_font_${f}`)}" style="font-family:${CAPTION_FONTS[f].replace(/"/g, "'")}">Aa</button>`).join('')}</div>`);
+      html += field(t('vlayer_text_colour'), `<div class="seg ed-swatches" data-seg="cs-color" role="radiogroup">${['#ffffff', '#000000', '#ffd60a', ...CALLOUT_COLOURS.filter((c) => !/^#(ffffff|000000|ffd60a)$/i.test(c)).slice(0, 4)].map((c) => `<button type="button" data-v="${c}" ${on('color', c)} aria-label="${c}" title="${c}"><span class="ed-swatch" style="background:${c}"></span></button>`).join('')}</div>`);
+      html += field(t('cap_band'), `<div class="seg seg-wrap" data-seg="cs-band" role="radiogroup">${['dark', 'light', 'outline', 'none'].map((b) => `<button type="button" data-v="${b}" ${on('band', b)}>${t(`cap_band_${b}`)}</button>`).join('')}</div>`);
+      html += field(t('cap_place'), `<div class="seg" data-seg="cs-place" role="radiogroup">${['bottom', 'middle', 'top'].map((b) => `<button type="button" data-v="${b}" ${on('place', b)}>${t(`thumb_${b}`)}</button>`).join('')}</div>`);
+      html += `<label class="toggle"><span>${t('cap_highlight')}<small>${t('cap_highlight_hint')}</small></span><input type="checkbox" data-cs="highlight" ${cs.highlight ? 'checked' : ''}></label>`;
+      html += `</div>`;
+      const next = nextCaption(x);
+      html += `<div class="row ed-actions"><button type="button" class="btn" data-join ${next ? '' : 'disabled'} data-tip="${t('cap_join_tip')}">${t('cap_join')}</button>${opts.reviewCaptions ? `<button type="button" class="btn" data-review data-tip="${t('cap_review_tip')}">${t('cap_review')}</button>` : ''}<button type="button" class="btn" data-fillers data-tip="${t('fillers_tip')}">${t('fillers_find')}</button></div>`;
       html += `<div class="row ed-actions"><button type="button" class="btn" data-subs="srt" data-tip="${t('edit_subtitles_tip')}">${t('edit_subtitles_srt')}</button><button type="button" class="btn" data-subs="vtt" data-tip="${t('edit_subtitles_tip')}">${t('edit_subtitles_vtt')}</button></div>`;
       if (canTranslate) html += `<label class="field"><span>${t('translate_captions')}</span><select data-translate>${languageOptions()}</select></label>`;
+      else html += `<p class="muted small">${t('translate_not_here')}</p>`;
+      // Subtitles in the file: the captions, and the same in other languages.
+      html += `<div class="ed-cap-style"><b>${t('subs_title')}</b>`;
+      html += `<label class="toggle"><span>${t('subs_burn')}<small>${t('subs_burn_hint')}</small></span><input type="checkbox" data-cs="burn" ${cs.burn ? 'checked' : ''}></label>`;
+      html += `<label class="toggle"><span>${t('subs_embed')}<small>${t('subs_embed_hint')}</small></span><input type="checkbox" data-cs="embed" ${cs.embed ? 'checked' : ''}></label>`;
+      html += `<label class="field"><span>${t('subs_lang')}</span><select data-sublang="">${languageChoices(cs.lang, t('subs_lang_none'))}</select></label>`;
+      for (const tr of edits.subtitleTracks) {
+        const n = edits.captions.filter((c) => tr.texts[c.id]?.trim()).length;
+        html += `<div class="row sub-track"><select data-sublang="${tr.id}" aria-label="${t('subs_track_lang')}">${languageChoices(tr.lang === 'und' ? '' : tr.lang, t('subs_lang_none'))}</select><span class="muted small">${t('subs_track_count', [String(n), String(edits.captions.length)])}</span><button type="button" class="btn ghost icon" data-subdel="${tr.id}" aria-label="${t('subs_track_remove')}" title="${t('subs_track_remove')}"><svg class="i" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>`;
+      }
+      if (edits.subtitleTracks.length < 8) {
+        html += `<div class="row ed-actions"><button type="button" class="btn" data-subfile data-tip="${t('subs_add_file_tip')}">${t('subs_add_file')}</button></div>`;
+        if (canTranslate) html += `<label class="field"><span>${t('subs_add_translation')}</span><select data-subtranslate>${languageOptions()}</select></label>`;
+      }
+      html += `</div>`;
+    }
+    if (kind === 'layers' && x.kind === 'text') {
+      html += `<label class="field"><span>${t('edit_text')}</span><textarea rows="2" data-k="text" placeholder="${t('vlayer_text_default')}"></textarea></label>`;
+      html += field(t('vlayer_text_colour'), `<div class="seg ed-swatches" data-seg="color" role="radiogroup">${['#ffffff', '#000000', ...CALLOUT_COLOURS.filter((c) => !/^#(ffffff|000000)$/i.test(c)).slice(0, 5)].map((c) => `<button type="button" data-v="${c}" role="radio" aria-checked="${c === x.color}" class="${c === x.color ? 'on' : ''}" aria-label="${c}" title="${c}"><span class="ed-swatch" style="background:${c}"></span></button>`).join('')}</div>`);
+      html += field(t('vlayer_text_bg'), seg('bg', [['dark', t('vlayer_bg_dark')], ['light', t('vlayer_bg_light')], ['none', t('vlayer_bg_none')]], x.bg));
+    }
+    if (kind === 'layers' && x.kind === 'sound') {
+      html += field(`${t('vlayer_volume')} <b>${Math.round(x.volume * 100)}%</b>`, `<input type="range" data-k="volume" min="0" max="2" step="0.05" value="${x.volume}">`);
+      html += field(`${t('vlayer_fade')} <b>${x.fade ? `${x.fade.toFixed(1)} s` : t('video_off')}</b>`, `<input type="range" data-k="fade" min="0" max="3" step="0.1" value="${x.fade}">`);
+      html += `<p class="muted small">${t('vo_hint')}</p>`;
+    } else if (kind === 'layers') {
+      const arrows = { tl: '↖', bl: '↙', c: '●', tr: '↗', br: '↘' }; // left side, middle, right side
+      html += field(t('vlayer_position'), `<div class="seg" data-seg="pos" role="radiogroup">${Object.keys(arrows).filter((p) => LAYER_POSITIONS.includes(p)).map((p) => `<button type="button" data-v="${p}" role="radio" aria-checked="${p === x.pos}" class="${p === x.pos ? 'on' : ''}" aria-label="${t(`vlayer_pos_${p}`)}" title="${t(`vlayer_pos_${p}`)}">${arrows[p]}</button>`).join('')}</div>`);
+      html += field(`${t('edit_size')} <b>${Math.round(x.size * 100)}%</b>`, `<input type="range" data-k="size" min="0.1" max="1" step="0.05" value="${x.size}">`);
+      html += field(t('vlayer_shape'), seg('shape', [['rect', t('vlayer_shape_rect')], ['circle', t('vlayer_shape_circle')]], x.shape));
+      if ((x.kind || 'video') === 'video' && x.sound) html += field(`${t('vlayer_volume')} <b>${Math.round(x.volume * 100)}%</b>`, `<input type="range" data-k="volume" min="0" max="2" step="0.05" value="${x.volume}">`);
+      html += field(`${t('vlayer_opacity')} <b>${Math.round(x.opacity * 100)}%</b>`, `<input type="range" data-k="opacity" min="0.1" max="1" step="0.05" value="${x.opacity}">`);
+      html += field(`${t('vlayer_fade')} <b>${x.fade ? `${x.fade.toFixed(1)} s` : t('video_off')}</b>`, `<input type="range" data-k="fade" min="0" max="3" step="0.1" value="${x.fade}">`);
+      const borders = ['none', '#ffffff', '#000000', ...CALLOUT_COLOURS.filter((c) => !/^#(ffffff|000000)$/i.test(c)).slice(0, 4)];
+      html += field(t('vlayer_border'), `<div class="seg ed-swatches" data-seg="border" role="radiogroup">${borders.map((c) => `<button type="button" data-v="${c}" role="radio" aria-checked="${c === x.border}" class="${c === x.border ? 'on' : ''}" aria-label="${c === 'none' ? t('vlayer_border_none') : c}" title="${c === 'none' ? t('vlayer_border_none') : c}">${c === 'none' ? '∅' : `<span class="ed-swatch" style="background:${c}"></span>`}</button>`).join('')}</div>`);
+      html += `<label class="toggle"><span>${t('vlayer_shadow')}</span><input type="checkbox" data-k="shadow" ${x.shadow ? 'checked' : ''}></label>`;
+      html += `<label class="toggle"><span>${t('vlayer_move')}<small>${t('vlayer_move_hint')}</small></span><input type="checkbox" data-k="move" ${x.move ? 'checked' : ''}></label>`;
+      if (x.move) html += `<div class="row ed-actions"><button type="button" class="btn" data-goto="start">${t('vlayer_go_start')}</button><button type="button" class="btn" data-goto="end">${t('vlayer_go_end')}</button></div>`;
+      if ((x.kind || 'video') === 'video') html += field(t('vlayer_offset'), `<input type="number" data-k="offset" min="0" step="0.1" value="${round(x.offset)}">`);
+      html += `<p class="muted small">${t('vlayer_hint')}</p>`;
     }
     if (kind === 'mutes') html += `<p class="muted small">${t('edit_mute_hint')}</p>`;
     if (kind === 'cuts') html += `<p class="muted small">${t('edit_cut_hint')}</p>`;
@@ -323,22 +479,38 @@ export function mountEdits(opts) {
     change((e) => {
       const x = list(kind, e).find((y) => y.id === id);
       if (!x) return;
-      if (k === 'from') { x.from = Math.max(0, Math.min(v, x.to - 0.1)); }
+      if (k === 'from') {
+        const from = Math.max(0, Math.min(v, x.to - 0.1));
+        if (kind === 'layers') x.offset = Math.max(0, x.offset + from - x.from); // its picture stays where it was in time
+        x.from = from;
+      }
       else if (k === 'to') { x.to = Math.min(opts.duration(), Math.max(v, x.from + 0.1)); }
       else x[k] = v;
     }, { ...opt, group: opt?.quiet ? `${id}:${k}` : null });
   };
   form.addEventListener('input', (e) => {
+    if (e.target.dataset.cs) { const k = e.target.dataset.cs; change((x) => { x.captionStyle[k] = e.target.checked; }); return; }
     const k = e.target.dataset.k;
     if (!k) return;
+    if (k === 'move') return setMove(e.target.checked);
     if (e.target.type === 'checkbox') return setField(k, e.target.checked);
     if (e.target.tagName === 'TEXTAREA') return setField(k, e.target.value, { quiet: true });
     if (e.target.type === 'range') return setField(k, Number(e.target.value), { quiet: true });
   });
   form.addEventListener('change', (e) => {
     if (e.target.matches('[data-translate]')) { translateCaptions(e.target); return; }
+    if (e.target.matches('[data-subtranslate]')) { translateTrack(e.target); return; }
+    if (e.target.dataset.sublang !== undefined) {
+      const id = e.target.dataset.sublang, lang = e.target.value;
+      change((x) => {
+        if (!id) x.captionStyle.lang = lang;
+        else { const tr = x.subtitleTracks.find((y) => y.id === id); if (tr) tr.lang = lang || 'und'; }
+      });
+      return;
+    }
     const k = e.target.dataset.k;
     if (k === 'from' || k === 'to') setField(k, Number(e.target.value) || 0);
+    if (k === 'offset') setField(k, Math.max(0, Number(e.target.value) || 0));
     if (e.target.type === 'range') renderForm(); // the value in the label
   });
   form.addEventListener('click', (e) => {
@@ -349,7 +521,18 @@ export function mountEdits(opts) {
     if (b.dataset.now) return setField(b.dataset.now, round(player.currentTime));
     if (b.dataset.colour) return setField('color', b.dataset.colour);
     if (b.dataset.subs) return opts.downloadSubtitles?.(b.dataset.subs);
+    if (b.dataset.subdel) return change((x) => { x.subtitleTracks = x.subtitleTracks.filter((y) => y.id !== b.dataset.subdel); });
+    if (b.dataset.subfile !== undefined) return addTrackFile();
+    if (b.dataset.goto) { const x = item(); if (x) opts.seek(b.dataset.goto === 'end' ? Math.max(x.from, x.to - 0.05) : x.from + 0.01); return; }
+    if (b.dataset.join !== undefined) return joinCaption();
+    if (b.dataset.review !== undefined) return opts.reviewCaptions?.();
+    if (b.dataset.fillers !== undefined) return opts.findFillers?.();
     const s = b.closest('[data-seg]');
+    if (s?.dataset.seg.startsWith('cs-') && b.dataset.v !== undefined) {
+      const k = s.dataset.seg.slice(3);
+      change((e) => { e.captionStyle[k] = b.dataset.v; });
+      return;
+    }
     if (s && b.dataset.v !== undefined) {
       const v = s.dataset.seg === 'rate' || s.dataset.seg === 'size' ? Number(b.dataset.v) : b.dataset.v;
       // A new step takes the next number.
@@ -359,6 +542,60 @@ export function mountEdits(opts) {
       setField(s.dataset.seg, v);
     }
   });
+
+  /** Turns a layer's movement on (ending where it is now, to be dragged at its end) or off. */
+  function setMove(on) {
+    const id = selected?.id;
+    const W = player.videoWidth || 1920, H = player.videoHeight || 1080;
+    change((e) => {
+      const l = e.layers.find((y) => y.id === id);
+      if (!l) return;
+      if (!on) { delete l.move; delete l.x2; delete l.y2; delete l.size2; return; }
+      const b = layerBox({ ...l, move: false }, W, H);
+      Object.assign(l, { move: true, x2: (b.x + b.w / 2) / W, y2: (b.y + b.h / 2) / H, size2: l.size });
+    });
+    const x = item();
+    if (on && x) { opts.seek(Math.max(x.from, x.to - 0.05)); toast(t('vlayer_move_now'), { ms: 5000 }); }
+  }
+
+  /** A subtitle language from an SRT or WebVTT file (these captions, translated elsewhere, say). */
+  function addTrackFile() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.srt,.vtt,text/vtt,application/x-subrip';
+    input.addEventListener('change', async () => {
+      const f = input.files?.[0];
+      if (!f) return;
+      let texts = {};
+      try { texts = matchSubtitles(opts.cues?.() || [], parseSubtitles(await f.text())); } catch { /* not text */ }
+      if (!Object.keys(texts).length) { toast(t('subs_file_failed'), { kind: 'error', ms: 6000 }); return; }
+      // The language, when the file's name says it (talk.fr.srt).
+      const lang = /[._-]([a-z]{2,3}(?:-[A-Za-z]{2,4})?)\.(srt|vtt)$/i.exec(f.name)?.[1] || 'und';
+      change((x) => { x.subtitleTracks.push({ id: editId(), lang: /^[a-z]{2,3}(-[A-Za-z]{2,4})?$/.test(lang) ? lang : 'und', texts }); });
+      toast(t('subs_file_added', String(Object.keys(texts).length)), { kind: 'success' });
+    });
+    input.click();
+  }
+
+  /** The captions in another language, kept beside them as a subtitle language. */
+  async function translateTrack(select) {
+    const target = select.value;
+    if (!target) return;
+    select.disabled = true;
+    const list = edits.captions.filter((c) => c.text.trim());
+    toast(t('translate_working'), { ms: 3000 });
+    try {
+      const out = await translateAll(list.map((c) => c.text), target, (f) => toast(t('translate_download', String(Math.round(f * 100))), { ms: 2000 }));
+      const texts = Object.fromEntries(list.map((c, i) => [c.id, String(out[i] ?? '').slice(0, 300)]));
+      change((e) => { e.subtitleTracks = [...e.subtitleTracks.filter((y) => y.lang !== target), { id: editId(), lang: target, texts }]; });
+      toast(t('subs_translated', languageName(target)), { kind: 'success' });
+    } catch (err) {
+      toast(translateError(err), { kind: 'error', ms: 6000 });
+    } finally {
+      select.value = '';
+      select.disabled = false;
+    }
+  }
 
   /** Every caption into the language chosen in `select`, as one change that can be undone. */
   async function translateCaptions(select) {
@@ -453,7 +690,7 @@ export function mountEdits(opts) {
     const mode = e.clientX - r.left < edge ? 'from' : r.right - e.clientX < edge ? 'to' : 'move';
     const track = $('#track').getBoundingClientRect();
     const timeAt = (cx) => ((cx - track.left) / track.width) * opts.duration();
-    const t0 = timeAt(e.clientX), from = x.from, to = x.to;
+    const t0 = timeAt(e.clientX), from = x.from, to = x.to, offset = x.offset;
     const before = snapshot();
     bar.setPointerCapture(e.pointerId);
     const move = (ev) => {
@@ -461,7 +698,10 @@ export function mountEdits(opts) {
       const D = opts.duration();
       const target = list(kind).find((y) => y.id === id);
       if (!target) return;
-      if (mode === 'from') target.from = round(Math.max(0, Math.min(from + d, to - 0.1)));
+      if (mode === 'from') {
+        target.from = round(Math.max(0, Math.min(from + d, to - 0.1)));
+        if (kind === 'layers') target.offset = Math.max(0, offset + target.from - from);
+      }
       else if (mode === 'to') target.to = round(Math.min(D, Math.max(to + d, from + 0.1)));
       else { const len = to - from; target.from = round(Math.max(0, Math.min(D - len, from + d))); target.to = round(target.from + len); }
       opts.seek(mode === 'to' ? target.to : target.from);
@@ -472,7 +712,7 @@ export function mountEdits(opts) {
       bar.removeEventListener('pointermove', move);
       bar.removeEventListener('pointerup', up);
       bar.removeEventListener('pointercancel', up);
-      if (snapshot() !== before) { pushUndo(before); after(); }
+      if (snapshot() !== before) { pushUndo(before, null, describeChange(JSON.parse(before), edits)); after(); }
     };
     bar.addEventListener('pointermove', move);
     bar.addEventListener('pointerup', up);
@@ -704,7 +944,7 @@ export function mountEdits(opts) {
       layer.removeEventListener('pointermove', move);
       layer.removeEventListener('pointerup', up);
       layer.removeEventListener('pointercancel', up);
-      if (snapshot() !== before) { pushUndo(before); edits = normaliseEdits(edits); after(); }
+      if (snapshot() !== before) { pushUndo(before, null, describeChange(JSON.parse(before), edits)); edits = normaliseEdits(edits); after(); }
     };
     layer.addEventListener('pointermove', move);
     layer.addEventListener('pointerup', up);
@@ -741,8 +981,12 @@ export function mountEdits(opts) {
     $('#au-volume-v').textContent = `${Math.round(a.volume * 100)}%`;
     $('#au-fade-in').value = String(a.fadeIn);
     $('#au-fade-out').value = String(a.fadeOut);
+    $('#au-clean').checked = a.clean;
+    $('#au-level').checked = a.level;
+    for (const id of ['#au-clean-row', '#au-level-row']) $(id).classList.toggle('hidden', !opts.meta.hasAudio);
     const clicks = !!opts.meta.clicks?.length;
     $('#ed-autozoom').classList.toggle('hidden', !clicks);
+    $('#ed-follow').classList.toggle('hidden', !opts.meta.moves?.length);
     $('#ed-silence').classList.toggle('hidden', !opts.meta.hasAudio);
     $('#ed-silence').disabled = !opts.levels?.();
     $('#ed-mark span').textContent = mark === null ? t('edit_mark') : t('edit_mark_end');
@@ -815,9 +1059,23 @@ export function mountEdits(opts) {
 
   $('#ed-add').addEventListener('click', (e) => {
     const kind = e.target.closest('[data-add]')?.dataset.add;
-    if (kind) add(kind);
+    if (kind === 'textlayer') {
+      // Words over the picture, in the middle to start with, as long as a caption.
+      add('layers', { kind: 'text', text: t('vlayer_text_default'), color: '#ffffff', bg: 'dark', border: 'none', shadow: true, size: 0.45, pos: 'c', shape: 'rect', aspect: 3, len: 3 });
+    } else if (kind) add(kind);
   });
   $('#ed-autozoom').addEventListener('click', zoomOnClicks);
+  // One zoom over the kept part that follows the pointer.
+  $('#ed-follow').addEventListener('click', () => {
+    const { start, end } = opts.trim();
+    $('#edit-section').open = true;
+    const x = { id: editId(), from: round(start), to: round(end), x: 0.5, y: 0.5, scale: 1.6, auto: false, follow: true };
+    change((e) => { e.zooms = [...e.zooms.filter((z) => !z.follow), x]; });
+    select('zooms', x.id);
+    toast(t('zoom_follow_added'), { kind: 'success' });
+  });
+  $('#au-clean').addEventListener('change', (e) => change((x) => { x.audio.clean = e.target.checked; }));
+  $('#au-level').addEventListener('change', (e) => change((x) => { x.audio.level = e.target.checked; }));
   $('#ed-silence').addEventListener('click', cutSilences);
   $('#ed-mark').addEventListener('click', markCut);
   $('#ed-undo').addEventListener('click', () => restore(undo, redo));
@@ -836,6 +1094,8 @@ export function mountEdits(opts) {
     const kind = Object.keys(KINDS).find((x) => KINDS[x].key === k);
     if (kind) { e.preventDefault(); $('#edit-section').open = true; add(kind); return; }
     if ((k === 'delete' || k === 'backspace') && selected) { e.preventDefault(); remove(selected.kind, selected.id); return; }
+    // Enter splits the chosen edit at the playhead (not while a button has the focus).
+    if (k === 'enter' && selected && !e.target.closest('button, a, summary')) { e.preventDefault(); split(); return; }
     if (k === 'escape' && (selected || cropping || mark !== null)) { selected = null; cropping = false; mark = null; render(); }
   });
   addEventListener('resize', () => drawLayer(true));
@@ -848,14 +1108,16 @@ export function mountEdits(opts) {
     renderSettings();
     $('#ed-undo').disabled = !undo.length;
     $('#ed-redo').disabled = !redo.length;
+    $('#ed-hist-open').disabled = !undo.length && !redo.length;
+    renderHistory();
     drawLayer(true);
   }
 
   render();
   return {
     get: () => edits,
-    /** Adds an edit of `kind` (as its button does). */
-    add: (kind) => add(kind),
+    /** Adds an edit of `kind` (as its button does), with any `fields` given. */
+    add: (kind, fields) => add(kind, fields),
     /** Where each moment of the kept part plays. */
     map: () => { const { start, end } = opts.trim(); return clipMap(edits, start, end); },
     editing,
@@ -872,6 +1134,59 @@ export function mountEdits(opts) {
     soundReady: () => renderSettings(),
     /** After the recording's size is known. */
     ready: () => render(),
+    /** Changes the music (null: none); it can be undone. `quiet`: a slider moving. */
+    setMusic: (m, quiet = false) => change((e) => { e.music = m ? { ...(e.music || {}), ...m } : null; }, { quiet, group: quiet ? 'music' : null }),
+    /** Changes a caption's words (`quiet`: typing, undone as one step). */
+    setCaption: (id, patch, quiet = false) => change((e) => { const c = e.captions.find((x) => x.id === id); if (c) Object.assign(c, patch); }, { quiet, group: quiet ? `${id}:review` : null }),
+    /** Chooses a caption, as clicking it does. */
+    chooseCaption: (id) => select('captions', id),
+    /** Adds captions ([{ from, to, text }]) in one step to undo. */
+    addCaptions: (list) => change((e) => { for (const c of list) e.captions.push({ id: editId(), from: c.from, to: c.to, text: String(c.text).slice(0, 300), size: 2 }); }),
+    /** Puts `list` in place of the chapters; it can be undone. */
+    setChapters: (list, quiet = false) => change((e) => { e.chapters = list; }, { quiet, group: quiet ? 'chapters' : null }),
+    /** Changes the background (for a platform's shape); it can be undone. */
+    setBackground: (patch) => change((e) => { Object.assign(e.background, patch); }),
+    /** Adds a zoom at each recorded click, as Zoom in on clicks does. */
+    zoomOnClicks: () => zoomOnClicks(),
+    /** Chooses an edit, as clicking it in the list does. */
+    choose: (kind, id) => select(kind, id),
+    /** Puts a brand kit's look on the video: how captions look, and the background (not its shape). */
+    setLook(look) {
+      const n = normaliseEdits({ captionStyle: look?.captionStyle || {}, background: look?.background || {} });
+      change((e) => {
+        if (look?.captionStyle) for (const k of ['font', 'color', 'band', 'place', 'highlight', 'hcolor']) e.captionStyle[k] = n.captionStyle[k];
+        if (look?.background) Object.assign(e.background, { ...n.background, aspect: e.background.aspect });
+      });
+    },
+    /** Changes how every caption looks (it can be undone). */
+    setCaptionStyle: (patch) => change((e) => { Object.assign(e.captionStyle, patch); }),
+    /** Turns the rings at clicks on or off. */
+    setRings: (on) => change((e) => { e.rings.on = on; }),
+    /** Adds layers (voiceover pieces, say) as one change that can be undone. */
+    addLayers(list) {
+      const made = list.map((f) => ({ id: editId(), ...f }));
+      change((e) => { e.layers.push(...made); });
+      if (made[0]) select('layers', made[0].id);
+      return made;
+    },
+    /**
+     * Cuts out filler words: `cuts` [{ from, to }] and `words` { [caption id]: Set of word
+     * numbers } taken out of the captions, as one change that can be undone.
+     */
+    cutFillers(cuts, words) {
+      change((e) => {
+        for (const c of cuts) e.cuts.push({ id: editId(), from: round(c.from), to: round(c.to) });
+        for (const c of e.captions) if (words[c.id]) c.text = withoutWords(c.text, words[c.id]);
+        e.captions = e.captions.filter((c) => c.text.trim());
+      });
+    },
+    /** The chosen edit, when it is one of `kind`. */
+    chosen: (kind) => (selected?.kind === kind ? item() : null),
+    /** Changes a layer as it is dragged on the picture: one step to undo; `done` shows the form again. */
+    placeLayer(id, fields, done = false) {
+      if (done) { renderForm(); return; }
+      change((e) => { const l = e.layers.find((y) => y.id === id); if (l) Object.assign(l, fields); }, { quiet: true, group: `${id}:place` });
+    },
     /** Puts `raw` in place of the edits (it can be undone). */
     replace: (raw) => change((e) => { Object.assign(e, normaliseEdits(raw)); }),
   };

@@ -6,6 +6,7 @@ import { THEMES, STYLE_KEYS, newSlide, drawSlide, slideImages, loadFontFile, isO
 import { mountPresets } from '../lib/presets.js';
 import { toast } from '../lib/ui.js';
 import { t } from '../lib/i18n.js';
+import { blobToDataUrl } from '../lib/util.js';
 
 const $ = (s) => document.querySelector(s);
 const STYLE_STORE = 'slideStyle';
@@ -567,11 +568,15 @@ export function mountSlides(opts) {
       label: t('slides_kit'), custom: t('slides_kit_none'), yours: t('slides_kit_yours'), saveCurrent: t('slides_kit_save'),
       placeholder: t('slides_kit_name'), name: t('slides_kit_name'), delete: t('slides_kit_delete'), deleted: (n) => t('slides_kit_deleted', n),
     },
+    // With the video's look: how captions look and the background around the picture.
     capture: async () => {
       const s = sel();
-      return { style: await portable(Object.fromEntries(STYLE_KEYS.map((k) => [k, s?.[k] ?? null])), { maxBlob: 3e6 }) };
+      return { style: await portable(Object.fromEntries(STYLE_KEYS.map((k) => [k, s?.[k] ?? null])), { maxBlob: 3e6 }), look: opts.look?.() || null };
     },
-    apply: async (p) => { if (sel()) update(await cleanFields(p.style)); },
+    apply: async (p) => {
+      if (sel()) update(await cleanFields(p.style));
+      if (p.look) opts.setLook?.(p.look);
+    },
   }).then((k) => { kits = k; });
 
   // ---------- slides to and from a file ----------
@@ -857,6 +862,24 @@ export function mountSlides(opts) {
   }
 
   $('#slide-add').addEventListener('click', () => add());
+
+  /** A title slide where the kept part starts and a closing one where it ends, in the current style. */
+  function addBookends() {
+    if (opts.busy()) return;
+    const { start, end } = opts.trim();
+    const from = sel() || byTime().at(-1);
+    const style = from ? Object.fromEntries(STYLE_KEYS.map((k) => [k, from[k]])) : remembered || {};
+    const at = (x) => Math.round(Math.max(0, Math.min(opts.duration(), x)) * 10) / 10;
+    const intro = newSlide(at(start), { ...style, title: opts.title?.() || '' });
+    const outro = newSlide(at(end), { ...style, title: t('slides_outro_default') });
+    slides.push(intro, outro);
+    $('#slides-section').open = true;
+    renderList();
+    select(intro.id);
+    changed();
+    toast(t('slides_bookends_added'), { kind: 'success' });
+  }
+  $('#slide-bookends').addEventListener('click', addBookends);
   $('#sl-del').addEventListener('click', () => remove());
   $('#sl-dup').addEventListener('click', () => {
     const s = sel();
@@ -915,9 +938,9 @@ export function mountSlides(opts) {
       try {
         const style = Object.fromEntries(STYLE_KEYS.filter((k) => k !== 'bgImage' && k !== 'logo' && k !== 'fontFile').map((k) => [k, s[k]]));
         // So does a font file of the user's own, on the same terms.
-        style.fontFile = s.fontFile && s.fontFile.size < 1.5e6 ? await dataUrl(s.fontFile) : null;
+        style.fontFile = s.fontFile && s.fontFile.size < 1.5e6 ? await blobToDataUrl(s.fontFile) : null;
         // The logo goes along when it is small enough to keep in settings.
-        style.logo = s.logo && s.logo.size < 1.5e6 ? await dataUrl(s.logo) : null;
+        style.logo = s.logo && s.logo.size < 1.5e6 ? await blobToDataUrl(s.logo) : null;
         remembered = { ...style, logo: s.logo, fontFile: s.fontFile, bgImage: null };
         syncForget();
         await chrome.storage.local.set({ [STYLE_STORE]: style });
@@ -930,9 +953,24 @@ export function mountSlides(opts) {
   // Closed until there are slides, so trimming and exporting stay close at hand.
   $('#slides-section').open = slides.length > 0;
   renderList();
+  /** Holds `picture` (the frame at `at`, as exported) on screen for `duration` s: a slide of it alone. */
+  function addFreeze(at, picture, duration = 2) {
+    if (opts.busy()) return;
+    const s = newSlide(Math.round(Math.max(0, Math.min(opts.duration(), at)) * 1000) / 1000, {
+      bgKind: 'image', bgImage: picture, bgDim: 0, band: false, fade: false, logo: null, picture: null, duration,
+    });
+    slides.push(s);
+    $('#slides-section').open = true;
+    renderList();
+    select(s.id);
+    changed();
+  }
+
   return {
     all: () => slides,
     add,
+    addFreeze,
+    bookends: addBookends,
     skip,
     hide,
     showing: () => !!shown,
@@ -960,15 +998,6 @@ export function mountSlides(opts) {
 
 function formatSeconds(n) {
   return Number.isInteger(n) ? String(n) : n.toFixed(1);
-}
-
-function dataUrl(blob) {
-  return new Promise((resolve, reject) => {
-    const r = new FileReader();
-    r.onload = () => resolve(r.result);
-    r.onerror = () => reject(r.error);
-    r.readAsDataURL(blob);
-  });
 }
 
 /**

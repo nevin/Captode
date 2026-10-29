@@ -41,6 +41,19 @@ export function toast(message, { kind = 'info', ms = 2600, action = null } = {})
   timer = setTimeout(() => region.classList.add('hidden'), ms);
 }
 
+let quiet = null;
+/** Tells screen readers `message` without showing anything. */
+export function announce(message) {
+  if (!quiet) {
+    quiet = document.createElement('div');
+    quiet.className = 'sr-only';
+    quiet.setAttribute('aria-live', 'polite');
+    document.body.appendChild(quiet);
+  }
+  quiet.textContent = '';
+  setTimeout(() => { quiet.textContent = message; }, 30);
+}
+
 /**
  * Gives icon-only buttons with a tooltip an accessible name, and wires a
  * `.tabs` bar to the panes it controls with the ARIA tab pattern.
@@ -204,4 +217,17 @@ export async function shareFile(blob, name) {
     if (e?.name !== 'AbortError') throw e;
   }
   return true;
+}
+
+/**
+ * Whether this browser has room to keep about `bytes` more (with some to spare);
+ * true when it can't tell.
+ */
+export async function hasRoom(bytes) {
+  try {
+    const { usage = 0, quota = 0 } = await navigator.storage.estimate();
+    return !quota || quota - usage > bytes * 1.2 + 50e6;
+  } catch {
+    return true;
+  }
 }

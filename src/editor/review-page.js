@@ -3,11 +3,11 @@
 // open (no server, no account), so it can be attached to a ticket or sent in chat.
 
 import { t } from '../lib/i18n.js';
+import { esc } from '../lib/util.js';
 
 /** The language the page is written in. */
 const lang = () => { try { return chrome.i18n.getUILanguage(); } catch { return 'en'; } };
 
-const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
 /**
  * `image`: a data: URL. `steps`: [{ n, x, y (fractions of the image), color, note }].

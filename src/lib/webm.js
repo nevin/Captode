@@ -1,6 +1,8 @@
 // WebM (Matroska) reading and writing: enough to take apart the files MediaRecorder
 // makes and to write new ones from WebCodecs output.
 
+import { iso639 } from './langs.js';
+
 // ---------- reading ----------
 
 const ID = {
@@ -119,7 +121,10 @@ export function demuxWebm(buffer, { views = false } = {}) {
   for (const t of tracks.values()) {
     const codec = CODECS[t.codecId];
     if (t.type === 1 && !out.video) {
-      out.video = { codec, codecId: t.codecId, width: t.width, height: t.height, description: t.private, frames: t.frames };
+      // Its colour tag, kept so a copy of the frames is read the same way (Chrome stalls
+      // seeking full-range video that isn't tagged as such).
+      const colour = t.colour && { primaries: t.colour.primaries, transfer: t.colour.transfer, matrix: t.colour.matrix, fullRange: t.colour.range === 2, range: t.colour.range };
+      out.video = { codec, codecId: t.codecId, width: t.width, height: t.height, description: t.private, frames: t.frames, ...(colour && { colour }) };
     } else if (t.type === 2 && !out.audio) {
       out.audio = { codec, codecId: t.codecId, sampleRate: t.sampleRate, channels: t.channels, description: t.private, frames: t.frames };
     }
@@ -138,7 +143,9 @@ function parseTrackField(t, id, b, p, n) {
     case ID.CodecID: t.codecId = readStr(b, p, n); break;
     case ID.CodecPrivate: t.private = b.slice(p, p + n); break;
     case ID.Video:
+    case ID.Colour:
     case ID.Audio: {
+      if (id === ID.Colour) t.colour = { matrix: 2, transfer: 2, primaries: 2, range: 0 }; // "unspecified" unless said
       let q = p;
       while (q < p + n) {
         const cid = readVint(b, q, true);
@@ -152,6 +159,10 @@ function parseTrackField(t, id, b, p, n) {
     case ID.PixelHeight: t.height = readUint(b, p, n); break;
     case ID.SamplingFrequency: t.sampleRate = readFloat(b, p, n); break;
     case ID.Channels: t.channels = readUint(b, p, n); break;
+    case ID.MatrixCoefficients: if (t.colour) t.colour.matrix = readUint(b, p, n); break;
+    case ID.Range: if (t.colour) t.colour.range = readUint(b, p, n); break;
+    case ID.TransferCharacteristics: if (t.colour) t.colour.transfer = readUint(b, p, n); break;
+    case ID.Primaries: if (t.colour) t.colour.primaries = readUint(b, p, n); break;
     default: break;
   }
 }
@@ -202,22 +213,24 @@ function el(id, body, { float = false, sizeWidth = 0, uintWidth = 0 } = {}) {
 
 /**
  * Builds a WebM file from encoded chunks.
- * `video`: `{ codecId, width, height, frames, colour? }` (colour as for MP4); `audio` (optional):
+ * `video`: `{ codecId, width, height, frames, colour? }` (colour as for MP4), or null for
+ * sound alone; `audio` (optional):
  * `{ codecId, sampleRate, channels, description, frames }`. Frames are
- * `{ timestamp (µs), key, data }` in decode order.
+ * `{ timestamp (µs), key, data }` in decode order. `subtitles` (optional):
+ * `[{ lang, cues: [{ start, end, text }] }]`, each a WebVTT subtitle track.
  */
-export function muxWebm({ video, audio = null }) {
+export function muxWebm({ video, audio = null, chapters = null, subtitles = null }) {
   const ms = (us) => Math.round(us / 1000);
-  const tracks = [
+  const tracks = video ? [
     el(ID.TrackEntry, [
       el(ID.TrackNumber, 1), el(ID.TrackUID, 1), el(ID.TrackType, 1), el(ID.CodecID, video.codecId),
       el(ID.Video, [el(ID.PixelWidth, video.width), el(ID.PixelHeight, video.height),
         ...(video.colour ? [el(ID.Colour, [
-          el(ID.MatrixCoefficients, video.colour.matrix), el(ID.Range, video.colour.fullRange ? 2 : 1),
+          el(ID.MatrixCoefficients, video.colour.matrix), el(ID.Range, video.colour.range ?? (video.colour.fullRange ? 2 : 1)),
           el(ID.TransferCharacteristics, video.colour.transfer), el(ID.Primaries, video.colour.primaries),
         ])] : [])]),
     ]),
-  ];
+  ] : [];
   if (audio) {
     tracks.push(el(ID.TrackEntry, [
       el(ID.TrackNumber, 2), el(ID.TrackUID, 2), el(ID.TrackType, 2), el(ID.CodecID, audio.codecId),
@@ -227,10 +240,24 @@ export function muxWebm({ video, audio = null }) {
     ]));
   }
 
-  // Interleave both tracks by time, and start a new cluster at each video key
+  // Subtitle tracks, from number 3: off unless chosen in the player.
+  const subs = (subtitles || []).filter((x) => x.cues?.length);
+  subs.forEach((x, i) => {
+    tracks.push(el(ID.TrackEntry, [
+      el(ID.TrackNumber, 3 + i), el(ID.TrackUID, 3 + i), el(ID.TrackType, 17), el(ID.CodecID, 'S_TEXT/WEBVTT'),
+      el(0x88, 0), // FlagDefault
+      el(0x22b59c, iso639(x.lang, true)), // Language
+      ...(x.lang && x.lang !== 'und' ? [el(0x22b59d, x.lang)] : []), // LanguageBCP47
+    ]));
+  });
+
+  // Interleave the tracks by time, and start a new cluster at each video key
   // frame (and at least every 5 s, so relative block times fit in 16 bits).
-  const all = video.frames.map((f) => ({ ...f, track: 1 }));
+  const all = video ? video.frames.map((f) => ({ ...f, track: 1 })) : [];
   if (audio) all.push(...audio.frames.map((f) => ({ ...f, key: true, track: 2 })));
+  subs.forEach((x, i) => all.push(...x.cues.filter((c) => c.end > c.start && c.text).map((c) => ({
+    timestamp: Math.round(c.start * 1e6), length: Math.round((c.end - c.start) * 1000), data: enc.encode(c.text), key: true, track: 3 + i, text: true,
+  }))));
   all.sort((a, b) => a.timestamp - b.timestamp || a.track - b.track);
   const clusters = [];
   let cur = null;
@@ -242,6 +269,13 @@ export function muxWebm({ video, audio = null }) {
     }
     // A SimpleBlock's header, then the frame itself: the frames are never copied
     // here (the Blob at the end copies them once), so a long video isn't held twice more.
+    if (f.text) {
+      // A cue: a Block in a BlockGroup, with how long it shows.
+      const block = el(ID.BlockGroup, [el(0xa1, concat([new Uint8Array([0x80 | f.track, ((t - cur.time) >> 8) & 255, (t - cur.time) & 255, 0]), f.data])), el(0x9b, f.length)]);
+      cur.parts.push(block);
+      cur.size += block.length;
+      continue;
+    }
     const head = new Uint8Array([...idBytes(ID.SimpleBlock), ...sizeBytes(4 + f.data.length),
       0x80 | f.track, ((t - cur.time) >> 8) & 255, (t - cur.time) & 255, f.key ? 0x80 : 0]);
     cur.parts.push(head, f.data);
@@ -252,7 +286,7 @@ export function muxWebm({ video, audio = null }) {
     const parts = [new Uint8Array([...idBytes(ID.Cluster), ...sizeBytes(time.length + c.size)]), time, ...c.parts];
     return { parts, length: parts[0].length + time.length + c.size };
   });
-  const last = all.length ? all[all.length - 1] : null;
+  const last = all.filter((f) => !f.text).at(-1) || null;
   const durationMs = last ? ms(last.timestamp + (last.duration || 0)) : 0;
 
   const info = el(ID.Info, [
@@ -260,6 +294,11 @@ export function muxWebm({ video, audio = null }) {
     el(ID.Duration, durationMs, { float: true }),
   ]);
   const tracksEl = el(ID.Tracks, tracks);
+  // Chapters: [{ at (s), title }], shown by players as sections.
+  const chaptersEl = chapters?.length ? el(0x1043a770, [el(0x45b9, chapters.map((c, i) => el(0xb6, [
+    el(0x73c4, i + 1), el(0x91, Math.round(c.at * 1e9)),
+    el(0x80, [el(0x85, String(c.title || `${i + 1}`)), el(0x437c, 'und')]),
+  ])))]) : new Uint8Array(0);
 
   // Cues let players seek straight to key frames. Positions are written at a fixed
   // width so the layout can be worked out before the values are known.
@@ -272,21 +311,21 @@ export function muxWebm({ video, audio = null }) {
     .map(([c, at]) => el(ID.CuePoint, [el(ID.CueTime, c.time),
       el(ID.CueTrackPositions, [el(ID.CueTrack, 1), el(ID.CueClusterPosition, at, { uintWidth: 8 })])]));
   const cuesLen = el(ID.Cues, cueFor(clusters.map(() => 0))).length;
-  const firstCluster = shSize + info.length + tracksEl.length + cuesLen;
+  const firstCluster = shSize + info.length + tracksEl.length + chaptersEl.length + cuesLen;
   const positions = [];
   let at = firstCluster;
   for (const c of clusterBytes) { positions.push(at); at += c.length; }
   const cues = el(ID.Cues, cueFor(positions));
   const seek = (id, pos) => el(ID.Seek, [el(ID.SeekID, new Uint8Array(idBytes(id))), el(ID.SeekPosition, pos, { uintWidth: 8 })]);
   const seekHead = el(ID.SeekHead, [
-    seek(ID.Info, shSize), seek(ID.Tracks, shSize + info.length), seek(ID.Cues, shSize + info.length + tracksEl.length),
+    seek(ID.Info, shSize), seek(ID.Tracks, shSize + info.length), seek(ID.Cues, shSize + info.length + tracksEl.length + chaptersEl.length),
   ]);
 
   const header = el(ID.EBML, [
     el(ID.EBMLVersion, 1), el(ID.EBMLReadVersion, 1), el(ID.EBMLMaxIDLength, 4), el(ID.EBMLMaxSizeLength, 8),
     el(ID.DocType, 'webm'), el(ID.DocTypeVersion, 4), el(ID.DocTypeReadVersion, 2),
   ]);
-  const body = [seekHead, info, tracksEl, cues, ...clusterBytes.flatMap((c) => c.parts)];
+  const body = [seekHead, info, tracksEl, chaptersEl, cues, ...clusterBytes.flatMap((c) => c.parts)];
   const bodyLen = body.reduce((n, a) => n + a.length, 0);
   const segHead = concat([new Uint8Array(idBytes(ID.Segment)), new Uint8Array(sizeBytes(bodyLen, 8))]);
   return new Blob([header, segHead, ...body], { type: audio ? 'video/webm' : 'video/webm' });

@@ -4,6 +4,7 @@
 // browser has no translator (Firefox, Safari, older Chrome), it isn't offered.
 
 import { t } from './i18n.js';
+import { esc } from './util.js';
 
 export const canTranslate = typeof globalThis.Translator?.create === 'function';
 
@@ -14,8 +15,17 @@ export function languageOptions() {
   let names = null;
   try { names = new Intl.DisplayNames([navigator.language], { type: 'language' }); } catch {}
   const list = LANGS.map((code) => [code, names?.of(code) || code]).sort((a, b) => a[1].localeCompare(b[1]));
-  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   return `<option value="">${esc(t('translate_into'))}</option>${list.map(([c, n]) => `<option value="${c}">${esc(n)}</option>`).join('')}`;
+}
+
+/**
+ * `<option>`s for choosing the language something is in, `value` chosen; the first,
+ * `none`, for not saying.
+ */
+export function languageChoices(value, none) {
+  const codes = LANGS.includes(value) || !value || value === 'und' ? LANGS : [...LANGS, value];
+  const list = codes.map((code) => [code, languageName(code)]).sort((a, b) => a[1].localeCompare(b[1]));
+  return `<option value="">${esc(none)}</option>${list.map(([c, n]) => `<option value="${c}"${c === value ? ' selected' : ''}>${esc(n)}</option>`).join('')}`;
 }
 
 /** The language `text` is in, as the browser's detector sees it, else the user's own. */

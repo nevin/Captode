@@ -4,6 +4,7 @@
 // through the list.
 import { DEVICES, GROUPS } from './devices.js';
 import { t } from './i18n.js';
+import { esc } from './util.js';
 
 const RECENT_KEY = 'deviceRecent';
 const RECENT_MAX = 4;
@@ -16,7 +17,6 @@ const FILTERS = [
   ['tablet', t('picker_tablets'), (d) => d.type === 'tablet'],
 ];
 
-const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const size = (d) => `${d.px[0]} × ${d.px[1]}`;
 
 let uid = 0;

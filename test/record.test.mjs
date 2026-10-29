@@ -221,7 +221,10 @@ export const tests = {
     };
     await sleep(700);
     await page.mouse.click(100, 100); // at about 0.7 s
+    // The pointer moving: noted a few times a second, for a zoom that follows it.
+    for (let i = 1; i <= 4; i++) { await page.mouse.move(100 + i * 40, 100 + i * 20); await sleep(130); }
     await setPaused(true);
+    await page.mouse.move(600, 400); // while paused: left out
     await page.mouse.click(200, 200); // while paused: left out
     await sleep(1500);
     await setPaused(false);
@@ -238,8 +241,11 @@ export const tests = {
     const clicks = meta.clicks || [];
     ok(clicks.length === 2, `clicks ${JSON.stringify(clicks)}`);
     near(clicks[0].t, 0.7, 0.4, 'first click');
-    near(clicks[1].t, 1.2, 0.45, 'click after the pause');
-    near(meta.duration, 1.7, 0.4, 'recorded duration');
-    return `clicks at ${clicks.map((c) => c.t).join(', ')} s of ${meta.duration.toFixed(2)} s`;
+    near(clicks[1].t, 1.7, 0.5, 'click after the pause');
+    near(meta.duration, 2.2, 0.5, 'recorded duration');
+    const moves = meta.moves || [];
+    ok(moves.length >= 3, `the pointer noted as it moved: ${JSON.stringify(moves)}`);
+    ok(moves.every((m) => m.t <= meta.duration + 0.3 && m.x < 0.7), 'none while paused, each within the video');
+    return `${moves.length} pointer positions; clicks at ${clicks.map((c) => c.t).join(', ')} s of ${meta.duration.toFixed(2)} s`;
   },
 };

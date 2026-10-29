@@ -9,6 +9,7 @@ import { zip } from '../lib/zip.js';
 import { fileStem } from '../lib/filename.js';
 import { getSettings } from '../lib/settings.js';
 import { canTranslate, languageOptions, translateAll, translateError, languageName } from '../lib/translate.js';
+import { once, blobToDataUrl } from '../lib/util.js';
 
 localize();
 enhance();
@@ -22,7 +23,6 @@ let steps = []; // [{ t, x, y, text, canvas, url }]
 let created = 0;
 let url = '';
 
-const once = (el, ev) => new Promise((r) => el.addEventListener(ev, r, { once: true }));
 
 /** The recording's frames at each step, each with its marker drawn. */
 async function grabFrames(blob, list) {
@@ -140,7 +140,7 @@ const dataUrl = async (c, png = false) => {
   // and for pasting: not every document or wiki takes WebP.
   let blob = png ? null : await c.convertToBlob({ type: 'image/webp', quality: 0.9 });
   if (blob?.type !== 'image/webp') blob = await c.convertToBlob({ type: 'image/png' });
-  return new Promise((r) => { const fr = new FileReader(); fr.onload = () => r(fr.result); fr.readAsDataURL(blob); });
+  return blobToDataUrl(blob);
 };
 
 async function busy(button, fn) {
@@ -190,6 +190,8 @@ $('#dl-md').addEventListener('click', (e) => busy(e.currentTarget, async () => {
 
 // ---------- translating ----------
 
+// Where the browser can't, the page says so rather than leaving the menu out silently.
+if (!canTranslate) $('#translate-note').classList.remove('hidden');
 if (canTranslate) {
   const sel = $('#translate');
   sel.innerHTML = languageOptions();

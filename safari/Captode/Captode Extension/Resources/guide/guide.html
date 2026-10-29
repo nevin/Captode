@@ -11,6 +11,7 @@
   body { background: var(--stage); min-height: 100vh; }
   .topbar .actions { display: flex; gap: 6px; flex-wrap: wrap; }
   .topbar .translate { width: auto; height: 32px; }
+  .topbar .translate-note { align-self: center; font-size: 12px; color: var(--muted); }
   main { max-width: 920px; margin: 0 auto; padding: 24px 16px 64px; }
   .title { width: 100%; font-size: 22px; font-weight: 650; height: 44px; margin-bottom: 4px; }
   .muted { color: var(--muted); }
@@ -34,6 +35,7 @@
   <div class="spacer"></div>
   <div class="actions">
     <select id="translate" class="translate hidden" aria-label="Translate into" data-i18n-aria-label="translate_into"></select>
+    <span id="translate-note" class="translate-note hidden" data-i18n="guide_translate_not_here">Translating isn't available in this browser</span>
     <button class="btn" id="copy" disabled data-tip="Every step with its picture, to paste into Google Docs, Notion, Confluence or an email" data-i18n-tip="guide_copy_tip" data-i18n="editor_copy">Copy</button>
     <button class="btn" id="dl-page" disabled data-tip="One web page with every step; opens in any browser" data-i18n-tip="guide_page_tip" data-i18n="guide_download_page">Web page</button>
     <button class="btn" id="dl-pdf" disabled data-i18n="guide_download_pdf">PDF</button>

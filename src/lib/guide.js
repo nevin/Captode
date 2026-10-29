@@ -4,9 +4,9 @@
 
 import { t } from './i18n.js';
 import { drawStep } from './shapes.js';
+import { esc } from './util.js';
 
 const ACCENT = '#5b4bff';
-const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const lang = () => { try { return chrome.i18n.getUILanguage(); } catch { return 'en'; } };
 
 /** A step's note to start with: what was clicked, when the recording knows. */
