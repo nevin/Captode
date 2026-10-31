@@ -238,7 +238,8 @@ export function findPrivate(region, space) {
   const out = [];
   const add = (rect, kind) => {
     if (out.length >= 300 || rect.width < 2 || rect.height < 2) return;
-    let x = rect.left + ox - region.x, y = rect.top + oy - region.y, w = rect.width, h = rect.height;
+    const x = rect.left + ox - region.x, y = rect.top + oy - region.y;
+    let w = rect.width, h = rect.height;
     if (x + w <= 0 || y + h <= 0 || x >= region.w || y >= region.h) return;
     const x0 = Math.max(0, x), y0 = Math.max(0, y);
     w = Math.min(region.w, x + w) - x0; h = Math.min(region.h, y + h) - y0;

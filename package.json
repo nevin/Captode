@@ -1,6 +1,6 @@
 {
   "name": "captode",
-  "version": "2.3.2",
+  "version": "2.3.3",
   "private": true,
   "description": "Screenshot and screen recorder browser extension with an image editor and GIF/MP4/WebP export.",
   "license": "GPL-3.0-or-later",
@@ -11,12 +11,16 @@
     "icons": "node tools/brand.mjs",
     "store": "node tools/store-assets.mjs",
     "package": "node tools/package.mjs",
+    "lint": "eslint src tools",
     "lint:firefox": "node tools/lint-firefox.mjs",
     "i18n": "node tools/i18n-check.mjs",
     "release": "node tools/release.mjs"
   },
   "devDependencies": {
+    "@eslint/js": "9.39.4",
     "addons-linter": "10.13.0",
+    "eslint": "9.39.4",
+    "globals": "14.0.0",
     "puppeteer": "24.43.1"
   },
   "engines": {

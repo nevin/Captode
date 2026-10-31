@@ -82,6 +82,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
   for (const f of files) writeFileSync(f.path, f.text);
   try {
     run('npm', ['run', '-s', 'i18n'], { show: true });
+    if (!flag('skip-tests')) run('npm', ['run', '-s', 'lint'], { show: true }); // the code checks
     if (!flag('skip-tests')) run('npm', ['test'], { show: true });
     run('npm', ['run', '-s', 'package'], { show: true });
     if (!flag('skip-tests')) run('npm', ['run', '-s', 'lint:firefox'], { show: true });

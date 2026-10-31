@@ -1362,17 +1362,8 @@ const previewLayers = layerVideos();
 /** Lays [from, from + len) of `blob` over the picture from the playhead: kept with the recording, then a layer in the edits. */
 async function addLayer(blob, { from = 0, len = null } = {}) {
   if (busy || !source || !editor) return;
-  if (!(await roomFor(blob.size))) return;
-  busy = true;
-  joinAbort = new AbortController();
-  player.pause();
-  $('#convert').disabled = true;
-  $('#convert').classList.add('hidden');
-  $('#cancel').disabled = false;
-  $('#cancel').classList.remove('hidden');
-  $('#progress-wrap').classList.remove('hidden');
-  $('#result').classList.add('hidden');
-  progress(0, t('vlayer_preparing'));
+  if (!(await roomFor(blob.size)) || busy) return;
+  startWork(t('vlayer_preparing'));
   let made = null;
   try {
     const fps = Math.round(Math.min(60, Math.max(15, Number(meta.fps) || 30)));
@@ -1388,14 +1379,7 @@ async function addLayer(blob, { from = 0, len = null } = {}) {
       toast(t({ unplayable: 'clips_unplayable', unsupported: 'clips_unsupported' }[err?.code] || 'vlayer_failed'), { kind: 'error', ms: 6000 });
     }
   } finally {
-    joinAbort = null;
-    busy = false;
-    $('#convert').disabled = false;
-    $('#cancel').disabled = true;
-    $('#cancel').classList.add('hidden');
-    $('#progress-wrap').classList.add('hidden');
-    if (result) $('#result').classList.remove('hidden');
-    else $('#convert').classList.remove('hidden');
+    endWork();
   }
   if (made) {
     $('#edit-section').open = true;
@@ -1417,6 +1401,16 @@ async function roomFor(bytes) {
  */
 async function runWithProgress(label, fn) {
   if (busy) return null;
+  const signal = startWork(label);
+  try {
+    return await fn(signal, progress);
+  } finally {
+    endWork();
+  }
+}
+
+/** The page busy with a long job, `label` by the progress bar: Export gives way to Cancel. Its AbortSignal. */
+function startWork(label) {
   busy = true;
   joinAbort = new AbortController();
   player.pause();
@@ -1427,18 +1421,19 @@ async function runWithProgress(label, fn) {
   $('#progress-wrap').classList.remove('hidden');
   $('#result').classList.add('hidden');
   progress(0, label);
-  try {
-    return await fn(joinAbort.signal, progress);
-  } finally {
-    joinAbort = null;
-    busy = false;
-    $('#convert').disabled = false;
-    $('#cancel').disabled = true;
-    $('#cancel').classList.add('hidden');
-    $('#progress-wrap').classList.add('hidden');
-    if (result) $('#result').classList.remove('hidden');
-    else $('#convert').classList.remove('hidden');
-  }
+  return joinAbort.signal;
+}
+
+/** The page as it was, after a long job. */
+function endWork() {
+  joinAbort = null;
+  busy = false;
+  $('#convert').disabled = false;
+  $('#cancel').disabled = true;
+  $('#cancel').classList.add('hidden');
+  $('#progress-wrap').classList.add('hidden');
+  if (result) $('#result').classList.remove('hidden');
+  else $('#convert').classList.remove('hidden');
 }
 
 let undoData = null; // the recording before clips were last joined, moved or removed
@@ -1488,17 +1483,8 @@ async function rebuild({ pieces, moves, clips: list }, done) {
   // The joined recording, beside the one kept to undo this.
   if (!(await roomFor([...new Set(pieces.map((p) => p.blob))].reduce((n, b) => n + b.size, 0)))) return;
   if (busy) return;
-  busy = true;
   const runAt = markRunning('join');
-  joinAbort = new AbortController();
-  player.pause();
-  $('#convert').disabled = true;
-  $('#convert').classList.add('hidden');
-  $('#cancel').disabled = false;
-  $('#cancel').classList.remove('hidden');
-  $('#progress-wrap').classList.remove('hidden');
-  $('#result').classList.add('hidden');
-  progress(0, t('clips_joining'));
+  startWork(t('clips_joining'));
   try {
     const fps = Math.round(Math.min(60, Math.max(15, Number(meta.fps) || 30)));
     const { blob, lostSound } = await joinPieces(pieces, { fps, signal: joinAbort.signal, onProgress: (f) => progress(f) });
@@ -1532,16 +1518,8 @@ async function rebuild({ pieces, moves, clips: list }, done) {
       toast(t({ unplayable: 'clips_unplayable', unsupported: 'clips_unsupported' }[err?.code] || 'clips_failed'), { kind: 'error', ms: 6000 });
     }
   } finally {
-    joinAbort = null;
-    if (!leaving) {
-      busy = false;
-      $('#convert').disabled = false;
-      $('#cancel').disabled = true;
-      $('#cancel').classList.add('hidden');
-      $('#progress-wrap').classList.add('hidden');
-      if (result) $('#result').classList.remove('hidden');
-      else $('#convert').classList.remove('hidden');
-    }
+    if (leaving) joinAbort = null; // the page opens again: busy until then
+    else endWork();
   }
 }
 

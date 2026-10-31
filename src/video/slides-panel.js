@@ -23,7 +23,7 @@ const EDGE_PX = 7; // how near an overlay bar's right edge a press resizes it (.
 export function mountSlides(opts) {
   const { player } = opts;
   // Fill in anything a slide saved by an older version lacks.
-  let slides = (opts.slides || []).map((s) => newSlide(s.at, s));
+  const slides = (opts.slides || []).map((s) => newSlide(s.at, s));
   let selected = null; // the chosen slide's id
   let shown = null; // { s, present, timers } while a slide is over the player
   let skipAt = null; // the moment of a slide just presented, so carrying on doesn't show it again

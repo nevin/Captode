@@ -477,7 +477,7 @@ export async function fitReadable(src, format, o, maxBytes, minScale = 1) {
     for (const k of scales) {
       const c = at(k);
       const opts = { ...o, lossless: false, calibrate: false };
-      let blob = await encodeImage(c, lossyFormat, { ...opts, quality: READABLE_QUALITY });
+      const blob = await encodeImage(c, lossyFormat, { ...opts, quality: READABLE_QUALITY });
       if (lossyFormat === 'webp' && blob.type !== 'image/webp') break; // no WebP encoder here
       keep(blob, c);
       if (blob.size > maxBytes) continue;

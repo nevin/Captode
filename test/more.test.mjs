@@ -390,5 +390,16 @@ export const tests = {
     await video.click('#ed-hist-open');
     await video.evaluate(() => captodeEdits.replace({ ...captodeEdits.get(), cuts: [], captions: [], zooms: [] }));
   },
+
+  async 'ids from a file are kept only when plain, since they go into the page\'s markup'({ video }) {
+    const r = await video.evaluate(async () => {
+      const { normaliseEdits } = await import('/lib/video-edits.js');
+      const { newSlide } = await import('/lib/slides.js');
+      const bad = '"><img src=x>';
+      const e = normaliseEdits({ cuts: [{ id: bad, from: 1, to: 2 }, { id: 'ok-1', from: 3, to: 4 }], chapters: [{ id: bad, at: 1 }], captions: [{ id: 'c1', from: 0, to: 1, text: 'x' }], subtitleTracks: [{ id: bad, lang: 'fr', texts: { c1: 'y' } }] });
+      return [e.cuts[0].id, e.cuts[1].id, e.chapters[0].id, e.subtitleTracks[0].id, newSlide(1, { id: bad }).id];
+    });
+    ok(r[1] === 'ok-1' && r.every((id) => /^[\w-]+$/.test(id)), `only plain ids: ${JSON.stringify(r)}`);
+  },
 };
 

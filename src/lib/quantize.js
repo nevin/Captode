@@ -65,7 +65,7 @@ export function buildPalette(data, maxColors, mask = null) {
   if (!bins.length) return new Uint8Array([0, 0, 0]);
 
   const comp = [(k) => k >> 10, (k) => (k >> 5) & 31, (k) => k & 31];
-  let boxes = [{ keys: bins, n: bins.reduce((a, k) => a + count[k], 0) }];
+  const boxes = [{ keys: bins, n: bins.reduce((a, k) => a + count[k], 0) }];
 
   const spread = (box) => {
     let best = -1;

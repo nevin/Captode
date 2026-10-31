@@ -23,6 +23,7 @@ export function fileStem(pattern, { title = '', url = '', when = new Date() } = 
   };
   const name = (pattern || DEFAULT_FILE_NAME).trim()
     .replace(/\{(title|site|date|time)\}/g, (_, k) => values[k])
+    // eslint-disable-next-line no-control-regex -- control characters aren't allowed in file names
     .replace(/[\\/:*?"<>|\u0000-\u001f]+/g, '-')
     // Separators left beside an empty part, doubled or at either end.
     .replace(/([-_ .])[-_ .]+/g, '$1').replace(/^[-_ .]+|[-_ .]+$/g, '')

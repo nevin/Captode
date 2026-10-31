@@ -11,7 +11,7 @@ import { mountDevicePanel, renderInDevice } from '../lib/device.js';
 import { createLayers } from './layers.js';
 import { mountMultiExport } from './multi-export.js';
 import { mountShare } from './share.js';
-import { luminance, contrast, contrastHtml, hexOf, measureLabel, measureText as measureWords, edgeNear as edgeIn, measureFrom, drawMeasures } from '../lib/review.js';
+import { contrast, contrastHtml, hexOf, measureLabel, measureText as measureWords, edgeNear as edgeIn, measureFrom, drawMeasures } from '../lib/review.js';
 import { getSettings, backgroundColour } from '../lib/settings.js';
 import { getBrand, loadLogo, drawLogo } from '../lib/brand.js';
 import { fileStem } from '../lib/filename.js';
@@ -1282,7 +1282,7 @@ fg.addEventListener('pointermove', (e) => {
     drag.moved ||= Math.hypot(dx, dy) > 0;
   } else if (drag.kind === 'crop') {
     const s = drag.start;
-    let w = pt.x - s.x;
+    const w = pt.x - s.x;
     let h = pt.y - s.y;
     const ratio = Number($('#c-ratio').value);
     if (ratio) h = (Math.sign(h) || 1) * Math.abs(w) / ratio;
