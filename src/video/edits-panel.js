@@ -3,13 +3,14 @@
 // timeline and an item in the list; boxes and arrows are drawn on the picture. The
 // drawing and timing live in lib/video-edits.js, shared with the export.
 import {
-  normaliseEdits, editId, clipMap, composer, calloutBox, RATES, CALLOUT_COLOURS, CALLOUT_KINDS, ASPECTS, LAYER_POSITIONS, CAPTION_FONTS, layerBox,
+  normaliseEdits, editId, clipMap, composer, calloutBox, CALLOUT_COLOURS, ASPECTS, layerBox,
   parseSubtitles, matchSubtitles, withoutWords,
 } from '../lib/video-edits.js';
 import { findSilences } from '../lib/audio-levels.js';
 import { toast } from '../lib/ui.js';
 import { t } from '../lib/i18n.js';
-import { canTranslate, languageOptions, languageChoices, translateAll, translateError, languageName } from '../lib/translate.js';
+import { translateAll, translateError, languageName } from '../lib/translate.js';
+import { editForm, round } from './edit-forms.js';
 
 const $ = (s) => document.querySelector(s);
 const EDGE_PX = 7; // how near a bar's ends a press resizes it
@@ -49,7 +50,6 @@ export function mountEdits(opts) {
   const list = (kind, e = edits) => (kind === 'mutes' ? e.audio.mutes : e[kind]);
   const item = () => (selected ? list(selected.kind).find((x) => x.id === selected.id) || null : null);
   const pct = (x) => (opts.duration() ? (x / opts.duration()) * 100 : 0) + '%';
-  const round = (v) => Math.round(v * 10) / 10;
   const snapshot = () => JSON.stringify(edits);
 
   /** Makes a change: `fn` changes the edits; it can be undone. */
@@ -364,109 +364,16 @@ export function mountEdits(opts) {
     }
   }
 
-  const field = (label, html) => `<label class="field"><span>${label}</span>${html}</label>`;
-  const seg = (k, options, v) => `<div class="seg" data-seg="${k}" role="radiogroup">${options.map(([val, label]) => `<button type="button" data-v="${val}" role="radio" aria-checked="${String(val) === String(v)}" class="${String(val) === String(v) ? 'on' : ''}">${label}</button>`).join('')}</div>`;
-  const timeField = (k, label, v) => field(label, `<div class="with-btn"><input type="number" data-k="${k}" min="0" step="0.1" value="${round(v)}"><button type="button" class="btn ghost icon" data-now="${k}" data-tip="${t('edit_at_playhead')}"><svg class="i" viewBox="0 0 24 24"><path d="M12 3v18M7 8l5-5 5 5"/></svg></button></div>`);
-
   function renderForm() {
     const el = $('#ed-item');
     const x = item();
     el.classList.toggle('hidden', !x);
     if (!x) { el.textContent = ''; return; }
     const kind = selected.kind;
-    let html = `<div class="ed-head"><span class="ed-dot" style="background:${KINDS[kind].colour}"></span><b>${name(kind)}</b></div>`;
-    if (!x.whole) html += `<div class="grid2">${timeField('from', t('edit_from'), x.from)}${timeField('to', t('edit_to'), x.to)}</div>`;
-    if (kind === 'blurs' || kind === 'callouts') html += `<label class="toggle"><span>${t('edit_whole_toggle')}</span><input type="checkbox" data-k="whole" ${x.whole ? 'checked' : ''}></label>`;
-    if (kind === 'speeds') {
-      html += field(t('edit_speed'), seg('rate', RATES.map((r) => [r, `${r}×`]), x.rate));
-      html += `<label class="toggle"><span>${t('edit_speed_ease')}</span><input type="checkbox" data-k="ease" ${x.ease ? 'checked' : ''}></label>`;
-      html += `<p class="muted small">${t('edit_speed_hint')}</p>`;
-    }
-    if (kind === 'zooms') {
-      html += field(`${t('edit_zoom')} <b>${Math.round(x.scale * 10) / 10}×</b>`, `<input type="range" data-k="scale" min="1.1" max="4" step="0.1" value="${x.scale}">`);
-      if (opts.meta.moves?.length || x.follow) html += `<label class="toggle"><span>${t('zoom_follow')}<small>${t('zoom_follow_hint')}</small></span><input type="checkbox" data-k="follow" ${x.follow ? 'checked' : ''}></label>`;
-      html += `<p class="muted small">${t('edit_zoom_hint')}</p>`;
-    }
-    if (kind === 'blurs') {
-      html += field(t('edit_blur_style'), seg('mode', ['blur', 'pixelate', 'box'].map((m) => [m, t(`edit_blur_${m}`)]), x.mode));
-      if (x.mode !== 'box') html += field(`${t('edit_strength')} <b>${x.strength}</b>`, `<input type="range" data-k="strength" min="1" max="10" step="1" value="${x.strength}">`);
-      html += `<p class="muted small">${t('edit_draw_hint')}</p>`;
-    }
-    if (kind === 'callouts') {
-      html += field(t('edit_callout_kind'), `<div class="seg seg-wrap" data-seg="kind" role="radiogroup">${CALLOUT_KINDS.map((k) => `<button type="button" data-v="${k}" role="radio" aria-checked="${k === x.kind}" class="${k === x.kind ? 'on' : ''}">${t(`edit_callout_${k}`)}</button>`).join('')}</div>`);
-      if (x.kind === 'text') html += `<label class="field"><span>${t('edit_text')}</span><textarea rows="2" data-k="text" placeholder="${t('edit_text_placeholder')}"></textarea></label>`;
-      if (x.kind === 'step') html += `<label class="field"><span>${t('edit_step_label')}</span><textarea rows="1" maxlength="3" data-k="text" placeholder="1"></textarea></label>`;
-      if (x.kind !== 'spot') {
-        html += `<div class="field"><span>${t('edit_colour')}</span><div class="swatches ed-colours">${CALLOUT_COLOURS.map((c) => `<button type="button" data-colour="${c}" aria-pressed="${c === x.color}" style="background:${c}" aria-label="${c}"></button>`).join('')}</div></div>`;
-        html += field(t('edit_size'), seg('size', [[1, 'S'], [2, 'M'], [3, 'L']], x.size));
-      }
-      html += `<p class="muted small">${t('edit_draw_hint')}</p>`;
-    }
-    if (kind === 'captions') {
-      html += `<label class="field"><span>${t('edit_text')}</span><textarea rows="2" data-k="text" placeholder="${t('edit_caption_placeholder')}"></textarea></label>`;
-      html += field(t('edit_size'), seg('size', [[1, 'S'], [2, 'M'], [3, 'L']], x.size));
-      html += `<p class="muted small">${t('edit_caption_hint')}</p>`;
-      // How every caption looks.
-      const cs = edits.captionStyle;
-      const on = (k, v) => `role="radio" aria-checked="${String(cs[k]) === String(v)}" class="${String(cs[k]) === String(v) ? 'on' : ''}"`;
-      html += `<div class="ed-cap-style"><b>${t('cap_style')}</b>`;
-      html += field(t('cap_font'), `<div class="seg" data-seg="cs-font" role="radiogroup">${Object.keys(CAPTION_FONTS).map((f) => `<button type="button" data-v="${f}" ${on('font', f)} title="${t(`cap_font_${f}`)}" aria-label="${t(`cap_font_${f}`)}" style="font-family:${CAPTION_FONTS[f].replace(/"/g, "'")}">Aa</button>`).join('')}</div>`);
-      html += field(t('vlayer_text_colour'), `<div class="seg ed-swatches" data-seg="cs-color" role="radiogroup">${['#ffffff', '#000000', '#ffd60a', ...CALLOUT_COLOURS.filter((c) => !/^#(ffffff|000000|ffd60a)$/i.test(c)).slice(0, 4)].map((c) => `<button type="button" data-v="${c}" ${on('color', c)} aria-label="${c}" title="${c}"><span class="ed-swatch" style="background:${c}"></span></button>`).join('')}</div>`);
-      html += field(t('cap_band'), `<div class="seg seg-wrap" data-seg="cs-band" role="radiogroup">${['dark', 'light', 'outline', 'none'].map((b) => `<button type="button" data-v="${b}" ${on('band', b)}>${t(`cap_band_${b}`)}</button>`).join('')}</div>`);
-      html += field(t('cap_place'), `<div class="seg" data-seg="cs-place" role="radiogroup">${['bottom', 'middle', 'top'].map((b) => `<button type="button" data-v="${b}" ${on('place', b)}>${t(`thumb_${b}`)}</button>`).join('')}</div>`);
-      html += `<label class="toggle"><span>${t('cap_highlight')}<small>${t('cap_highlight_hint')}</small></span><input type="checkbox" data-cs="highlight" ${cs.highlight ? 'checked' : ''}></label>`;
-      html += `</div>`;
-      const next = nextCaption(x);
-      html += `<div class="row ed-actions"><button type="button" class="btn" data-join ${next ? '' : 'disabled'} data-tip="${t('cap_join_tip')}">${t('cap_join')}</button>${opts.reviewCaptions ? `<button type="button" class="btn" data-review data-tip="${t('cap_review_tip')}">${t('cap_review')}</button>` : ''}<button type="button" class="btn" data-fillers data-tip="${t('fillers_tip')}">${t('fillers_find')}</button></div>`;
-      html += `<div class="row ed-actions"><button type="button" class="btn" data-subs="srt" data-tip="${t('edit_subtitles_tip')}">${t('edit_subtitles_srt')}</button><button type="button" class="btn" data-subs="vtt" data-tip="${t('edit_subtitles_tip')}">${t('edit_subtitles_vtt')}</button></div>`;
-      if (canTranslate) html += `<label class="field"><span>${t('translate_captions')}</span><select data-translate>${languageOptions()}</select></label>`;
-      else html += `<p class="muted small">${t('translate_not_here')}</p>`;
-      // Subtitles in the file: the captions, and the same in other languages.
-      html += `<div class="ed-cap-style"><b>${t('subs_title')}</b>`;
-      html += `<label class="toggle"><span>${t('subs_burn')}<small>${t('subs_burn_hint')}</small></span><input type="checkbox" data-cs="burn" ${cs.burn ? 'checked' : ''}></label>`;
-      html += `<label class="toggle"><span>${t('subs_embed')}<small>${t('subs_embed_hint')}</small></span><input type="checkbox" data-cs="embed" ${cs.embed ? 'checked' : ''}></label>`;
-      html += `<label class="field"><span>${t('subs_lang')}</span><select data-sublang="">${languageChoices(cs.lang, t('subs_lang_none'))}</select></label>`;
-      for (const tr of edits.subtitleTracks) {
-        const n = edits.captions.filter((c) => tr.texts[c.id]?.trim()).length;
-        html += `<div class="row sub-track"><select data-sublang="${tr.id}" aria-label="${t('subs_track_lang')}">${languageChoices(tr.lang === 'und' ? '' : tr.lang, t('subs_lang_none'))}</select><span class="muted small">${t('subs_track_count', [String(n), String(edits.captions.length)])}</span><button type="button" class="btn ghost icon" data-subdel="${tr.id}" aria-label="${t('subs_track_remove')}" title="${t('subs_track_remove')}"><svg class="i" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>`;
-      }
-      if (edits.subtitleTracks.length < 8) {
-        html += `<div class="row ed-actions"><button type="button" class="btn" data-subfile data-tip="${t('subs_add_file_tip')}">${t('subs_add_file')}</button></div>`;
-        if (canTranslate) html += `<label class="field"><span>${t('subs_add_translation')}</span><select data-subtranslate>${languageOptions()}</select></label>`;
-      }
-      html += `</div>`;
-    }
-    if (kind === 'layers' && x.kind === 'text') {
-      html += `<label class="field"><span>${t('edit_text')}</span><textarea rows="2" data-k="text" placeholder="${t('vlayer_text_default')}"></textarea></label>`;
-      html += field(t('vlayer_text_colour'), `<div class="seg ed-swatches" data-seg="color" role="radiogroup">${['#ffffff', '#000000', ...CALLOUT_COLOURS.filter((c) => !/^#(ffffff|000000)$/i.test(c)).slice(0, 5)].map((c) => `<button type="button" data-v="${c}" role="radio" aria-checked="${c === x.color}" class="${c === x.color ? 'on' : ''}" aria-label="${c}" title="${c}"><span class="ed-swatch" style="background:${c}"></span></button>`).join('')}</div>`);
-      html += field(t('vlayer_text_bg'), seg('bg', [['dark', t('vlayer_bg_dark')], ['light', t('vlayer_bg_light')], ['none', t('vlayer_bg_none')]], x.bg));
-    }
-    if (kind === 'layers' && x.kind === 'sound') {
-      html += field(`${t('vlayer_volume')} <b>${Math.round(x.volume * 100)}%</b>`, `<input type="range" data-k="volume" min="0" max="2" step="0.05" value="${x.volume}">`);
-      html += field(`${t('vlayer_fade')} <b>${x.fade ? `${x.fade.toFixed(1)} s` : t('video_off')}</b>`, `<input type="range" data-k="fade" min="0" max="3" step="0.1" value="${x.fade}">`);
-      html += `<p class="muted small">${t('vo_hint')}</p>`;
-    } else if (kind === 'layers') {
-      const arrows = { tl: '↖', bl: '↙', c: '●', tr: '↗', br: '↘' }; // left side, middle, right side
-      html += field(t('vlayer_position'), `<div class="seg" data-seg="pos" role="radiogroup">${Object.keys(arrows).filter((p) => LAYER_POSITIONS.includes(p)).map((p) => `<button type="button" data-v="${p}" role="radio" aria-checked="${p === x.pos}" class="${p === x.pos ? 'on' : ''}" aria-label="${t(`vlayer_pos_${p}`)}" title="${t(`vlayer_pos_${p}`)}">${arrows[p]}</button>`).join('')}</div>`);
-      html += field(`${t('edit_size')} <b>${Math.round(x.size * 100)}%</b>`, `<input type="range" data-k="size" min="0.1" max="1" step="0.05" value="${x.size}">`);
-      html += field(t('vlayer_shape'), seg('shape', [['rect', t('vlayer_shape_rect')], ['circle', t('vlayer_shape_circle')]], x.shape));
-      if ((x.kind || 'video') === 'video' && x.sound) html += field(`${t('vlayer_volume')} <b>${Math.round(x.volume * 100)}%</b>`, `<input type="range" data-k="volume" min="0" max="2" step="0.05" value="${x.volume}">`);
-      html += field(`${t('vlayer_opacity')} <b>${Math.round(x.opacity * 100)}%</b>`, `<input type="range" data-k="opacity" min="0.1" max="1" step="0.05" value="${x.opacity}">`);
-      html += field(`${t('vlayer_fade')} <b>${x.fade ? `${x.fade.toFixed(1)} s` : t('video_off')}</b>`, `<input type="range" data-k="fade" min="0" max="3" step="0.1" value="${x.fade}">`);
-      const borders = ['none', '#ffffff', '#000000', ...CALLOUT_COLOURS.filter((c) => !/^#(ffffff|000000)$/i.test(c)).slice(0, 4)];
-      html += field(t('vlayer_border'), `<div class="seg ed-swatches" data-seg="border" role="radiogroup">${borders.map((c) => `<button type="button" data-v="${c}" role="radio" aria-checked="${c === x.border}" class="${c === x.border ? 'on' : ''}" aria-label="${c === 'none' ? t('vlayer_border_none') : c}" title="${c === 'none' ? t('vlayer_border_none') : c}">${c === 'none' ? '∅' : `<span class="ed-swatch" style="background:${c}"></span>`}</button>`).join('')}</div>`);
-      html += `<label class="toggle"><span>${t('vlayer_shadow')}</span><input type="checkbox" data-k="shadow" ${x.shadow ? 'checked' : ''}></label>`;
-      html += `<label class="toggle"><span>${t('vlayer_move')}<small>${t('vlayer_move_hint')}</small></span><input type="checkbox" data-k="move" ${x.move ? 'checked' : ''}></label>`;
-      if (x.move) html += `<div class="row ed-actions"><button type="button" class="btn" data-goto="start">${t('vlayer_go_start')}</button><button type="button" class="btn" data-goto="end">${t('vlayer_go_end')}</button></div>`;
-      if ((x.kind || 'video') === 'video') html += field(t('vlayer_offset'), `<input type="number" data-k="offset" min="0" step="0.1" value="${round(x.offset)}">`);
-      html += `<p class="muted small">${t('vlayer_hint')}</p>`;
-    }
-    if (kind === 'mutes') html += `<p class="muted small">${t('edit_mute_hint')}</p>`;
-    if (kind === 'cuts') html += `<p class="muted small">${t('edit_cut_hint')}</p>`;
-    const at = player.currentTime;
-    const canSplit = !x.whole && at >= x.from + 0.1 && at <= x.to - 0.1;
-    html += `<div class="row ed-actions">${x.whole ? '' : `<button type="button" class="btn" data-split ${canSplit ? '' : 'disabled'} data-tip="${t('edit_split_tip')}">${t('edit_split')}</button>`}<button type="button" class="btn danger" data-del>${t('edit_delete')}</button></div>`;
-    el.innerHTML = html;
+    el.innerHTML = editForm(kind, x, {
+      colour: KINDS[kind].colour, name: name(kind), at: player.currentTime,
+      edits, meta: opts.meta, reviewCaptions: opts.reviewCaptions, next: kind === 'captions' && nextCaption(x),
+    });
     const text = el.querySelector('[data-k="text"]');
     if (text) text.value = x.text;
   }

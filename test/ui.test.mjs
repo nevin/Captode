@@ -1172,6 +1172,8 @@ export const tests = {
     await pop.evaluate(() => chrome.storage.local.set({ whatsNew: '2.3.0' }));
     await pop.reload();
     await pop.waitForFunction(() => !document.querySelector('#whats-new').classList.contains('hidden'), { polling: 100 });
+    const title = await pop.$eval('#whats-new-title', (e) => e.textContent);
+    ok(title === `New in Captode ${await pop.evaluate(() => chrome.runtime.getManifest().version)}`, `names this version: ${title}`);
     await pop.click('#whats-new-close');
     ok(!(await pop.evaluate(async () => (await chrome.storage.local.get('whatsNew')).whatsNew)), 'dismissed for good');
     await pop.reload();

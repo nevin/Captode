@@ -2126,12 +2126,6 @@
   "part_of": {
     "message": "Teil $1 von $2"
   },
-  "popup_new_in_captode_2_3": {
-    "message": "Neu in Captode 2.3"
-  },
-  "popup_whats_new_2_3": {
-    "message": "Pausieren und auf der Seite zeichnen während der Aufnahme, Untertitel hinzufügen, Text aus Screenshots kopieren, Ihr Logo einfügen und Aufnahmen behalten oder als Projektdateien speichern."
-  },
   "slides_title": {
     "message": "Folien"
   },
@@ -4123,5 +4117,38 @@
   },
   "hist_minutes": {
     "message": "vor $1 Min."
+  },
+  "storage_free_up": {
+    "message": "Platz freigeben"
+  },
+  "storage_low_title": {
+    "message": "Der Speicherplatz wird knapp"
+  },
+  "storage_low": {
+    "message": "Captode hat nur noch etwa $1 für Aufnahmen frei. Lösche Aufnahmen, die du nicht mehr brauchst, die größten zuerst."
+  },
+  "storage_free_left": {
+    "message": "Etwa $1 frei."
+  },
+  "popup_whats_new_title": {
+    "message": "Neu in Captode $1"
+  },
+  "popup_whats_new_text": {
+    "message": "Sprich über eine Aufnahme, schneide „äh“ und „ähm“ anhand der Untertitel heraus, säubere den Ton und gehe im Verlauf mehrere Änderungen auf einmal zurück. Auf der Videoseite zeigt ? die Tastenkürzel."
+  },
+  "vkeys_playing": {
+    "message": "Wiedergabe"
+  },
+  "vkeys_step": {
+    "message": "Ein Bild zurück oder vor (eine Sekunde mit ⇧)"
+  },
+  "vkeys_zoom": {
+    "message": "Zeitleiste vergrößern oder verkleinern"
+  },
+  "vkeys_frame": {
+    "message": "Das angezeigte Bild im Editor öffnen"
+  },
+  "vkeys_help": {
+    "message": "Diese Tastenkürzel zeigen"
   }
 }

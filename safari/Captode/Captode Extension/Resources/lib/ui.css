@@ -328,6 +328,7 @@ dialog.modal[open] { animation: dialog-in .16s ease-out; }
 .keys h3:first-child { margin-top: 0; }
 .keys div { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 5px 0; border-bottom: 1px solid var(--line); }
 .keys div span:last-child { white-space: nowrap; }
+@media (max-width: 560px) { .keys { grid-template-columns: 1fr; } }
 
 kbd {
   display: inline-block; min-width: 18px; padding: 0 5px; border-radius: 4px; text-align: center;

@@ -2126,12 +2126,6 @@
   "part_of": {
     "message": "parte $1 de $2"
   },
-  "popup_new_in_captode_2_3": {
-    "message": "Novidades do Captode 2.3"
-  },
-  "popup_whats_new_2_3": {
-    "message": "Pause e desenhe na página durante a gravação, adicione legendas, copie texto das capturas, adicione seu logotipo e mantenha capturas ou salve-as como arquivos de projeto."
-  },
   "slides_title": {
     "message": "Slides"
   },
@@ -4123,5 +4117,38 @@
   },
   "hist_minutes": {
     "message": "há $1 min"
+  },
+  "storage_free_up": {
+    "message": "Liberar espaço"
+  },
+  "storage_low_title": {
+    "message": "O espaço está acabando"
+  },
+  "storage_low": {
+    "message": "Restam apenas cerca de $1 para o Captode guardar gravações. Exclua as capturas de que não precisa mais, das maiores para as menores."
+  },
+  "storage_free_left": {
+    "message": "Cerca de $1 livres."
+  },
+  "popup_whats_new_title": {
+    "message": "Novidades do Captode $1"
+  },
+  "popup_whats_new_text": {
+    "message": "Narre sobre uma gravação, corte os “é” e “hum” pelas legendas, limpe o som e volte várias alterações de uma vez pelo histórico. Na página do vídeo, pressione ? para ver os atalhos de teclado."
+  },
+  "vkeys_playing": {
+    "message": "Reprodução"
+  },
+  "vkeys_step": {
+    "message": "Um quadro para trás ou para a frente (um segundo com ⇧)"
+  },
+  "vkeys_zoom": {
+    "message": "Aproximar ou afastar a linha do tempo"
+  },
+  "vkeys_frame": {
+    "message": "Abrir o quadro na tela no editor"
+  },
+  "vkeys_help": {
+    "message": "Mostrar estes atalhos"
   }
 }

@@ -219,15 +219,29 @@ export async function shareFile(blob, name) {
   return true;
 }
 
+/** How many bytes this browser has left for Captode to keep; null when it can't tell. */
+export async function spaceLeft() {
+  try {
+    const { usage = 0, quota = 0 } = await navigator.storage.estimate();
+    return quota ? Math.max(0, quota - usage) : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Below this much space left, Captode says so before it runs out. */
+export const LOW_SPACE = 500e6;
+
 /**
  * Whether this browser has room to keep about `bytes` more (with some to spare);
  * true when it can't tell.
  */
 export async function hasRoom(bytes) {
-  try {
-    const { usage = 0, quota = 0 } = await navigator.storage.estimate();
-    return !quota || quota - usage > bytes * 1.2 + 50e6;
-  } catch {
-    return true;
-  }
+  const left = await spaceLeft();
+  return left === null || left > bytes * 1.2 + 50e6;
+}
+
+/** Opens Settings at its list of captures, largest first, to free up space. */
+export function openStorage() {
+  chrome.tabs.create({ url: chrome.runtime.getURL('settings/settings.html?sort=big#storage') });
 }

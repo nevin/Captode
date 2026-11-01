@@ -823,7 +823,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 });
 
 // After an update that adds features, the popup says what's new, once.
-const WHATS_NEW = '2.3.0';
+const WHATS_NEW = '2.3.4'; // updates from before this see the note in the popup
 chrome.runtime.onInstalled.addListener(({ reason, previousVersion }) => {
   createMenu();
   applyIconAction();

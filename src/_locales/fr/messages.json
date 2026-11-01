@@ -2126,12 +2126,6 @@
   "part_of": {
     "message": "partie $1 sur $2"
   },
-  "popup_new_in_captode_2_3": {
-    "message": "Nouveau dans Captode 2.3"
-  },
-  "popup_whats_new_2_3": {
-    "message": "Mettez en pause et dessinez sur la page pendant l’enregistrement, ajoutez des légendes, copiez le texte des captures, ajoutez votre logo, et gardez vos captures ou enregistrez-les en fichiers de projet."
-  },
   "slides_title": {
     "message": "Diapositives"
   },
@@ -4123,5 +4117,38 @@
   },
   "hist_minutes": {
     "message": "il y a $1 min"
+  },
+  "storage_free_up": {
+    "message": "Libérer de l'espace"
+  },
+  "storage_low_title": {
+    "message": "L'espace devient insuffisant"
+  },
+  "storage_low": {
+    "message": "Il ne reste qu'environ $1 à Captode pour garder les enregistrements. Supprimez les captures dont vous n'avez plus besoin, les plus volumineuses d'abord."
+  },
+  "storage_free_left": {
+    "message": "Environ $1 disponibles."
+  },
+  "popup_whats_new_title": {
+    "message": "Nouveautés de Captode $1"
+  },
+  "popup_whats_new_text": {
+    "message": "Parlez par-dessus un enregistrement, coupez les « euh » grâce aux sous-titres, nettoyez le son et revenez plusieurs modifications en arrière d'un coup depuis l'historique. Sur la page vidéo, appuyez sur ? pour les raccourcis clavier."
+  },
+  "vkeys_playing": {
+    "message": "Lecture"
+  },
+  "vkeys_step": {
+    "message": "Une image en arrière ou en avant (une seconde avec ⇧)"
+  },
+  "vkeys_zoom": {
+    "message": "Zoomer sur la chronologie ou dézoomer"
+  },
+  "vkeys_frame": {
+    "message": "Ouvrir l'image affichée dans l'éditeur"
+  },
+  "vkeys_help": {
+    "message": "Afficher ces raccourcis"
   }
 }

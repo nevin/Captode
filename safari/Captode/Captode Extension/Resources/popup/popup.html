@@ -49,8 +49,13 @@
   </div>
   <div id="whats-new" class="banner new hidden" role="status">
     <svg class="i" viewBox="0 0 24 24"><path d="M12 3l2.4 5.3 5.6.6-4.2 3.8 1.2 5.6L12 15.5 7 18.3l1.2-5.6L4 8.9l5.6-.6z"/></svg>
-    <div><b data-i18n="popup_new_in_captode_2_3">New in Captode 2.3</b><span data-i18n="popup_whats_new_2_3">Pause and draw on the page while recording, add captions, copy text from screenshots, add your logo, and keep captures or save them as project files.</span></div>
+    <div><b id="whats-new-title">New in Captode</b><span data-i18n="popup_whats_new_text">Talk over a recording, cut “um” and “uh” from its captions, clean up its sound, and go back several changes at once from the history. On the video page, press ? for its keyboard shortcuts.</span></div>
     <button class="btn ghost icon close" id="whats-new-close" data-tip="Dismiss" aria-label="Dismiss" data-i18n-aria-label="popup_dismiss" data-i18n-tip="popup_dismiss"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+  </div>
+  <div id="low-space" class="banner warn hidden" role="status">
+    <svg class="i" viewBox="0 0 24 24"><path d="M12 3 2 20h20L12 3z"/><path d="M12 10v4M12 17v.01"/></svg>
+    <div><b data-i18n="storage_low_title">Space is running low</b><span id="low-space-text"></span>
+      <button class="btn small" id="low-space-open" data-i18n="storage_free_up">Free up space</button></div>
   </div>
   <div id="blocked" class="banner warn hidden">
     <svg class="i" viewBox="0 0 24 24"><path d="M12 3 2 20h20L12 3z"/><path d="M12 10v4M12 17v.01"/></svg>

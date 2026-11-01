@@ -2126,12 +2126,6 @@
   "part_of": {
     "message": "第 $1 部分，共 $2 部分"
   },
-  "popup_new_in_captode_2_3": {
-    "message": "Captode 2.3 新功能"
-  },
-  "popup_whats_new_2_3": {
-    "message": "录屏时可暂停并在页面上绘制，可添加字幕、从截图中复制文字、加上你的标志，还可保留截图或保存为项目文件。"
-  },
   "slides_title": {
     "message": "幻灯片"
   },
@@ -4123,5 +4117,38 @@
   },
   "hist_minutes": {
     "message": "$1 分钟前"
+  },
+  "storage_free_up": {
+    "message": "释放空间"
+  },
+  "storage_low_title": {
+    "message": "空间不足"
+  },
+  "storage_low": {
+    "message": "Captode 只剩约 $1 的空间来保存录制。请删除不再需要的捕获，从最大的开始。"
+  },
+  "storage_free_left": {
+    "message": "约 $1 可用。"
+  },
+  "popup_whats_new_title": {
+    "message": "Captode $1 新功能"
+  },
+  "popup_whats_new_text": {
+    "message": "在录制上配音，根据字幕剪掉“嗯”“呃”，清理声音，并从历史记录一次回退多步更改。在视频页面按 ? 查看键盘快捷键。"
+  },
+  "vkeys_playing": {
+    "message": "播放"
+  },
+  "vkeys_step": {
+    "message": "后退或前进一帧（按住 ⇧ 为一秒）"
+  },
+  "vkeys_zoom": {
+    "message": "放大或缩小时间轴"
+  },
+  "vkeys_frame": {
+    "message": "在编辑器中打开当前画面"
+  },
+  "vkeys_help": {
+    "message": "显示这些快捷键"
   }
 }

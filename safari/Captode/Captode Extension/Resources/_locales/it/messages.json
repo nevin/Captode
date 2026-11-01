@@ -2126,12 +2126,6 @@
   "part_of": {
     "message": "parte $1 di $2"
   },
-  "popup_new_in_captode_2_3": {
-    "message": "Novità di Captode 2.3"
-  },
-  "popup_whats_new_2_3": {
-    "message": "Metti in pausa e disegna sulla pagina durante la registrazione, aggiungi didascalie, copia il testo dagli screenshot, aggiungi il tuo logo e conserva le acquisizioni o salvale come file di progetto."
-  },
   "slides_title": {
     "message": "Slide"
   },
@@ -4123,5 +4117,38 @@
   },
   "hist_minutes": {
     "message": "$1 min fa"
+  },
+  "storage_free_up": {
+    "message": "Libera spazio"
+  },
+  "storage_low_title": {
+    "message": "Lo spazio sta per finire"
+  },
+  "storage_low": {
+    "message": "A Captode restano solo circa $1 per conservare le registrazioni. Elimina le acquisizioni che non ti servono più, dalle più grandi."
+  },
+  "storage_free_left": {
+    "message": "Circa $1 liberi."
+  },
+  "popup_whats_new_title": {
+    "message": "Novità di Captode $1"
+  },
+  "popup_whats_new_text": {
+    "message": "Parla sopra una registrazione, taglia gli “ehm” dai sottotitoli, pulisci l'audio e torna indietro di più modifiche insieme dalla cronologia. Nella pagina del video, premi ? per le scorciatoie da tastiera."
+  },
+  "vkeys_playing": {
+    "message": "Riproduzione"
+  },
+  "vkeys_step": {
+    "message": "Un fotogramma indietro o avanti (un secondo con ⇧)"
+  },
+  "vkeys_zoom": {
+    "message": "Ingrandisci o riduci la timeline"
+  },
+  "vkeys_frame": {
+    "message": "Apri nell'editor il fotogramma mostrato"
+  },
+  "vkeys_help": {
+    "message": "Mostra queste scorciatoie"
   }
 }

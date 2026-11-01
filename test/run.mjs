@@ -19,7 +19,8 @@ for (const file of files) {
   const names = Object.keys(mod.tests).filter((n) => `${file} ${n}`.includes(filter));
   if (!names.length) continue;
   console.log(`\n${file}`);
-  const env = { ...(await launch()), site: site.url };
+  // A file can ask for Chrome switches of its own, such as its stand-in camera and microphone.
+  const env = { ...(await launch({ args: mod.launchArgs })), site: site.url };
   try {
     if (mod.setup) Object.assign(env, await mod.setup(env));
     for (const name of names) {

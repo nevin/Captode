@@ -6,7 +6,7 @@ import { fileStem, DEFAULT_FILE_NAME, FILE_NAME_TOKENS } from '../lib/filename.j
 import { listCaptures, setKept, deleteCapture, restoreCapture } from '../lib/db.js';
 import { openProject, pageFor } from '../lib/project.js';
 import { downloadProject } from '../lib/keep.js';
-import { fmtBytes, ago, confirmDialog } from '../lib/ui.js';
+import { fmtBytes, ago, confirmDialog, LOW_SPACE } from '../lib/ui.js';
 import { getBrand, saveBrand, logoFromFile, loadLogo, drawLogo } from '../lib/brand.js';
 
 localize();
@@ -290,7 +290,13 @@ async function renderStorage() {
   const items = await listCaptures(500);
   const est = await navigator.storage?.estimate?.().catch(() => null);
   const used = items.reduce((n, it) => n + it.size, 0);
-  document.getElementById('storage-usage').textContent = `${t('storage_hint')} ${t('storage_used', [String(items.length), fmtBytes(est?.usage ?? used)])}`;
+  // What's left, and a warning when it's running low.
+  const left = est?.quota ? Math.max(0, est.quota - (est.usage || 0)) : null;
+  const free = left === null ? '' : ` ${t('storage_free_left', fmtBytes(left))}`;
+  document.getElementById('storage-usage').textContent = `${t('storage_hint')} ${t('storage_used', [String(items.length), fmtBytes(est?.usage ?? used)])}${free}`;
+  const low = $('#storage-low');
+  low.classList.toggle('hidden', left === null || left >= LOW_SPACE);
+  if (left !== null) low.textContent = t('storage_low', fmtBytes(left));
   document.getElementById('delete-unkept').disabled = !items.some((it) => !it.kept);
   list.textContent = '';
   // Search and show only some: offered once there are enough to look through.
@@ -376,6 +382,8 @@ document.getElementById('open-project')?.addEventListener('change', async (e) =>
   }
 });
 
+// "Free up space" elsewhere opens this list largest first.
+if (new URLSearchParams(location.search).get('sort') === 'big') $('#storage-sort').value = 'big';
 renderStorage();
 
 // ---------- export presets ----------

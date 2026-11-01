@@ -2126,12 +2126,6 @@
   "part_of": {
     "message": "$2 のうち $1"
   },
-  "popup_new_in_captode_2_3": {
-    "message": "Captode 2.3 の新機能"
-  },
-  "popup_whats_new_2_3": {
-    "message": "録画中の一時停止とページへの描画、字幕、スクリーンショットからのテキストのコピー、ロゴの追加、キャプチャの保持とプロジェクトファイルへの保存に対応しました。"
-  },
   "slides_title": {
     "message": "スライド"
   },
@@ -4123,5 +4117,38 @@
   },
   "hist_minutes": {
     "message": "$1 分前"
+  },
+  "storage_free_up": {
+    "message": "空き容量を増やす"
+  },
+  "storage_low_title": {
+    "message": "空き容量が少なくなっています"
+  },
+  "storage_low": {
+    "message": "Captode が録画を保存できる容量は残り約 $1 です。不要なキャプチャを大きいものから削除してください。"
+  },
+  "storage_free_left": {
+    "message": "空き約 $1。"
+  },
+  "popup_whats_new_title": {
+    "message": "Captode $1 の新機能"
+  },
+  "popup_whats_new_text": {
+    "message": "録画にナレーションを入れ、字幕から「えー」「あの」をカットし、音声をきれいにし、履歴から複数の変更をまとめて戻せます。動画ページで ? を押すとキーボードショートカットが表示されます。"
+  },
+  "vkeys_playing": {
+    "message": "再生"
+  },
+  "vkeys_step": {
+    "message": "1 フレーム戻る／進む（⇧ で 1 秒）"
+  },
+  "vkeys_zoom": {
+    "message": "タイムラインを拡大／縮小"
+  },
+  "vkeys_frame": {
+    "message": "表示中のフレームをエディタで開く"
+  },
+  "vkeys_help": {
+    "message": "このショートカットを表示"
   }
 }

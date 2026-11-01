@@ -1,4 +1,4 @@
-import { enhance, tablist, showShortcut, shareCaptode } from '../lib/ui.js';
+import { enhance, tablist, showShortcut, shareCaptode, spaceLeft, LOW_SPACE, openStorage, fmtBytes } from '../lib/ui.js';
 import { outputSize } from '../lib/recorder.js';
 import { t, localize } from '../lib/i18n.js';
 import { listCaptures } from '../lib/db.js';
@@ -119,8 +119,19 @@ if (canQueueExports) {
 
 // Once, after an update with new features.
 const { whatsNew } = await chrome.storage.local.get('whatsNew');
-if (whatsNew && !lastError) $('#whats-new').classList.remove('hidden');
+if (whatsNew && !lastError) {
+  $('#whats-new-title').textContent = t('popup_whats_new_title', chrome.runtime.getManifest().version);
+  $('#whats-new').classList.remove('hidden');
+}
 $('#whats-new-close').addEventListener('click', () => { $('#whats-new').classList.add('hidden'); chrome.storage.local.remove('whatsNew'); });
+
+// Space running low: said before a recording, not after it fails to be kept.
+spaceLeft().then((left) => {
+  if (left === null || left >= LOW_SPACE) return;
+  $('#low-space-text').textContent = t('storage_low', fmtBytes(left));
+  $('#low-space').classList.remove('hidden');
+});
+$('#low-space-open').addEventListener('click', () => { openStorage(); window.close(); });
 
 // Browsers don't let extensions capture their own pages or add-on stores, so say so
 // up front instead of failing after a click. Recording the whole screen still works.

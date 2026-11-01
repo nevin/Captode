@@ -362,6 +362,7 @@ body.simple .adv { display: none !important; }
 /* The Simple / All tools switch on one line, clear of the header. */
 .ui-mode-row { padding-top: 12px; }
 .ui-mode-row .seg button { white-space: nowrap; }
+#keys-open { margin-left: auto; }
 #vo-rec { width: 100%; justify-content: center; }
 .ed-item .ed-actions, .ed-actions { flex-wrap: wrap; }
 /* Phones: the header's buttons as icons alone (their names stay for screen readers). */

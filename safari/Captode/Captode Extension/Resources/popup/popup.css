@@ -40,7 +40,7 @@ footer .toggle { margin: 0; }
 .banner { margin: 8px 16px 0; }
 .banner span { color: var(--muted); }
 .head-actions { display: flex; gap: 2px; }
-.banner .btn.small { display: inline-flex; height: 28px; margin-top: 8px; padding: 0 10px; font-size: 12px; font-weight: 600; }
+.banner .btn.small { display: flex; width: fit-content; height: 28px; margin-top: 8px; padding: 0 10px; font-size: 12px; font-weight: 600; }
 
 /* Recording options: one summary line, opened on demand, so the popup fits in Chrome's 600 px. */
 details.opts { padding: 0; min-width: 0; }

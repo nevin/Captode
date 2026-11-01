@@ -2126,12 +2126,6 @@
   "part_of": {
     "message": "parte $1 de $2"
   },
-  "popup_new_in_captode_2_3": {
-    "message": "Novedades de Captode 2.3"
-  },
-  "popup_whats_new_2_3": {
-    "message": "Pausa y dibuja en la página mientras grabas, añade subtítulos, copia texto de las capturas, añade tu logotipo y conserva capturas o guárdalas como archivos de proyecto."
-  },
   "slides_title": {
     "message": "Diapositivas"
   },
@@ -4123,5 +4117,38 @@
   },
   "hist_minutes": {
     "message": "hace $1 min"
+  },
+  "storage_free_up": {
+    "message": "Liberar espacio"
+  },
+  "storage_low_title": {
+    "message": "Queda poco espacio"
+  },
+  "storage_low": {
+    "message": "A Captode solo le quedan unos $1 para guardar grabaciones. Elimina las capturas que ya no necesites, empezando por las más grandes."
+  },
+  "storage_free_left": {
+    "message": "Unos $1 libres."
+  },
+  "popup_whats_new_title": {
+    "message": "Novedades de Captode $1"
+  },
+  "popup_whats_new_text": {
+    "message": "Habla sobre una grabación, corta los «eh» y «em» a partir de sus subtítulos, limpia el sonido y vuelve varios cambios atrás a la vez desde el historial. En la página del vídeo, pulsa ? para ver los atajos de teclado."
+  },
+  "vkeys_playing": {
+    "message": "Reproducción"
+  },
+  "vkeys_step": {
+    "message": "Un fotograma atrás o adelante (un segundo con ⇧)"
+  },
+  "vkeys_zoom": {
+    "message": "Acercar o alejar la línea de tiempo"
+  },
+  "vkeys_frame": {
+    "message": "Abrir el fotograma en pantalla en el editor"
+  },
+  "vkeys_help": {
+    "message": "Mostrar estos atajos"
   }
 }

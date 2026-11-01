@@ -82,3 +82,5 @@
 .preset-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
 .preset-list li { display: flex; align-items: center; gap: 8px; }
 .preset-list input { flex: 1; min-width: 0; }
+
+.storage-low { margin: 10px 0 0; padding: 8px 12px; border-radius: 8px; background: var(--warn-soft); font-size: 13px; }

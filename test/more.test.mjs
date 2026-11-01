@@ -401,5 +401,74 @@ export const tests = {
     });
     ok(r[1] === 'ok-1' && r.every((id) => /^[\w-]+$/.test(id)), `only plain ids: ${JSON.stringify(r)}`);
   },
-};
+  async 'keyboard shortcuts: ? lists them in this language, and Simple leaves out the tools it hides'({ video }) {
+    await video.evaluate(() => { document.activeElement?.blur(); document.querySelector('#player').pause(); });
+    await video.keyboard.type('?');
+    await video.waitForFunction(() => document.querySelector('#vkeys')?.open, { polling: 100, timeout: 3000 });
+    const shown = () => video.$$eval('#vkeys .keys div', (l) => l.filter((r) => r.offsetParent).map((r) => [r.firstChild.textContent, r.lastChild.textContent]));
+    const all = await shown();
+    ok(all.length >= 18 && all.every(([name, keys]) => name && keys && !/_|\s{2}/.test(name)), `named, without keys left in the names: ${JSON.stringify(all)}`);
+    ok(all.some(([n, k]) => n === 'Leave out a part' && k === 'X') && all.some(([n]) => n === 'Zoom in on a part of the picture'), 'the cut and zoom keys');
+    await video.keyboard.press('Escape');
+    await video.waitForFunction(() => !document.querySelector('#vkeys'), { polling: 50, timeout: 2000 }).catch(() => {});
+    ok(await video.evaluate(() => !document.querySelector('#vkeys')), 'Esc closes it');
+    await video.click('#ui-mode [data-v="simple"]');
+    await video.click('#keys-open');
+    const simple = await shown();
+    ok(simple.length < all.length && !simple.some(([n]) => n === 'Zoom in on a part of the picture') && simple.some(([n]) => n === 'Leave out a part'), `Simple lists only its tools: ${simple.length} of ${all.length}`);
+    await video.keyboard.press('Escape');
+    await video.waitForFunction(() => !document.querySelector('#vkeys'), { polling: 50, timeout: 2000 });
+    await video.click('#ui-mode [data-v="advanced"]');
+  },
 
+  async 'space running low: said when the page opens, once a day, and "Free up space" opens the list largest first'({ browser, video }) {
+    // 60 MB left: low, and too little for a voiceover (20 MB with some to spare).
+    const low = await video.evaluateOnNewDocument(() => {
+      navigator.storage.estimate = async () => ({ quota: 2e9, usage: 2e9 - 60e6 });
+    });
+    try {
+      await video.evaluate(() => localStorage.removeItem('captode-low-space'));
+      await video.reload();
+      await video.waitForFunction(() => /fps/.test(document.querySelector('#dims').textContent), { polling: 100 });
+      await video.waitForFunction(() => /57\.2/.test(document.querySelector('.toast:not(.hidden)')?.textContent || ''), { polling: 100, timeout: 6000 });
+      ok(await video.evaluate(() => !!document.querySelector('.toast .toast-action')), 'with Free up space');
+      // Once a day: not again on the next visit.
+      await video.reload();
+      await video.waitForFunction(() => /fps/.test(document.querySelector('#dims').textContent), { polling: 100 });
+      await sleep(2500);
+      ok(!(await video.evaluate(() => /MB/.test(document.querySelector('.toast:not(.hidden)')?.textContent || ''))), 'not said again the same day');
+      // Keeping more than there's room for is refused, with the same way out.
+      await video.evaluate(() => { document.querySelector('#sound-section').open = true; });
+      await video.$eval('#vo-rec', (b) => b.scrollIntoView({ block: 'center' }));
+      await video.click('#vo-rec');
+      await video.waitForFunction(() => document.querySelector('.toast:not(.hidden) .toast-action'), { polling: 100, timeout: 5000 });
+      const opened = browser.waitForTarget((t) => t.url().includes('settings/settings.html'), { timeout: 10000 });
+      await video.click('.toast .toast-action');
+      const settings = await (await opened).page();
+      await settings.waitForFunction(() => document.querySelector('#storage-list'), { polling: 100 });
+      ok(settings.url().endsWith('?sort=big#storage') && (await settings.$eval('#storage-sort', (s) => s.value)) === 'big', `Settings, largest first: ${settings.url()}`);
+      await settings.close();
+    } finally {
+      await video.removeScriptToEvaluateOnNewDocument(low.identifier);
+      await video.reload();
+      await video.waitForFunction(() => /fps/.test(document.querySelector('#dims').textContent), { polling: 100 });
+    }
+  },
+
+  async 'space running low: Settings and the popup say so before a recording'({ browser, url }) {
+    for (const [path, sel] of [['settings/settings.html', '#storage-low'], ['popup/popup.html', '#low-space']]) {
+      const p = await browser.newPage();
+      await p.evaluateOnNewDocument(() => { navigator.storage.estimate = async () => ({ quota: 2e9, usage: 2e9 - 120e6 }); });
+      await p.goto(url(path));
+      await p.waitForFunction((s) => !document.querySelector(s).classList.contains('hidden'), { polling: 100, timeout: 5000 }, sel);
+      const text = await p.$eval(sel, (e) => e.textContent);
+      ok(/120 MB|114/.test(text), `${path}: ${text}`);
+      await p.close();
+    }
+    // With room to spare, nothing.
+    const p = await open(browser, url('popup/popup.html'), { width: 340, height: 600 });
+    await sleep(500);
+    ok(await p.$eval('#low-space', (e) => e.classList.contains('hidden')), 'no note with room to spare');
+    await p.close();
+  },
+};

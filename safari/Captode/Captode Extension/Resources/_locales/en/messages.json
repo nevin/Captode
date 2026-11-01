@@ -2128,12 +2128,6 @@
   "part_of": {
     "message": "part $1 of $2"
   },
-  "popup_new_in_captode_2_3": {
-    "message": "New in Captode 2.3"
-  },
-  "popup_whats_new_2_3": {
-    "message": "Pause and draw on the page while recording, add captions, copy text from screenshots, add your logo, and keep captures or save them as project files."
-  },
   "slides_title": {
     "message": "Slides"
   },
@@ -4125,5 +4119,38 @@
   },
   "hist_minutes": {
     "message": "$1 min ago"
+  },
+  "storage_free_up": {
+    "message": "Free up space"
+  },
+  "storage_low_title": {
+    "message": "Space is running low"
+  },
+  "storage_low": {
+    "message": "Only about $1 is left for Captode to keep recordings in. Delete captures you no longer need, largest first."
+  },
+  "storage_free_left": {
+    "message": "About $1 free."
+  },
+  "popup_whats_new_title": {
+    "message": "New in Captode $1"
+  },
+  "popup_whats_new_text": {
+    "message": "Talk over a recording, cut “um” and “uh” from its captions, clean up its sound, and go back several changes at once from the history. On the video page, press ? for its keyboard shortcuts."
+  },
+  "vkeys_playing": {
+    "message": "Playing"
+  },
+  "vkeys_step": {
+    "message": "One frame back or on (a second with ⇧)"
+  },
+  "vkeys_zoom": {
+    "message": "Zoom the timeline in or out"
+  },
+  "vkeys_frame": {
+    "message": "Open the frame on screen in the editor"
+  },
+  "vkeys_help": {
+    "message": "Show these shortcuts"
   }
 }
