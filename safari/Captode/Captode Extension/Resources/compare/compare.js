@@ -13,8 +13,10 @@ const params = new URLSearchParams(location.search);
 const sides = { a: null, b: null }; // { bitmap, title }
 let mode = 'slider';
 let W = 0, H = 0; // A's size: the view's size in image pixels
-let diffRun = 0;
+let drawnA = null;
 let diffDone = null; // the last difference: { changed, total, box }
+let diffJob = null;
+let diffTimer;
 
 // ---------- choosing images ----------
 
@@ -85,6 +87,7 @@ function viewScale() {
 }
 
 async function redraw() {
+  invalidateDiff();
   const ready = sides.a && sides.b;
   $('#view').classList.toggle('hidden', !ready);
   $('#empty').classList.toggle('hidden', !!ready);
@@ -93,11 +96,15 @@ async function redraw() {
   const a = sides.a.bitmap;
   W = a.width;
   H = a.height;
-  const ca = $('#can-a');
-  ca.width = W; ca.height = H;
-  ca.getContext('2d').drawImage(a, 0, 0);
+  if (drawnA !== a) {
+    const ca = $('#can-a');
+    ca.width = W; ca.height = H;
+    ca.getContext('2d').drawImage(a, 0, 0);
+    drawnA = a;
+  }
   const cb = $('#can-b');
-  cb.width = W; cb.height = H;
+  if (cb.width !== W) cb.width = W;
+  if (cb.height !== H) cb.height = H;
   const bctx = cb.getContext('2d');
   bctx.clearRect(0, 0, W, H);
   const p = placeB();
@@ -131,29 +138,62 @@ function layoutView() {
   for (const el of document.querySelectorAll('.mode-opt')) el.classList.toggle('hidden', el.dataset.for !== mode);
 }
 
-let diffWorker = null;
+function invalidateDiff() {
+  clearTimeout(diffTimer);
+  diffJob?.controller.abort();
+  diffJob = null;
+  diffDone = null;
+}
+
+function computeDiff() {
+  clearTimeout(diffTimer);
+  if (!sides.a || !sides.b) return;
+  if (diffDone) return diffDone;
+  if (diffJob) return diffJob.promise;
+  const controller = new AbortController();
+  const job = { controller };
+  diffJob = job;
+  job.promise = runDiff(Number($('#tol').value), controller.signal).catch((error) => {
+    if (!controller.signal.aborted) {
+      $('#stats').textContent = '—';
+      toast(t('queue_failed', error.message), { kind: 'error' });
+    }
+  }).finally(() => { if (diffJob === job) diffJob = null; });
+  return job.promise;
+}
 
 /**
  * Marks the pixels that differ by more than the tolerance in any channel: changed
  * pixels in pink over a faded A. Done in a worker, so the page stays responsive;
  * starting again stops one still running.
  */
-async function computeDiff() {
-  const run = ++diffRun;
-  diffWorker?.terminate();
-  const worker = new Worker('diff-worker.js');
-  diffWorker = worker;
+async function runDiff(tol, signal) {
   $('#stats').textContent = t('compare_comparing');
-  const [a, b] = await Promise.all([createImageBitmap($('#can-a')), createImageBitmap($('#can-b'))]);
+  const snapshots = await Promise.allSettled([createImageBitmap($('#can-a')), createImageBitmap($('#can-b'))]);
+  const [a, b] = snapshots.map((snapshot) => snapshot.value);
+  const failed = snapshots.find((snapshot) => snapshot.status === 'rejected');
+  if (signal.aborted || failed) {
+    a?.close();
+    b?.close();
+    if (failed) throw failed.reason;
+    return;
+  }
+  let worker;
   const result = await new Promise((resolve, reject) => {
+    worker = new Worker('diff-worker.js');
+    signal.addEventListener('abort', () => resolve(null), { once: true });
     worker.onmessage = ({ data }) => {
-      if (data.type === 'progress') { if (run === diffRun) $('#stats').textContent = t('compare_comparing_pct', Math.round(data.f * 100)); }
+      if (data.type === 'progress') $('#stats').textContent = t('compare_comparing_pct', Math.round(data.f * 100));
       else resolve(data);
     };
     worker.onerror = (e) => reject(new Error(e.message));
-    worker.postMessage({ a, b, tol: Number($('#tol').value) }, [a, b]);
-  }).finally(() => { worker.terminate(); if (diffWorker === worker) diffWorker = null; });
-  if (run !== diffRun) { result.image?.close(); return; }
+    worker.postMessage({ a, b, tol }, [a, b]);
+  }).finally(() => {
+    worker?.terminate();
+    a.close();
+    b.close();
+  });
+  if (!result || signal.aborted) { result?.image.close(); return; }
   const cd = $('#can-d');
   cd.width = W; cd.height = H;
   cd.getContext('2d').drawImage(result.image, 0, 0);
@@ -164,6 +204,7 @@ async function computeDiff() {
   $('#stats').innerHTML = changed
     ? t('compare_differ', [`<b>${pct < 0.01 ? '<0.01' : pct.toFixed(2)}%</b>`, changed.toLocaleString()]) + '<br>' + t('compare_within', [`${box.w} × ${box.h}`, `${box.x}, ${box.y}`])
     : t('compare_none');
+  return diffDone;
 }
 
 // ---------- controls ----------
@@ -185,8 +226,13 @@ $('#opacity').addEventListener('input', (e) => {
 });
 $('#tol').addEventListener('input', (e) => {
   $('#tol-v').textContent = e.target.value;
-  if (mode === 'diff') computeDiff();
+  invalidateDiff();
+  if (mode === 'diff') {
+    $('#stats').textContent = t('compare_comparing');
+    diffTimer = setTimeout(computeDiff, 120);
+  }
 });
+$('#tol').addEventListener('change', () => { if (mode === 'diff') computeDiff(); });
 $('#zoom').addEventListener('input', layoutView);
 for (const id of ['match', 'dx', 'dy']) $('#' + id).addEventListener('input', () => redraw());
 addEventListener('resize', () => { if (sides.a && sides.b) layoutView(); });
@@ -231,12 +277,11 @@ document.addEventListener('keydown', (e) => {
 });
 
 $('#dl-diff').addEventListener('click', async () => {
-  if (mode !== 'diff' || !diffDone) {
-    mode = 'diff';
-    $('#modes [data-mode="diff"]').click();
-    await computeDiff();
-  }
+  if (mode !== 'diff') $('#modes [data-mode="diff"]').click();
+  const result = await computeDiff();
+  if (!result || result !== diffDone) return;
   const blob = await new Promise((r) => $('#can-d').toBlob(r, 'image/png'));
+  if (!blob) return;
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob([tagPng(new Uint8Array(await blob.arrayBuffer()))], { type: 'image/png' }));
   a.download = `captode-difference-${Date.now()}.png`;

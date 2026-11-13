@@ -892,10 +892,10 @@ export const tests = {
     const [a, b] = await lab.evaluate(async () => {
       const { putCapture } = await import('/lib/db.js');
       const page = async (s, buttonX) => {
-        const c = new OffscreenCanvas(400 * s, 300 * s);
+        const c = new OffscreenCanvas(400 * s, 1800 * s);
         const g = c.getContext('2d');
         g.scale(s, s);
-        g.fillStyle = '#ffffff'; g.fillRect(0, 0, 400, 300);
+        g.fillStyle = '#ffffff'; g.fillRect(0, 0, 400, 1800);
         g.fillStyle = '#5b4bff'; g.fillRect(0, 0, 400, 40);
         g.fillStyle = '#30a46c'; g.fillRect(buttonX, 200, 100, 40);
         return c.convertToBlob();
@@ -905,7 +905,7 @@ export const tests = {
     await lab.close();
     const cmp = await open(browser, url(`compare/compare.html?a=${a}&b=${b}`), { width: 1400, height: 900 });
     await cmp.waitForFunction(() => !document.querySelector('#view').classList.contains('hidden'), { polling: 100 });
-    ok((await cmp.evaluate(() => captodeCompare.size())).join() === '800,600', 'A sets the size');
+    ok((await cmp.evaluate(() => captodeCompare.size())).join() === '800,3600', 'A sets the size');
     ok(/×2\.00/.test(await cmp.$eval('#match-note', (e) => e.textContent)), 'B is scaled to A');
     // Slider: the divider moves with the keyboard.
     await cmp.focus('#divider');
@@ -922,11 +922,80 @@ export const tests = {
     const st = await cmp.evaluate(() => captodeCompare.stats());
     ok(st.box && st.box.x === 80 && st.box.y === 400 && st.box.w === 240 && st.box.h === 80, `changes at ${JSON.stringify(st.box)}`);
     ok(Math.abs(st.changed - 2 * 40 * 80) < 400, `${st.changed} pixels changed, expected about ${2 * 40 * 80}`);
-    // Lining B up by hand removes the difference: move it 40 px left.
-    await cmp.evaluate(() => { const i = document.querySelector('#dx'); i.value = '-40'; i.dispatchEvent(new Event('input')); });
-    await cmp.waitForFunction(() => captodeCompare.stats()?.box?.y === 0 || /differ/.test(document.querySelector('#stats').textContent), { polling: 100 });
-    ok(/% of pixels differ|No differences/.test(await cmp.$eval('#stats', (e) => e.textContent)), 'the readout updates');
+    const baselinePixel = await cmp.$eval('#can-d', (c) => Array.from(c.getContext('2d').getImageData(90, 420, 1, 1).data).join());
+    await cmp.evaluate(() => {
+      globalThis.compareWorkers = 0;
+      globalThis.Worker = class extends Worker {
+        constructor(...args) { super(...args); globalThis.compareWorkers++; }
+      };
+      document.querySelector('[data-mode="overlay"]').click();
+      document.querySelector('[data-mode="diff"]').click();
+    });
+    ok(await cmp.evaluate(() => compareWorkers === 0 && !!captodeCompare.stats()), 'returning to Difference reuses the last result');
+    await cmp.$eval('#tol', (slider) => {
+      for (const value of [9, 10, 11, 12, 8]) {
+        slider.value = value;
+        slider.dispatchEvent(new Event('input'));
+      }
+      slider.dispatchEvent(new Event('change'));
+    });
+    await cmp.waitForFunction(() => captodeCompare.stats(), { polling: 100 });
+    ok(await cmp.evaluate(() => compareWorkers) === 1, 'the tolerance burst runs one worker');
+    ok(JSON.stringify(await cmp.evaluate(() => captodeCompare.stats())) === JSON.stringify(st), 'the final tolerance restores the same result');
+    ok(await cmp.$eval('#can-d', (c) => Array.from(c.getContext('2d').getImageData(90, 420, 1, 1).data).join()) === baselinePixel, 'the final diff pixel matches');
+    // Move B 40 px left to align the buttons, leaving its right edge uncovered.
+    const drewA = await cmp.evaluate(() => {
+      const ctx = document.querySelector('#can-a').getContext('2d');
+      let drawn = false;
+      const drawImage = ctx.drawImage.bind(ctx);
+      ctx.drawImage = (...args) => { drawn = true; drawImage(...args); };
+      const i = document.querySelector('#dx');
+      i.value = '-40';
+      i.dispatchEvent(new Event('input'));
+      return drawn;
+    });
+    ok(!drewA, 'adjusting B does not redraw A');
+    await cmp.waitForFunction(() => captodeCompare.stats()?.box?.y === 0, { polling: 100 });
+    ok(await cmp.evaluate(() => compareWorkers) === 2, 'adjusting alignment invalidates the cached difference');
+    const aligned = await cmp.evaluate(() => captodeCompare.stats());
+    ok(aligned.changed === 40 * 3600 && aligned.box.x === 760, 'only the uncovered edge differs after alignment');
     await cmp.close();
+  },
+
+  async 'compare: transparent pixels in a partial band do not reuse earlier pixels'({ browser, url }) {
+    const cmp = await open(browser, url('compare/compare.html'));
+    try {
+      const result = await cmp.evaluate(async () => {
+        // At this width the worker reads 2,000 rows per band.
+        const a = new OffscreenCanvas(1000, 2003);
+        const b = new OffscreenCanvas(1000, 2003);
+        for (const canvas of [a, b]) {
+          const ctx = canvas.getContext('2d');
+          ctx.fillStyle = '#fff';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+        b.getContext('2d').clearRect(25, 2001, 4, 2);
+        const images = { a: a.transferToImageBitmap(), b: b.transferToImageBitmap() };
+        const worker = new Worker('diff-worker.js');
+        try {
+          return await new Promise((resolve, reject) => {
+            worker.onerror = (e) => reject(new Error(e.message));
+            worker.onmessage = ({ data }) => {
+              if (data.type !== 'done') return;
+              data.image.close();
+              resolve({ changed: data.changed, box: data.box });
+            };
+            worker.postMessage({ ...images, tol: 0 }, [images.a, images.b]);
+          });
+        } finally {
+          worker.terminate();
+        }
+      });
+      const { changed, box } = result;
+      ok(changed === 8 && box?.x === 25 && box.y === 2001 && box.w === 4 && box.h === 2, JSON.stringify(result));
+    } finally {
+      await cmp.close();
+    }
   },
 
   async 'quick styles colour the selection and new annotations'({ browser, url }) {
@@ -1046,7 +1115,7 @@ export const tests = {
       const { putCapture } = await import('/lib/db.js');
       const c = new OffscreenCanvas(800, 500);
       c.getContext('2d').fillRect(0, 0, 10, 10);
-      return putCapture(await c.convertToBlob(), { title: 'Checkout page', url: 'https://example.com/checkout', mode: 'visible', dpr: 2 });
+      return putCapture(await c.convertToBlob(), { title: 'Checkout page', url: 'https://example.com/checkout?token=private#session', mode: 'visible', dpr: 2 });
     });
     await lab.close();
     const ed = await open(browser, url(`editor/editor.html?id=${id}&reopen=1`), { width: 1400, height: 900 });
@@ -1066,6 +1135,9 @@ export const tests = {
       await ed.click('#share-open');
       await ed.waitForFunction(() => document.querySelector('#share').open && document.querySelectorAll('#sh-steps textarea').length === 2, { polling: 100 });
       ok(await ed.$eval('#sh-title', (e) => e.value) === 'Checkout page', 'the title starts as the capture\'s');
+      ok(await ed.$eval('#sh-url', (e) => e.value) === 'none', 'the source URL is off by default');
+      await ed.select('#sh-url', 'clean');
+      ok((await ed.$eval('#sh-facts', (e) => e.textContent)).includes('https://example.com/checkout'), 'the selected source appears in the preview');
       await ed.type('#sh-summary', 'Spacing above the button is off.');
       await ed.type('#sh-steps [data-i="0"]', 'Header <b>too</b> tall');
       await ed.type('#sh-steps [data-i="1"]', 'Button should be 48 px');
@@ -1078,6 +1150,7 @@ export const tests = {
       ok(page.html.includes('Spacing above the button is off.') && page.html.includes('Button should be 48 px'), 'the summary and notes are in the page');
       ok(page.html.includes('Header &lt;b&gt;too&lt;/b&gt; tall') && !page.html.includes('<b>too</b>'), 'notes are escaped');
       ok(page.html.includes('https://example.com/checkout') && page.html.includes('2× pixel ratio'), 'where it came from');
+      ok(!page.html.includes('token=private') && !page.html.includes('#session'), 'the sanitized URL omits query and fragment');
       ok(/src="data:image\/png;base64,/.test(page.html) && (page.html.match(/class="marker"/g) || []).length === 2, 'the image and two step markers are inside');
       ok(!/<(script|link)[^>]+src=|<link[^>]+href=/.test(page.html.replace(/<script>[\s\S]*?<\/script>/g, '')), 'nothing is loaded from elsewhere');
       // The notes are kept on the steps.
@@ -1086,9 +1159,68 @@ export const tests = {
       // And the page works: clicking a step lights up its marker.
       const view = await browser.newPage();
       await view.setContent(page.html);
+      await view.focus('#zoom');
+      await view.keyboard.press('Enter');
+      ok(await view.$eval('#zoom', (button) => button.getAttribute('aria-pressed')) === 'true', 'Enter opens the full-size image');
+      await view.keyboard.press('Space');
+      ok(await view.$eval('#zoom', (button) => button.getAttribute('aria-pressed')) === 'false', 'Space returns to fit');
       await view.click('#step-1');
       ok(await view.$eval('.marker[data-i="1"]', (m) => m.classList.contains('on')), 'clicking a note highlights its marker');
       await view.close();
+    } finally {
+      await ed.close();
+    }
+  },
+
+  async 'share for review: imported step markup is inert and private details are opt-in'({ browser, url }) {
+    const lab = await open(browser, url('lab/lab.html'));
+    const id = await lab.evaluate(async () => {
+      const { zipBlobs } = await import('/lib/zip.js');
+      const { openProject } = await import('/lib/project.js');
+      const c = new OffscreenCanvas(400, 200);
+      c.getContext('2d').fillRect(0, 0, 10, 10);
+      const project = {
+        format: 'captode-project',
+        version: 1,
+        capture: {
+          blob: { $blob: 0, type: 'image/png' },
+          meta: { url: 'https://example.com/private?token=secret', title: 'Imported capture' },
+          edits: { objects: [
+            { type: 'step', x: 30, y: 30, size: 28, n: '<img id="bad-number">', color: '"><img id="bad-color">' },
+            { type: 'text', x: 70, y: 70, size: 18, text: 'Selectable label', font: 'sans-serif', color: '#17171c' },
+          ] },
+        },
+      };
+      const file = await zipBlobs([
+        { name: 'project.json', data: new TextEncoder().encode(JSON.stringify(project)) },
+        { name: 'files/0', data: await c.convertToBlob() },
+      ]);
+      return (await openProject(file)).id;
+    });
+    await lab.close();
+    const ed = await open(browser, url(`editor/editor.html?id=${id}&reopen=1`));
+    try {
+      await ed.waitForFunction(() => globalThis.captodeEditor?.objects().length === 2, { polling: 100 });
+      await ed.evaluate(() => {
+        HTMLAnchorElement.prototype.click = function () { window.__download = this.href; };
+        document.querySelector('#share-open').click();
+      });
+      const safe = await ed.evaluate(() => {
+        const step = captodeEditor.objects()[0];
+        return step.n === 1 && step.color === '#e5484d'
+          && document.querySelector('#sh-steps .n').textContent === '1'
+          && !document.querySelector('#bad-number, #bad-color');
+      });
+      ok(safe, 'invalid project step values are replaced without inserting markup');
+      await ed.evaluate(() => document.querySelector('#sh-labels').click());
+      ok((await ed.$eval('#sh-label-preview', (e) => e.textContent)) === 'Selectable label', 'opted-in labels appear in the preview');
+      await ed.evaluate(() => {
+        document.querySelector('#sh-labels').click();
+        document.querySelector('#sh-go').click();
+      });
+      await ed.waitForFunction(() => window.__download, { polling: 100 });
+      const html = await ed.evaluate(async () => (await fetch(window.__download)).text());
+      ok(!/bad-number|bad-color|example\.com\/private|Selectable label/.test(html), 'the export omits injected markup and default-private text and URL');
     } finally {
       await ed.close();
     }

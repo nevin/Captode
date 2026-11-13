@@ -87,9 +87,10 @@ The capture opens in the editor, where you can:
 - **Presets** for common uses (chat, issue trackers, email, design review, phone mock-ups,
   websites), or save your own. Your last format and options are remembered.
 - **Several devices at once:** one zip with an image for each device you tick.
-- **Share for review:** a single web page with the annotated image, a note for each numbered
-  step and where the capture came from, to attach to a ticket or send in chat. It opens in any
-  browser, needs no account, and nothing is uploaded.
+- **Share for review:** a single web page with the annotated image and a note for each numbered
+  step, to attach to a ticket or send in chat. Preview the image and details before saving, and
+  choose whether to include the source URL or selectable copies of the image labels. Both are off
+  by default. The page opens in any browser, needs no account, and nothing is uploaded.
 - **Keyboard shortcuts** for every tool. Press **?** in the editor to see them all.
 - **Keyboard and screen readers:** every annotation is listed in words in the Annotate tab,
   where it can be chosen, moved, edited or removed from the keyboard, and changes are announced.

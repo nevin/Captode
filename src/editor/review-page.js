@@ -44,6 +44,8 @@ figure.full { cursor: zoom-out; overflow: auto; max-height: 85vh; }
 figure .shot { position: relative; }
 figure img { display: block; width: 100%; height: auto; }
 figure.full .shot { width: ${width}px; }
+.zoom { margin: 0 0 8px; padding: 6px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); color: var(--text); font: inherit; cursor: pointer; }
+.zoom:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .marker { position: absolute; width: 34px; height: 34px; margin: -17px 0 0 -17px; border-radius: 50%; outline: none; }
 .marker.on, .marker:focus-visible { box-shadow: 0 0 0 3px #fff, 0 0 0 6px var(--c, var(--accent)); }
 aside { position: sticky; top: 16px; display: grid; gap: 16px; }
@@ -69,12 +71,15 @@ footer { text-align: center; padding: 0 16px 32px; color: var(--muted); font-siz
   ${summary ? `<p class="summary">${esc(summary)}</p>` : ''}
 </header>
 <main>
+  <div>
+  <button type="button" class="zoom" id="zoom" aria-controls="fig" aria-pressed="false">${esc(t('share_view_full_size'))}</button>
   <figure id="fig" title="${esc(t('page_full_size'))}">
     <div class="shot">
       <img src="${image}" width="${width}" height="${height}" alt="${esc(summary ? `${title}: ${summary.split('\n')[0].slice(0, 160)}` : title)}">
       ${markers}
     </div>
   </figure>
+  </div>
   <aside>
     ${steps.length ? `<section><h2>${esc(t('page_steps'))}</h2><ol id="notes">${notes}</ol></section>` : ''}
     ${labels.length ? `<section><h2>${esc(t('page_labels'))}</h2><ul class="labels">${labels.map((l) => `<li>${esc(l)}</li>`).join('')}</ul></section>` : ''}
@@ -85,6 +90,7 @@ footer { text-align: center; padding: 0 16px 32px; color: var(--muted); font-siz
 <script>
   // Steps and their markers light up together; the image toggles full size.
   const fig = document.getElementById('fig');
+  const zoom = document.getElementById('zoom');
   const all = (i) => document.querySelectorAll('[data-i="' + i + '"]');
   let on = null;
   const show = (i) => {
@@ -98,7 +104,9 @@ footer { text-align: center; padding: 0 16px 32px; color: var(--muted); font-siz
   document.querySelectorAll('.marker').forEach((m) => {
     m.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); show(m.dataset.i); const li = document.getElementById('step-' + m.dataset.i); li.focus({ preventScroll: true }); li.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); });
   });
-  fig.addEventListener('click', (e) => { if (e.target.tagName === 'IMG') fig.classList.toggle('full'); });
+  const toggleZoom = () => zoom.setAttribute('aria-pressed', String(fig.classList.toggle('full')));
+  zoom.addEventListener('click', toggleZoom);
+  fig.addEventListener('click', (e) => { if (e.target.tagName === 'IMG') toggleZoom(); });
 </script>
 </body>
 </html>

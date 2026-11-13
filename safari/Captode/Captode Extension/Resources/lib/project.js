@@ -9,6 +9,7 @@
 
 import { zipBlobs, unzip } from './zip.js';
 import { getCapture, putCapture, putExtras } from './db.js';
+import { stepAppearance } from './shapes.js';
 
 export const PROJECT_EXT = 'captode';
 const FORMAT = 'captode-project';
@@ -91,6 +92,9 @@ export async function openProject(file) {
   try { capture = unpack(json.capture, files); } catch { throw new Error('not-project'); }
   const { blob, meta, created, ...extras } = capture || {};
   if (!(blob instanceof Blob) || !/^(image|video)\//.test(blob.type)) throw new Error('not-project');
+  if (Array.isArray(extras.edits?.objects)) {
+    extras.edits.objects = extras.edits.objects.map((o, i) => o?.type === 'step' ? { ...o, ...stepAppearance(o, i + 1) } : o);
+  }
   const id = await putCapture(blob, { ...(meta && typeof meta === 'object' ? meta : {}), opened: Date.now(), ...(Number.isFinite(created) && { made: created }) });
   await putExtras(id, { ...extras, kept: true });
   return { id, kind: blob.type.startsWith('video/') ? 'video' : 'image' };

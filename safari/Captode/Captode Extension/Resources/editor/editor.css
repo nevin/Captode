@@ -197,6 +197,11 @@ body { display: flex; flex-direction: column; overflow: hidden; }
 #sh-steps label { display: grid; grid-template-columns: 28px 1fr; gap: 10px; align-items: start; }
 #sh-steps .n { display: grid; place-items: center; width: 24px; height: 24px; margin-top: 4px; border-radius: 50%; color: #fff; font-weight: 700; font-size: 12px; }
 #sh-steps textarea { min-height: 38px; }
+.sh-preview { margin-block: 12px; }
+.sh-preview summary { cursor: pointer; font-weight: 600; }
+#sh-image { display: block; width: auto; height: auto; max-width: 100%; max-height: 150px; margin-block: 8px; }
+#sh-facts { display: grid; grid-template-columns: auto 1fr; gap: 4px 10px; }
+#sh-facts dd { margin: 0; overflow-wrap: anywhere; }
 
 /* Annotations list */
 .layers { list-style: none; margin: 4px 0 8px; padding: 3px; max-height: 240px; overflow-y: auto; border: 1px solid var(--line); border-radius: 8px; outline: none; }

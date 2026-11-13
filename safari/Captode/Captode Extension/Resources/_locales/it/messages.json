@@ -1523,6 +1523,27 @@
   "multi_failed": {
     "message": "Non ha funzionato: $1"
   },
+  "share_preview": {
+    "message": "Contenuto da condividere"
+  },
+  "share_image_preview": {
+    "message": "Anteprima dell’immagine"
+  },
+  "share_url_none": {
+    "message": "Ometti l’URL di origine"
+  },
+  "share_url_clean": {
+    "message": "Includi l’URL senza query o frammento"
+  },
+  "share_url_full": {
+    "message": "Includi l’URL completo"
+  },
+  "share_include_labels": {
+    "message": "Includi le etichette dell’immagine come testo selezionabile"
+  },
+  "share_view_full_size": {
+    "message": "Visualizza a grandezza reale"
+  },
   "share_page": {
     "message": "Pagina"
   },

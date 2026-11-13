@@ -1523,6 +1523,27 @@
   "multi_failed": {
     "message": "未能完成：$1"
   },
+  "share_preview": {
+    "message": "将要分享的内容"
+  },
+  "share_image_preview": {
+    "message": "图片预览"
+  },
+  "share_url_none": {
+    "message": "省略来源网址"
+  },
+  "share_url_clean": {
+    "message": "包含网址，但不包含查询参数和片段"
+  },
+  "share_url_full": {
+    "message": "包含完整网址"
+  },
+  "share_include_labels": {
+    "message": "将图片标签作为可选中文本包含在内"
+  },
+  "share_view_full_size": {
+    "message": "查看原始大小"
+  },
   "share_page": {
     "message": "页面"
   },

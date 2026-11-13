@@ -1523,6 +1523,27 @@
   "multi_failed": {
     "message": "실패했습니다: $1"
   },
+  "share_preview": {
+    "message": "공유할 내용"
+  },
+  "share_image_preview": {
+    "message": "이미지 미리보기"
+  },
+  "share_url_none": {
+    "message": "원본 URL 생략"
+  },
+  "share_url_clean": {
+    "message": "쿼리와 프래그먼트를 제외한 URL 포함"
+  },
+  "share_url_full": {
+    "message": "전체 URL 포함"
+  },
+  "share_include_labels": {
+    "message": "이미지 라벨을 선택 가능한 텍스트로 포함"
+  },
+  "share_view_full_size": {
+    "message": "원본 크기로 보기"
+  },
   "share_page": {
     "message": "페이지"
   },

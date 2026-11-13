@@ -11,6 +11,13 @@ function luminance(hex) {
 /** The colours offered for annotations and callouts. */
 export const PALETTE = ['#e5484d', '#f76b15', '#ffc53d', '#30a46c', '#0090ff', '#5b4bff', '#17171c', '#ffffff'];
 
+export function stepAppearance(step, fallbackNumber) {
+  return {
+    n: Number.isSafeInteger(step.n) && step.n >= 0 ? step.n : fallbackNumber,
+    color: typeof step.color === 'string' && /^#[0-9a-f]{6}$/i.test(step.color) ? step.color : PALETTE[0],
+  };
+}
+
 /** Starts a path of a rectangle with corners rounded by `r`. */
 export function roundRect(ctx, x, y, w, h, r) {
   r = Math.max(0, Math.min(r, Math.abs(w) / 2, Math.abs(h) / 2));

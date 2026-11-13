@@ -26,6 +26,63 @@ const catchSaves = (page) => page.evaluate(() => {
 });
 
 export const tests = {
+  async 'download reuses the exact size estimate until the image or export settings change'({ browser, url }) {
+    const lab = await open(browser, url('lab/lab.html'));
+    const id = await shot(lab, 1);
+    await lab.close();
+    const ed = await open(browser, url(`editor/editor.html?id=${id}&reopen=1`));
+    try {
+      await ed.waitForFunction(() => globalThis.captodeEditor?.size(), { polling: 100 });
+      await catchSaves(ed);
+      await ed.evaluate(() => {
+        globalThis.jpegEncodes = [];
+        globalThis.Worker = class extends Worker {
+          postMessage(data, transfer) {
+            if (data.format === 'jpeg') this.addEventListener('message', (e) => {
+              if (e.data.result) globalThis.jpegEncodes.push(e.data.result.blob);
+            }, { once: true });
+            super.postMessage(data, transfer);
+          }
+        };
+        document.querySelector('#tab-export').click();
+        const format = document.querySelector('#x-format');
+        format.value = 'jpeg';
+        format.dispatchEvent(new Event('input'));
+      });
+      await ed.waitForFunction(() => jpegEncodes.length === 1 && !document.querySelector('#x-estimate .working'), { polling: 100 });
+      await ed.evaluate(() => document.querySelector('#download2').click());
+      await ed.waitForFunction(() => window.__saved.length === 1, { polling: 100 });
+      const reused = await ed.evaluate(async () => {
+        const saved = new Uint8Array(await (await fetch(window.__saved[0].url)).arrayBuffer());
+        const estimate = new Uint8Array(await jpegEncodes[0].arrayBuffer());
+        return jpegEncodes.length === 1 && saved.length === estimate.length && saved.every((byte, i) => byte === estimate[i]);
+      });
+      ok(reused, 'download used the estimate bytes without another JPEG encode');
+      await ed.evaluate(() => {
+        const scale = document.querySelector('#x-scale');
+        scale.value = '0.5';
+        scale.dispatchEvent(new Event('input'));
+        document.querySelector('#download2').click();
+      });
+      await ed.waitForFunction(() => window.__saved.length === 2, { polling: 100 });
+      await ed.waitForFunction(() => /400 × 250/.test(document.querySelector('#x-dims').textContent), { polling: 100 });
+      await ed.evaluate(() => {
+        document.querySelector('#rot-cw').click();
+        document.querySelector('#download2').click();
+      });
+      await ed.waitForFunction(() => window.__saved.length === 3, { polling: 100 });
+      const sizes = await ed.evaluate(async () => Promise.all(window.__saved.map(async ({ url }) => {
+        const bitmap = await createImageBitmap(await (await fetch(url)).blob());
+        const size = [bitmap.width, bitmap.height];
+        bitmap.close();
+        return size.join('×');
+      })));
+      ok(sizes.join(',') === '800×500,400×250,250×400', `download sizes after changing scale and rotating: ${sizes}`);
+    } finally {
+      await ed.close();
+    }
+  },
+
   async 'size limits keep text readable: lossless first, never below on-screen size, never blurry quality'({ browser, url }) {
     const lab = await open(browser, url('lab/lab.html'));
     const r = await lab.evaluate(async () => {

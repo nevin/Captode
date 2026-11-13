@@ -51,8 +51,9 @@ them. It does not collect, transmit, sell or share any personal or sensitive dat
 - **Slide files** made with Export in the Slides section are files you download; Captode
   doesn't upload them. They hold the slides' words, settings, pictures and font file.
 - **Review pages** made with Share for review, and zips of several devices, are files you
-  download: Captode doesn't upload or host them. A review page contains the image and the
-  notes you wrote, and the address of the page you captured.
+  download. Captode doesn't upload or host them. A review page contains the image and the
+  notes you wrote. The source URL and selectable copies of the image labels are optional and
+  off by default.
 - **Camera and microphone** are used only if you turn on Camera bubble or Microphone in
   the recording options, and only while a recording is running. What they capture goes
   into that recording on your device and nowhere else. Your browser asks you before

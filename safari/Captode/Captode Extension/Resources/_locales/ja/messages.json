@@ -1523,6 +1523,27 @@
   "multi_failed": {
     "message": "うまくいきませんでした：$1"
   },
+  "share_preview": {
+    "message": "共有される内容"
+  },
+  "share_image_preview": {
+    "message": "画像のプレビュー"
+  },
+  "share_url_none": {
+    "message": "元の URL を含めない"
+  },
+  "share_url_clean": {
+    "message": "クエリとフラグメントを除いた URL を含める"
+  },
+  "share_url_full": {
+    "message": "URL 全体を含める"
+  },
+  "share_include_labels": {
+    "message": "画像のラベルを選択可能なテキストとして含める"
+  },
+  "share_view_full_size": {
+    "message": "原寸で表示"
+  },
   "share_page": {
     "message": "ページ"
   },

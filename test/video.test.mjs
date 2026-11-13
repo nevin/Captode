@@ -87,6 +87,13 @@ export async function setup({ browser, url }) {
     return [before, after];
   }, t);
 
+  // Clicks go to the middle of the view first: Puppeteer scrolls a control only just into
+  // view, which in the panel can leave it under the export bar, so the click lands on Export.
+  const click = page.click.bind(page);
+  page.click = async (sel, options) => {
+    await page.$eval(sel, (e) => e.scrollIntoView({ block: 'center' })).catch(() => {});
+    return click(sel, options);
+  };
   // The lab page reads frame times; give the video page the same helper.
   await page.evaluate(async () => { window.lab = await import('/lab/lab.js'); });
   // Slides start folded away (the recording has none), out of the way of trimming and exporting.
@@ -1624,6 +1631,46 @@ export const tests = {
       await video.evaluate(() => chrome.storage.local.remove('videoDefaults'));
       await clearEdits(video);
       await video.bringToFront();
+    }
+  },
+
+  async 'Frame to editor takes the slide on screen, or the frame with its overlays on it'({ browser, video, set }) {
+    /** Presses F, and reads what the editor opened: its name, size and two pixels. */
+    const frameToEditor = async () => {
+      const before = new Set(browser.targets());
+      await video.evaluate(() => document.activeElement?.blur());
+      await video.keyboard.press('f');
+      const target = await browser.waitForTarget((x) => !before.has(x) && x.url().includes('editor.html?id='), { timeout: 15000 });
+      const ed = await prepare(await target.page());
+      await ed.waitForFunction(() => /px/.test(document.querySelector('#doc-dims').textContent), { polling: 100 });
+      const r = await ed.evaluate(() => {
+        const d = captodeEditor.pixels();
+        const px = (x, y) => [...d.data.slice((y * d.width + x) * 4, (y * d.width + x) * 4 + 3)];
+        return { name: document.querySelector('#doc-name').textContent, size: captodeEditor.size(), corner: px(10, 10), band: px(100, 655) };
+      });
+      await ed.close();
+      await video.bringToFront();
+      return r;
+    };
+    try {
+      // An inserted slide being edited: the slide itself.
+      await video.evaluate(() => { const p = document.querySelector('#player'); p.pause(); p.currentTime = 2; });
+      await sleep(200);
+      await video.click('#slide-add');
+      await video.type('#sl-title', 'Snapshot');
+      await video.click('#sl-themes [data-theme="paper"]');
+      await set('#slide-editor [data-k="fade"]', false);
+      let r = await frameToEditor();
+      ok(r.size.join() === '1280,720' && r.corner.every((c) => c > 240) && / · Snapshot$/.test(r.name), `the slide: ${JSON.stringify(r)}`);
+      await deleteSlides(video);
+      // An overlay on at the playhead: the frame, with the overlay's band over it.
+      await addOverlay(video, set, 2);
+      await video.evaluate(() => { document.querySelector('#player').currentTime = 2.5; });
+      await sleep(300);
+      r = await frameToEditor();
+      ok(r.band.every((c) => c > 160) && r.corner[0] < 150 && / · 0:02\.5$/.test(r.name), `the frame with the overlay: ${JSON.stringify(r)}`);
+    } finally {
+      await deleteSlides(video);
     }
   },
 };

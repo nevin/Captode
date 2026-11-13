@@ -1193,10 +1193,25 @@ function noteMissing() {
 async function frameToEditor() {
   if (!player.videoWidth || $('#player').classList.contains('hidden')) return;
   player.pause();
-  const c = new OffscreenCanvas(player.videoWidth, player.videoHeight);
-  c.getContext('2d').drawImage(player, 0, 0);
+  S.slides?.hold(); // a slide on screen stays there, rather than playback carrying on behind the editor
+  // What is on screen, at the recording's own size: a slide by itself, or the frame
+  // with any overlays on it as the export has them.
+  const W = player.videoWidth, H = player.videoHeight;
+  const on = await S.slides?.snapshot(W, H);
+  let c = on?.slide;
+  if (!c) {
+    c = new OffscreenCanvas(W, H);
+    const ctx = c.getContext('2d');
+    ctx.drawImage(player, 0, 0);
+    for (const o of on?.overlays || []) {
+      ctx.globalAlpha = o.a;
+      ctx.drawImage(o.canvas, o.dx * W, 0);
+    }
+    ctx.globalAlpha = 1;
+  }
   const blob = await c.convertToBlob({ type: 'image/png' });
-  const title = `${S.meta.title || t('video_recording')} · ${fmtTime(player.currentTime)}`;
+  const what = on?.slide ? on.title || t('slides_slide') : fmtTime(player.currentTime);
+  const title = `${S.meta.title || t('video_recording')} · ${what}`;
   const id = await putCapture(blob, { title, url: S.meta.url, mode: 'frame', dpr: S.meta.dpr });
   await chrome.tabs.create({ url: chrome.runtime.getURL(`editor/editor.html?id=${id}&reopen=1`) });
 }

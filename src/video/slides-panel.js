@@ -39,9 +39,9 @@ export function mountSlides(opts) {
 
   // ---------- drawing ----------
 
-  /** Draws `s` into `canvas` at `scale` of the output size (the layout is the same at any size). */
-  async function paint(canvas, s, maxSide) {
-    const [W, H] = opts.size();
+  /** Draws `s` into `canvas` at `scale` of the output size, or of `size` (the layout is the same at any size). */
+  async function paint(canvas, s, maxSide, size = opts.size()) {
+    const [W, H] = size;
     if (!W || !H) return;
     const k = Math.min(1, maxSide / Math.max(W, H));
     const imgs = await slideImages(s);
@@ -239,6 +239,15 @@ export function mountSlides(opts) {
     return overlaysAt(overlaySchedule(slides, start, end, fps, map), (map ? map.outOf(now) : now - start) * fps, fps)
       .map(({ e, a, dx }) => ({ id: e.s.id, canvas: liveCanvas(e.s), a, dx }))
       .filter((x) => x.canvas);
+  }
+
+  /** The overlays on at time `now`, as the export has them: `[{ s, a, dx }]`. */
+  function overlaysOn(now) {
+    const { start, end } = opts.trim();
+    const fps = 60;
+    if (now > end + 1e-3) return [];
+    const map = opts.clip?.();
+    return overlaysAt(overlaySchedule(slides, start, end, fps, map), (map ? map.outOf(now) : now - start) * fps, fps).map(({ e, a, dx }) => ({ s: e.s, a, dx }));
   }
 
   /** The overlays at the playhead, in the view; it is theirs whenever no slide has it. */
@@ -974,6 +983,26 @@ export function mountSlides(opts) {
     skip,
     hide,
     showing: () => !!shown,
+    /**
+     * What the slides put on screen now, drawn afresh at `W` × `H` (for Frame to editor):
+     * an inserted slide on its own (`{ slide, title }`), or the overlays on at this moment,
+     * to go over the frame (`{ overlays: [{ canvas, a, dx }] }`).
+     */
+    async snapshot(W, H) {
+      const draw = async (s) => { const c = new OffscreenCanvas(1, 1); await paint(c, s, Infinity, [W, H]); return c; };
+      if (shown && !isOverlay(shown.s)) return { slide: await draw(shown.s), title: shown.s.title.trim() };
+      return { overlays: await Promise.all(overlaysOn(player.currentTime).map(async ({ s, a, dx }) => ({ canvas: await draw(s), a, dx }))) };
+    },
+    /** A slide being presented in playback stays on screen, and playback doesn't carry on. */
+    hold() {
+      if (!shown?.present) return;
+      clearTimers();
+      shown.timers = [];
+      shown.present = false;
+      view.style.transition = 'none';
+      view.style.opacity = '1';
+      drawView();
+    },
     /** After the trim, the output size or the timeline's length changes. */
     refresh() {
       forget();

@@ -87,6 +87,7 @@ const DASHABLE = new Set(['line', 'arrow', 'rect', 'ellipse']);
 const frame = { padding: 0, bg: 'transparent', radius: 0, shadow: false }; // bg: a colour or 'transparent'
 
 let base = null;     // OffscreenCanvas with the pixels being edited
+let lastExport = null; // the completed size estimate and the state it was encoded from
 let logo = null;     // your logo from Settings, ready to draw (lib/brand.js), when one is set
 let logoOn = false;  // added to this picture's corner
 let objects = [];    // annotations, in image coordinates
@@ -172,7 +173,10 @@ function commit() {
 
 // The export's size estimate draws and encodes the whole image, so it's only worked
 // out while the Export tab shows it; opening the tab works it out afresh (showPane).
-const exportChanged = () => { if (document.body.dataset.pane === 'export') refreshExport(); };
+const exportChanged = () => {
+  lastExport = null;
+  if (document.body.dataset.pane === 'export') refreshExport();
+};
 
 // ---------- keeping edits ----------
 // Edits to a capture are saved with it (on this device, like the capture), so
@@ -2312,8 +2316,26 @@ function fitOptions(scale = $('#x-scale').value) {
   return { ...encodeOptions(), readable: true, minScale: Math.min(1, 1 / captureDpr / scaleFactor(scale)) };
 }
 
-function encode(c, lane = 'export') {
-  return encodeOffThread(c, $('#x-format').value, fitOptions(), lane, Number($('#x-limit').value) * 1024);
+function exportOptions(scale = $('#x-scale').value) {
+  return { format: $('#x-format').value, options: fitOptions(scale), maxBytes: Number($('#x-limit').value) * 1024 };
+}
+
+function encode(c, lane = 'export', { format, options, maxBytes } = exportOptions()) {
+  return encodeOffThread(c, format, options, lane, maxBytes);
+}
+
+function exportRequest() {
+  const scale = $('#x-scale').value;
+  const deviceOpts = device?.get();
+  const encoding = exportOptions(scale);
+  // Some edits update the live image before committing to undo history. Key the
+  // file to the actual render inputs so Download is safe even during that gap.
+  const key = JSON.stringify([objects, frame, logoOn, scaleFactor(scale), deviceOpts, encoding]);
+  return { image: base, key, scale, deviceOpts, encoding };
+}
+
+function sameExport(a, b) {
+  return a !== null && a.image === b.image && a.key === b.key;
 }
 
 /** Says what was changed to fit the size limit, if anything. */
@@ -2371,12 +2393,13 @@ let estimateRun = 0;
 const refreshExport = debounce(async () => {
   if (!base) return;
   const run = ++estimateRun;
+  const request = exportRequest();
   previewSoon(); // the picture first: the file can take seconds to make
   $('#x-estimate').innerHTML = `<span class="working" title="${t('estimate_working')}">…</span>`;
   try {
-    const c = await finalCanvas();
-    const r = await encode(c, 'estimate');
-    if (run !== estimateRun) return;
+    const c = await finalCanvas(request);
+    const r = await encode(c, 'estimate', request.encoding);
+    if (run !== estimateRun || !sameExport(request, exportRequest())) return;
     $('#x-estimate').textContent = fmtBytes(r.blob.size);
     $('#x-dims').textContent = t('export_will_be', `${r.width} × ${r.height} px`);
     $('#x-fitted').textContent = fittedNote(r.fitted, r.blob.size);
@@ -2388,7 +2411,7 @@ const refreshExport = debounce(async () => {
     fa.textContent = forceFit ? t('fit_keep_readable') : t('fit_anyway');
     $('#x-picked').textContent = pickedNote(r.picked);
     $('#x-picked').classList.toggle('hidden', !r.picked || !!r.fitted);
-    lastExport = r.blob;
+    lastExport = { image: request.image, key: request.key, blob: r.blob };
     refreshHint(c, r.blob.size);
   } catch (e) {
     if (e.superseded) return;
@@ -2437,6 +2460,7 @@ mountMultiExport({
 // ---------- share for review (share.js) ----------
 
 mountShare({
+  preview: () => smallPicture(Math.max(1, Math.min(400, 150 * fullW() / fullH()))),
   hasImage: () => !!base,
   finishEditing: () => { if (editing) finishText(); },
   objects: () => objects,
@@ -2448,8 +2472,7 @@ mountShare({
   commit: () => commit(),
 });
 
-let lastExport = null; // the estimate's file, which names Smallest's extension
-function fileName(blob = lastExport) {
+function fileName(blob) {
   const n = ($('#x-name').value || 'captode').trim().replace(/[\\/:*?"<>|]+/g, '-');
   return `${n}.${extFor(blob)}`;
 }
@@ -2533,7 +2556,9 @@ async function download() {
   const btns = [$('#download'), $('#download2')];
   btns.forEach((b) => { b.disabled = true; });
   try {
-    const { blob } = await encode(await finalCanvas());
+    const request = exportRequest();
+    const { blob } = sameExport(lastExport, request)
+      ? lastExport : await encode(await finalCanvas(request), 'export', request.encoding);
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
     a.download = fileName(blob);

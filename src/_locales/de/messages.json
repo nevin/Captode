@@ -1523,6 +1523,27 @@
   "multi_failed": {
     "message": "Das hat nicht geklappt: $1"
   },
+  "share_preview": {
+    "message": "Was geteilt wird"
+  },
+  "share_image_preview": {
+    "message": "Bildvorschau"
+  },
+  "share_url_none": {
+    "message": "Quell-URL weglassen"
+  },
+  "share_url_clean": {
+    "message": "URL ohne Abfrage oder Fragment hinzufügen"
+  },
+  "share_url_full": {
+    "message": "Vollständige URL hinzufügen"
+  },
+  "share_include_labels": {
+    "message": "Bildbeschriftungen als auswählbaren Text hinzufügen"
+  },
+  "share_view_full_size": {
+    "message": "In voller Größe anzeigen"
+  },
   "share_page": {
     "message": "Seite"
   },

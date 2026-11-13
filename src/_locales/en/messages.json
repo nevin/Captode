@@ -1525,6 +1525,27 @@
   "multi_failed": {
     "message": "That didn't work: $1"
   },
+  "share_preview": {
+    "message": "What will be shared"
+  },
+  "share_image_preview": {
+    "message": "Image preview"
+  },
+  "share_url_none": {
+    "message": "Omit source URL"
+  },
+  "share_url_clean": {
+    "message": "Include URL without query or fragment"
+  },
+  "share_url_full": {
+    "message": "Include full URL"
+  },
+  "share_include_labels": {
+    "message": "Include image labels as selectable text"
+  },
+  "share_view_full_size": {
+    "message": "View full size"
+  },
   "share_page": {
     "message": "Page"
   },

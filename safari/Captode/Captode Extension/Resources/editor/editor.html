@@ -408,6 +408,20 @@
     <label class="field"><span data-i18n="editor_summary">Summary <small class="muted" data-i18n="editor_optional">optional</small></span><textarea id="sh-summary" rows="3" placeholder="What should reviewers look at?" data-i18n-placeholder="editor_what_should_reviewers_look_at"></textarea></label>
     <div id="sh-steps"></div>
     <p class="muted small" id="sh-none" data-i18n="editor_add_numbered_steps_n_to">Add numbered steps (N) to the image to write a note for each.</p>
+    <details class="sh-preview" open>
+      <summary data-i18n="share_preview">What will be shared</summary>
+      <canvas id="sh-image" role="img" aria-label="Image preview" data-i18n-aria-label="share_image_preview"></canvas>
+      <label class="field"><span data-i18n="share_page">Source page</span>
+        <select id="sh-url">
+          <option value="none" data-i18n="share_url_none">Omit source URL</option>
+          <option value="clean" data-i18n="share_url_clean">Include URL without query or fragment</option>
+          <option value="full" data-i18n="share_url_full">Include full URL</option>
+        </select>
+      </label>
+      <label class="toggle"><span data-i18n="share_include_labels">Include image labels as selectable text</span><input id="sh-labels" type="checkbox"></label>
+      <ul id="sh-label-preview" class="small" hidden></ul>
+      <dl id="sh-facts" class="small"></dl>
+    </details>
     <div class="row actions">
       <button type="button" class="btn" data-close data-i18n="settings_cancel">Cancel</button>
       <button type="submit" class="btn primary" id="sh-go" data-i18n="editor_download_review_page">Download review page</button>

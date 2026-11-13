@@ -4,22 +4,23 @@
 
 self.onmessage = ({ data: { a, b, tol } }) => {
   const W = a.width, H = a.height;
-  const ca = new OffscreenCanvas(W, H).getContext('2d', { willReadFrequently: true });
-  const cb = new OffscreenCanvas(W, H).getContext('2d', { willReadFrequently: true });
-  ca.drawImage(a, 0, 0);
-  cb.drawImage(b, 0, 0);
-  a.close();
-  b.close();
+  // Reuse band-sized readback canvases so long captures don't need two
+  // additional full-size backing stores in the worker.
+  const band = Math.min(H, Math.max(1, Math.floor(2e6 / W)));
+  const ca = new OffscreenCanvas(W, band).getContext('2d', { willReadFrequently: true });
+  const cb = new OffscreenCanvas(W, band).getContext('2d', { willReadFrequently: true });
   const out = new OffscreenCanvas(W, H);
   const octx = out.getContext('2d');
   let changed = 0;
   let x0 = W, y0 = H, x1 = -1, y1 = -1;
-  // In bands, so memory stays small for very long captures.
-  const band = Math.max(1, Math.floor(2e6 / W));
   for (let y = 0; y < H; y += band) {
     const h = Math.min(band, H - y);
-    const pa = ca.getImageData(0, y, W, h).data;
-    const pb = cb.getImageData(0, y, W, h).data;
+    ca.clearRect(0, 0, W, h);
+    cb.clearRect(0, 0, W, h);
+    ca.drawImage(a, 0, y, W, h, 0, 0, W, h);
+    cb.drawImage(b, 0, y, W, h, 0, 0, W, h);
+    const pa = ca.getImageData(0, 0, W, h).data;
+    const pb = cb.getImageData(0, 0, W, h).data;
     const img = octx.createImageData(W, h);
     const o = img.data;
     for (let i = 0; i < pa.length; i += 4) {
@@ -43,6 +44,8 @@ self.onmessage = ({ data: { a, b, tol } }) => {
     octx.putImageData(img, 0, y);
     self.postMessage({ type: 'progress', f: (y + h) / H });
   }
+  a.close();
+  b.close();
   const box = x1 >= 0 ? { x: x0, y: y0, w: x1 - x0 + 1, h: y1 - y0 + 1 } : null;
   if (box) {
     // Outline where the changes are.
