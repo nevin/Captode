@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <title>Captode</title>
+  <defs>
+    <linearGradient id="bracket" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#5B47FF"/>
+      <stop offset="1" stop-color="#9B4DFF"/>
+    </linearGradient>
+    <linearGradient id="frame" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#4F3BF5"/>
+      <stop offset="1" stop-color="#8E44FF"/>
+    </linearGradient>
+    <linearGradient id="bar" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#1F1F5C"/>
+      <stop offset="1" stop-color="#3A2BC9"/>
+    </linearGradient>
+    <linearGradient id="playDark" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#3A35C8"/>
+      <stop offset="1" stop-color="#161A3A"/>
+    </linearGradient>
+    <linearGradient id="playLight" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#A35BFF"/>
+      <stop offset="1" stop-color="#5B47FF"/>
+    </linearGradient>
+    <linearGradient id="dot" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FF6A3D"/>
+      <stop offset="1" stop-color="#F01E45"/>
+    </linearGradient>
+    <mask id="playShape" maskUnits="userSpaceOnUse" x="0" y="0" width="512" height="512">
+      <path d="M212 212 L212 346 L326 279 Z" fill="#fff" stroke="#fff" stroke-width="30" stroke-linejoin="round"/>
+    </mask>
+  </defs>
+  <!-- Capture brackets -->
+  <g fill="none" stroke="url(#bracket)" stroke-width="34" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M44 166 V92 A48 48 0 0 1 92 44 H166"/>
+    <path d="M346 44 H420 A48 48 0 0 1 468 92 V166"/>
+    <path d="M468 346 V420 A48 48 0 0 1 420 468 H346"/>
+    <path d="M166 468 H92 A48 48 0 0 1 44 420 V346"/>
+  </g>
+  <!-- Browser window, with a light outline so its edge stays visible on dark backgrounds -->
+  <rect x="73" y="101" width="366" height="314" rx="51" fill="#ECE9FF"/>
+  <rect x="80" y="108" width="352" height="300" rx="44" fill="url(#frame)"/>
+  <path d="M124 108 H388 A44 44 0 0 1 432 152 V168 H80 V152 A44 44 0 0 1 124 108 Z" fill="url(#bar)"/>
+  <circle cx="122" cy="138" r="11" fill="#8B5CF6"/>
+  <circle cx="156" cy="138" r="11" fill="#C9B8FF"/>
+  <circle cx="190" cy="138" r="11" fill="#E6E8F0"/>
+  <rect x="94" y="168" width="324" height="226" rx="30" fill="#F7F7FD"/>
+  <!-- Play: a folded ribbon, light on the left, dark on the right -->
+  <g mask="url(#playShape)">
+    <rect x="180" y="180" width="170" height="200" fill="url(#playDark)"/>
+    <path d="M180 180 H262 Q258 262 180 334 Z" fill="url(#playLight)"/>
+  </g>
+  <!-- Record -->
+  <circle cx="370" cy="212" r="32" fill="#FFFFFF"/>
+  <circle cx="370" cy="212" r="24" fill="url(#dot)"/>
+</svg>

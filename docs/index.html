@@ -1,0 +1,314 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Captode: screenshots and screen recordings</title>
+<meta name="description" content="Full-page, visible or selected-area screenshots and screen recordings of the current tab, with an editor to mark them up. Everything stays in your browser.">
+<meta property="og:title" content="Captode: screenshots and screen recordings">
+<meta property="og:description" content="Capture, mark up and export screenshots and recordings. Nothing is uploaded.">
+<meta property="og:image" content="https://nevin.github.io/Captode/assets/social.jpg">
+<meta property="og:url" content="https://nevin.github.io/Captode/">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="assets/logo.svg" type="image/svg+xml">
+<link rel="icon" href="logo.png" type="image/png">
+<style>
+:root {
+  --bg: #ffffff;
+  --bg-soft: #f6f5ff;
+  --text: #16163a;
+  --muted: #55557a;
+  --line: #e3e1f5;
+  --accent: #5b47ff;
+  --accent-2: #9b4dff;
+  --on-accent: #ffffff;
+  --card: #ffffff;
+  --shadow: 0 1px 2px rgba(22, 22, 58, .06), 0 12px 32px rgba(22, 22, 58, .10);
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0f0f24;
+    --bg-soft: #17173a;
+    --text: #ecebff;
+    --muted: #a9a8cc;
+    --line: #2a2a52;
+    --accent: #8c7dff;
+    --accent-2: #b37cff;
+    --on-accent: #0f0f24;
+    --card: #17173a;
+    --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 12px 32px rgba(0, 0, 0, .35);
+  }
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+section[id] { scroll-margin-top: 60px; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 17px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--accent); }
+img { max-width: 100%; display: block; }
+.wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+
+header.top {
+  position: sticky; top: 0; z-index: 10;
+  background: color-mix(in srgb, var(--bg) 85%, transparent);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--line);
+}
+header.top .wrap { display: flex; align-items: center; gap: 24px; height: 60px; }
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 18px; color: var(--text); text-decoration: none; }
+.brand img { width: 30px; height: 30px; }
+header.top nav { margin-left: auto; display: flex; gap: 20px; }
+header.top nav a { color: var(--muted); text-decoration: none; font-size: 15px; }
+header.top nav a:hover { color: var(--text); }
+
+.hero { padding: 80px 0 56px; text-align: center; }
+.hero img.logo { width: 88px; height: 88px; margin: 0 auto 20px; }
+.hero h1 { font-size: clamp(34px, 6vw, 56px); line-height: 1.1; margin: 0 0 18px; letter-spacing: -.02em; }
+.hero h1 span {
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.hero p.lead { font-size: clamp(18px, 2.4vw, 21px); color: var(--muted); max-width: 680px; margin: 0 auto 32px; }
+.buttons { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 12px 22px; border-radius: 10px; font-weight: 600; font-size: 16px;
+  text-decoration: none; border: 1px solid var(--line); color: var(--text); background: var(--card);
+}
+.btn.primary { background: linear-gradient(90deg, var(--accent), var(--accent-2)); color: var(--on-accent); border: 0; }
+.btn:hover { filter: brightness(1.05); transform: translateY(-1px); }
+.nav-cta { padding: 8px 16px; font-size: 14px; margin-left: 4px; }
+.badges { display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; }
+.badge {
+  display: inline-flex; align-items: center; gap: 12px; min-width: 230px;
+  padding: 10px 22px 10px 16px; border-radius: 12px; text-decoration: none;
+  background: #111127; color: #fff; border: 1px solid #2c2c4d;
+  transition: transform .15s, box-shadow .15s;
+}
+.badge:hover { transform: translateY(-1px); box-shadow: var(--shadow); }
+.badge svg { width: 30px; height: 30px; fill: #a99cff; flex: none; }
+.badge span { display: flex; flex-direction: column; text-align: left; font-weight: 600; font-size: 19px; line-height: 1.15; }
+.badge small { font-weight: 400; font-size: 12px; opacity: .8; }
+@media (prefers-color-scheme: dark) { .badge { background: #ffffff; color: #111127; border-color: #ffffff; } .badge svg { fill: #5b47ff; } }
+.badges + .small { margin-top: 20px; }
+.small { color: var(--muted); font-size: 14px; margin-top: 16px; }
+.hero .shot { margin: 56px auto 0; max-width: 1000px; border-radius: 14px; overflow: hidden; box-shadow: var(--shadow); border: 1px solid var(--line); }
+
+.pills { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 28px; padding: 0; list-style: none; }
+.pills li { background: var(--bg-soft); border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px; font-size: 14px; color: var(--muted); }
+
+section.features { padding: 40px 0; }
+.feature { display: grid; grid-template-columns: 1fr 1.25fr; gap: 56px; align-items: center; padding: 48px 0; }
+.feature:nth-child(even) .text { order: 2; }
+.feature h2 { font-size: clamp(24px, 3.2vw, 32px); line-height: 1.2; margin: 0 0 14px; letter-spacing: -.01em; }
+.feature p { color: var(--muted); margin: 0 0 14px; }
+.feature ul { margin: 0; padding-left: 20px; color: var(--muted); }
+.feature li { margin: 4px 0; }
+.feature li b { color: var(--text); font-weight: 600; }
+.feature figure { margin: 0; border-radius: 12px; overflow: hidden; box-shadow: var(--shadow); border: 1px solid var(--line); }
+
+section.band { background: var(--bg-soft); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 72px 0; }
+section.band h2 { text-align: center; font-size: clamp(26px, 3.6vw, 36px); margin: 0 0 12px; }
+section.band p.sub { text-align: center; color: var(--muted); max-width: 640px; margin: 0 auto 40px; }
+.grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 22px; }
+.card h3 { margin: 0 0 6px; font-size: 18px; }
+.card p { margin: 0; color: var(--muted); font-size: 15px; }
+
+section.install { padding: 80px 0; text-align: center; }
+section.install h2 { font-size: clamp(26px, 3.6vw, 36px); margin: 0 0 12px; }
+section.install p { color: var(--muted); max-width: 640px; margin: 0 auto 28px; }
+.source { max-width: 560px; margin: 36px auto 0; text-align: left; background: var(--bg-soft); border: 1px solid var(--line); border-radius: 12px; padding: 20px 24px; }
+.source h3 { margin: 0 0 8px; font-size: 16px; }
+.source ol { margin: 0; padding-left: 20px; color: var(--muted); font-size: 15px; }
+code { font: 14px ui-monospace, SFMono-Regular, Menlo, monospace; background: var(--bg-soft); border: 1px solid var(--line); border-radius: 5px; padding: 1px 5px; }
+
+footer { border-top: 1px solid var(--line); padding: 32px 0; color: var(--muted); font-size: 14px; }
+footer .wrap { display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: center; }
+footer nav { margin-left: auto; display: flex; flex-wrap: wrap; gap: 20px; }
+footer a { color: var(--muted); }
+
+@media (max-width: 860px) {
+  .feature { grid-template-columns: 1fr; gap: 24px; padding: 32px 0; }
+  .feature:nth-child(even) .text { order: 0; }
+  .grid { grid-template-columns: 1fr; }
+  header.top nav { display: none; }
+  .nav-cta { margin-left: auto; }
+  .hero { padding: 48px 0 32px; }
+  .wrap { padding: 0 16px; }
+}
+</style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Captode — Screenshot & Screen Recorder",
+  "applicationCategory": "BrowserApplication",
+  "operatingSystem": "Chrome, Edge, Firefox on Windows, macOS, Linux, ChromeOS",
+  "softwareVersion": "2.3.6",
+  "description": "Take full-page, visible or selected-area screenshots and screen recordings, mark them up, and save them as images, PDFs or videos.",
+  "url": "https://nevin.github.io/Captode/",
+  "image": "https://nevin.github.io/Captode/assets/social.jpg",
+  "installUrl": "https://chromewebstore.google.com/detail/captode-%E2%80%94-screenshot-scre/mphigcddnecjbnkcpiaabheopepcmgce",
+  "downloadUrl": "https://chromewebstore.google.com/detail/captode-%E2%80%94-screenshot-scre/mphigcddnecjbnkcpiaabheopepcmgce",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "license": "https://www.gnu.org/licenses/gpl-3.0.html",
+  "author": { "@type": "Person", "name": "Nevin Paul" }
+}
+</script>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#"><img src="assets/logo.svg" alt="">Captode</a>
+    <nav>
+      <a href="#features">Features</a>
+      <a href="#privacy">Privacy</a>
+      <a href="#install">Install</a>
+      <a href="https://github.com/nevin/Captode">GitHub</a>
+    </nav>
+    <a class="btn primary nav-cta" href="https://chromewebstore.google.com/detail/captode-%E2%80%94-screenshot-scre/mphigcddnecjbnkcpiaabheopepcmgce">Add to Chrome</a>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="wrap">
+      <img class="logo" src="assets/logo.svg" alt="Captode logo">
+      <h1>Screenshots and recordings,<br><span>made in your browser</span></h1>
+      <p class="lead">Capture the whole page, what you see, a region or a single element. Record a tab or your screen. Mark it up and export it in the format you need. Nothing is uploaded.</p>
+      <div class="buttons">
+        <a class="btn primary" href="https://chromewebstore.google.com/detail/captode-%E2%80%94-screenshot-scre/mphigcddnecjbnkcpiaabheopepcmgce">Add to Chrome — free</a>
+        <a class="btn" href="https://addons.mozilla.org/firefox/addon/captode/">Get it for Firefox</a>
+      </div>
+      <p class="small">Also works in Edge, Brave, Opera and Arc. No account, no watermark.</p>
+      <ul class="pills">
+        <li>Full page</li><li>Visible area</li><li>Selected area</li><li>Element</li>
+        <li>Tab and screen recording</li><li>Annotations</li><li>Device frames</li><li>9 languages</li>
+      </ul>
+      <div class="shot"><img src="assets/1-capture.jpg" width="1280" height="800" alt="The Captode popup over a web page, offering full page, visible area, selected area and element screenshots"></div>
+    </div>
+  </section>
+
+  <section class="features" id="features">
+    <div class="wrap">
+      <div class="feature">
+        <div class="text">
+          <h2>Mark it up</h2>
+          <p>Every capture opens in an editor built for explaining things.</p>
+          <ul>
+            <li><b>Crop, rotate and flip</b>, with your annotations following</li>
+            <li><b>Arrows, shapes and callouts</b> that point at what matters</li>
+            <li><b>Text, numbered steps and highlights</b></li>
+            <li><b>Blur or pixelate</b> anything private, or let Captode blur email addresses and card numbers for you</li>
+          </ul>
+        </div>
+        <figure><img src="assets/2-annotate.jpg" width="1280" height="800" loading="lazy" alt="The Captode editor with arrows, numbered steps and text on a screenshot"></figure>
+      </div>
+
+      <div class="feature">
+        <div class="text">
+          <h2>Record, trim and share</h2>
+          <p>Record a tab, a window or your whole screen, with your voice and a camera bubble if you like.</p>
+          <ul>
+            <li><b>Show clicks and shortcuts</b>, never ordinary typing or passwords</li>
+            <li><b>Trim, add captions, slides, music and layers</b></li>
+            <li><b>Export</b> as MP4, WebM, GIF or animated WebP, at the size and frame rate you choose</li>
+          </ul>
+        </div>
+        <figure><img src="assets/5-record.jpg" width="1280" height="800" loading="lazy" alt="The Captode video page trimming a recording and exporting it as a GIF"></figure>
+      </div>
+
+      <div class="feature">
+        <div class="text">
+          <h2>Review a build against its design</h2>
+          <p>Tools for checking pixels, in the editor's Review tab.</p>
+          <ul>
+            <li><b>Measure</b> in CSS pixels, with edges that snap</li>
+            <li><b>Colour picker</b> with WCAG contrast results</li>
+            <li><b>Spacing grid</b> every 4, 8, 16 or 24 pixels</li>
+            <li><b>Share for review</b>: save the image and its notes as one page to send to your team</li>
+          </ul>
+        </div>
+        <figure><img src="assets/3-review.jpg" width="1280" height="800" loading="lazy" alt="Measuring and checking colour contrast in the Review tab"></figure>
+      </div>
+
+      <div class="feature">
+        <div class="text">
+          <h2>Compare before and after</h2>
+          <p>Put two captures, or a capture and a design file, side by side, as an overlay, behind a slider, or as a difference that highlights every changed pixel. A 1× design and a 2× screenshot are lined up automatically.</p>
+        </div>
+        <figure><img src="assets/6-compare.jpg" width="1280" height="800" loading="lazy" alt="Two screenshots compared, with the changed pixels highlighted"></figure>
+      </div>
+
+      <div class="feature">
+        <div class="text">
+          <h2>Inside a real device</h2>
+          <p>Turn on Device mode to export a screenshot or video inside one of 63 phones and tablets, from iPhone and iPad to Pixel and Galaxy, each with its published screen size, pixel density and bezels.</p>
+        </div>
+        <figure><img src="assets/4-devices.jpg" width="1280" height="800" loading="lazy" alt="A screenshot shown inside a phone frame"></figure>
+      </div>
+    </div>
+  </section>
+
+  <section class="band" id="privacy">
+    <div class="wrap">
+      <h2>Private by design</h2>
+      <p class="sub">Captode does not collect, send or store anything outside your browser.</p>
+      <div class="grid">
+        <div class="card"><h3>No upload</h3><p>Captures, edits and exports are all made on your device. There is no server to send them to.</p></div>
+        <div class="card"><h3>No account</h3><p>Install it and start. No sign-up, no tracking, no watermark on what you make.</p></div>
+        <div class="card"><h3>Only when you ask</h3><p>No host permissions and no content scripts. Captode touches a page only after you start a capture.</p></div>
+      </div>
+      <p class="sub" style="margin:32px auto 0"><a href="https://github.com/nevin/Captode/blob/main/PRIVACY.md">Read the privacy policy</a></p>
+    </div>
+  </section>
+
+  <section class="install" id="install">
+    <div class="wrap">
+      <h2>Get Captode</h2>
+      <p>Chrome 116 or later and other Chromium browsers on Windows, macOS, Linux and ChromeOS, and Firefox 140 or later. In English, German, Spanish, French, Italian, Japanese, Korean, Brazilian Portuguese and Simplified Chinese.</p>
+      <div class="badges">
+        <a class="badge" href="https://chromewebstore.google.com/detail/captode-%E2%80%94-screenshot-scre/mphigcddnecjbnkcpiaabheopepcmgce" aria-label="Available in the Chrome Web Store">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 3a2 2 0 0 1 4 0v2h4a1 1 0 0 1 1 1v4h-2a2 2 0 0 0 0 4h2v4a1 1 0 0 1-1 1h-4v-2a2 2 0 0 0-4 0v2H6a1 1 0 0 1-1-1v-4h2a2 2 0 0 0 0-4H5V6a1 1 0 0 1 1-1h4z"/></svg>
+          <span><small>Available in the</small>Chrome Web Store</span>
+        </a>
+        <a class="badge" href="https://addons.mozilla.org/firefox/addon/captode/" aria-label="Get the add-on for Firefox">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 3a2 2 0 0 1 4 0v2h4a1 1 0 0 1 1 1v4h-2a2 2 0 0 0 0 4h2v4a1 1 0 0 1-1 1h-4v-2a2 2 0 0 0-4 0v2H6a1 1 0 0 1-1-1v-4h2a2 2 0 0 0 0-4H5V6a1 1 0 0 1 1-1h4z"/></svg>
+          <span><small>Get the add-on for</small>Firefox</span>
+        </a>
+      </div>
+      <p class="small">Version 2.3.6 · Free and open source · <a href="https://github.com/nevin/Captode/releases">All releases on GitHub</a></p>
+      <div class="source">
+        <h3>From source</h3>
+        <ol>
+          <li>Clone <a href="https://github.com/nevin/Captode">the repository</a>.</li>
+          <li>Open <code>chrome://extensions</code> and turn on <b>Developer mode</b>.</li>
+          <li>Click <b>Load unpacked</b> and choose the <code>src</code> folder.</li>
+        </ol>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>© 2026 Nevin Paul · GPL licence</span>
+    <nav>
+      <a href="https://chromewebstore.google.com/detail/captode-%E2%80%94-screenshot-scre/mphigcddnecjbnkcpiaabheopepcmgce">Chrome Web Store</a>
+      <a href="https://addons.mozilla.org/firefox/addon/captode/">Firefox Add-ons</a>
+      <a href="https://github.com/nevin/Captode">GitHub</a>
+      <a href="https://github.com/nevin/Captode/blob/main/PRIVACY.md">Privacy</a>
+      <a href="https://github.com/nevin/Captode/issues">Report a problem</a>
+    </nav>
+  </div>
+</footer>
+
+</body>
+</html>
